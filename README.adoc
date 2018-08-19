@@ -1,0 +1,280 @@
+RESCACHED(1)
+============
+:doctype: manpage
+:man source: rescached
+:man version: 2018.08.19
+:man manual: rescached
+
+
+== NAME
+
+rescached - DNS resolver cache daemon.
+
+
+== SYNOPSIS
+
++rescached+ 'rescached.cfg'
+
+
+== OPTIONS
+
+'rescached.cfg' is rescached configuration, usually it reside in
+/etc/rescached/rescached.cfg.
+
+
+== DESCRIPTION
+
++rescached+ is a daemon that caching internet name and address on local memory
+when running for speeding up DNS resolution.
+
++rescached+ is not a reimplementation of DNS server like BIND.
+
++rescached+ primary goal is only to caching DNS queries and answers, used by
+personal or small group of users, to minimize unneeded traffic to outside
+network.
+
+
+=== Features
+
+* Enable to handle request from UDP connections.
+
+TODO:
+
+- Load and serve addresses and hostnames in +/etc/hosts+.
+- Load and serve addresses and hostnames from all files inside directory
+  +/etc/rescached/hosts.d/+, recursively.
+- Blocking ads and/or malicious websites through list in
+  +/etc/rescached/hosts.d/hosts.block+.
+
+
+=== Behind The DNS
+
+When you open a website, let say 'kilabit.info', in a browser, the first thing
+that browser do is to translate name address 'kilabit.info' into an internet
+address (e.g.: 103.200.4.162) so browser can make a connection to
+'kilabit.info' server.
+
+How browser do that?
+
+First, it will send query to one of DNS server listed in your system
+configuration (i.e. +/etc/resolv.conf+ in Linux).
+Then, if your DNS server also "caching" the name that you requested, it will
+reply the answer (internet address) directly, if it is not then it will ask
+their parent DNS server.
+
+----
++----+      +----------------+      +------------------+
+| PC | <==> | ISP DNS Server | <==> | Other DNS Server | <==> ...
++----+      +----------------+      +------------------+
+----
+
+If you browsing frequently on the same site, hitting the refresh button,
+opening another page on the same website, etc; this procedures will always
+repeated every times, not including all external links like ads, social media
+button, or javascripts from an other server.
+
+To make this repetitive procedures less occurred, you can run +rescached+ in
+your personal computer.
+The first time the answer is received in your local computer, +rescached+ will
+saved it in computer memory and any subsequent request of the same address
+will be answered directly by +rescached+.
+
+----
++----+      +----------------+      +------------------+
+| PC |      | ISP DNS Server | <==> | Other DNS Server | <==> ...
++----+      +----------------+      +------------------+
+  ^^             ^^
+  ||             ||
+  vv             ||
++-----------+    ||
+| rescached | <==//
++-----------+
+----
+
+The only request that will be send to your DNS server is the one that does not
+already exist in +rescached+ cache.
+
+
+=== How Cache in +rescached+ Works
+
+This section explain the simplified version of how internal program works.
+
+Each query and answer data in cache have a number of accessed field, which
+defined how the cache will be ordered in memory.
+The frequently queried host-name will be at the top of cache list, and less
+queried host-name will at the bottom of cache list.
+The following table show an example of list of cache with number of frequently
+accessed in the first column, and name of host in the second column.
+
+----
++-----+------------------+
+| #   | host-name        |
++-----+------------------+
+| 529 | kilabit.info     |
++-----+------------------+
+| 233 | www.google.com   |
++-----+------------------+
+| ... |        ...       |
++-----+------------------+
+| 1   | www.kilabit.info |
++-----+------------------+
+----
+
+The number of cache that +rescached+ can hold in memory is depend on the value
+of +cache.max+ in configuration file.
+When the number of cache in memory reached it +cache.max+ value, it will
+remove all cache data that has the number of frequently accessed less than or
+equal to +cache.threshold+.
+
+
+== Installation
+
+=== Prerequisites
+
+* Go compiler
+* git SCM
+* asciidoc, to generate manual page
+* systemd or system V init tool for service
+
+=== Compiling From Source
+
+To build +rescached+ from the source, follow the procedures bellow,
+
+	$ go get -u github.com/shuLhan/rescached.go
+	$ cd ${GOPATH}/src/github.com/shuLhan/rescached.go.git
+	$ go build ./cmd/rescached
+
+The last command will build binary named +rescached+ in current directory.
+
+=== Installation
+
+After program successfully build, you can install it manually by copying to
+system binary directory.
+
+==== Manual Installation
+
+* Copy rescached configuration to system directory.
+Assume that we use directory "/etc/rescached" as configuration directory, then
++
+	$ sudo mkdir -p /etc/rescached
+	$ sudo cp cmd/rescached/rescached.cfg /etc/rescached
+
+* Copy rescached program to your system path.
++
+	$ sudo cp cmd/rescached/rescached /usr/bin
+
+* Create system startup script.
++
+If you want your program running each time the system is starting up you can
+create a system startup script (or system service).
+You can see an example for +init.d+ startup script in file
++scripts/rescached.run+ or +scripts/rescached.arch+.
++
+This step is really different between each system, consult your distribution
+wiki, forum, or mailing-list on how to create system startup script.
+
+==== Post Installation Configuration
+
+* Set your parent DNS server.
++
+Edit rescached configuration, +/etc/rescached/rescached.cfg+, change the value
+of +server.parent+ based on your preferred DNS server.
+
+* Set maximum caches and cache threshold
++
+Edit rescached configuration, +/etc/rescached/rescached.cfg+, change the value
+of +cache.max+ and/or +cache.threshold+ to match your needs.
+
+* Set your system DNS server to point to rescached.
++
+In UNIX system,
++
+	$ sudo mv /etc/resolv.conf /etc/resolv.conf.org
+	$ sudo echo "nameserver 127.0.0.1" > /etc/resolv.conf
+
+* If you use +systemd+, run +rescached+ service by invoking,
++
+	$ sudo systemctl start rescached.service
++
+and if you want +rescached+ service to run when system startup, enable it by
+invoking,
++
+	$ sudo systemctl enable rescached.service
+
+
+== CONFIGURATION
+
+All rescached startup option located in file +/etc/rescached/rescached.cfg+.
+See manual page of *rescached.cfg*(5) for more information.
+
+
+== EXIT STATUS
+
+Upon success, +rescached+ will return 0, or 1 otherwise.
+
+
+== FILES
+
+'/etc/rescached/rescached.cfg'::
+
+The +rescached+ main configuration.
+This configuration will be read when program started.
+
+'/var/run/rescached.pid'::
+
+File where process ID of rescached will be saved when running.
+
+
+== NOTES
+
+This program developed with references to,
+
+'RFC1034':: Domain Names - Concepts and Facilities.
+'RFC1035':: Domain Names - Implementation and Specification.
+'RFC1886':: DNS Extensions to support IP version 6.
+'RFC2782':: A DNS RR for specifying the location of services (DNS SRV)
+
+== BUGS
+
++rescached+ only know specific DNS record type,
+[horizontal]
+A:: a host address
+NS:: an authoritative name server
+CNAME:: a canonical name for an alias
+SOA:: zone authority
+PTR:: a domain name pointer
+HINFO:: host information
+MX:: mail exchange
+TXT:: text string
+SRV:: location of services
+AAAA:: a host address for IPv6
+
++rescached+ only run and tested in Linux system.
+Technically, if it can compiled, it will run in any operating system.
+
+For request of features and/or bugs report please submitted through web at
+https://github.com/shuLhan/rescached.go/issues.
+
+
+== AUTHOR
+
++rescached+ is developed by Shulhan (ms@kilabit.info).
+
+
+== LICENSE
+
+Copyright 2018, M. Shulhan (ms@kilabit.info).
+All rights reserved.
+
+Use of this source code is governed by a BSD-style license that can be found
+in the LICENSE file.
+
+
+== LINKS
+
+Source code repository: https://github.com/shuLhan/rescached.go
+
+
+== SEE ALSO
+
+*rescached.cfg*(5)
