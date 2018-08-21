@@ -97,17 +97,26 @@ func LoadHostsFile(path string) {
 		return
 	}
 
-	for _, msg := range msgs {
+	n := 0
+	for x, msg := range msgs {
 		res := &response{
 			// Flag to indicated that this response is from local
 			// hosts file.
 			receivedAt: 0,
 			msg:        msg,
 		}
-		_caches.put(res)
+
+		ok := _caches.put(res)
+		if ok {
+			n++
+		}
+
+		msgs[x] = nil
 	}
 
 	if DebugLevel >= 1 {
-		log.Printf("== %d loaded\n", len(msgs))
+		log.Printf("== %d loaded\n", n)
 	}
+
+	msgs = nil
 }
