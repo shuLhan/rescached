@@ -21,13 +21,15 @@ build: test $(RESCACHED_BIN) doc
 test: $(COVER_HTML)
 
 test.prof:
-	go test -count=1 -cpuprofile $(CPU_PROF) -memprofile $(MEM_PROF) ./...
+	export CGO_ENABLED=1 && \
+	go test -race -count=1 -cpuprofile $(CPU_PROF) -memprofile $(MEM_PROF) ./...
 
 $(COVER_HTML): $(COVER_OUT)
 	go tool cover -html=$< -o $@
 
 $(COVER_OUT): $(SRC) $(SRC_TEST)
-	go test -count=1 -coverprofile=$@ ./...
+	export CGO_ENABLED=1 && \
+	go test -race -count=1 -coverprofile=$@ ./...
 
 coverbrowse: $(COVER_HTML)
 	xdg-open $<
@@ -36,7 +38,8 @@ lint:
 	golangci-lint run ./...
 
 $(RESCACHED_BIN): $(SRC)
-	go build -v ./cmd/rescached
+	export CGO_ENABLED=1 && \
+	go build -race -v ./cmd/rescached
 
 doc: $(RESCACHED_MAN)
 
