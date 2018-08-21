@@ -91,6 +91,7 @@ func main() {
 
 	err = rcd.Start(cfg.listen)
 	if err != nil {
+		stop()
 		log.Println(err)
 	}
 
