@@ -6,7 +6,6 @@ package rescached
 
 import (
 	"fmt"
-	"net"
 	"strings"
 	"sync"
 	"time"
@@ -29,7 +28,6 @@ var _responsePool = sync.Pool{
 type response struct {
 	receivedAt int64
 	msg        *dns.Message
-	raddr      *net.UDPAddr
 }
 
 func freeResponse(res *response) {
@@ -42,6 +40,11 @@ func freeResponse(res *response) {
 // will return false.
 //
 func (res *response) isExpired() bool {
+	// Local responses from hosts file will never be expired.
+	if res.receivedAt == 0 {
+		return false
+	}
+
 	elapSeconds := uint32(time.Now().Unix() - res.receivedAt)
 
 	return res.msg.IsExpired(elapSeconds)
@@ -67,8 +70,7 @@ func (res *response) unpack() (err error) {
 func (res *response) String() string {
 	var b strings.Builder
 
-	fmt.Fprintf(&b, "{receivedAt:%d msg:%+v raddr:%+v}", res.receivedAt,
-		res.msg, res.raddr)
+	fmt.Fprintf(&b, "{receivedAt:%d msg:%+v}", res.receivedAt, res.msg)
 
 	return b.String()
 }
