@@ -159,6 +159,7 @@ func (srv *Server) processRequestQueue() {
 }
 
 func (srv *Server) processForwardQueue(cl *dns.Client) {
+	var ok bool
 	for req := range srv.fwQueue {
 		err := cl.Send(req.msg, nil)
 		if err != nil {
@@ -212,6 +213,9 @@ func (srv *Server) processForwardQueue(cl *dns.Client) {
 		}
 
 		freeRequest(req)
-		_caches.put(res)
+		ok = _caches.put(res)
+		if !ok {
+			freeResponse(res)
+		}
 	}
 }

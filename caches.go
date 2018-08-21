@@ -46,16 +46,18 @@ func (c *caches) get(req *request) *response {
 
 //
 // put response to cache only if it's contains an answer and TTL is greater
-// than zero (0).
+// than zero (0).  If response contains no answer or TTL is zero it will
+// return false, otherwise it will return true.
 //
-func (c *caches) put(res *response) {
+func (c *caches) put(res *response) bool {
 	if res.msg.Header.ANCount == 0 || len(res.msg.Answer) == 0 {
 		log.Printf("! Empty answers on %s\n", res.msg)
-		return
+		return false
 	}
 	for x := 0; x < len(res.msg.Answer); x++ {
 		if res.msg.Answer[x].TTL == 0 {
-			return
+			log.Printf("! Empty TTL on %s\n", res.msg)
+			return false
 		}
 	}
 
@@ -69,11 +71,13 @@ func (c *caches) put(res *response) {
 		cres := newCacheResponses(res)
 		c.v.Store(qname, cres)
 		c.n++
-		return
+		return true
 	}
 
 	cres := v.(*cacheResponses)
 	cres.upsert(res)
+
+	return true
 }
 
 //
