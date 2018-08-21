@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"log"
 	"sync"
+
+	"github.com/shuLhan/share/lib/dns"
 )
 
 //
@@ -72,4 +74,36 @@ func (c *caches) put(res *response) {
 
 	cres := v.(*cacheResponses)
 	cres.upsert(res)
+}
+
+//
+// LoadHostsFile parse hosts formatted file as put it into caches.
+//
+func LoadHostsFile(path string) {
+	if DebugLevel >= 1 {
+		if len(path) == 0 {
+			log.Println("= Loading system hosts file")
+		} else {
+			log.Printf("= Loading hosts file '%s'", path)
+		}
+	}
+
+	msgs, err := dns.HostsLoad(path)
+	if err != nil {
+		return
+	}
+
+	for _, msg := range msgs {
+		res := &response{
+			// Flag to indicated that this response is from local
+			// hosts file.
+			receivedAt: 0,
+			msg:        msg,
+		}
+		_caches.put(res)
+	}
+
+	if DebugLevel >= 1 {
+		log.Printf("== %d loaded\n", len(msgs))
+	}
 }

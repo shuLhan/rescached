@@ -48,6 +48,8 @@ func New(nsParents []*net.UDPAddr) (srv *Server, err error) {
 		_caches = newCaches()
 	}
 
+	LoadHostsFile("")
+
 	return
 }
 
