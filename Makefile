@@ -3,7 +3,6 @@
 ## license that can be found in the LICENSE file.
 
 .PHONY: install build test doc test.prof coverbrowse lint clean distclean
-.DEFAULT: build
 
 SRC:=$(shell go list -f '{{$$d:=.Dir}} {{ range .GoFiles }}{{$$d}}/{{.}} {{end}}' ./...)
 SRC_TEST:=$(shell go list -f '{{$$d:=.Dir}} {{ range .TestGoFiles }}{{$$d}}/{{.}} {{end}}' ./...)
@@ -36,7 +35,7 @@ coverbrowse: $(COVER_HTML)
 lint:
 	golangci-lint run ./...
 
-$(RESCACHED_BIN):
+$(RESCACHED_BIN): $(SRC)
 	go build -v ./cmd/rescached
 
 doc: $(RESCACHED_MAN)
