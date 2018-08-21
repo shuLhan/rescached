@@ -8,11 +8,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"strconv"
 	"syscall"
+	"time"
 
 	"github.com/shuLhan/rescached.go"
 )
@@ -83,6 +86,16 @@ func handleSignal() {
 	stop()
 }
 
+func profiling() {
+	srv := &http.Server{
+		Addr:         "127.0.0.1:5380",
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+	log.Println(srv.ListenAndServe())
+}
+
 func stop() {
 	removePID()
 	os.Exit(0)
@@ -117,6 +130,7 @@ func main() {
 	loadHostsDir(cfg)
 
 	go handleSignal()
+	go profiling()
 
 	err = rcd.Start(cfg.listen)
 	if err != nil {
