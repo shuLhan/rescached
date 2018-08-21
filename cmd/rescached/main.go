@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 	"syscall"
 
@@ -24,6 +25,30 @@ var (
 	rcd *rescached.Server
 	cfg *config
 )
+
+func loadHostsDir(cfg *config) {
+	d, err := os.Open(cfg.hostsDir)
+	if err != nil {
+		log.Println("! loadHostsDir: Open:", err)
+		return
+	}
+
+	fis, err := d.Readdir(0)
+	if err != nil {
+		log.Println("! loadHostsDir: Readdir:", err)
+		return
+	}
+
+	for x := 0; x < len(fis); x++ {
+		if fis[x].IsDir() {
+			continue
+		}
+
+		hostsFile := filepath.Join(cfg.hostsDir, fis[x].Name())
+
+		rescached.LoadHostsFile(hostsFile)
+	}
+}
 
 func removePID() {
 	err := os.Remove(cfg.filePID)
@@ -88,6 +113,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	loadHostsDir(cfg)
 
 	err = rcd.Start(cfg.listen)
 	if err != nil {

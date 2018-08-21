@@ -25,6 +25,7 @@ const (
 	cfgKeyCacheThreshold = "cache.threshold"
 	cfgKeyDebug          = "debug"
 	cfgKeyFilePID        = "file.pid"
+	cfgKeyHostsDir       = "hosts_d.path"
 	cfgKeyListen         = "server.listen"
 	cfgKeyNSNetwork      = "server.parent.connection"
 	cfgKeyNSParent       = "server.parent"
@@ -36,6 +37,7 @@ const (
 	defCacheMax       = 100000
 	defCacheThreshold = 1
 	defFilePID        = "rescached.pid"
+	defHostsDir       = "/etc/rescached/hosts.d"
 	defListen         = "127.0.0.1:53"
 	defNSNetwork      = "udp"
 	defPort           = 53
@@ -55,6 +57,7 @@ type config struct {
 	nsNetwork      string
 	listen         *net.UDPAddr
 	timeout        time.Duration
+	hostsDir       string
 	cacheMax       uint32
 	cacheThreshold uint32
 	debugLevel     byte
@@ -83,6 +86,7 @@ func newConfig(file string) (cfg *config, err error) {
 		return nil, err
 	}
 
+	cfg.hostsDir = in.GetString(cfgSecRescached, "", cfgKeyHostsDir, defHostsDir)
 	cfg.parseTimeout(in)
 	cfg.parseCacheMax(in)
 	cfg.parseCacheThreshold(in)
