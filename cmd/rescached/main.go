@@ -66,6 +66,8 @@ func stop() {
 func main() {
 	var err error
 
+	log.SetFlags(0)
+
 	cfg, err = newConfig(cfgFilename)
 	if err != nil {
 		log.Fatal(err)
