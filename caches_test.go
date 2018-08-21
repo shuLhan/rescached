@@ -19,7 +19,7 @@ func TestCachesPut(t *testing.T) {
 	cases := []struct {
 		desc   string
 		res    *response
-		expLen int
+		expLen uint64
 	}{{
 		desc: "New",
 		res: &response{

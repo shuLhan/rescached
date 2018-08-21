@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"sync/atomic"
 
 	"github.com/shuLhan/share/lib/dns"
 )
@@ -16,7 +17,7 @@ import (
 // caches represent a mapping between domain-name and cached responses.
 //
 type caches struct {
-	n int
+	n uint64
 	v sync.Map
 }
 
@@ -70,7 +71,7 @@ func (c *caches) put(res *response) bool {
 	if !ok {
 		cres := newCacheResponses(res)
 		c.v.Store(qname, cres)
-		c.n++
+		atomic.AddUint64(&c.n, 1)
 		return true
 	}
 
@@ -107,7 +108,9 @@ func LoadHostsFile(path string) {
 		}
 
 		ok := _caches.put(res)
-		if ok {
+		if !ok {
+			res.msg.Reset()
+		} else {
 			n++
 		}
 
