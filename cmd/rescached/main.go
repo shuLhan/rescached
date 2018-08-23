@@ -17,7 +17,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/shuLhan/rescached.go"
+	"github.com/shuLhan/rescached-go"
 )
 
 const (
