@@ -18,20 +18,20 @@ var _testCacheResponses = newCacheResponses(nil)
 func TestCacheResponsesUpsert(t *testing.T) {
 	cases := []struct {
 		desc   string
-		res    *response
+		res    *dns.Response
 		expLen int
-		exp    []*response
+		exp    []*dns.Response
 	}{{
 		desc: "New",
 		res:  _testResponses[0],
-		exp: []*response{
+		exp: []*dns.Response{
 			_testResponses[0],
 		},
 		expLen: 1,
 	}, {
 		desc: "New",
 		res:  _testResponses[1],
-		exp: []*response{
+		exp: []*dns.Response{
 			_testResponses[0],
 			_testResponses[1],
 		},
@@ -39,7 +39,7 @@ func TestCacheResponsesUpsert(t *testing.T) {
 	}, {
 		desc: "Replace",
 		res:  _testResponses[2],
-		exp: []*response{
+		exp: []*dns.Response{
 			_testResponses[1],
 			_testResponses[2],
 		},
@@ -70,12 +70,12 @@ func TestCacheResponsesUpsert(t *testing.T) {
 func TestCacheResponsesGet(t *testing.T) {
 	cases := []struct {
 		desc string
-		req  *request
-		exp  *response
+		req  *dns.Request
+		exp  *dns.Response
 	}{{
 		desc: "Cache hit",
-		req: &request{
-			msg: &dns.Message{
+		req: &dns.Request{
+			Message: &dns.Message{
 				Question: &dns.SectionQuestion{
 					Type:  1,
 					Class: 1,
@@ -85,8 +85,8 @@ func TestCacheResponsesGet(t *testing.T) {
 		exp: _testResponses[2],
 	}, {
 		desc: "Cache miss",
-		req: &request{
-			msg: &dns.Message{
+		req: &dns.Request{
+			Message: &dns.Message{
 				Question: &dns.SectionQuestion{
 					Type:  0,
 					Class: 1,

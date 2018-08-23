@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+
+	"github.com/shuLhan/share/lib/dns"
 )
 
 //
@@ -19,7 +21,7 @@ type cacheResponses struct {
 	v *list.List
 }
 
-func newCacheResponses(res *response) (cres *cacheResponses) {
+func newCacheResponses(res *dns.Response) (cres *cacheResponses) {
 	cres = &cacheResponses{
 		v: list.New(),
 	}
@@ -30,16 +32,16 @@ func newCacheResponses(res *response) (cres *cacheResponses) {
 }
 
 //
-// get cached response based on query type and class.
+// get cached response based on request type and class.
 //
-func (cres *cacheResponses) get(req *request) (res *response) {
+func (cres *cacheResponses) get(req *dns.Request) (res *dns.Response) {
 	cres.RLock()
 	for e := cres.v.Front(); e != nil; e = e.Next() {
-		res = e.Value.(*response)
-		if req.msg.Question.Type != res.msg.Question.Type {
+		res = e.Value.(*dns.Response)
+		if req.Message.Question.Type != res.Message.Question.Type {
 			continue
 		}
-		if req.msg.Question.Class != res.msg.Question.Class {
+		if req.Message.Question.Class != res.Message.Question.Class {
 			continue
 		}
 		cres.RUnlock()
@@ -52,14 +54,14 @@ func (cres *cacheResponses) get(req *request) (res *response) {
 //
 // upsert update or insert response in cache.
 //
-func (cres *cacheResponses) upsert(res *response) {
+func (cres *cacheResponses) upsert(res *dns.Response) {
 	cres.Lock()
 	for e := cres.v.Front(); e != nil; e = e.Next() {
-		ev := e.Value.(*response)
-		if res.msg.Question.Type != ev.msg.Question.Type {
+		ev := e.Value.(*dns.Response)
+		if res.Message.Question.Type != ev.Message.Question.Type {
 			continue
 		}
-		if res.msg.Question.Class != ev.msg.Question.Class {
+		if res.Message.Question.Class != ev.Message.Question.Class {
 			continue
 		}
 
@@ -85,8 +87,8 @@ func (cres *cacheResponses) String() string {
 		} else {
 			b.WriteByte(' ')
 		}
-		ev := e.Value.(*response)
-		fmt.Fprintf(&b, "%s", ev)
+		ev := e.Value.(*dns.Response)
+		fmt.Fprintf(&b, "%+v", ev)
 	}
 	b.WriteByte(']')
 

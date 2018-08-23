@@ -8,8 +8,8 @@ import (
 	"github.com/shuLhan/share/lib/dns"
 )
 
-var _testResponses = []*response{{
-	msg: &dns.Message{
+var _testResponses = []*dns.Response{{
+	Message: &dns.Message{
 		Packet: []byte{1},
 		Header: &dns.SectionHeader{
 			ANCount: 1,
@@ -24,7 +24,7 @@ var _testResponses = []*response{{
 		}},
 	},
 }, {
-	msg: &dns.Message{
+	Message: &dns.Message{
 		Packet: []byte{2},
 		Header: &dns.SectionHeader{
 			ANCount: 1,
@@ -39,7 +39,7 @@ var _testResponses = []*response{{
 		}},
 	},
 }, {
-	msg: &dns.Message{
+	Message: &dns.Message{
 		Packet: []byte{1, 1},
 		Header: &dns.SectionHeader{
 			ANCount: 1,

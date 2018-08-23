@@ -117,7 +117,7 @@ func main() {
 
 	rescached.DebugLevel = cfg.debugLevel
 
-	rcd, err = rescached.New(cfg.nsParents)
+	rcd, err = rescached.New(cfg.nsNetwork, cfg.nsParents)
 	if err != nil {
 		log.Fatal(err)
 	}

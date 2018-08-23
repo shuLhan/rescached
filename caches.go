@@ -5,7 +5,6 @@
 package rescached
 
 import (
-	"fmt"
 	"log"
 	"sync"
 	"sync/atomic"
@@ -33,8 +32,8 @@ func newCaches() *caches {
 //
 // get cached response based on request name and type.
 //
-func (c *caches) get(req *request) *response {
-	v, ok := c.v.Load(string(req.msg.Question.Name))
+func (c *caches) get(req *dns.Request) *dns.Response {
+	v, ok := c.v.Load(string(req.Message.Question.Name))
 	if !ok {
 		return nil
 	}
@@ -50,23 +49,19 @@ func (c *caches) get(req *request) *response {
 // than zero (0).  If response contains no answer or TTL is zero it will
 // return false, otherwise it will return true.
 //
-func (c *caches) put(res *response) bool {
-	if res.msg.Header.ANCount == 0 || len(res.msg.Answer) == 0 {
-		log.Printf("! Empty answers on %s\n", res.msg)
+func (c *caches) put(res *dns.Response) bool {
+	if res.Message.Header.ANCount == 0 || len(res.Message.Answer) == 0 {
+		log.Printf("! Empty answers on %s\n", res.Message)
 		return false
 	}
-	for x := 0; x < len(res.msg.Answer); x++ {
-		if res.msg.Answer[x].TTL == 0 {
-			log.Printf("! Empty TTL on %s\n", res.msg)
+	for x := 0; x < len(res.Message.Answer); x++ {
+		if res.Message.Answer[x].TTL == 0 {
+			log.Printf("! Empty TTL on %s\n", res.Message)
 			return false
 		}
 	}
 
-	if DebugLevel >= 1 {
-		fmt.Printf("+ caching: %s\n", res.msg.Answer[0])
-	}
-
-	qname := string(res.msg.Question.Name)
+	qname := string(res.Message.Question.Name)
 	v, ok := c.v.Load(qname)
 	if !ok {
 		cres := newCacheResponses(res)
@@ -100,16 +95,16 @@ func LoadHostsFile(path string) {
 
 	n := 0
 	for x, msg := range msgs {
-		res := &response{
+		res := &dns.Response{
 			// Flag to indicated that this response is from local
 			// hosts file.
-			receivedAt: 0,
-			msg:        msg,
+			ReceivedAt: 0,
+			Message:    msg,
 		}
 
 		ok := _caches.put(res)
 		if !ok {
-			res.msg.Reset()
+			res.Message.Reset()
 		} else {
 			n++
 		}
@@ -120,6 +115,4 @@ func LoadHostsFile(path string) {
 	if DebugLevel >= 1 {
 		log.Printf("== %d loaded\n", n)
 	}
-
-	msgs = nil
 }

@@ -55,7 +55,7 @@ type config struct {
 	filePID        string
 	nsParents      []*net.UDPAddr
 	nsNetwork      string
-	listen         *net.UDPAddr
+	listen         string
 	timeout        time.Duration
 	hostsDir       string
 	cacheMax       uint32
@@ -79,13 +79,7 @@ func newConfig(file string) (cfg *config, err error) {
 	}
 
 	cfg.nsNetwork = in.GetString(cfgSecRescached, "", cfgKeyNSNetwork, defNSNetwork)
-
-	v := in.GetString(cfgSecRescached, "", cfgKeyListen, defListen)
-	cfg.listen, err = parseIPPort(v)
-	if err != nil {
-		return nil, err
-	}
-
+	cfg.listen = in.GetString(cfgSecRescached, "", cfgKeyListen, defListen)
 	cfg.hostsDir = in.GetString(cfgSecRescached, "", cfgKeyHostsDir, defHostsDir)
 	cfg.parseTimeout(in)
 	cfg.parseCacheMax(in)
@@ -104,7 +98,7 @@ func (cfg *config) parseNSParent(in *ini.Ini) error {
 	}
 
 	for _, ns := range nsParents {
-		addr, err := parseIPPort(ns)
+		addr, err := parseIPPort(strings.TrimSpace(ns))
 		if err != nil {
 			return err
 		}

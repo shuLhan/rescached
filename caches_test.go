@@ -14,16 +14,16 @@ import (
 var _testCaches = newCaches()
 
 func TestCachesPut(t *testing.T) {
-	t.Logf("_testResponses[0]: %s\n", _testResponses[0])
+	t.Logf("_testResponses[0]: %+v\n", _testResponses[0])
 
 	cases := []struct {
 		desc   string
-		res    *response
+		res    *dns.Response
 		expLen uint64
 	}{{
 		desc: "New",
-		res: &response{
-			msg: &dns.Message{
+		res: &dns.Response{
+			Message: &dns.Message{
 				Packet: []byte{1},
 				Header: &dns.SectionHeader{
 					ANCount: 1,
@@ -42,8 +42,8 @@ func TestCachesPut(t *testing.T) {
 		expLen: 1,
 	}, {
 		desc: "New",
-		res: &response{
-			msg: &dns.Message{
+		res: &dns.Response{
+			Message: &dns.Message{
 				Packet: []byte{2},
 				Header: &dns.SectionHeader{
 					ANCount: 1,
@@ -61,8 +61,8 @@ func TestCachesPut(t *testing.T) {
 		expLen: 2,
 	}, {
 		desc: "Replace",
-		res: &response{
-			msg: &dns.Message{
+		res: &dns.Response{
+			Message: &dns.Message{
 				Packet: []byte{1, 1},
 				Header: &dns.SectionHeader{
 					ANCount: 1,
@@ -92,12 +92,12 @@ func TestCachesPut(t *testing.T) {
 func TestCachesGet(t *testing.T) {
 	cases := []struct {
 		desc string
-		req  *request
-		exp  *response
+		req  *dns.Request
+		exp  *dns.Response
 	}{{
 		desc: "Cache hit",
-		req: &request{
-			msg: &dns.Message{
+		req: &dns.Request{
+			Message: &dns.Message{
 				Question: &dns.SectionQuestion{
 					Name:  []byte("1"),
 					Type:  1,
@@ -108,8 +108,8 @@ func TestCachesGet(t *testing.T) {
 		exp: _testResponses[2],
 	}, {
 		desc: "Cache miss",
-		req: &request{
-			msg: &dns.Message{
+		req: &dns.Request{
+			Message: &dns.Message{
 				Question: &dns.SectionQuestion{
 					Name:  []byte("1"),
 					Type:  0,

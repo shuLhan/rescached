@@ -7,6 +7,7 @@ package rescached
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -23,25 +24,39 @@ var (
 	DebugLevel byte = 0
 )
 
+// List of error messages.
+var (
+	ErrNetworkType = errors.New("Invalid network type")
+)
+
 // Server implement caching DNS server.
 type Server struct {
+	network   string
+	dnsServer *dns.Server
 	nsParents []*net.UDPAddr
-	udpc      *net.UDPConn
-	reqQueue  chan *request
-	fwQueue   chan *request
-	resQueue  chan *response
+	reqQueue  chan *dns.Request
+	fwQueue   chan *dns.Request
 }
 
 //
 // New create and initialize new rescached server.
 //
-func New(nsParents []*net.UDPAddr) (srv *Server, err error) {
-	srv = &Server{
-		nsParents: nsParents,
-		reqQueue:  make(chan *request, _maxQueue),
-		fwQueue:   make(chan *request, _maxQueue),
-		resQueue:  make(chan *response, _maxQueue),
+func New(network string, nsParents []*net.UDPAddr) (srv *Server, err error) {
+	switch network {
+	case "udp", "tcp":
+	default:
+		return nil, ErrNetworkType
 	}
+
+	srv = &Server{
+		network:   network,
+		dnsServer: new(dns.Server),
+		nsParents: nsParents,
+		reqQueue:  make(chan *dns.Request, _maxQueue),
+		fwQueue:   make(chan *dns.Request, _maxQueue),
+	}
+
+	srv.dnsServer.Handler = srv
 
 	// Initialize caches and queue.
 	if _caches == nil {
@@ -54,17 +69,19 @@ func New(nsParents []*net.UDPAddr) (srv *Server, err error) {
 }
 
 //
+// ServeDNS handle DNS request from server.
+//
+func (srv *Server) ServeDNS(req *dns.Request) {
+	srv.reqQueue <- req
+}
+
+//
 // Start the server, waiting for DNS query from clients, read it and response
 // it.
 //
-func (srv *Server) Start(listen *net.UDPAddr) (err error) {
+func (srv *Server) Start(listenAddr string) (err error) {
 	if DebugLevel >= 1 {
-		fmt.Printf("= Listening on %s\n", listen)
-	}
-
-	srv.udpc, err = net.ListenUDP("udp", listen)
-	if err != nil {
-		return
+		fmt.Printf("= Listening on %s\n", listenAddr)
 	}
 
 	err = srv.runForwarders()
@@ -73,58 +90,43 @@ func (srv *Server) Start(listen *net.UDPAddr) (err error) {
 	}
 
 	go srv.processRequestQueue()
-	srv.handleIncomingClient()
+
+	err = srv.dnsServer.ListenAndServe(listenAddr)
 
 	return
 }
 
 func (srv *Server) runForwarders() (err error) {
-	for x := 0; x < _maxForwarder; x++ {
-		var cl *dns.Client
+	max := _maxForwarder
+	if len(srv.nsParents) > max {
+		max = len(srv.nsParents)
+	}
 
-		cl, err = dns.NewClient(nil)
+	for x := 0; x < max; x++ {
+		var cl dns.Client
+
+		nsIdx := x % len(srv.nsParents)
+		raddr := srv.nsParents[nsIdx]
+
+		if srv.network == "udp" {
+			cl, err = dns.NewUDPClient(raddr.String())
+		}
 		if err != nil {
 			log.Fatal("processForwardQueue: NewClient:", err)
 			return
 		}
 
-		for y := 0; y < len(srv.nsParents); y++ {
-			cl.AddRemoteUDPAddr(srv.nsParents[y])
-		}
-
-		go srv.processForwardQueue(cl)
+		go srv.processForwardQueue(cl, raddr)
 	}
 	return
-}
-
-func (srv *Server) handleIncomingClient() {
-	var (
-		n   int
-		err error
-	)
-	for {
-		req := _requestPool.Get().(*request)
-
-		n, req.raddr, err = srv.udpc.ReadFromUDP(req.msg.Packet)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		req.msg.Packet = req.msg.Packet[:n]
-
-		srv.reqQueue <- req
-	}
 }
 
 func (srv *Server) processRequestQueue() {
 	var err error
 
 	for req := range srv.reqQueue {
-		req.msg.UnpackHeaderQuestion()
-
 		if DebugLevel >= 1 {
-			fmt.Printf("< request: %s\n", req.msg.Question)
+			fmt.Printf("< request: %s\n", req.Message.Question)
 		}
 
 		// Check if request query name exist in cache.
@@ -134,88 +136,102 @@ func (srv *Server) processRequestQueue() {
 			continue
 		}
 
-		if res.isExpired() {
+		if res.IsExpired() {
 			if DebugLevel >= 1 {
-				fmt.Printf("- expired: %s\n", res.msg.Answer[0])
+				fmt.Printf("- expired: %s\n", res.Message.Answer[0])
 			}
-
 			srv.fwQueue <- req
 			continue
 		}
 
 		if DebugLevel >= 1 {
-			fmt.Printf("= cache  : %s\n", res.msg.Answer[0])
+			fmt.Printf("= cache  : %s\n", res.Message.Answer[0])
 		}
 
-		res.msg.SetID(req.msg.Header.ID)
+		res.Message.SetID(req.Message.Header.ID)
 
-		_, err = srv.udpc.WriteToUDP(res.msg.Packet, req.raddr)
+		_, err = req.Sender.Send(res.Message, req.UDPAddr)
 		if err != nil {
 			log.Println("processRequestQueue: WriteToUDP:", err)
 		}
 
-		freeRequest(req)
+		srv.dnsServer.FreeRequest(req)
 	}
 }
 
-func (srv *Server) processForwardQueue(cl *dns.Client) {
-	var ok bool
+func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
+	var (
+		ok  bool
+		err error
+		res *dns.Response
+	)
 	for req := range srv.fwQueue {
-		err := cl.Send(req.msg, nil)
+		ok = false
+		if srv.network == "tcp" {
+			cl, err = dns.NewTCPClient(raddr.String())
+			if err != nil {
+				srv.dnsServer.FreeRequest(req)
+				continue
+			}
+		}
+
+		_, err = cl.Send(req.Message, raddr)
 		if err != nil {
 			log.Println("processForwardQueue: Send:", err)
-			freeRequest(req)
-			continue
+			goto out
 		}
 
-		res := _responsePool.Get().(*response)
+		res = _responsePool.Get().(*dns.Response)
+		res.Reset()
 
-		err = cl.Recv(res.msg)
+		_, err = cl.Recv(res.Message)
 		if err != nil {
 			log.Println("processForwardQueue: Recv:", err)
-			freeRequest(req)
-			freeResponse(res)
-			continue
+			goto out
 		}
 
-		err = res.unpack()
+		err = res.Unpack()
 		if err != nil {
 			log.Println("processForwardQueue: UnmarshalBinary:", err)
-			freeRequest(req)
-			freeResponse(res)
-			continue
+			goto out
 		}
 
-		if !bytes.Equal(req.msg.Question.Name, res.msg.Question.Name) {
-			freeRequest(req)
-			freeResponse(res)
-			continue
+		if !bytes.Equal(req.Message.Question.Name, res.Message.Question.Name) {
+			goto out
 		}
-		if req.msg.Header.ID != res.msg.Header.ID {
-			freeRequest(req)
-			freeResponse(res)
-			continue
+		if req.Message.Header.ID != res.Message.Header.ID {
+			goto out
 		}
-		if req.msg.Question.Type != res.msg.Question.Type {
-			freeRequest(req)
-			freeResponse(res)
-			continue
+		if req.Message.Question.Type != res.Message.Question.Type {
+			goto out
 		}
 
-		res.msg.SetID(req.msg.Header.ID)
+		res.Message.SetID(req.Message.Header.ID)
+		ok = true
 
-		_, err = srv.udpc.WriteToUDP(res.msg.Packet, req.raddr)
+		_, err = req.Sender.Send(res.Message, req.UDPAddr)
 		if err != nil {
-			log.Println("processForwardQueue: WriteToUDP:", err)
-			freeRequest(req)
-			freeResponse(res)
-			continue
+			log.Println("processForwardQueue: Send:", err)
 		}
 
-		freeRequest(req)
-		ok = _caches.put(res)
-		if !ok {
-			freeResponse(res)
+	out:
+		if srv.network == "tcp" {
+			if cl != nil {
+				cl.Close()
+			}
+		}
+
+		srv.dnsServer.FreeRequest(req)
+
+		if ok {
+			ok = _caches.put(res)
+			if !ok {
+				freeResponse(res)
+			} else {
+				if DebugLevel >= 1 {
+					fmt.Printf("+ caching: %s\n", res.Message.Answer[0])
+				}
+			}
 		}
 	}
 }
