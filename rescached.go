@@ -13,6 +13,7 @@ import (
 	"net"
 
 	"github.com/shuLhan/share/lib/dns"
+	libnet "github.com/shuLhan/share/lib/net"
 )
 
 const (
@@ -31,7 +32,7 @@ var (
 
 // Server implement caching DNS server.
 type Server struct {
-	network   string
+	netType   libnet.Type
 	dnsServer *dns.Server
 	nsParents []*net.UDPAddr
 	reqQueue  chan *dns.Request
@@ -42,14 +43,13 @@ type Server struct {
 // New create and initialize new rescached server.
 //
 func New(network string, nsParents []*net.UDPAddr) (srv *Server, err error) {
-	switch network {
-	case "udp", "tcp":
-	default:
+	netType := libnet.ConvertStandard(network)
+	if !libnet.IsTypeTransport(netType) {
 		return nil, ErrNetworkType
 	}
 
 	srv = &Server{
-		network:   network,
+		netType:   netType,
 		dnsServer: new(dns.Server),
 		nsParents: nsParents,
 		reqQueue:  make(chan *dns.Request, _maxQueue),
@@ -108,7 +108,7 @@ func (srv *Server) runForwarders() (err error) {
 		nsIdx := x % len(srv.nsParents)
 		raddr := srv.nsParents[nsIdx]
 
-		if srv.network == "udp" {
+		if libnet.IsTypeUDP(srv.netType) {
 			cl, err = dns.NewUDPClient(raddr.String())
 		}
 		if err != nil {
@@ -167,7 +167,7 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 	)
 	for req := range srv.fwQueue {
 		ok = false
-		if srv.network == "tcp" {
+		if libnet.IsTypeTCP(srv.netType) {
 			cl, err = dns.NewTCPClient(raddr.String())
 			if err != nil {
 				srv.dnsServer.FreeRequest(req)
@@ -215,7 +215,7 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 		}
 
 	out:
-		if srv.network == "tcp" {
+		if libnet.IsTypeTCP(srv.netType) {
 			if cl != nil {
 				cl.Close()
 			}

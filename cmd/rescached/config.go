@@ -5,7 +5,6 @@
 package main
 
 import (
-	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -99,7 +98,7 @@ func (cfg *config) parseNSParent(in *ini.Ini) error {
 	}
 
 	for _, ns := range nsParents {
-		addr, err := libnet.ParseUDPAddr(strings.TrimSpace(ns))
+		addr, err := libnet.ParseUDPAddr(strings.TrimSpace(ns), defPort)
 		if err != nil {
 			return err
 		}
