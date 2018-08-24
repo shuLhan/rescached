@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/shuLhan/share/lib/ini"
+	libnet "github.com/shuLhan/share/lib/net"
 )
 
 // List of config sections.
@@ -98,7 +99,7 @@ func (cfg *config) parseNSParent(in *ini.Ini) error {
 	}
 
 	for _, ns := range nsParents {
-		addr, err := parseIPPort(strings.TrimSpace(ns))
+		addr, err := libnet.ParseUDPAddr(strings.TrimSpace(ns))
 		if err != nil {
 			return err
 		}
@@ -106,28 +107,6 @@ func (cfg *config) parseNSParent(in *ini.Ini) error {
 	}
 
 	return nil
-}
-
-func parseIPPort(address string) (*net.UDPAddr, error) {
-	udpAddr := new(net.UDPAddr)
-
-	host, port, err := net.SplitHostPort(address)
-	if err != nil {
-		host = address
-		port = defPortString
-	}
-
-	udpAddr.IP = net.ParseIP(host)
-	if udpAddr.IP == nil {
-		err = fmt.Errorf("Invalid address format %s", host)
-		return nil, err
-	}
-	udpAddr.Port, err = strconv.Atoi(port)
-	if err != nil {
-		udpAddr.Port = defPort
-	}
-
-	return udpAddr, nil
 }
 
 func (cfg *config) parseTimeout(in *ini.Ini) {
