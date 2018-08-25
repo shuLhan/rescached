@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 
 	"github.com/shuLhan/share/lib/dns"
 	libnet "github.com/shuLhan/share/lib/net"
@@ -37,13 +38,15 @@ type Server struct {
 	nsParents []*net.UDPAddr
 	reqQueue  chan *dns.Request
 	fwQueue   chan *dns.Request
-	caches    *caches
+	cw        *cacheWorker
 }
 
 //
 // New create and initialize new rescached server.
 //
-func New(network string, nsParents []*net.UDPAddr) (srv *Server, err error) {
+func New(network string, nsParents []*net.UDPAddr, cachePruneDelay, cacheThreshold time.Duration) (
+	srv *Server, err error,
+) {
 	netType := libnet.ConvertStandard(network)
 	if !libnet.IsTypeTransport(netType) {
 		return nil, ErrNetworkType
@@ -55,7 +58,7 @@ func New(network string, nsParents []*net.UDPAddr) (srv *Server, err error) {
 		nsParents: nsParents,
 		reqQueue:  make(chan *dns.Request, _maxQueue),
 		fwQueue:   make(chan *dns.Request, _maxQueue),
-		caches:    newCaches(),
+		cw:        newCacheWorker(cachePruneDelay, cacheThreshold),
 	}
 
 	srv.dnsServer.Handler = srv
@@ -71,9 +74,9 @@ func New(network string, nsParents []*net.UDPAddr) (srv *Server, err error) {
 func (srv *Server) LoadHostsFile(path string) {
 	if DebugLevel >= 1 {
 		if len(path) == 0 {
-			log.Println("= Loading system hosts file")
+			fmt.Println("= Loading system hosts file")
 		} else {
-			log.Printf("= Loading hosts file '%s'", path)
+			fmt.Printf("= Loading hosts file '%s'\n", path)
 		}
 	}
 
@@ -91,7 +94,7 @@ func (srv *Server) LoadHostsFile(path string) {
 			Message:    msgs[x],
 		}
 
-		ok := srv.caches.put(res)
+		ok := srv.cw.add(res, false)
 		if !ok {
 			freeResponse(res)
 		} else {
@@ -100,7 +103,7 @@ func (srv *Server) LoadHostsFile(path string) {
 	}
 
 	if DebugLevel >= 1 {
-		log.Printf("== %d loaded\n", n)
+		fmt.Printf("== %d loaded\n", n)
 	}
 }
 
@@ -125,6 +128,7 @@ func (srv *Server) Start(listenAddr string) (err error) {
 		return
 	}
 
+	go srv.cw.start()
 	go srv.processRequestQueue()
 
 	err = srv.dnsServer.ListenAndServe(listenAddr)
@@ -166,32 +170,31 @@ func (srv *Server) processRequestQueue() {
 		}
 
 		// Check if request query name exist in cache.
-		res := srv.caches.get(req)
-		if res == nil {
+		qname := string(req.Message.Question.Name)
+		_, cres := srv.cw.caches.get(qname, req.Message.Question.Type, req.Message.Question.Class)
+		if cres == nil {
 			srv.fwQueue <- req
 			continue
 		}
 
-		if res.IsExpired() {
+		if cres.v.IsExpired() {
 			if DebugLevel >= 1 {
-				fmt.Printf("- expired: %s\n", res.Message.Answer[0])
+				fmt.Printf("- expired: %s\n", cres.v.Message.Question)
 			}
 			srv.fwQueue <- req
 			continue
 		}
 
-		if DebugLevel >= 1 {
-			fmt.Printf("= cache  : %s\n", res.Message.Answer[0])
-		}
+		cres.v.Message.SetID(req.Message.Header.ID)
 
-		res.Message.SetID(req.Message.Header.ID)
-
-		_, err = req.Sender.Send(res.Message, req.UDPAddr)
+		_, err = req.Sender.Send(cres.v.Message, req.UDPAddr)
 		if err != nil {
 			log.Println("processRequestQueue: WriteToUDP:", err)
 		}
 
 		srv.dnsServer.FreeRequest(req)
+
+		srv.cw.updateQueue <- cres
 	}
 }
 
@@ -260,14 +263,7 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 		srv.dnsServer.FreeRequest(req)
 
 		if ok {
-			ok = srv.caches.put(res)
-			if !ok {
-				freeResponse(res)
-			} else {
-				if DebugLevel >= 1 {
-					fmt.Printf("+ caching: %s\n", res.Message.Answer[0])
-				}
-			}
+			srv.cw.addQueue <- res
 		}
 	}
 }

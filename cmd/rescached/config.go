@@ -21,29 +21,29 @@ const (
 
 // List of config keys.
 const (
-	cfgKeyCacheMax       = "cache.max"
-	cfgKeyCacheThreshold = "cache.threshold"
-	cfgKeyDebug          = "debug"
-	cfgKeyFilePID        = "file.pid"
-	cfgKeyHostsDir       = "hosts_d.path"
-	cfgKeyListen         = "server.listen"
-	cfgKeyNSNetwork      = "server.parent.connection"
-	cfgKeyNSParent       = "server.parent"
-	cfgKeyTimeout        = "server.timeout"
+	cfgKeyCachePruneDelay = "cache.prune_delay"
+	cfgKeyCacheThreshold  = "cache.threshold"
+	cfgKeyDebug           = "debug"
+	cfgKeyFilePID         = "file.pid"
+	cfgKeyHostsDir        = "hosts_d.path"
+	cfgKeyListen          = "server.listen"
+	cfgKeyNSNetwork       = "server.parent.connection"
+	cfgKeyNSParent        = "server.parent"
+	cfgKeyTimeout         = "server.timeout"
 )
 
 // List of default values.
 const (
-	defCacheMax       = 100000
-	defCacheThreshold = 1
-	defFilePID        = "rescached.pid"
-	defHostsDir       = "/etc/rescached/hosts.d"
-	defListen         = "127.0.0.1:53"
-	defNSNetwork      = "udp"
-	defPort           = 53
-	defPortString     = "53"
-	defTimeout        = 3
-	defTimeoutString  = "3"
+	defCachePruneDelay = 60 * time.Second
+	defCacheThreshold  = -10 * time.Second
+	defFilePID         = "rescached.pid"
+	defHostsDir        = "/etc/rescached/hosts.d"
+	defListen          = "127.0.0.1:53"
+	defNSNetwork       = "udp"
+	defPort            = 53
+	defPortString      = "53"
+	defTimeout         = 6
+	defTimeoutString   = "6"
 )
 
 // List of default values.
@@ -52,15 +52,15 @@ var (
 )
 
 type config struct {
-	filePID        string
-	nsParents      []*net.UDPAddr
-	nsNetwork      string
-	listen         string
-	timeout        time.Duration
-	hostsDir       string
-	cacheMax       uint32
-	cacheThreshold uint32
-	debugLevel     byte
+	filePID         string
+	nsParents       []*net.UDPAddr
+	nsNetwork       string
+	listen          string
+	timeout         time.Duration
+	hostsDir        string
+	cachePruneDelay time.Duration
+	cacheThreshold  time.Duration
+	debugLevel      byte
 }
 
 func newConfig(file string) (cfg *config, err error) {
@@ -82,7 +82,7 @@ func newConfig(file string) (cfg *config, err error) {
 	cfg.listen = in.GetString(cfgSecRescached, "", cfgKeyListen, defListen)
 	cfg.hostsDir = in.GetString(cfgSecRescached, "", cfgKeyHostsDir, defHostsDir)
 	cfg.parseTimeout(in)
-	cfg.parseCacheMax(in)
+	cfg.parseCachePruneDelay(in)
 	cfg.parseCacheThreshold(in)
 	cfg.parseDebugLevel(in)
 
@@ -119,20 +119,26 @@ func (cfg *config) parseTimeout(in *ini.Ini) {
 	cfg.timeout = time.Duration(timeout) * time.Second
 }
 
-func (cfg *config) parseCacheMax(in *ini.Ini) {
-	v, ok := in.Get(cfgSecRescached, "", cfgKeyCacheMax)
+func (cfg *config) parseCachePruneDelay(in *ini.Ini) {
+	v, ok := in.Get(cfgSecRescached, "", cfgKeyCachePruneDelay)
 	if !ok {
-		cfg.cacheMax = defCacheMax
+		cfg.cachePruneDelay = defCachePruneDelay
 		return
 	}
 
-	cacheMax, err := strconv.ParseUint(v, 10, 32)
+	v = strings.TrimSpace(v)
+
+	var err error
+
+	cfg.cachePruneDelay, err = time.ParseDuration(v)
 	if err != nil {
-		cfg.cacheMax = defCacheMax
+		cfg.cachePruneDelay = defCachePruneDelay
 		return
 	}
 
-	cfg.cacheMax = uint32(cacheMax)
+	if cfg.cachePruneDelay == 0 {
+		cfg.cachePruneDelay = defCachePruneDelay
+	}
 }
 
 func (cfg *config) parseCacheThreshold(in *ini.Ini) {
@@ -142,13 +148,19 @@ func (cfg *config) parseCacheThreshold(in *ini.Ini) {
 		return
 	}
 
-	cacheThreshold, err := strconv.ParseUint(v, 10, 32)
+	v = strings.TrimSpace(v)
+
+	var err error
+
+	cfg.cacheThreshold, err = time.ParseDuration(v)
 	if err != nil {
 		cfg.cacheThreshold = defCacheThreshold
 		return
 	}
 
-	cfg.cacheThreshold = uint32(cacheThreshold)
+	if cfg.cacheThreshold >= 0 {
+		cfg.cacheThreshold = defCacheThreshold
+	}
 }
 
 func (cfg *config) parseDebugLevel(in *ini.Ini) {

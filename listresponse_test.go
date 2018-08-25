@@ -13,9 +13,9 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
-var _testCacheResponses = newCacheResponses(nil)
+var _testListResponse = newListResponse(nil)
 
-func TestCacheResponsesUpsert(t *testing.T) {
+func TestListResponseAdd(t *testing.T) {
 	cases := []struct {
 		desc   string
 		res    *dns.Response
@@ -40,18 +40,20 @@ func TestCacheResponsesUpsert(t *testing.T) {
 		desc: "Replace",
 		res:  _testResponses[2],
 		exp: []*dns.Response{
+			_testResponses[0],
 			_testResponses[1],
 			_testResponses[2],
 		},
-		expLen: 2,
+		expLen: 3,
 	}}
 
 	for _, c := range cases {
 		t.Logf(c.desc)
 
-		_testCacheResponses.upsert(c.res)
+		cres := _testListResponse.add(c.res)
+		cres.accessedAt = 0
 
-		test.Assert(t, "listResponse.Len", c.expLen, _testCacheResponses.v.Len(), true)
+		test.Assert(t, "listResponse.Len", c.expLen, _testListResponse.v.Len(), true)
 
 		var b strings.Builder
 		b.WriteByte('[')
@@ -63,43 +65,34 @@ func TestCacheResponsesUpsert(t *testing.T) {
 		}
 		b.WriteByte(']')
 
-		test.Assert(t, "listResponse", b.String(), _testCacheResponses.String(), true)
+		test.Assert(t, "listResponse", b.String(), _testListResponse.String(), true)
 	}
 }
 
-func TestCacheResponsesGet(t *testing.T) {
+func TestListResponseGet(t *testing.T) {
 	cases := []struct {
-		desc string
-		req  *dns.Request
-		exp  *dns.Response
+		desc   string
+		qtype  uint16
+		qclass uint16
+		exp    *cacheResponse
 	}{{
-		desc: "Cache hit",
-		req: &dns.Request{
-			Message: &dns.Message{
-				Question: &dns.SectionQuestion{
-					Type:  1,
-					Class: 1,
-				},
-			},
+		desc:   "Cache hit",
+		qtype:  1,
+		qclass: 1,
+		exp: &cacheResponse{
+			v: _testResponses[0],
 		},
-		exp: _testResponses[2],
 	}, {
-		desc: "Cache miss",
-		req: &dns.Request{
-			Message: &dns.Message{
-				Question: &dns.SectionQuestion{
-					Type:  0,
-					Class: 1,
-				},
-			},
-		},
-		exp: nil,
+		desc:   "Cache miss",
+		qtype:  0,
+		qclass: 1,
+		exp:    nil,
 	}}
 
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		got := _testCacheResponses.get(c.req)
+		got := _testListResponse.get(c.qtype, c.qclass)
 
 		test.Assert(t, "cacheResponse.get", c.exp, got, true)
 	}

@@ -5,18 +5,13 @@
 package rescached
 
 import (
-	"log"
 	"sync"
-	"sync/atomic"
-
-	"github.com/shuLhan/share/lib/dns"
 )
 
 //
 // caches represent a mapping between domain-name and cached responses.
 //
 type caches struct {
-	n uint64
 	v sync.Map
 }
 
@@ -28,48 +23,45 @@ func newCaches() *caches {
 }
 
 //
-// get cached response based on request name and type.
+// get cached response based on request name, type, and class
 //
-func (c *caches) get(req *dns.Request) *dns.Response {
-	v, ok := c.v.Load(string(req.Message.Question.Name))
+func (c *caches) get(qname string, qtype, qclass uint16) (
+	lres *listResponse, cres *cacheResponse,
+) {
+	v, ok := c.v.Load(qname)
 	if !ok {
-		return nil
+		return
 	}
-	lres := v.(*listResponse)
-	if lres == nil || lres.v == nil {
-		return nil
-	}
-	return lres.get(req)
+
+	lres = v.(*listResponse)
+	cres = lres.get(qtype, qclass)
+
+	return
 }
 
 //
-// put response to cache only if it's contains an answer and TTL is greater
-// than zero (0).  If response contains no answer or TTL is zero it will
-// return false, otherwise it will return true.
+// add response to caches.
 //
-func (c *caches) put(res *dns.Response) bool {
-	if res.Message.Header.ANCount == 0 || len(res.Message.Answer) == 0 {
-		log.Printf("! Empty answers on %s\n", res.Message)
-		return false
-	}
-	for x := 0; x < len(res.Message.Answer); x++ {
-		if res.Message.Answer[x].TTL == 0 {
-			log.Printf("! Empty TTL on %s\n", res.Message)
-			return false
-		}
-	}
+func (c *caches) add(key string, cres *cacheResponse) {
+	lres := newListResponse(cres)
+	c.v.Store(key, lres)
+}
 
-	qname := string(res.Message.Question.Name)
+//
+// remove cache by name, type, and class; and return the cached response.
+// If no record found it will return nil.
+//
+func (c *caches) remove(qname string, qtype, qclass uint16) *cacheResponse {
 	v, ok := c.v.Load(qname)
 	if !ok {
-		lres := newListResponse(res)
-		c.v.Store(qname, lres)
-		atomic.AddUint64(&c.n, 1)
-		return true
+		return nil
 	}
 
 	lres := v.(*listResponse)
-	lres.upsert(res)
+	if lres.v.Len() == 0 {
+		c.v.Delete(qname)
+		return nil
+	}
 
-	return true
+	return lres.remove(qtype, qclass)
 }

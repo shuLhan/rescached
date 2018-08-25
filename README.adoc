@@ -25,7 +25,7 @@ rescached - DNS resolver cache daemon.
 == DESCRIPTION
 
 +rescached+ is a daemon that caching internet name and address on local memory
-when running for speeding up DNS resolution.
+for speeding up DNS resolution.
 
 +rescached+ is not a reimplementation of DNS server like BIND.
 
@@ -36,16 +36,12 @@ network.
 
 === Features
 
-* Enable to handle request from UDP connections.
-
-TODO:
-
+- Enable to handle request from UDP connections.
 - Load and serve addresses and hostnames in +/etc/hosts+.
 - Load and serve addresses and hostnames from all files inside directory
   +/etc/rescached/hosts.d/+, recursively.
 - Blocking ads and/or malicious websites through list in
   +/etc/rescached/hosts.d/hosts.block+.
-
 
 === Behind The DNS
 
@@ -99,50 +95,57 @@ already exist in +rescached+ cache.
 
 This section explain the simplified version of how internal program works.
 
-Each query and answer data in cache have a number of accessed field, which
-defined how the cache will be ordered in memory.
-The frequently queried host-name will be at the top of cache list, and less
-queried host-name will at the bottom of cache list.
-The following table show an example of list of cache with number of frequently
-accessed in the first column, and name of host in the second column.
+Each DNS record in cache have the time last accessed field, which defined how
+the cache will be ordered in memory.
+The last queried host-name will be at the bottom of cache list, and the oldest
+queried host-name will at the top of cache list.
+
+The following table illustrate list of caches in memory,
 
 ----
-+-----+------------------+
-| #   | host-name        |
-+-----+------------------+
-| 529 | kilabit.info     |
-+-----+------------------+
-| 233 | www.google.com   |
-+-----+------------------+
-| ... |        ...       |
-+-----+------------------+
-| 1   | www.kilabit.info |
-+-----+------------------+
++---------------------+------------------+
+| Accessed At         | host-name        |
++---------------------+------------------+
+| 2018-01-01 00:00:01 | kilabit.info     |
++---------------------+------------------+
+| 2018-01-01 00:00:02 | www.google.com   |
++---------------------+------------------+
+|         ...         |        ...       |
++---------------------+------------------+
+| 2018-01-01 00:01:00 | www.kilabit.info |
++---------------------+------------------+
 ----
 
-The number of cache that +rescached+ can hold in memory is depend on the value
-of +cache.max+ in configuration file.
-When the number of cache in memory reached it +cache.max+ value, it will
-remove all cache data that has the number of frequently accessed less than or
-equal to +cache.threshold+.
+Every +cache.prune_delay+ (e.g. 1 hour), rescached will try to pruning old
+records from cache.
+If the accessed-at value of record in cache is less than,
+
+----
+	current-time + cache.threshold
+----
+
+(remember than +cache.threshold+ value must be negative) it will remove the
+record from cache.
 
 
 == Installation
 
 === Prerequisites
 
-* Go compiler
-* git SCM
+* https://golang.org[Go compiler]
+* https://git-scm.com[git, version control system]
 * asciidoc, to generate manual page
 * systemd or system V init tool for service
 
 === Compiling From Source
 
-To build +rescached+ from the source, follow the procedures bellow,
+Steps to compile from source,
 
-	$ go get -u github.com/shuLhan/rescached.go
-	$ cd ${GOPATH}/src/github.com/shuLhan/rescached.go.git
+----
+	$ go get -u github.com/shuLhan/rescached-go
+	$ cd ${GOPATH}/src/github.com/shuLhan/rescached-go.git
 	$ go build ./cmd/rescached
+----
 
 The last command will build binary named +rescached+ in current directory.
 
@@ -154,7 +157,7 @@ system binary directory.
 ==== Manual Installation
 
 * Copy rescached configuration to system directory.
-Assume that we use directory "/etc/rescached" as configuration directory, then
+We use directory "/etc/rescached" as configuration directory.
 +
 	$ sudo mkdir -p /etc/rescached
 	$ sudo cp cmd/rescached/rescached.cfg /etc/rescached
@@ -168,7 +171,7 @@ Assume that we use directory "/etc/rescached" as configuration directory, then
 If you want your program running each time the system is starting up you can
 create a system startup script (or system service).
 You can see an example for +init.d+ startup script in file
-+scripts/rescached.run+ or +scripts/rescached.arch+.
++scripts/rescached.run+.
 +
 This step is really different between each system, consult your distribution
 wiki, forum, or mailing-list on how to create system startup script.
@@ -180,10 +183,10 @@ wiki, forum, or mailing-list on how to create system startup script.
 Edit rescached configuration, +/etc/rescached/rescached.cfg+, change the value
 of +server.parent+ based on your preferred DNS server.
 
-* Set maximum caches and cache threshold
+* Set the cache prune delay and threshold
 +
 Edit rescached configuration, +/etc/rescached/rescached.cfg+, change the value
-of +cache.max+ and/or +cache.threshold+ to match your needs.
+of +cache.prune_delay+ and/or +cache.threshold+ to match your needs.
 
 * Set your system DNS server to point to rescached.
 +
@@ -204,7 +207,7 @@ invoking,
 
 == CONFIGURATION
 
-All rescached startup option located in file +/etc/rescached/rescached.cfg+.
+All rescached configuration located in file +/etc/rescached/rescached.cfg+.
 See manual page of *rescached.cfg*(5) for more information.
 
 
@@ -238,22 +241,28 @@ This program developed with references to,
 
 +rescached+ only know specific DNS record type,
 [horizontal]
-A:: a host address
-NS:: an authoritative name server
-CNAME:: a canonical name for an alias
-SOA:: zone authority
-PTR:: a domain name pointer
-HINFO:: host information
-MX:: mail exchange
-TXT:: text string
-SRV:: location of services
-AAAA:: a host address for IPv6
+A:: A host address in IPv4
+NS:: An authoritative name server
+CNAME:: A canonical name for an alias
+SOA::  Start of [a zone of] authority record
+MB:: Mail box
+MG:: Mail group
+NULL:: Placeholders for experimental extensions
+WKS:: Record to describe well-known services supported by a host
+PTR:: Pointer to a canonical name.
+HINFO:: Host information
+MINFO:: Mail information
+MX:: Mail exchange
+TXT:: Text record
+AAAA:: A host address in IPv6
+SRV:: Service locator
+OPT:: This is a "pseudo DNS record type" needed to support EDNS
 
 +rescached+ only run and tested in Linux system.
 Technically, if it can compiled, it will run in any operating system.
 
 For request of features and/or bugs report please submitted through web at
-https://github.com/shuLhan/rescached.go/issues.
+https://github.com/shuLhan/rescached-go/issues.
 
 
 == AUTHOR
@@ -272,7 +281,7 @@ in the LICENSE file.
 
 == LINKS
 
-Source code repository: https://github.com/shuLhan/rescached.go
+Source code repository: https://github.com/shuLhan/rescached-go
 
 
 == SEE ALSO

@@ -17,60 +17,65 @@ import (
 // listResponse represent cached DNS response.
 //
 type listResponse struct {
-	sync.RWMutex
+	sync.Mutex
 	v *list.List
 }
 
-func newListResponse(res *dns.Response) (lres *listResponse) {
+func newListResponse(cres *cacheResponse) (lres *listResponse) {
 	lres = &listResponse{
 		v: list.New(),
 	}
-	if res != nil {
-		lres.v.PushBack(res)
+	if cres == nil {
+		return
 	}
+	lres.v.PushBack(cres)
 	return
 }
 
 //
 // get cached response based on request type and class.
 //
-func (lres *listResponse) get(req *dns.Request) (res *dns.Response) {
-	lres.RLock()
+func (lres *listResponse) get(qtype, qclass uint16) *cacheResponse {
+	lres.Lock()
 	for e := lres.v.Front(); e != nil; e = e.Next() {
-		res = e.Value.(*dns.Response)
-		if req.Message.Question.Type != res.Message.Question.Type {
+		cres := e.Value.(*cacheResponse)
+		if qtype != cres.v.Message.Question.Type {
 			continue
 		}
-		if req.Message.Question.Class != res.Message.Question.Class {
+		if qclass != cres.v.Message.Question.Class {
 			continue
 		}
-		lres.RUnlock()
-		return
+		lres.Unlock()
+		return cres
 	}
-	lres.RUnlock()
+	lres.Unlock()
 	return nil
 }
 
-//
-// upsert update or insert response in cache.
-//
-func (lres *listResponse) upsert(res *dns.Response) {
+func (lres *listResponse) add(res *dns.Response) *cacheResponse {
+	cres := newCacheResponse(res)
+	lres.Lock()
+	lres.v.PushBack(cres)
+	lres.Unlock()
+	return cres
+}
+
+func (lres *listResponse) remove(qtype, qclass uint16) *cacheResponse {
 	lres.Lock()
 	for e := lres.v.Front(); e != nil; e = e.Next() {
-		ev := e.Value.(*dns.Response)
-		if res.Message.Question.Type != ev.Message.Question.Type {
+		cres := e.Value.(*cacheResponse)
+		if qtype != cres.v.Message.Question.Type {
 			continue
 		}
-		if res.Message.Question.Class != ev.Message.Question.Class {
+		if qclass != cres.v.Message.Question.Class {
 			continue
 		}
-
 		lres.v.Remove(e)
-		freeResponse(ev)
-		break
+		lres.Unlock()
+		return cres
 	}
-	lres.v.PushBack(res)
 	lres.Unlock()
+	return nil
 }
 
 //
@@ -81,15 +86,19 @@ func (lres *listResponse) String() string {
 
 	b.WriteByte('[')
 	first := true
+
+	lres.Lock()
 	for e := lres.v.Front(); e != nil; e = e.Next() {
 		if first {
 			first = false
 		} else {
 			b.WriteByte(' ')
 		}
-		ev := e.Value.(*dns.Response)
-		fmt.Fprintf(&b, "%+v", ev)
+		ev := e.Value.(*cacheResponse)
+		fmt.Fprintf(&b, "%+v", ev.v)
 	}
+	lres.Unlock()
+
 	b.WriteByte(']')
 
 	return b.String()

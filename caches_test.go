@@ -13,7 +13,7 @@ import (
 
 var _testCaches = newCaches()
 
-func TestCachesPut(t *testing.T) {
+func TestCachesAdd(t *testing.T) {
 	t.Logf("_testResponses[0]: %+v\n", _testResponses[0])
 
 	cases := []struct {
@@ -83,47 +83,42 @@ func TestCachesPut(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		_testCaches.put(c.res)
+		key := string(c.res.Message.Question.Name)
+		cres := newCacheResponse(c.res)
+		cres.accessedAt = 0
 
-		test.Assert(t, "Length", c.expLen, _testCaches.n, true)
+		_testCaches.add(key, cres)
 	}
 }
 
 func TestCachesGet(t *testing.T) {
 	cases := []struct {
-		desc string
-		req  *dns.Request
-		exp  *dns.Response
+		desc   string
+		qname  string
+		qtype  uint16
+		qclass uint16
+		req    *dns.Request
+		exp    *cacheResponse
 	}{{
-		desc: "Cache hit",
-		req: &dns.Request{
-			Message: &dns.Message{
-				Question: &dns.SectionQuestion{
-					Name:  []byte("1"),
-					Type:  1,
-					Class: 1,
-				},
-			},
+		desc:   "Cache hit",
+		qname:  "1",
+		qtype:  1,
+		qclass: 1,
+		exp: &cacheResponse{
+			v: _testResponses[2],
 		},
-		exp: _testResponses[2],
 	}, {
-		desc: "Cache miss",
-		req: &dns.Request{
-			Message: &dns.Message{
-				Question: &dns.SectionQuestion{
-					Name:  []byte("1"),
-					Type:  0,
-					Class: 1,
-				},
-			},
-		},
-		exp: nil,
+		desc:   "Cache miss",
+		qname:  "1",
+		qtype:  0,
+		qclass: 1,
+		exp:    nil,
 	}}
 
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		got := _testCaches.get(c.req)
+		_, got := _testCaches.get(c.qname, c.qtype, c.qclass)
 
 		test.Assert(t, "caches.get", c.exp, got, true)
 	}
