@@ -20,8 +20,6 @@ type caches struct {
 	v sync.Map
 }
 
-var _caches *caches
-
 //
 // newCaches create, initialize, and return new caches.
 //
@@ -74,45 +72,4 @@ func (c *caches) put(res *dns.Response) bool {
 	cres.upsert(res)
 
 	return true
-}
-
-//
-// LoadHostsFile parse hosts formatted file as put it into caches.
-//
-func LoadHostsFile(path string) {
-	if DebugLevel >= 1 {
-		if len(path) == 0 {
-			log.Println("= Loading system hosts file")
-		} else {
-			log.Printf("= Loading hosts file '%s'", path)
-		}
-	}
-
-	msgs, err := dns.HostsLoad(path)
-	if err != nil {
-		return
-	}
-
-	n := 0
-	for x, msg := range msgs {
-		res := &dns.Response{
-			// Flag to indicated that this response is from local
-			// hosts file.
-			ReceivedAt: 0,
-			Message:    msg,
-		}
-
-		ok := _caches.put(res)
-		if !ok {
-			res.Message.Reset()
-		} else {
-			n++
-		}
-
-		msgs[x] = nil
-	}
-
-	if DebugLevel >= 1 {
-		log.Printf("== %d loaded\n", n)
-	}
 }

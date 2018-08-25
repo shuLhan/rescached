@@ -37,6 +37,7 @@ type Server struct {
 	nsParents []*net.UDPAddr
 	reqQueue  chan *dns.Request
 	fwQueue   chan *dns.Request
+	caches    *caches
 }
 
 //
@@ -54,18 +55,53 @@ func New(network string, nsParents []*net.UDPAddr) (srv *Server, err error) {
 		nsParents: nsParents,
 		reqQueue:  make(chan *dns.Request, _maxQueue),
 		fwQueue:   make(chan *dns.Request, _maxQueue),
+		caches:    newCaches(),
 	}
 
 	srv.dnsServer.Handler = srv
 
-	// Initialize caches and queue.
-	if _caches == nil {
-		_caches = newCaches()
-	}
-
-	LoadHostsFile("")
+	srv.LoadHostsFile("")
 
 	return
+}
+
+//
+// LoadHostsFile parse hosts formatted file and put it into caches.
+//
+func (srv *Server) LoadHostsFile(path string) {
+	if DebugLevel >= 1 {
+		if len(path) == 0 {
+			log.Println("= Loading system hosts file")
+		} else {
+			log.Printf("= Loading hosts file '%s'", path)
+		}
+	}
+
+	msgs, err := dns.HostsLoad(path)
+	if err != nil {
+		return
+	}
+
+	n := 0
+	for x := 0; x < len(msgs); x++ {
+		res := &dns.Response{
+			// Flag to indicated that this response is from local
+			// hosts file.
+			ReceivedAt: 0,
+			Message:    msgs[x],
+		}
+
+		ok := srv.caches.put(res)
+		if !ok {
+			freeResponse(res)
+		} else {
+			n++
+		}
+	}
+
+	if DebugLevel >= 1 {
+		log.Printf("== %d loaded\n", n)
+	}
 }
 
 //
@@ -130,7 +166,7 @@ func (srv *Server) processRequestQueue() {
 		}
 
 		// Check if request query name exist in cache.
-		res := _caches.get(req)
+		res := srv.caches.get(req)
 		if res == nil {
 			srv.fwQueue <- req
 			continue
@@ -224,7 +260,7 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 		srv.dnsServer.FreeRequest(req)
 
 		if ok {
-			ok = _caches.put(res)
+			ok = srv.caches.put(res)
 			if !ok {
 				freeResponse(res)
 			} else {

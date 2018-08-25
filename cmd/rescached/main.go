@@ -49,7 +49,7 @@ func loadHostsDir(cfg *config) {
 
 		hostsFile := filepath.Join(cfg.hostsDir, fis[x].Name())
 
-		rescached.LoadHostsFile(hostsFile)
+		rcd.LoadHostsFile(hostsFile)
 	}
 }
 
