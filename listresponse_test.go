@@ -51,7 +51,7 @@ func TestCacheResponsesUpsert(t *testing.T) {
 
 		_testCacheResponses.upsert(c.res)
 
-		test.Assert(t, "cacheResponses.Len", c.expLen, _testCacheResponses.v.Len(), true)
+		test.Assert(t, "listResponse.Len", c.expLen, _testCacheResponses.v.Len(), true)
 
 		var b strings.Builder
 		b.WriteByte('[')
@@ -63,7 +63,7 @@ func TestCacheResponsesUpsert(t *testing.T) {
 		}
 		b.WriteByte(']')
 
-		test.Assert(t, "cacheResponses", b.String(), _testCacheResponses.String(), true)
+		test.Assert(t, "listResponse", b.String(), _testCacheResponses.String(), true)
 	}
 }
 

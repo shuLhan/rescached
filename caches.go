@@ -35,11 +35,11 @@ func (c *caches) get(req *dns.Request) *dns.Response {
 	if !ok {
 		return nil
 	}
-	cres := v.(*cacheResponses)
-	if cres == nil || cres.v == nil {
+	lres := v.(*listResponse)
+	if lres == nil || lres.v == nil {
 		return nil
 	}
-	return cres.get(req)
+	return lres.get(req)
 }
 
 //
@@ -62,14 +62,14 @@ func (c *caches) put(res *dns.Response) bool {
 	qname := string(res.Message.Question.Name)
 	v, ok := c.v.Load(qname)
 	if !ok {
-		cres := newCacheResponses(res)
-		c.v.Store(qname, cres)
+		lres := newListResponse(res)
+		c.v.Store(qname, lres)
 		atomic.AddUint64(&c.n, 1)
 		return true
 	}
 
-	cres := v.(*cacheResponses)
-	cres.upsert(res)
+	lres := v.(*listResponse)
+	lres.upsert(res)
 
 	return true
 }
