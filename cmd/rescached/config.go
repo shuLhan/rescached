@@ -40,7 +40,6 @@ const (
 	defListen          = "127.0.0.1:53"
 	defNSNetwork       = "udp"
 	defPort            = 53
-	defPortString      = "53"
 	defTimeout         = 6
 	defTimeoutString   = "6"
 )

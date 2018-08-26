@@ -97,7 +97,6 @@ func TestCachesGet(t *testing.T) {
 		qname  string
 		qtype  uint16
 		qclass uint16
-		req    *dns.Request
 		exp    *cacheResponse
 	}{{
 		desc:   "Cache hit",
