@@ -1,0 +1,167 @@
+RESCACHED.CONF(5)
+=================
+:doctype: manpage
+:man source: rescached.cfg
+:man version: 2018.08.26
+:man manual: rescached.cfg
+
+
+== NAME
+
+rescached.cfg - Configuration for rescached service
+
+
+== SYNOPSIS
+
+/etc/rescached/rescached.cfg
+
+
+== DESCRIPTION
+
+These file configure the behaviour of *rescached*(1) service.
+In those file you can see some comment for any option and some possible value.
+This section will explain more about each option and how they effect
++rescached+.
+
+The configuration is using INI format where each options is grouped by header
+in square bracket:
+
+* +[rescached]+
+* +[log]+
+
+
+== OPTIONS
+
+=== +[rescached]+
+
+This group of options contain the main configuration.
+
+[[file.pid]]
+==== +file.pid+
+
+Value:: 	A path to process id file.
+Format:: 	/any/path/to/file
+Default:: 	rescached.pid (in current directory)
+Description:: 	When +rescached+ started, it will create this file as a
+mediator to any system service.
+Content of this file is the process ID (PID) of +rescached+ in system.
+If not set then the default name will be used, and it will be saved in current
+directory where user running +rescached+.
+
+[[server.parent]]
+==== +server.parent+
+
+Value:: 	List of parent DNS servers, separated by commas.
+Format:: 	IP-ADDRESS:PORT, IP-ADDRESS:PORT, ...
+Default::
+* Address: 8.8.8.8, 8.8.4.4
+* Port: 53
+Description:: 	When +rescached+ receive a query from client and when it does
+not have a cached address of query, it will pass the query to those parent
+server.
++rescached+ use a Google DNS public server as a default parent address if not set.
+The reason for this is that Google DNS public server use a simple and small
+size of response/answer.
+Please, do not use OpenDNS server.
+If certain host-name not found (i.e. typo in host-name), OpenDNS will reply
+with its own address, instead of replying with empty answer.
+This will make +rescached+ caching a false data.
+To check if your parent server reply the unknown host-name with no answer, use
+*resolver*(1) tool.
+
+[[server.parent.connection]]
+==== +server.parent.connection+
+
+Value:: Request to parent server using specific protocol.
+Format:: String ("udp" or "tcp", without quotes)
+Default:: udp
+Description:: Type of protocol that will be used to send request to
++server.parent+.
+When +rescached+ receive query from client it will forward the query to the
++server.parent+ using default protocol (UDP).
+In case UDP is blocked, you can set this variable to "tcp".
+
+[[server.listen]]
+==== +server.listen+
+
+Value:: 	Local IP address that +rescached+ will listening for client
+request.
+Format:: 	<IP-ADDRESS>:<PORT>
+Default:: 	127.0.0.1:53
+Description:: 	Address in local network where +rescached+ will listening for
+query from client.
+If you want rescached to serve a query from another host in your local
+network, change this value to +0.0.0.0:53+.
+
+[[server.timeout]]
+==== +server.timeout+
+
+Value:: 	Timeout value, in seconds, for writing or sending packet.
+Format:: 	Number
+Default:: 	6
+Description:: 	This option set the server read and write timeout value.
+
+[[cache.prune_delay]]
+==== +cache.prune_delay+
+
+Format:: 	Duration
+Default:: 	1h
+Description::   Every N seconds/minutes/hours, rescached will traverse all
+caches and remove response that has not been accessed less than
++cache.threshold+.
+
+[[cache.threshold]]
+==== +cache.threshold+
+
+Format:: 	Duration
+Default:: 	1h
+Description:: 	The duration when the cache will be considered expired.
+
+[[debug]]
+==== +debug+
+
+Value::
+0::: log nothing.
+1::: log startup, request, response, caches, and exit status.
+Format:: 	Number (0 or 1).
+Default:: 	0
+Description:: 	This option only used by developer for debugging program or if
+user want to monitor what kind of traffic goes out, set this option to 1.
+
+
+== EXAMPLE
+
+Simple rescached configuration using dnscrypt-proxy that listen on port 54 as
+parent resolver, with prune delay set to 60 seconds and threshold also to 60
+seconds.
+
+..............................................................................
+[rescached]
+server.parent=127.0.0.1:54
+cache.prune_delay=60s
+cache.threshold=60s
+..............................................................................
+
+Save the above script into +rescached.cfg+ and run it,
+
+	$ sudo rescached rescached.cfg
+
+
+== AUTHOR
+
++rescached+ is developed by M. Shulhan (ms@kilabit.info).
+
+
+== LICENSE
+
+Copyright 2018, M. Shulhan (ms@kilabit.info).
+All rights reserved.
+
+Use of this source code is governed by a BSD-style license that can be found
+in the LICENSE file.
+
+
+
+== SEE ALSO
+
+*rescached*(1)

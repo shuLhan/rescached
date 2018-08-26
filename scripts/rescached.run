@@ -1,0 +1,88 @@
+#!/bin/sh
+## Copyright 2018, Shulhan <ms@kilabit.info>. All rights reserved.
+## Use of this source code is governed by a BSD-style
+## license that can be found in the LICENSE file.
+
+### BEGIN INIT INFO
+# Provides:          rescached
+# Required-Start:    $syslog $remote_fs
+# Required-Stop:     $syslog $remote_fs
+# Default-Start:     3 5
+# Default-Stop:      0 1 2 6
+# Short-Description: resolver cache daemon.
+# Description:       resolver cache daemon.
+### END INIT INFO
+
+RESCACHED_BIN=/usr/bin/rescached
+RESCACHED_CFG=/etc/rescached/rescached.cfg
+
+#
+# check if program exist.
+#
+test -x ${RESCACHED_BIN} || {
+	echo "Program '${RESCACHED_BIN}' not installed";
+	if [ "$1" = "stop" ]; then
+		exit 0;
+	else
+		exit 5;
+	fi;
+}
+
+#
+# check if configuration file exist.
+#
+test -r ${RESCACHED_CFG} || {
+	echo "File '${RESCACHED_CFG}' not existing";
+	if [ "$1" = "stop" ]; then
+		exit 0;
+	else
+		exit 6;
+	fi;
+}
+
+case "$1" in
+start)
+	echo -n "Starting rescached "
+	${RESCACHED_BIN} ${RESCACHED_CFG} &
+	if test $? = 0; then
+		echo "[OK]";
+	else
+		echo "[FAIL]";
+	fi;
+	;;
+
+stop)
+	echo -n "Shutting down rescached "
+
+	RESCACHED_PID=`pidof ${RESCACHED_BIN}`
+	if [[ "${RESCACHED_PID}" != "" ]]; then
+		kill ${RESCACHED_PID};
+	fi
+
+	if test $? = 0; then
+		echo "[OK]";
+	else
+		echo "[not running]";
+	fi;
+	;;
+
+restart)
+	$0 stop
+	$0 start
+	;;
+
+status)
+	echo -n "Checking for service rescached "
+	RESCACHED_PID=`pidof ${RESCACHED_BIN}`
+	if [[ "${RESCACHED_PID}" -ne "" ]]; then
+		echo "[running]";
+	else
+		echo "[not running]";
+	fi;
+	;;
+
+*)
+	echo "Usage: $0 {start|stop|restart|status}"
+	exit 1
+	;;
+esac

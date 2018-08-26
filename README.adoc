@@ -171,7 +171,8 @@ We use directory "/etc/rescached" as configuration directory.
 If you want your program running each time the system is starting up you can
 create a system startup script (or system service).
 You can see an example for +init.d+ startup script in file
-+scripts/rescached.run+.
++scripts/rescached.run+ and for +systemd+ service in
++scripts/rescached.service+.
 +
 This step is really different between each system, consult your distribution
 wiki, forum, or mailing-list on how to create system startup script.
@@ -222,6 +223,10 @@ Upon success, +rescached+ will return 0, or 1 otherwise.
 
 The +rescached+ main configuration.
 This configuration will be read when program started.
+
+'/usr/share/rescached/LICENSE'::
+
+License file for this software.
 
 '/var/run/rescached.pid'::
 
