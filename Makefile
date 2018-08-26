@@ -12,11 +12,11 @@ COVER_HTML:=cover.html
 CPU_PROF:=cpu.prof
 MEM_PROF:=mem.prof
 
-RESCACHED_CFG:=./cmd/rescached/rescached.cfg
-RESCACHED_CFG_MAN:=./rescached.cfg.5.gz
-
 RESCACHED_BIN:=./rescached
 RESCACHED_MAN:=./rescached.1.gz
+
+RESCACHED_CFG:=./cmd/rescached/rescached.cfg
+RESCACHED_CFG_MAN:=./doc/rescached.cfg.5.gz
 
 RESOLVER_BIN:=./resolver
 RESOLVER_MAN:=./doc/resolver.1.gz
@@ -56,9 +56,9 @@ $(RESCACHED_MAN): README.adoc
 	a2x -v --doctype manpage --format manpage $< >/dev/null 2>&1
 	gzip -f rescached.1
 
-$(RESCACHED_CFG_MAN): rescached.cfg.adoc
+$(RESCACHED_CFG_MAN): doc/rescached.cfg.adoc
 	a2x -v --doctype manpage --format manpage $< >/dev/null 2>&1
-	gzip -f rescached.cfg.5
+	gzip -f doc/rescached.cfg.5
 
 $(RESOLVER_MAN): doc/resolver.adoc
 	a2x -v --doctype manpage --format manpage $< >/dev/null 2>&1
