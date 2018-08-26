@@ -34,8 +34,8 @@ const (
 
 // List of default values.
 const (
-	defCachePruneDelay = 60 * time.Second
-	defCacheThreshold  = -10 * time.Second
+	defCachePruneDelay = 5 * time.Minute
+	defCacheThreshold  = -1 * time.Hour
 	defFilePID         = "rescached.pid"
 	defListen          = "127.0.0.1:53"
 	defNSNetwork       = "udp"

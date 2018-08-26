@@ -116,7 +116,7 @@ The following table illustrate list of caches in memory,
 +---------------------+------------------+
 ----
 
-Every +cache.prune_delay+ (e.g. 1 hour), rescached will try to pruning old
+Every +cache.prune_delay+ (e.g. 5 minutes), rescached will try to pruning old
 records from cache.
 If the accessed-at value of record in cache is less than,
 
