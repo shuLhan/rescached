@@ -18,8 +18,10 @@ RESCACHED_CFG_MAN:=./rescached.cfg.5.gz
 RESCACHED_BIN:=./rescached
 RESCACHED_MAN:=./rescached.1.gz
 
+RESOLVER_BIN:=./resolver
+RESOLVER_MAN:=./doc/resolver.1.gz
 
-build: test $(RESCACHED_BIN) doc
+build: test $(RESCACHED_BIN) $(RESOLVER_BIN) doc
 
 test: $(COVER_HTML)
 
@@ -44,15 +46,23 @@ $(RESCACHED_BIN): $(SRC)
 	export CGO_ENABLED=1 && \
 	go build -race -v ./cmd/rescached
 
-doc: $(RESCACHED_MAN) $(RESCACHED_CFG_MAN)
+$(RESOLVER_BIN): $(SRC)
+	export CGO_ENABLED=1 && \
+	go build -race -v ./cmd/resolver
+
+doc: $(RESCACHED_MAN) $(RESCACHED_CFG_MAN) $(RESOLVER_MAN)
 
 $(RESCACHED_MAN): README.adoc
-	@a2x -v --doctype manpage --format manpage $< 2>/dev/null
-	@gzip -f rescached.1
+	a2x -v --doctype manpage --format manpage $< >/dev/null 2>&1
+	gzip -f rescached.1
 
 $(RESCACHED_CFG_MAN): rescached.cfg.adoc
-	@a2x -v --doctype manpage --format manpage $< 2>/dev/null
-	@gzip -f rescached.cfg.5
+	a2x -v --doctype manpage --format manpage $< >/dev/null 2>&1
+	gzip -f rescached.cfg.5
+
+$(RESOLVER_MAN): doc/resolver.adoc
+	a2x -v --doctype manpage --format manpage $< >/dev/null 2>&1
+	gzip -f doc/resolver.1
 
 distclean: clean
 	go clean -i ./...

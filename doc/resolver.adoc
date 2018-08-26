@@ -1,0 +1,117 @@
+RESOLVER(1)
+===========
+:doctype: manpage
+:man source: resolver
+:man version: 2018.08.26
+:man manual: resolver
+
+
+== NAME
+
+resolver - a tool to query DNS record, specifically build for *rescached*(1)
+and developer.
+
+
+== SYNOPSIS
+
++resolver+ [-ns nameserver] [-t type] [-c class] hostname
+
+
+== DESCRIPTION
+
++resolver+ is a tool to resolve hostname to address, or to query services
+on hostname by type (MX, SOA, TXT, etc.).
+It will return and print the DNS response.
+
+
+== OPTIONS
+
+[[nameserver]]
+=== +nameserver+
+
+Value::		Internet address
+Format:: 	xxx.xxx.xxx.xxx[:port]
+Default::	One of +nameserver+ in +/etc/resolv.conf+
+Description:: 	This option define the DNS server where the resolver will
+send the query.
+
+[[type]]
+=== +type+
+
+Value::		DNS record type
+Format::	String
+Default::	A
+Description::	List of supported DNS record type,
+
+TYPE (ID) - Description
+
+* A       (1) - a host Address
+* NS      (2) - an authoritative Name Server
+* CNAME   (5) - the Canonical NAME for an alias
+* SOA     (6) - marks the Start of a zone of Authority
+* MB      (7) - a MailBox domain name
+* MG      (8) - a Mail Group member
+* MR      (9) - a Mail Rename domain name
+* NULL   (10) - a null resource record
+* WKS    (11) - a Well Known Service description
+* PTR    (12) - a domain name PoinTeR
+* HINFO  (13) - Host INFOrmation
+* MINFO  (14) - mailbox or mail list information
+* MX     (15) - Mail Exchange
+* TXT    (16) - TeXT strings
+* AAAA   (28) - a host address in IPv6
+* SRV    (33) -  a SerViCe record
+
+[[hostname]]
+=== +hostname+
+
+Value::		Internet hostname
+Format::	[subdomain].[domain][.TLD]
+Default::	-
+Description::	Hostname that will be queried to name server.
+
+
+== EXIT STATUS
+
+Upon exit and success +resolver+ will return 0, or 1 otherwise.
+
+
+== EXAMPLE
+
+* Resolve the IPv4 address for kilabit.info using one of nameserver in
+  +/etc/resolv.conf+,
++
+	$ resolver kilabit.info
+
+* Resolve the IPv4 address for kilabit.info using 127.0.0.1 at port 54 as
+  name server,
++
+	$ resolver -ns 127.0.0.1:54 kilabit.info
+
+* Resolve the mail exchange (MX) for kilabit.info,
++
+	$ resolver -t MX kilabit.info
+
+
+== AUTHOR
+
+This software is developed by M. Shulhan (ms@kilabit.info).
+
+
+== LICENSE
+
+Copyright 2018, M. Shulhan (ms@kilabit.info).
+All rights reserved.
+
+Use of this source code is governed by a BSD-style license that can be found
+in the LICENSE file.
+
+
+== LINKS
+
+Source code repository: https://github.com/shuLhan/rescached-go
+
+
+== SEE ALSO
+
+*rescached*(1), *rescached.cfg*(5)
