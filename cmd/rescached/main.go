@@ -5,6 +5,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -21,12 +22,12 @@ import (
 )
 
 const (
-	cfgFilename = "/etc/rescached/rescached.cfg"
+	defConfig = "/etc/rescached/rescached.cfg"
 )
 
 var (
-	rcd *rescached.Server
-	cfg *config
+	rcd      *rescached.Server
+	_filePID string
 )
 
 func loadHostsDir(cfg *config) {
@@ -54,26 +55,26 @@ func loadHostsDir(cfg *config) {
 }
 
 func removePID() {
-	err := os.Remove(cfg.filePID)
+	err := os.Remove(_filePID)
 	if err != nil {
 		log.Println(err)
 	}
 }
 
 //
-// writePID will write current process PID to file `filePID` only if the
+// writePID will write current process PID to file `_filePID` only if the
 // file is not exist, otherwise it will return an error.
 //
 func writePID() (err error) {
-	_, err = os.Stat(cfg.filePID)
+	_, err = os.Stat(_filePID)
 	if err == nil {
-		err = fmt.Errorf("writePID: pid file '%s' exist", cfg.filePID)
+		err = fmt.Errorf("writePID: pid file '%s' exist", _filePID)
 		return
 	}
 
 	pid := strconv.Itoa(os.Getpid())
 
-	err = ioutil.WriteFile(cfg.filePID, []byte(pid), 0400)
+	err = ioutil.WriteFile(_filePID, []byte(pid), 0400)
 
 	return
 }
@@ -102,11 +103,18 @@ func stop() {
 }
 
 func main() {
-	var err error
+	var (
+		err        error
+		fileConfig string
+		cfg        *config
+	)
 
 	log.SetFlags(0)
 
-	cfg, err = newConfig(cfgFilename)
+	flag.StringVar(&fileConfig, "f", defConfig, "path to configuration")
+	flag.Parse()
+
+	cfg, err = newConfig(fileConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -115,6 +123,7 @@ func main() {
 		fmt.Printf("= config: %+v\n", cfg)
 	}
 
+	_filePID = cfg.filePID
 	rescached.DebugLevel = cfg.debugLevel
 
 	rcd, err = rescached.New(cfg.nsNetwork, cfg.nsParents,
