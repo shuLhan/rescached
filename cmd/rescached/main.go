@@ -121,12 +121,18 @@ func handleSignal() {
 }
 
 func profiling() {
+	pprofAddr := os.Getenv("RESCACHED_HTTP_PPROF")
+	if len(pprofAddr) == 0 {
+		pprofAddr = "127.0.0.1:5380"
+	}
+
 	srv := &http.Server{
-		Addr:         "127.0.0.1:5380",
+		Addr:         pprofAddr,
 		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		WriteTimeout: 5 * time.Second,
 		IdleTimeout:  120 * time.Second,
 	}
+
 	log.Println(srv.ListenAndServe())
 }
 
