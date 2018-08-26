@@ -37,7 +37,6 @@ const (
 	defCachePruneDelay = 60 * time.Second
 	defCacheThreshold  = -10 * time.Second
 	defFilePID         = "rescached.pid"
-	defHostsDir        = "/etc/rescached/hosts.d"
 	defListen          = "127.0.0.1:53"
 	defNSNetwork       = "udp"
 	defPort            = 53
@@ -80,7 +79,7 @@ func newConfig(file string) (cfg *config, err error) {
 
 	cfg.nsNetwork = in.GetString(cfgSecRescached, "", cfgKeyNSNetwork, defNSNetwork)
 	cfg.listen = in.GetString(cfgSecRescached, "", cfgKeyListen, defListen)
-	cfg.hostsDir = in.GetString(cfgSecRescached, "", cfgKeyHostsDir, defHostsDir)
+	cfg.hostsDir = in.GetString(cfgSecRescached, "", cfgKeyHostsDir, "")
 	cfg.parseTimeout(in)
 	cfg.parseCachePruneDelay(in)
 	cfg.parseCacheThreshold(in)

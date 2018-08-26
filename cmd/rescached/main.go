@@ -31,6 +31,10 @@ var (
 )
 
 func loadHostsDir(cfg *config) {
+	if len(cfg.hostsDir) == 0 {
+		return
+	}
+
 	d, err := os.Open(cfg.hostsDir)
 	if err != nil {
 		log.Println("! loadHostsDir: Open:", err)
