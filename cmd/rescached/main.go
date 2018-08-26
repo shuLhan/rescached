@@ -26,9 +26,38 @@ const (
 )
 
 var (
-	rcd      *rescached.Server
-	_filePID string
+	rcd         *rescached.Server
+	_filePID    string
+	_listenAddr string
 )
+
+func createRescachedServer(fileConfig string) {
+	cfg, err := newConfig(fileConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if cfg.debugLevel >= 1 {
+		fmt.Printf("= config: %+v\n", cfg)
+	}
+
+	_filePID = cfg.filePID
+	_listenAddr = cfg.listen
+	rescached.DebugLevel = cfg.debugLevel
+
+	rcd, err = rescached.New(cfg.nsNetwork, cfg.nsParents,
+		cfg.cachePruneDelay, cfg.cacheThreshold)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = writePID()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	loadHostsDir(cfg)
+}
 
 func loadHostsDir(cfg *config) {
 	if len(cfg.hostsDir) == 0 {
@@ -110,7 +139,6 @@ func main() {
 	var (
 		err        error
 		fileConfig string
-		cfg        *config
 	)
 
 	log.SetFlags(0)
@@ -118,35 +146,12 @@ func main() {
 	flag.StringVar(&fileConfig, "f", defConfig, "path to configuration")
 	flag.Parse()
 
-	cfg, err = newConfig(fileConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if cfg.debugLevel >= 1 {
-		fmt.Printf("= config: %+v\n", cfg)
-	}
-
-	_filePID = cfg.filePID
-	rescached.DebugLevel = cfg.debugLevel
-
-	rcd, err = rescached.New(cfg.nsNetwork, cfg.nsParents,
-		cfg.cachePruneDelay, cfg.cacheThreshold)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = writePID()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	loadHostsDir(cfg)
+	createRescachedServer(fileConfig)
 
 	go handleSignal()
 	go profiling()
 
-	err = rcd.Start(cfg.listen)
+	err = rcd.Start(_listenAddr)
 	if err != nil {
 		log.Println(err)
 		stop()
