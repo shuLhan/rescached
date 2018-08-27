@@ -194,6 +194,14 @@ func (srv *Server) processRequestQueue() {
 
 		srv.dnsServer.FreeRequest(req)
 
+		// Ignore update on local caches
+		if cres.v.ReceivedAt == 0 {
+			if DebugLevel >= 1 {
+				fmt.Printf("= local  : %s\n", cres.v.Message.Question)
+			}
+			continue
+		}
+
 		srv.cw.updateQueue <- cres
 	}
 }
