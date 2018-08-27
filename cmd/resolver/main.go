@@ -40,17 +40,17 @@ func messagePrint(nameserver string, msg *dns.Message) string {
 	}
 
 	for x, rr := range msg.Answer {
-		fmt.Fprintf(&b, "\n> Answer %d", x)
+		fmt.Fprintf(&b, "\n> Answer #%d:", x+1)
 		fmt.Fprintf(&b, "\n>> Resource record: %s", rr.String())
 		fmt.Fprintf(&b, "\n>> RDATA: %s", rr.RData())
 	}
 	for x, rr := range msg.Authority {
-		fmt.Fprintf(&b, "\n> Authority %d", x)
+		fmt.Fprintf(&b, "\n> Authority #%d:", x+1)
 		fmt.Fprintf(&b, "\n>> Resource record: %s", rr.String())
 		fmt.Fprintf(&b, "\n>> RDATA: %s", rr.RData())
 	}
 	for x, rr := range msg.Additional {
-		fmt.Fprintf(&b, "\n> Additional %d", x)
+		fmt.Fprintf(&b, "\n> Additional #%d:", x+1)
 		fmt.Fprintf(&b, "\n>> Resource record: %s", rr.String())
 		fmt.Fprintf(&b, "\n>> RDATA: %s", rr.RData())
 	}

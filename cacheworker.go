@@ -119,7 +119,7 @@ func (cw *cacheWorker) add(res *dns.Response, addToList bool) bool {
 		cw.cachesList.fix(cres)
 
 		if DebugLevel >= 1 {
-			fmt.Printf("+ update: %10d %s\n", cres.accessedAt,
+			fmt.Printf("+ update : %10d %s\n", cres.accessedAt,
 				res.Message.Question)
 		}
 	}
