@@ -7,10 +7,45 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"strings"
+	"time"
 
 	"github.com/shuLhan/share/lib/dns"
+	libnet "github.com/shuLhan/share/lib/net"
 )
+
+const (
+	defResolvConf = "/etc/resolv.conf"
+)
+
+func parseNameServers(nameservers []string) (udpAddrs []*net.UDPAddr) {
+	for _, ns := range nameservers {
+		addr, err := libnet.ParseUDPAddr(ns, dns.DefaultPort)
+		if err != nil {
+			log.Fatal(err)
+		}
+		udpAddrs = append(udpAddrs, addr)
+	}
+	return
+}
+
+func populateQueries(cr *libnet.ResolvConf, qname string) (queries []string) {
+	names := strings.Split(qname, ".")
+
+	if len(names) == cr.NDots+1 {
+		queries = append(queries, qname)
+	} else {
+		if len(cr.Domain) > 0 {
+			queries = append(queries, qname+"."+cr.Domain)
+		}
+		for _, s := range cr.Search {
+			queries = append(queries, qname+"."+s)
+		}
+	}
+
+	return
+}
 
 func messagePrint(nameserver string, msg *dns.Message) string {
 	var b strings.Builder
@@ -71,10 +106,54 @@ func main() {
 		log.Fatal(err)
 	}
 
-	msg, err := cl.Lookup(opts.qtype, opts.qclass, []byte(opts.qname))
+	cr, err := libnet.NewResolvConf(defResolvConf)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	println(messagePrint(opts.nameserver, msg))
+	if len(cr.NameServers) == 0 {
+		cr.NameServers = append(cr.NameServers, "127.0.0.1")
+	}
+
+	var (
+		res        *dns.Message
+		nameserver string
+	)
+
+	nsAddrs := parseNameServers(cr.NameServers)
+	queries := populateQueries(cr, string(opts.qname))
+	cl.Timeout = time.Duration(cr.Timeout) * time.Second
+
+	fmt.Printf("= resolv.conf: %+v\n", cr)
+
+	// The algorithm used is to try a name server, and  if  the  query
+	// times out, try the next, until out of name servers, then repeat
+	// trying all the name servers until a maximum number of retries are
+	// made.)
+	for _, qname := range queries {
+		for x := 0; x < cr.Attempts; x++ {
+			for _, addr := range nsAddrs {
+				cl.Addr = addr
+				nameserver = addr.String()
+
+				fmt.Printf("> Lookup %s at %s\n", qname, nameserver)
+
+				res, err = cl.Lookup(opts.qtype, opts.qclass, []byte(qname))
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				if res.Header.ANCount == 0 {
+					continue
+				}
+
+				goto out
+			}
+		}
+	}
+
+out:
+	if res != nil {
+		println(messagePrint(nameserver, res))
+	}
 }
