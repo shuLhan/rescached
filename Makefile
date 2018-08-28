@@ -75,7 +75,7 @@ install: build
 	sudo mkdir -p /etc/rescached
 	sudo mkdir -p /etc/rescached/hosts.d
 	sudo cp $(RESCACHED_CFG)    /etc/rescached/
-	sudp cp scripts/hosts.block /etc/rescached/hosts.d/
+	sudo cp scripts/hosts.block /etc/rescached/hosts.d/
 
 	sudo mkdir -p /usr/bin
 	sudo cp -f $(RESCACHED_BIN)                     /usr/bin/
