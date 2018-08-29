@@ -13,6 +13,7 @@ import (
 	"net"
 	"time"
 
+	libbytes "github.com/shuLhan/share/lib/bytes"
 	"github.com/shuLhan/share/lib/dns"
 	libnet "github.com/shuLhan/share/lib/net"
 )
@@ -170,6 +171,7 @@ func (srv *Server) processRequestQueue() {
 		}
 
 		// Check if request query name exist in cache.
+		libbytes.ToLower(&req.Message.Question.Name)
 		qname := string(req.Message.Question.Name)
 		_, cres := srv.cw.caches.get(qname, req.Message.Question.Type, req.Message.Question.Class)
 		if cres == nil {

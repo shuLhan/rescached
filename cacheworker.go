@@ -9,6 +9,7 @@ import (
 	"log"
 	"time"
 
+	libbytes "github.com/shuLhan/share/lib/bytes"
 	"github.com/shuLhan/share/lib/dns"
 )
 
@@ -86,6 +87,7 @@ func (cw *cacheWorker) add(res *dns.Response, addToList bool) bool {
 		}
 	}
 
+	libbytes.ToLower(&res.Message.Question.Name)
 	qname := string(res.Message.Question.Name)
 
 	lres, cres := cw.caches.get(qname, res.Message.Question.Type,
