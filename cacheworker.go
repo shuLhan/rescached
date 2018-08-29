@@ -62,9 +62,7 @@ func (cw *cacheWorker) pruneWorker() {
 	defer ticker.Stop()
 
 	for t := range ticker.C {
-		if DebugLevel >= 1 {
-			fmt.Printf("= pruning at %v\n", t)
-		}
+		fmt.Printf("= pruning at %v\n", t)
 
 		cw.prune()
 	}
@@ -132,10 +130,8 @@ func (cw *cacheWorker) add(res *dns.Response, addToList bool) bool {
 func (cw *cacheWorker) update(cres *cacheResponse) {
 	cw.cachesList.fix(cres)
 
-	if DebugLevel >= 1 {
-		fmt.Printf("= cache  : %4d %10d %s\n", cw.cachesList.length(),
-			cres.accessedAt, cres.v.Message.Question)
-	}
+	fmt.Printf("= cache  : %4d %10d %s\n", cw.cachesList.length(),
+		cres.accessedAt, cres.v.Message.Question)
 }
 
 func (cw *cacheWorker) remove(cres *cacheResponse) {
@@ -148,10 +144,8 @@ func (cw *cacheWorker) remove(cres *cacheResponse) {
 	cw.caches.remove(qname, cres.v.Message.Question.Type,
 		cres.v.Message.Question.Class)
 
-	if DebugLevel >= 1 {
-		fmt.Printf("= pruning: %4d %10d %s\n", cw.cachesList.length(),
-			cres.accessedAt, cres.v.Message.Question)
-	}
+	fmt.Printf("= pruning: %4d %10d %s\n", cw.cachesList.length(),
+		cres.accessedAt, cres.v.Message.Question)
 
 	cres.el = nil
 	cres.v = nil

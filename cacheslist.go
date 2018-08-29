@@ -61,9 +61,7 @@ func (cl *cachesList) prune() (lcres []*cacheResponse) {
 	el := cl.v.Front()
 	exp := time.Now().Add(cl.threshold).Unix()
 
-	if DebugLevel >= 1 {
-		fmt.Println("= prune threshold:", exp)
-	}
+	fmt.Println("= prune threshold:", exp)
 
 	for el != nil {
 		cres := el.Value.(*cacheResponse)

@@ -73,12 +73,10 @@ func New(network string, nsParents []*net.UDPAddr, cachePruneDelay, cacheThresho
 // LoadHostsFile parse hosts formatted file and put it into caches.
 //
 func (srv *Server) LoadHostsFile(path string) {
-	if DebugLevel >= 1 {
-		if len(path) == 0 {
-			fmt.Println("= Loading system hosts file")
-		} else {
-			fmt.Printf("= Loading hosts file '%s'\n", path)
-		}
+	if len(path) == 0 {
+		fmt.Println("= Loading system hosts file")
+	} else {
+		fmt.Printf("= Loading hosts file '%s'\n", path)
 	}
 
 	msgs, err := dns.HostsLoad(path)
@@ -103,9 +101,7 @@ func (srv *Server) LoadHostsFile(path string) {
 		}
 	}
 
-	if DebugLevel >= 1 {
-		fmt.Printf("== %d loaded\n", n)
-	}
+	fmt.Printf("== %d loaded\n", n)
 }
 
 //
@@ -120,9 +116,7 @@ func (srv *Server) ServeDNS(req *dns.Request) {
 // it.
 //
 func (srv *Server) Start(listenAddr string) (err error) {
-	if DebugLevel >= 1 {
-		fmt.Printf("= Listening on %s\n", listenAddr)
-	}
+	fmt.Printf("= Listening on %s\n", listenAddr)
 
 	err = srv.runForwarders()
 	if err != nil {
