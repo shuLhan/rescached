@@ -108,18 +108,23 @@ func main() {
 		log.Fatal(err)
 	}
 
-	cl, err := dns.NewUDPClient(opts.nameserver)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	cr, err := libnet.NewResolvConf(defResolvConf)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if len(cr.NameServers) == 0 {
-		cr.NameServers = append(cr.NameServers, "127.0.0.1")
+	if len(opts.nameserver) > 0 {
+		cr.NameServers = cr.NameServers[:0]
+		cr.NameServers = append(cr.NameServers, opts.nameserver)
+	} else {
+		if len(cr.NameServers) == 0 {
+			cr.NameServers = append(cr.NameServers, "127.0.0.1")
+		}
+	}
+
+	cl, err := dns.NewUDPClient(cr.NameServers[0])
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	var (

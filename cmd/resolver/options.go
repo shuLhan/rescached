@@ -13,10 +13,6 @@ import (
 	libnet "github.com/shuLhan/share/lib/net"
 )
 
-const (
-	defNameserver = "8.8.8.8:53"
-)
-
 // List of error messages.
 var (
 	errQueryName  = errors.New("Missing or invalid query name")
@@ -110,7 +106,6 @@ func newOptions() (*options, error) {
 
 func (opts *options) parseNameServer() error {
 	if len(opts.nameserver) == 0 {
-		opts.nameserver = defNameserver
 		return nil
 	}
 
