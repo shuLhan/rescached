@@ -31,9 +31,16 @@ func parseNameServers(nameservers []string) (udpAddrs []*net.UDPAddr) {
 }
 
 func populateQueries(cr *libnet.ResolvConf, qname string) (queries []string) {
-	names := strings.Split(qname, ".")
+	ndots := 0
 
-	if len(names) == cr.NDots+1 {
+	for _, c := range qname {
+		if c == '.' {
+			ndots++
+			continue
+		}
+	}
+
+	if ndots >= cr.NDots {
 		queries = append(queries, qname)
 	} else {
 		if len(cr.Domain) > 0 {
