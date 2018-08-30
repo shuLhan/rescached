@@ -59,6 +59,13 @@ func (lres *listResponse) add(res *dns.Response) *cacheResponse {
 	return cres
 }
 
+func (lres *listResponse) update(cres *cacheResponse, res *dns.Response) *dns.Response {
+	lres.Lock()
+	oldRes := cres.update(res)
+	lres.Unlock()
+	return oldRes
+}
+
 func (lres *listResponse) remove(qtype, qclass uint16) *cacheResponse {
 	lres.Lock()
 	for e := lres.v.Front(); e != nil; e = e.Next() {

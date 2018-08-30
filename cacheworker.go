@@ -114,7 +114,7 @@ func (cw *cacheWorker) add(res *dns.Response, addToList bool) bool {
 		return true
 	}
 
-	oldRes := cres.update(res)
+	oldRes := lres.update(cres, res)
 	freeResponse(oldRes)
 
 	if addToList {
@@ -132,8 +132,10 @@ func (cw *cacheWorker) add(res *dns.Response, addToList bool) bool {
 func (cw *cacheWorker) update(cres *cacheResponse) {
 	cw.cachesList.fix(cres)
 
-	fmt.Printf("= cache  : %4d %10d %s\n", cw.cachesList.length(),
-		cres.accessedAt, cres.v.Message.Question)
+	if DebugLevel >= 1 {
+		fmt.Printf("= cache  : %4d %10d %s\n", cw.cachesList.length(),
+			cres.accessedAt, cres.v.Message.Question)
+	}
 }
 
 func (cw *cacheWorker) remove(cres *cacheResponse) {
