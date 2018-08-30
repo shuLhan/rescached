@@ -47,7 +47,10 @@ func (cw *cacheWorker) start() {
 	for {
 		select {
 		case res := <-cw.addQueue:
-			cw.add(res, true)
+			added := cw.add(res, true)
+			if !added {
+				freeResponse(res)
+			}
 
 		case cres := <-cw.updateQueue:
 			cw.update(cres)
