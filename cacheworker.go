@@ -22,6 +22,7 @@ type cacheWorker struct {
 	updateQueue    chan *cacheResponse
 	removeQueue    chan *cacheResponse
 	caches         *caches
+	cachesRequest  *cachesRequest
 	cachesList     *cachesList
 	pruneDelay     time.Duration
 	cacheThreshold time.Duration
@@ -33,6 +34,7 @@ func newCacheWorker(pruneDelay, cacheThreshold time.Duration) *cacheWorker {
 		updateQueue:    make(chan *cacheResponse, maxWorkerQueue),
 		removeQueue:    make(chan *cacheResponse, maxWorkerQueue),
 		caches:         newCaches(),
+		cachesRequest:  newCachesRequest(),
 		cachesList:     newCachesList(cacheThreshold),
 		pruneDelay:     pruneDelay,
 		cacheThreshold: cacheThreshold,

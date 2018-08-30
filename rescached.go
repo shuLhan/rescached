@@ -169,6 +169,13 @@ func (srv *Server) processRequestQueue() {
 		qname := string(req.Message.Question.Name)
 		_, cres := srv.cw.caches.get(qname, req.Message.Question.Type, req.Message.Question.Class)
 		if cres == nil {
+			// Check and/or push if the same request already
+			// forwarded before.
+			dup := srv.cw.cachesRequest.push(qname, req)
+			if dup {
+				continue
+			}
+
 			srv.fwQueue <- req
 			continue
 		}
@@ -177,6 +184,14 @@ func (srv *Server) processRequestQueue() {
 			if DebugLevel >= 1 {
 				fmt.Printf("- expired: %s\n", cres.v.Message.Question)
 			}
+
+			// Check and/or push if the same request already
+			// forwarded before.
+			dup := srv.cw.cachesRequest.push(qname, req)
+			if dup {
+				continue
+			}
+
 			srv.fwQueue <- req
 			continue
 		}
@@ -213,8 +228,7 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 		if libnet.IsTypeTCP(srv.netType) {
 			cl, err = dns.NewTCPClient(raddr.String())
 			if err != nil {
-				srv.dnsServer.FreeRequest(req)
-				continue
+				goto out
 			}
 		}
 
@@ -249,13 +263,7 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 			goto out
 		}
 
-		res.Message.SetID(req.Message.Header.ID)
 		ok = true
-
-		_, err = req.Sender.Send(res.Message, req.UDPAddr)
-		if err != nil {
-			log.Println("processForwardQueue: Send:", err)
-		}
 
 	out:
 		if libnet.IsTypeTCP(srv.netType) {
@@ -264,10 +272,29 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 			}
 		}
 
-		srv.dnsServer.FreeRequest(req)
+		qname := string(req.Message.Question.Name)
+		reqs := srv.cw.cachesRequest.pops(qname,
+			req.Message.Question.Type, req.Message.Question.Class)
+
+		for x := 0; x < len(reqs); x++ {
+			if ok {
+				res.Message.SetID(reqs[x].Message.Header.ID)
+
+				_, err = reqs[x].Sender.Send(res.Message, reqs[x].UDPAddr)
+				if err != nil {
+					log.Println("! processForwardQueue: Send:", err)
+				}
+			}
+			srv.dnsServer.FreeRequest(reqs[x])
+		}
 
 		if ok {
 			srv.cw.addQueue <- res
+		} else {
+			if res != nil {
+				freeResponse(res)
+				res = nil
+			}
 		}
 	}
 }
