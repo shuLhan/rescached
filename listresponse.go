@@ -25,10 +25,9 @@ func newListResponse(cres *cacheResponse) (lres *listResponse) {
 	lres = &listResponse{
 		v: list.New(),
 	}
-	if cres == nil {
-		return
+	if cres != nil {
+		lres.v.PushBack(cres)
 	}
-	lres.v.PushBack(cres)
 	return
 }
 
