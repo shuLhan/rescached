@@ -21,13 +21,17 @@ RESCACHED_CFG_MAN:=./doc/rescached.cfg.5.gz
 RESOLVER_BIN:=./resolver
 RESOLVER_MAN:=./doc/resolver.1.gz
 
-build: test $(RESCACHED_BIN) $(RESOLVER_BIN) doc
+RESOLVERBENCH_BIN:=./resolverbench
+
+build: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
 
 test: $(COVER_HTML)
 
 test.prof:
 	export CGO_ENABLED=1 && \
-	go test -race -count=1 -cpuprofile $(CPU_PROF) -memprofile $(MEM_PROF) ./...
+		go test -race -count=1 \
+			-cpuprofile $(CPU_PROF) \
+			-memprofile $(MEM_PROF) ./...
 
 $(COVER_HTML): $(COVER_OUT)
 	go tool cover -html=$< -o $@
@@ -44,11 +48,15 @@ lint:
 
 $(RESCACHED_BIN): $(SRC)
 	export CGO_ENABLED=1 && \
-	go build -race -v ./cmd/rescached
+		go build -race -v ./cmd/rescached
 
 $(RESOLVER_BIN): $(SRC)
 	export CGO_ENABLED=1 && \
-	go build -race -v ./cmd/resolver
+		go build -race -v ./cmd/resolver
+
+$(RESOLVERBENCH_BIN): $(SRC)
+	export CGO_ENABLED=1 && \
+		go build -race -v ./cmd/resolverbench
 
 doc: $(RESCACHED_MAN) $(RESCACHED_CFG_MAN) $(RESOLVER_MAN)
 
@@ -68,8 +76,10 @@ distclean: clean
 	go clean -i ./...
 
 clean:
+	rm -f ./testdata/rescached.pid
 	rm -f $(COVER_OUT) $(COVER_HTML)
-	rm $(RESCACHED_BIN)
+	rm -f $(RESCACHED_MAN) $(RESOLVER_MAN) $(RESCACHED_CFG_MAN)
+	rm -f $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
 
 install: build
 	sudo mkdir -p /etc/rescached
