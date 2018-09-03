@@ -55,10 +55,10 @@ func main() {
 			continue
 		}
 
-		err = res.UnmarshalBinary(res.Packet)
+		err = res.Unpack()
 		if err != nil {
 			nfail++
-			log.Println("! UnmarshalBinary:", err)
+			log.Println("! Unpack:", err)
 			continue
 		}
 

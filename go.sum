@@ -1,3 +1,3 @@
-github.com/shuLhan/share v0.0.0-20180830045255-191e2a8b73a5 h1:AoLAb/chr9qpG7kXM37yeLk4G+DJJahqqctpdJPykbo=
-github.com/shuLhan/share v0.0.0-20180830045255-191e2a8b73a5/go.mod h1:lzcjs6ErUYp4Frs/NaE+k9lEFS7w1nMEpWAXTImyBSM=
+github.com/shuLhan/share v0.0.0-20180903155519-157a004e9f7c h1:20x4izLnfln0tqz4aoLRi3G0GoSIgWap3DWdSV/N2yk=
+github.com/shuLhan/share v0.0.0-20180903155519-157a004e9f7c/go.mod h1:lzcjs6ErUYp4Frs/NaE+k9lEFS7w1nMEpWAXTImyBSM=
 golang.org/x/sys v0.0.0-20180821140842-3b58ed4ad339/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
