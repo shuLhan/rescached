@@ -65,7 +65,7 @@ func (cl *cachesList) prune() (lcres []*cacheResponse) {
 
 	for el != nil {
 		cres := el.Value.(*cacheResponse)
-		if cres.accessedAt > exp {
+		if cres.isExpired(exp) {
 			break
 		}
 

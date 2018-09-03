@@ -6,6 +6,7 @@ package rescached
 
 import (
 	"container/list"
+	"sync"
 	"time"
 
 	"github.com/shuLhan/share/lib/dns"
@@ -15,6 +16,7 @@ import (
 // cacheResponse represent internal cache of DNS response.
 //
 type cacheResponse struct {
+	sync.Mutex
 	// Time where cache last accessed.
 	accessedAt int64
 
@@ -32,9 +34,18 @@ func newCacheResponse(res *dns.Response) *cacheResponse {
 	}
 }
 
+func (cres *cacheResponse) isExpired(expTime int64) bool {
+	cres.Lock()
+	yes := cres.accessedAt > expTime
+	cres.Unlock()
+	return yes
+}
+
 func (cres *cacheResponse) update(res *dns.Response) *dns.Response {
+	cres.Lock()
 	oldres := cres.v
 	cres.accessedAt = time.Now().Unix()
 	cres.v = res
+	cres.Unlock()
 	return oldres
 }
