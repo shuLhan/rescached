@@ -8,6 +8,7 @@ import (
 	"container/list"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -44,7 +45,7 @@ func (cl *cachesList) fix(cres *cacheResponse) {
 
 	cl.Lock()
 
-	cres.accessedAt = time.Now().Unix()
+	atomic.StoreInt64(&cres.accessedAt, time.Now().Unix())
 	if cres.el != nil {
 		cl.v.MoveToBack(cres.el)
 	} else {
@@ -65,7 +66,7 @@ func (cl *cachesList) prune() (lcres []*cacheResponse) {
 
 	for el != nil {
 		cres := el.Value.(*cacheResponse)
-		if cres.isExpired(exp) {
+		if cres.AccessedAt() > exp {
 			break
 		}
 
