@@ -2,7 +2,10 @@
 ## Use of this source code is governed by a BSD-style
 ## license that can be found in the LICENSE file.
 
-.PHONY: install build test doc test.prof coverbrowse lint clean distclean
+.PHONY: build debug install
+.PHONY: test test.prof coverbrowse lint
+.PHONY: doc
+.PHONY: clean distclean
 
 SRC:=$(shell go list -f '{{$$d:=.Dir}} {{ range .GoFiles }}{{$$d}}/{{.}} {{end}}' ./...)
 SRC_TEST:=$(shell go list -f '{{$$d:=.Dir}} {{ range .TestGoFiles }}{{$$d}}/{{.}} {{end}}' ./...)
@@ -11,6 +14,7 @@ COVER_OUT:=cover.out
 COVER_HTML:=cover.html
 CPU_PROF:=cpu.prof
 MEM_PROF:=mem.prof
+DEBUG=
 
 RESCACHED_BIN:=./rescached
 RESCACHED_MAN:=./rescached.1.gz
@@ -25,11 +29,14 @@ RESOLVERBENCH_BIN:=./resolverbench
 
 build: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
 
+debug: DEBUG=-race -v
+debug: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
+
 test: $(COVER_HTML)
 
 test.prof:
 	export CGO_ENABLED=1 && \
-		go test -race -count=1 \
+		go test $(DEBUG) -count=1 \
 			-cpuprofile $(CPU_PROF) \
 			-memprofile $(MEM_PROF) ./...
 
@@ -38,7 +45,7 @@ $(COVER_HTML): $(COVER_OUT)
 
 $(COVER_OUT): $(SRC) $(SRC_TEST)
 	export CGO_ENABLED=1 && \
-	go test -race -count=1 -coverprofile=$@ ./...
+	go test $(DEBUG) -count=1 -coverprofile=$@ ./...
 
 coverbrowse: $(COVER_HTML)
 	xdg-open $<
@@ -48,28 +55,28 @@ lint:
 
 $(RESCACHED_BIN): $(SRC)
 	export CGO_ENABLED=1 && \
-		go build -race -v ./cmd/rescached
+		go build $(DEBUG) ./cmd/rescached
 
 $(RESOLVER_BIN): $(SRC)
 	export CGO_ENABLED=1 && \
-		go build -race -v ./cmd/resolver
+		go build $(DEBUG) ./cmd/resolver
 
 $(RESOLVERBENCH_BIN): $(SRC)
 	export CGO_ENABLED=1 && \
-		go build -race -v ./cmd/resolverbench
+		go build $(DEBUG) ./cmd/resolverbench
 
 doc: $(RESCACHED_MAN) $(RESCACHED_CFG_MAN) $(RESOLVER_MAN)
 
 $(RESCACHED_MAN): README.adoc
-	a2x -v --doctype manpage --format manpage $< >/dev/null 2>&1
+	a2x --doctype manpage --format manpage $< >/dev/null 2>&1
 	gzip -f rescached.1
 
 $(RESCACHED_CFG_MAN): doc/rescached.cfg.adoc
-	a2x -v --doctype manpage --format manpage $< >/dev/null 2>&1
+	a2x --doctype manpage --format manpage $< >/dev/null 2>&1
 	gzip -f doc/rescached.cfg.5
 
 $(RESOLVER_MAN): doc/resolver.adoc
-	a2x -v --doctype manpage --format manpage $< >/dev/null 2>&1
+	a2x --doctype manpage --format manpage $< >/dev/null 2>&1
 	gzip -f doc/resolver.1
 
 distclean: clean
