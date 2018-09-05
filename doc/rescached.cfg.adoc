@@ -117,6 +117,16 @@ Format:: 	Duration
 Default:: 	1h
 Description:: 	The duration when the cache will be considered expired.
 
+[[dir.zone]]
+==== +dir.zone+
+
+Format:: string
+Default:: /etc/rescached/zone.d
+Description::  Path to zone directory.
+If set, rescached will load all master files inside directory.
+If its empty or unset, it will skip loading zone file even in default
+location.
+
 [[debug]]
 ==== +debug+
 

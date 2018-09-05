@@ -56,6 +56,7 @@ type config struct {
 	listen          string
 	timeout         time.Duration
 	hostsDir        string
+	dirMaster       string
 	cachePruneDelay time.Duration
 	cacheThreshold  time.Duration
 	debugLevel      byte
@@ -79,6 +80,7 @@ func newConfig(file string) (cfg *config, err error) {
 	cfg.nsNetwork = in.GetString(cfgSecRescached, "", cfgKeyNSNetwork, defNSNetwork)
 	cfg.listen = in.GetString(cfgSecRescached, "", cfgKeyListen, defListen)
 	cfg.hostsDir = in.GetString(cfgSecRescached, "", cfgKeyHostsDir, "")
+	cfg.dirMaster = in.GetString(cfgSecRescached, "", "dir.master", "")
 	cfg.parseTimeout(in)
 	cfg.parseCachePruneDelay(in)
 	cfg.parseCacheThreshold(in)

@@ -84,21 +84,37 @@ func (srv *Server) LoadHostsFile(path string) {
 		return
 	}
 
+	srv.populateCaches(msgs)
+}
+
+//
+// LostMasterFile parse master file and put the result into caches.
+//
+func (srv *Server) LoadMasterFile(path string) {
+	fmt.Printf("= Loading master file %s\n", path)
+
+	msgs, err := dns.MasterLoad(path, "", 0)
+	if err != nil {
+		return
+	}
+
+	srv.populateCaches(msgs)
+}
+
+func (srv *Server) populateCaches(msgs []*dns.Message) {
 	n := 0
 	for x := 0; x < len(msgs); x++ {
 		res := &dns.Response{
 			// Flag to indicated that this response is from local
-			// hosts file.
 			ReceivedAt: 0,
 			Message:    msgs[x],
 		}
 
 		ok := srv.cw.add(res, false)
-		if !ok {
-			freeResponse(res)
-		} else {
+		if ok {
 			n++
 		}
+		msgs[x] = nil
 	}
 
 	fmt.Printf("== %d loaded\n", n)

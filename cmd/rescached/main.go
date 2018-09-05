@@ -87,6 +87,34 @@ func loadHostsDir(cfg *config) {
 	}
 }
 
+func loadMasterDir(cfg *config) {
+	if len(cfg.dirMaster) == 0 {
+		return
+	}
+
+	d, err := os.Open(cfg.dirMaster)
+	if err != nil {
+		log.Println("! loadMasterDir: ", err)
+		return
+	}
+
+	fis, err := d.Readdir(0)
+	if err != nil {
+		log.Println("! loadMasterDir: ", err)
+		return
+	}
+
+	for x := 0; x < len(fis); x++ {
+		if fis[x].IsDir() {
+			continue
+		}
+
+		masterFile := filepath.Join(cfg.dirMaster, fis[x].Name())
+
+		rcd.LoadMasterFile(masterFile)
+	}
+}
+
 func removePID() {
 	err := os.Remove(_filePID)
 	if err != nil {
