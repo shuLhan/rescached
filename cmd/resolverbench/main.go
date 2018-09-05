@@ -32,7 +32,7 @@ func main() {
 	}
 
 	var nfail int
-	res := libdns.AllocMessage()
+	res := libdns.NewMessage()
 
 	fmt.Printf("= Benchmarking with %d messages\n", len(msgs))
 

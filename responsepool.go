@@ -13,7 +13,7 @@ import (
 var _responsePool = sync.Pool{
 	New: func() interface{} {
 		res := &dns.Response{
-			Message: dns.AllocMessage(),
+			Message: allocMessage(),
 		}
 		return res
 	},
