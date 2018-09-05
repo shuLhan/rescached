@@ -104,13 +104,7 @@ func (srv *Server) LoadMasterFile(path string) {
 func (srv *Server) populateCaches(msgs []*dns.Message) {
 	n := 0
 	for x := 0; x < len(msgs); x++ {
-		res := &dns.Response{
-			// Flag to indicated that this response is from local
-			ReceivedAt: 0,
-			Message:    msgs[x],
-		}
-
-		ok := srv.cw.add(res, false)
+		ok := srv.cw.add(msgs[x], false)
 		if ok {
 			n++
 		}
@@ -183,8 +177,8 @@ func (srv *Server) processRequestQueue() {
 		// Check if request query name exist in cache.
 		libbytes.ToLower(&req.Message.Question.Name)
 		qname := string(req.Message.Question.Name)
-		_, cres := srv.cw.caches.get(qname, req.Message.Question.Type, req.Message.Question.Class)
-		if cres == nil {
+		_, res := srv.cw.caches.get(qname, req.Message.Question.Type, req.Message.Question.Class)
+		if res == nil {
 			// Check and/or push if the same request already
 			// forwarded before.
 			dup := srv.cw.cachesRequest.push(qname, req)
@@ -196,9 +190,9 @@ func (srv *Server) processRequestQueue() {
 			continue
 		}
 
-		if cres.v.IsExpired() {
+		if res.isExpired() {
 			if DebugLevel >= 1 {
-				fmt.Printf("- expired: %s\n", cres.v.Message.Question)
+				fmt.Printf("- expired: %s\n", res.message.Question)
 			}
 
 			// Check and/or push if the same request already
@@ -212,9 +206,9 @@ func (srv *Server) processRequestQueue() {
 			continue
 		}
 
-		cres.v.Message.SetID(req.Message.Header.ID)
+		res.message.SetID(req.Message.Header.ID)
 
-		_, err = req.Sender.Send(cres.v.Message, req.UDPAddr)
+		_, err = req.Sender.Send(res.message, req.UDPAddr)
 		if err != nil {
 			log.Println("processRequestQueue: WriteToUDP:", err)
 		}
@@ -222,14 +216,14 @@ func (srv *Server) processRequestQueue() {
 		srv.dnsServer.FreeRequest(req)
 
 		// Ignore update on local caches
-		if cres.v.ReceivedAt == 0 {
+		if res.receivedAt == 0 {
 			if DebugLevel >= 1 {
-				fmt.Printf("= local  : %s\n", cres.v.Message.Question)
+				fmt.Printf("= local  : %s\n", res.message.Question)
 			}
 			continue
 		}
 
-		srv.cw.updateQueue <- cres
+		srv.cw.updateQueue <- res
 	}
 }
 
@@ -237,7 +231,7 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 	var (
 		ok  bool
 		err error
-		res *dns.Response
+		msg *dns.Message
 	)
 	for req := range srv.fwQueue {
 		ok = false
@@ -254,28 +248,28 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 			goto out
 		}
 
-		res = _responsePool.Get().(*dns.Response)
-		res.Reset()
+		msg = allocMessage()
+		msg.Reset()
 
-		_, err = cl.Recv(res.Message)
+		_, err = cl.Recv(msg)
 		if err != nil {
 			log.Println("processForwardQueue: Recv:", err)
 			goto out
 		}
 
-		err = res.Unpack()
+		err = msg.Unpack()
 		if err != nil {
 			log.Println("processForwardQueue: UnmarshalBinary:", err)
 			goto out
 		}
 
-		if !bytes.Equal(req.Message.Question.Name, res.Message.Question.Name) {
+		if !bytes.Equal(req.Message.Question.Name, msg.Question.Name) {
 			goto out
 		}
-		if req.Message.Header.ID != res.Message.Header.ID {
+		if req.Message.Header.ID != msg.Header.ID {
 			goto out
 		}
-		if req.Message.Question.Type != res.Message.Question.Type {
+		if req.Message.Question.Type != msg.Question.Type {
 			goto out
 		}
 
@@ -294,9 +288,9 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 
 		for x := 0; x < len(reqs); x++ {
 			if ok {
-				res.Message.SetID(reqs[x].Message.Header.ID)
+				msg.SetID(reqs[x].Message.Header.ID)
 
-				_, err = reqs[x].Sender.Send(res.Message, reqs[x].UDPAddr)
+				_, err = reqs[x].Sender.Send(msg, reqs[x].UDPAddr)
 				if err != nil {
 					log.Println("! processForwardQueue: Send:", err)
 				}
@@ -305,11 +299,11 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 		}
 
 		if ok {
-			srv.cw.addQueue <- res
+			srv.cw.addQueue <- msg
 		} else {
-			if res != nil {
-				freeResponse(res)
-				res = nil
+			if msg != nil {
+				freeMessage(msg)
+				msg = nil
 			}
 		}
 	}

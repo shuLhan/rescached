@@ -18,9 +18,9 @@ const (
 )
 
 type cacheWorker struct {
-	addQueue       chan *dns.Response
-	updateQueue    chan *cacheResponse
-	removeQueue    chan *cacheResponse
+	addQueue       chan *dns.Message
+	updateQueue    chan *response
+	removeQueue    chan *response
 	caches         *caches
 	cachesRequest  *cachesRequest
 	cachesList     *cachesList
@@ -30,9 +30,9 @@ type cacheWorker struct {
 
 func newCacheWorker(pruneDelay, cacheThreshold time.Duration) *cacheWorker {
 	return &cacheWorker{
-		addQueue:       make(chan *dns.Response, maxWorkerQueue),
-		updateQueue:    make(chan *cacheResponse, maxWorkerQueue),
-		removeQueue:    make(chan *cacheResponse, maxWorkerQueue),
+		addQueue:       make(chan *dns.Message, maxWorkerQueue),
+		updateQueue:    make(chan *response, maxWorkerQueue),
+		removeQueue:    make(chan *response, maxWorkerQueue),
 		caches:         newCaches(),
 		cachesRequest:  newCachesRequest(),
 		cachesList:     newCachesList(cacheThreshold),
@@ -46,17 +46,17 @@ func (cw *cacheWorker) start() {
 
 	for {
 		select {
-		case res := <-cw.addQueue:
-			added := cw.add(res, true)
+		case msg := <-cw.addQueue:
+			added := cw.add(msg, true)
 			if !added {
-				freeResponse(res)
+				freeMessage(msg)
 			}
 
-		case cres := <-cw.updateQueue:
-			cw.update(cres)
+		case res := <-cw.updateQueue:
+			cw.update(res)
 
-		case cres := <-cw.removeQueue:
-			cw.remove(cres)
+		case res := <-cw.removeQueue:
+			cw.remove(res)
 		}
 	}
 }
@@ -78,93 +78,92 @@ func (cw *cacheWorker) pruneWorker() {
 // It will return true if response is added or updated in cache, otherwise it
 // will return false.
 //
-func (cw *cacheWorker) add(res *dns.Response, addToList bool) bool {
-	if res.Message.Header.ANCount == 0 || len(res.Message.Answer) == 0 {
-		log.Printf("! Empty answers on %s\n", res.Message.Question)
+func (cw *cacheWorker) add(msg *dns.Message, addToList bool) bool {
+	if msg.Header.ANCount == 0 || len(msg.Answer) == 0 {
+		log.Printf("! Empty answers on %s\n", msg.Question)
 		return false
 	}
-	for x := 0; x < len(res.Message.Answer); x++ {
-		if res.Message.Answer[x].TTL == 0 {
-			log.Printf("! Zero TTL on %s\n", res.Message.Question)
+	for x := 0; x < len(msg.Answer); x++ {
+		if msg.Answer[x].TTL == 0 {
+			log.Printf("! Zero TTL on %s\n", msg.Question)
 			return false
 		}
 	}
 
-	libbytes.ToLower(&res.Message.Question.Name)
-	qname := string(res.Message.Question.Name)
+	libbytes.ToLower(&msg.Question.Name)
+	qname := string(msg.Question.Name)
 
-	lres, cres := cw.caches.get(qname, res.Message.Question.Type,
-		res.Message.Question.Class)
+	lres, res := cw.caches.get(qname, msg.Question.Type, msg.Question.Class)
 	if lres == nil {
-		cres = newCacheResponse(res)
+		res = newResponse(msg)
 
-		cw.caches.add(qname, cres)
+		cw.caches.add(qname, res)
 
 		if addToList {
-			cw.cachesList.push(cres)
+			cw.cachesList.push(res)
 		}
 
 		if DebugLevel >= 1 && addToList {
 			fmt.Printf("+ caching: %4d %10d %s\n",
-				cw.cachesList.length(), cres.accessedAt,
-				res.Message.Question)
+				cw.cachesList.length(), res.accessedAt,
+				res.message.Question)
 		}
 		return true
 	}
 	// Cache list contains other type.
-	if cres == nil {
-		lres.add(res)
+	if res == nil {
+		lres.add(msg)
 		return true
 	}
 
-	oldRes := lres.update(cres, res)
-	freeResponse(oldRes)
+	oldMsg := lres.update(res, msg)
+	freeMessage(oldMsg)
 
 	if addToList {
-		cw.cachesList.fix(cres)
+		cw.cachesList.fix(res)
 
 		if DebugLevel >= 1 {
-			fmt.Printf("+ update : %10d %s\n", cres.accessedAt,
-				res.Message.Question)
+			fmt.Printf("+ update : %10d %s\n", res.accessedAt,
+				res.message.Question)
 		}
 	}
 
 	return true
 }
 
-func (cw *cacheWorker) update(cres *cacheResponse) {
-	cw.cachesList.fix(cres)
+func (cw *cacheWorker) update(res *response) {
+	cw.cachesList.fix(res)
 
 	if DebugLevel >= 1 {
 		fmt.Printf("= cache  : %4d %10d %s\n", cw.cachesList.length(),
-			cres.accessedAt, cres.v.Message.Question)
+			res.accessedAt, res.message.Question)
 	}
 }
 
-func (cw *cacheWorker) remove(cres *cacheResponse) {
-	if cres.el != nil {
+func (cw *cacheWorker) remove(res *response) {
+	if res.el != nil {
 		return
 	}
 
-	qname := string(cres.v.Message.Question.Name)
+	qname := string(res.message.Question.Name)
 
-	cw.caches.remove(qname, cres.v.Message.Question.Type,
-		cres.v.Message.Question.Class)
+	cw.caches.remove(qname, res.message.Question.Type,
+		res.message.Question.Class)
 
 	fmt.Printf("= pruning: %4d %10d %s\n", cw.cachesList.length(),
-		cres.accessedAt, cres.v.Message.Question)
+		res.accessedAt, res.message.Question)
 
-	cres.el = nil
-	cres.v = nil
+	res.el = nil
+	res.message = nil
 }
 
 func (cw *cacheWorker) prune() {
-	lcres := cw.cachesList.prune()
-	if len(lcres) == 0 {
+	lres := cw.cachesList.prune()
+	if len(lres) == 0 {
 		return
 	}
 
-	for _, cres := range lcres {
-		cw.removeQueue <- cres
+	for _, res := range lres {
+		cw.removeQueue <- res
 	}
 }

@@ -21,12 +21,12 @@ type listResponse struct {
 	v *list.List
 }
 
-func newListResponse(cres *cacheResponse) (lres *listResponse) {
+func newListResponse(res *response) (lres *listResponse) {
 	lres = &listResponse{
 		v: list.New(),
 	}
-	if cres != nil {
-		lres.v.PushBack(cres)
+	if res != nil {
+		lres.v.PushBack(res)
 	}
 	return
 }
@@ -34,51 +34,51 @@ func newListResponse(cres *cacheResponse) (lres *listResponse) {
 //
 // get cached response based on request type and class.
 //
-func (lres *listResponse) get(qtype, qclass uint16) *cacheResponse {
+func (lres *listResponse) get(qtype, qclass uint16) *response {
 	lres.Lock()
 	for e := lres.v.Front(); e != nil; e = e.Next() {
-		cres := e.Value.(*cacheResponse)
-		if qtype != cres.v.Message.Question.Type {
+		res := e.Value.(*response)
+		if qtype != res.message.Question.Type {
 			continue
 		}
-		if qclass != cres.v.Message.Question.Class {
+		if qclass != res.message.Question.Class {
 			continue
 		}
 		lres.Unlock()
-		return cres
+		return res
 	}
 	lres.Unlock()
 	return nil
 }
 
-func (lres *listResponse) add(res *dns.Response) *cacheResponse {
-	cres := newCacheResponse(res)
+func (lres *listResponse) add(msg *dns.Message) *response {
+	res := newResponse(msg)
 	lres.Lock()
-	lres.v.PushBack(cres)
+	lres.v.PushBack(res)
 	lres.Unlock()
-	return cres
+	return res
 }
 
-func (lres *listResponse) update(cres *cacheResponse, res *dns.Response) *dns.Response {
+func (lres *listResponse) update(res *response, msg *dns.Message) *dns.Message {
 	lres.Lock()
-	oldRes := cres.update(res)
+	oldMsg := res.update(msg)
 	lres.Unlock()
-	return oldRes
+	return oldMsg
 }
 
-func (lres *listResponse) remove(qtype, qclass uint16) *cacheResponse {
+func (lres *listResponse) remove(qtype, qclass uint16) *response {
 	lres.Lock()
 	for e := lres.v.Front(); e != nil; e = e.Next() {
-		cres := e.Value.(*cacheResponse)
-		if qtype != cres.v.Message.Question.Type {
+		res := e.Value.(*response)
+		if qtype != res.message.Question.Type {
 			continue
 		}
-		if qclass != cres.v.Message.Question.Class {
+		if qclass != res.message.Question.Class {
 			continue
 		}
 		lres.v.Remove(e)
 		lres.Unlock()
-		return cres
+		return res
 	}
 	lres.Unlock()
 	return nil
@@ -100,8 +100,8 @@ func (lres *listResponse) String() string {
 		} else {
 			b.WriteByte(' ')
 		}
-		ev := e.Value.(*cacheResponse)
-		fmt.Fprintf(&b, "%+v", ev.v)
+		ev := e.Value.(*response)
+		fmt.Fprintf(&b, "%+v", ev.message)
 	}
 	lres.Unlock()
 

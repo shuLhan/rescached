@@ -6,20 +6,18 @@ package rescached
 
 import (
 	"sync"
-
-	"github.com/shuLhan/share/lib/dns"
 )
 
 var _responsePool = sync.Pool{
 	New: func() interface{} {
-		res := &dns.Response{
-			Message: allocMessage(),
+		res := &response{
+			message: allocMessage(),
 		}
 		return res
 	},
 }
 
-func freeResponse(res *dns.Response) {
-	res.Message.Reset()
+func freeResponse(res *response) {
+	res.message.Reset()
 	_responsePool.Put(res)
 }

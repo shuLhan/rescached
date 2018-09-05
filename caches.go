@@ -26,7 +26,7 @@ func newCaches() *caches {
 // get cached response based on request name, type, and class
 //
 func (c *caches) get(qname string, qtype, qclass uint16) (
-	lres *listResponse, cres *cacheResponse,
+	lres *listResponse, res *response,
 ) {
 	v, ok := c.v.Load(qname)
 	if !ok {
@@ -34,7 +34,7 @@ func (c *caches) get(qname string, qtype, qclass uint16) (
 	}
 
 	lres = v.(*listResponse)
-	cres = lres.get(qtype, qclass)
+	res = lres.get(qtype, qclass)
 
 	return
 }
@@ -42,8 +42,8 @@ func (c *caches) get(qname string, qtype, qclass uint16) (
 //
 // add response to caches.
 //
-func (c *caches) add(key string, cres *cacheResponse) {
-	lres := newListResponse(cres)
+func (c *caches) add(key string, res *response) {
+	lres := newListResponse(res)
 	c.v.Store(key, lres)
 }
 
@@ -51,7 +51,7 @@ func (c *caches) add(key string, cres *cacheResponse) {
 // remove cache by name, type, and class; and return the cached response.
 // If no record found it will return nil.
 //
-func (c *caches) remove(qname string, qtype, qclass uint16) *cacheResponse {
+func (c *caches) remove(qname string, qtype, qclass uint16) *response {
 	v, ok := c.v.Load(qname)
 	if !ok {
 		return nil

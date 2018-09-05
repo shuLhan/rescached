@@ -32,30 +32,30 @@ func (cl *cachesList) length() (n int) {
 	return n
 }
 
-func (cl *cachesList) push(cres *cacheResponse) {
+func (cl *cachesList) push(res *response) {
 	cl.Lock()
-	cres.el = cl.v.PushBack(cres)
+	res.el = cl.v.PushBack(res)
 	cl.Unlock()
 }
 
-func (cl *cachesList) fix(cres *cacheResponse) {
-	if cres == nil {
+func (cl *cachesList) fix(res *response) {
+	if res == nil {
 		return
 	}
 
 	cl.Lock()
 
-	atomic.StoreInt64(&cres.accessedAt, time.Now().Unix())
-	if cres.el != nil {
-		cl.v.MoveToBack(cres.el)
+	atomic.StoreInt64(&res.accessedAt, time.Now().Unix())
+	if res.el != nil {
+		cl.v.MoveToBack(res.el)
 	} else {
-		cres.el = cl.v.PushBack(cres)
+		res.el = cl.v.PushBack(res)
 	}
 
 	cl.Unlock()
 }
 
-func (cl *cachesList) prune() (lcres []*cacheResponse) {
+func (cl *cachesList) prune() (lres []*response) {
 	cl.Lock()
 
 	var next *list.Element
@@ -65,16 +65,16 @@ func (cl *cachesList) prune() (lcres []*cacheResponse) {
 	fmt.Println("= prune threshold:", exp)
 
 	for el != nil {
-		cres := el.Value.(*cacheResponse)
-		if cres.AccessedAt() > exp {
+		res := el.Value.(*response)
+		if res.AccessedAt() > exp {
 			break
 		}
 
 		next = el.Next()
 
 		cl.v.Remove(el)
-		cres.el = nil
-		lcres = append(lcres, cres)
+		res.el = nil
+		lres = append(lres, res)
 
 		el = next
 	}
