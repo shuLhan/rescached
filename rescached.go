@@ -91,7 +91,7 @@ func (srv *Server) LoadHostsFile(path string) {
 // LostMasterFile parse master file and put the result into caches.
 //
 func (srv *Server) LoadMasterFile(path string) {
-	fmt.Printf("= Loading master file %s\n", path)
+	fmt.Printf("= Loading master file '%s'\n", path)
 
 	msgs, err := dns.MasterLoad(path, "", 0)
 	if err != nil {
@@ -104,14 +104,14 @@ func (srv *Server) LoadMasterFile(path string) {
 func (srv *Server) populateCaches(msgs []*dns.Message) {
 	n := 0
 	for x := 0; x < len(msgs); x++ {
-		ok := srv.cw.add(msgs[x], false)
+		ok := srv.cw.add(msgs[x], true)
 		if ok {
 			n++
 		}
 		msgs[x] = nil
 	}
 
-	fmt.Printf("== %d loaded\n", n)
+	fmt.Printf("== %d record cached\n", n)
 }
 
 //

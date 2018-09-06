@@ -51,8 +51,11 @@ func (lres *listResponse) get(qtype, qclass uint16) *response {
 	return nil
 }
 
-func (lres *listResponse) add(msg *dns.Message) *response {
+func (lres *listResponse) add(msg *dns.Message, isLocal bool) *response {
 	res := newResponse(msg)
+	if isLocal {
+		res.receivedAt = 0
+	}
 	lres.Lock()
 	lres.v.PushBack(res)
 	lres.Unlock()

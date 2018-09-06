@@ -50,7 +50,7 @@ func TestListResponseAdd(t *testing.T) {
 	for _, c := range cases {
 		t.Logf(c.desc)
 
-		res := _testListResponse.add(c.msg)
+		res := _testListResponse.add(c.msg, true)
 		res.accessedAt = 0
 
 		test.Assert(t, "listResponse.Len", c.expLen, _testListResponse.v.Len(), true)

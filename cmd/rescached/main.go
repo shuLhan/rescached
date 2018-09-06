@@ -57,6 +57,7 @@ func createRescachedServer(fileConfig string) {
 	}
 
 	loadHostsDir(cfg)
+	loadMasterDir(cfg)
 }
 
 func loadHostsDir(cfg *config) {

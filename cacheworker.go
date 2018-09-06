@@ -47,7 +47,7 @@ func (cw *cacheWorker) start() {
 	for {
 		select {
 		case msg := <-cw.addQueue:
-			added := cw.add(msg, true)
+			added := cw.add(msg, false)
 			if !added {
 				freeMessage(msg)
 			}
@@ -78,7 +78,7 @@ func (cw *cacheWorker) pruneWorker() {
 // It will return true if response is added or updated in cache, otherwise it
 // will return false.
 //
-func (cw *cacheWorker) add(msg *dns.Message, addToList bool) bool {
+func (cw *cacheWorker) add(msg *dns.Message, isLocal bool) bool {
 	if msg.Header.ANCount == 0 || len(msg.Answer) == 0 {
 		log.Printf("! Empty answers on %s\n", msg.Question)
 		return false
@@ -96,14 +96,17 @@ func (cw *cacheWorker) add(msg *dns.Message, addToList bool) bool {
 	lres, res := cw.caches.get(qname, msg.Question.Type, msg.Question.Class)
 	if lres == nil {
 		res = newResponse(msg)
+		if isLocal {
+			res.receivedAt = 0
+		}
 
 		cw.caches.add(qname, res)
 
-		if addToList {
+		if !isLocal {
 			cw.cachesList.push(res)
 		}
 
-		if DebugLevel >= 1 && addToList {
+		if DebugLevel >= 1 && !isLocal {
 			fmt.Printf("+ caching: %4d %10d %s\n",
 				cw.cachesList.length(), res.accessedAt,
 				res.message.Question)
@@ -112,14 +115,14 @@ func (cw *cacheWorker) add(msg *dns.Message, addToList bool) bool {
 	}
 	// Cache list contains other type.
 	if res == nil {
-		lres.add(msg)
+		lres.add(msg, isLocal)
 		return true
 	}
 
 	oldMsg := lres.update(res, msg)
 	freeMessage(oldMsg)
 
-	if addToList {
+	if !isLocal {
 		cw.cachesList.fix(res)
 
 		if DebugLevel >= 1 {
