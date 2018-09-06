@@ -29,35 +29,9 @@ without port, 192.168.1.1:53 with port.  Default port is 53.`
 MB, MG, MR, NULL, WKS, PTR, HINFO, MINFO, MX, TXT, AAAA, or SRV.
 Default value in A.`
 
-	usageClass = `Query class.  Valid values are either IN, CS, CH, HS.
+	usageClass = `Query class.  Valid values are either IN, CS, HS.
 Default value is IN.`
 )
-
-var mapTypeValue = map[string]uint16{
-	"A":     dns.QueryTypeA,
-	"NS":    dns.QueryTypeNS,
-	"CNAME": dns.QueryTypeCNAME,
-	"SOA":   dns.QueryTypeSOA,
-	"MB":    dns.QueryTypeMB,
-	"MG":    dns.QueryTypeMG,
-	"MR":    dns.QueryTypeMR,
-	"NULL":  dns.QueryTypeNULL,
-	"WKS":   dns.QueryTypeWKS,
-	"PTR":   dns.QueryTypePTR,
-	"HINFO": dns.QueryTypeHINFO,
-	"MINFO": dns.QueryTypeMINFO,
-	"MX":    dns.QueryTypeMX,
-	"TXT":   dns.QueryTypeTXT,
-	"AAAA":  dns.QueryTypeAAAA,
-	"SRV":   dns.QueryTypeSRV,
-}
-
-var mapClassValue = map[string]uint16{
-	"IN": dns.QueryClassIN,
-	"CS": dns.QueryClassCS,
-	"CH": dns.QueryClassCH,
-	"HS": dns.QueryClassHS,
-}
 
 type options struct {
 	sqtype  string
@@ -124,7 +98,7 @@ func (opts *options) parseQType() error {
 
 	opts.sqtype = strings.ToUpper(opts.sqtype)
 
-	opts.qtype, ok = mapTypeValue[opts.sqtype]
+	opts.qtype, ok = dns.QueryTypes[opts.sqtype]
 	if !ok {
 		return errQueryType
 	}
@@ -137,7 +111,7 @@ func (opts *options) parseQClass() error {
 
 	opts.sqclass = strings.ToUpper(opts.sqclass)
 
-	opts.qclass, ok = mapClassValue[opts.sqclass]
+	opts.qclass, ok = dns.QueryClasses[opts.sqclass]
 	if !ok {
 		return errQueryClass
 	}
