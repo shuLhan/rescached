@@ -23,7 +23,7 @@ func parseNameServers(nameservers []string) (udpAddrs []*net.UDPAddr) {
 	for _, ns := range nameservers {
 		addr, err := libnet.ParseUDPAddr(ns, dns.DefaultPort)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("! parseNameServers: ", err)
 		}
 		udpAddrs = append(udpAddrs, addr)
 	}
@@ -105,12 +105,14 @@ func main() {
 
 	opts, err := newOptions()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("! newOptions: ", err)
 	}
+
+	fmt.Printf("= options: %+v\n", opts)
 
 	cr, err := libnet.NewResolvConf(defResolvConf)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("! NewResolvConf: ", err)
 	}
 
 	if len(opts.nameserver) > 0 {
@@ -118,13 +120,13 @@ func main() {
 		cr.NameServers = append(cr.NameServers, opts.nameserver)
 	} else {
 		if len(cr.NameServers) == 0 {
-			cr.NameServers = append(cr.NameServers, "127.0.0.1")
+			cr.NameServers = append(cr.NameServers, "127.0.0.1:53")
 		}
 	}
 
-	cl, err := dns.NewUDPClient(cr.NameServers[0])
+	cl, err := dns.NewUDPClient("")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("! dns.NewUDPClient: ", err)
 	}
 
 	var (
@@ -152,7 +154,7 @@ func main() {
 
 				res, err = cl.Lookup(opts.qtype, opts.qclass, []byte(qname))
 				if err != nil {
-					log.Println(err)
+					log.Println("! Lookup: ", err)
 					continue
 				}
 				if res.Header.ANCount == 0 {
