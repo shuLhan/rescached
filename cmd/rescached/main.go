@@ -74,6 +74,10 @@ func loadHostsDir(cfg *config) {
 	fis, err := d.Readdir(0)
 	if err != nil {
 		log.Println("! loadHostsDir: Readdir:", err)
+		err = d.Close()
+		if err != nil {
+			log.Println("! loadHostsDir: Close:", err)
+		}
 		return
 	}
 
@@ -85,6 +89,11 @@ func loadHostsDir(cfg *config) {
 		hostsFile := filepath.Join(cfg.hostsDir, fis[x].Name())
 
 		rcd.LoadHostsFile(hostsFile)
+	}
+
+	err = d.Close()
+	if err != nil {
+		log.Println("! loadHostsDir: Close:", err)
 	}
 }
 
@@ -102,6 +111,10 @@ func loadMasterDir(cfg *config) {
 	fis, err := d.Readdir(0)
 	if err != nil {
 		log.Println("! loadMasterDir: ", err)
+		err = d.Close()
+		if err != nil {
+			log.Println("! loadMasterDir: Close:", err)
+		}
 		return
 	}
 
@@ -113,6 +126,11 @@ func loadMasterDir(cfg *config) {
 		masterFile := filepath.Join(cfg.dirMaster, fis[x].Name())
 
 		rcd.LoadMasterFile(masterFile)
+	}
+
+	err = d.Close()
+	if err != nil {
+		log.Println("! loadHostsDir: Close:", err)
 	}
 }
 
