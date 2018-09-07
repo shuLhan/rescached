@@ -33,7 +33,7 @@ func newCacheWorker(pruneDelay, cacheThreshold time.Duration) *cacheWorker {
 		addQueue:       make(chan *dns.Message, maxWorkerQueue),
 		updateQueue:    make(chan *response, maxWorkerQueue),
 		removeQueue:    make(chan *response, maxWorkerQueue),
-		caches:         newCaches(),
+		caches:         &caches{},
 		cachesRequest:  newCachesRequest(),
 		cachesList:     newCachesList(cacheThreshold),
 		pruneDelay:     pruneDelay,

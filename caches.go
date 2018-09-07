@@ -16,13 +16,6 @@ type caches struct {
 }
 
 //
-// newCaches create, initialize, and return new caches.
-//
-func newCaches() *caches {
-	return &caches{}
-}
-
-//
 // get cached response based on request name, type, and class
 //
 func (c *caches) get(qname string, qtype, qclass uint16) (

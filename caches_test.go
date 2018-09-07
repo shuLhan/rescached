@@ -11,7 +11,7 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
-var _testCaches = newCaches()
+var _testCaches = &caches{}
 
 func TestCachesAdd(t *testing.T) {
 	t.Logf("_testResponses[0]: %+v\n", _testResponses[0])
