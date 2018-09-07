@@ -174,10 +174,9 @@ func profiling() {
 	}
 
 	srv := &http.Server{
-		Addr:         pprofAddr,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Second,
-		IdleTimeout:  120 * time.Second,
+		Addr:        pprofAddr,
+		ReadTimeout: 5 * time.Second,
+		IdleTimeout: 120 * time.Second,
 	}
 
 	log.Println(srv.ListenAndServe())
