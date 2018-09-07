@@ -59,39 +59,43 @@ type config struct {
 	cachePruneDelay time.Duration
 	cacheThreshold  time.Duration
 	debugLevel      byte
+	in              *ini.Ini
 }
 
-func newConfig(file string) (cfg *config, err error) {
-	cfg = new(config)
+func newConfig(file string) (*config, error) {
+	var err error
 
-	in, err := ini.Open(file)
+	cfg := new(config)
+
+	cfg.in, err = ini.Open(file)
 	if err != nil {
 		return nil, err
 	}
 
-	cfg.filePID = in.GetString(cfgSecRescached, "", cfgKeyFilePID, defFilePID)
+	cfg.filePID = cfg.in.GetString(cfgSecRescached, "", cfgKeyFilePID, defFilePID)
 
-	err = cfg.parseNSParent(in)
+	err = cfg.parseNSParent()
 	if err != nil {
 		return nil, err
 	}
 
-	cfg.nsNetwork = in.GetString(cfgSecRescached, "", cfgKeyNSNetwork, defNSNetwork)
-	cfg.listen = in.GetString(cfgSecRescached, "", cfgKeyListen, defListen)
-	cfg.dirHosts = in.GetString(cfgSecRescached, "", "dir.hosts", "")
-	cfg.dirMaster = in.GetString(cfgSecRescached, "", "dir.master", "")
-	cfg.parseTimeout(in)
-	cfg.parseCachePruneDelay(in)
-	cfg.parseCacheThreshold(in)
-	cfg.parseDebugLevel(in)
+	cfg.nsNetwork = cfg.in.GetString(cfgSecRescached, "", cfgKeyNSNetwork, defNSNetwork)
+	cfg.listen = cfg.in.GetString(cfgSecRescached, "", cfgKeyListen, defListen)
+	cfg.dirHosts = cfg.in.GetString(cfgSecRescached, "", "dir.hosts", "")
+	cfg.dirMaster = cfg.in.GetString(cfgSecRescached, "", "dir.master", "")
+	cfg.parseTimeout()
+	cfg.parseCachePruneDelay()
+	cfg.parseCacheThreshold()
+	cfg.parseDebugLevel()
+	cfg.in = nil
 
-	return
+	return cfg, nil
 }
 
-func (cfg *config) parseNSParent(in *ini.Ini) error {
+func (cfg *config) parseNSParent() error {
 	nsParents := defNSParent
 
-	v, ok := in.Get(cfgSecRescached, "", cfgKeyNSParent)
+	v, ok := cfg.in.Get(cfgSecRescached, "", cfgKeyNSParent)
 	if ok {
 		nsParents = strings.Split(v, ",")
 	}
@@ -107,8 +111,8 @@ func (cfg *config) parseNSParent(in *ini.Ini) error {
 	return nil
 }
 
-func (cfg *config) parseTimeout(in *ini.Ini) {
-	v := in.GetString(cfgSecRescached, "", cfgKeyTimeout, defTimeoutString)
+func (cfg *config) parseTimeout() {
+	v := cfg.in.GetString(cfgSecRescached, "", cfgKeyTimeout, defTimeoutString)
 	timeout, err := strconv.Atoi(v)
 	if err != nil {
 		timeout = defTimeout
@@ -118,8 +122,8 @@ func (cfg *config) parseTimeout(in *ini.Ini) {
 	cfg.timeout = time.Duration(timeout) * time.Second
 }
 
-func (cfg *config) parseCachePruneDelay(in *ini.Ini) {
-	v, ok := in.Get(cfgSecRescached, "", cfgKeyCachePruneDelay)
+func (cfg *config) parseCachePruneDelay() {
+	v, ok := cfg.in.Get(cfgSecRescached, "", cfgKeyCachePruneDelay)
 	if !ok {
 		cfg.cachePruneDelay = defCachePruneDelay
 		return
@@ -140,8 +144,8 @@ func (cfg *config) parseCachePruneDelay(in *ini.Ini) {
 	}
 }
 
-func (cfg *config) parseCacheThreshold(in *ini.Ini) {
-	v, ok := in.Get(cfgSecRescached, "", cfgKeyCacheThreshold)
+func (cfg *config) parseCacheThreshold() {
+	v, ok := cfg.in.Get(cfgSecRescached, "", cfgKeyCacheThreshold)
 	if !ok {
 		cfg.cacheThreshold = defCacheThreshold
 		return
@@ -162,8 +166,8 @@ func (cfg *config) parseCacheThreshold(in *ini.Ini) {
 	}
 }
 
-func (cfg *config) parseDebugLevel(in *ini.Ini) {
-	v, ok := in.Get(cfgSecRescached, "", cfgKeyDebug)
+func (cfg *config) parseDebugLevel() {
+	v, ok := cfg.in.Get(cfgSecRescached, "", cfgKeyDebug)
 	if !ok {
 		return
 	}
