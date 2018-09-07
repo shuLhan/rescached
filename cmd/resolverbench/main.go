@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	libdns "github.com/shuLhan/share/lib/dns"
 )
@@ -36,6 +37,7 @@ func main() {
 
 	fmt.Printf("= Benchmarking with %d messages\n", len(msgs))
 
+	timeStart := time.Now()
 	for x := 0; x < len(msgs); x++ {
 		//fmt.Printf("< Request: %6d %s\n", x, msgs[x].Question)
 
@@ -73,7 +75,9 @@ got: %s
 `, exp, got)
 		}
 	}
+	timeEnd := time.Now()
 
 	fmt.Printf("= Total: %d\n", len(msgs))
 	fmt.Printf("= Failed: %d\n", nfail)
+	fmt.Printf("= Elapsed time: %v\n", timeEnd.Sub(timeStart))
 }
