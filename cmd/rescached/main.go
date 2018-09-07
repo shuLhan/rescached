@@ -61,11 +61,11 @@ func createRescachedServer(fileConfig string) {
 }
 
 func loadHostsDir(cfg *config) {
-	if len(cfg.hostsDir) == 0 {
+	if len(cfg.dirHosts) == 0 {
 		return
 	}
 
-	d, err := os.Open(cfg.hostsDir)
+	d, err := os.Open(cfg.dirHosts)
 	if err != nil {
 		log.Println("! loadHostsDir: Open:", err)
 		return
@@ -86,7 +86,7 @@ func loadHostsDir(cfg *config) {
 			continue
 		}
 
-		hostsFile := filepath.Join(cfg.hostsDir, fis[x].Name())
+		hostsFile := filepath.Join(cfg.dirHosts, fis[x].Name())
 
 		rcd.LoadHostsFile(hostsFile)
 	}

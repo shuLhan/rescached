@@ -25,7 +25,6 @@ const (
 	cfgKeyCacheThreshold  = "cache.threshold"
 	cfgKeyDebug           = "debug"
 	cfgKeyFilePID         = "file.pid"
-	cfgKeyHostsDir        = "hosts_d.path"
 	cfgKeyListen          = "server.listen"
 	cfgKeyNSNetwork       = "server.parent.connection"
 	cfgKeyNSParent        = "server.parent"
@@ -55,7 +54,7 @@ type config struct {
 	nsNetwork       string
 	listen          string
 	timeout         time.Duration
-	hostsDir        string
+	dirHosts        string
 	dirMaster       string
 	cachePruneDelay time.Duration
 	cacheThreshold  time.Duration
@@ -79,7 +78,7 @@ func newConfig(file string) (cfg *config, err error) {
 
 	cfg.nsNetwork = in.GetString(cfgSecRescached, "", cfgKeyNSNetwork, defNSNetwork)
 	cfg.listen = in.GetString(cfgSecRescached, "", cfgKeyListen, defListen)
-	cfg.hostsDir = in.GetString(cfgSecRescached, "", cfgKeyHostsDir, "")
+	cfg.dirHosts = in.GetString(cfgSecRescached, "", "dir.hosts", "")
 	cfg.dirMaster = in.GetString(cfgSecRescached, "", "dir.master", "")
 	cfg.parseTimeout(in)
 	cfg.parseCachePruneDelay(in)
