@@ -51,12 +51,12 @@ directory where user running +rescached+.
 [[server.parent]]
 ==== +server.parent+
 
-Value:: 	List of parent DNS servers, separated by commas.
-Format:: 	IP-ADDRESS:PORT, IP-ADDRESS:PORT, ...
+Format:: IP-ADDRESS:PORT, IP-ADDRESS:PORT, ...
 Default::
-* Address: 8.8.8.8, 8.8.4.4
+* Address: 8.8.8.8 and 8.8.4.4
 * Port: 53
-Description:: 	When +rescached+ receive a query from client and when it does
+Description:: List of parent DNS servers, separated by commas.
+When +rescached+ receive a query from client and when it does
 not have a cached address of query, it will pass the query to those parent
 server.
 +rescached+ use a Google DNS public server as a default parent address if not set.
@@ -72,7 +72,6 @@ To check if your parent server reply the unknown host-name with no answer, use
 [[server.parent.connection]]
 ==== +server.parent.connection+
 
-Value:: Request to parent server using specific protocol.
 Format:: String ("udp" or "tcp", without quotes)
 Default:: udp
 Description:: Type of protocol that will be used to send request to
@@ -84,8 +83,6 @@ In case UDP is blocked, you can set this variable to "tcp".
 [[server.listen]]
 ==== +server.listen+
 
-Value:: 	Local IP address that +rescached+ will listening for client
-request.
 Format:: 	<IP-ADDRESS>:<PORT>
 Default:: 	127.0.0.1:53
 Description:: 	Address in local network where +rescached+ will listening for
@@ -96,7 +93,6 @@ network, change this value to +0.0.0.0:53+.
 [[server.timeout]]
 ==== +server.timeout+
 
-Value:: 	Timeout value, in seconds, for writing or sending packet.
 Format:: 	Number
 Default:: 	6
 Description:: 	This option set the server read and write timeout value.
@@ -117,6 +113,16 @@ Format:: 	Duration
 Default:: 	1h
 Description:: 	The duration when the cache will be considered expired.
 
+[[dir.hosts]]
+==== +dir.hosts+
+
+Format:: string
+Default:: /etc/rescached/hosts.d
+Description:: Path to hosts directory.
+If set, rescached will load all hosts formatted files inside the directory.
+If its empty or unset, it will not loading hosts files even in default
+location.
+
 [[dir.zone]]
 ==== +dir.zone+
 
@@ -124,7 +130,7 @@ Format:: string
 Default:: /etc/rescached/zone.d
 Description::  Path to zone directory.
 If set, rescached will load all master files inside directory.
-If its empty or unset, it will skip loading zone file even in default
+If its empty or unset, it will not loading zone file even in default
 location.
 
 [[debug]]
@@ -154,7 +160,7 @@ cache.threshold=60s
 
 Save the above script into +rescached.cfg+ and run it,
 
-	$ sudo rescached rescached.cfg
+	$ sudo rescached -f rescached.cfg
 
 
 == AUTHOR
@@ -169,7 +175,6 @@ All rights reserved.
 
 Use of this source code is governed by a BSD-style license that can be found
 in the LICENSE file.
-
 
 
 == SEE ALSO
