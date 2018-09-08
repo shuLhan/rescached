@@ -5,29 +5,29 @@ Build: normal
 
 Config options,
 
-+++
+----
 dir.hosts=/etc/rescached/hosts.d
 dir.master=/etc/rescached/master.d
 debug = 0
-+++
+----
 
 == resolverbench
 
 Result of benchmarking with local blocked host file,
 
-++++
+----
 master ms 0 % ./resolverbench 127.0.0.1:53 scripts/hosts.block
 = Benchmarking with 27367 messages
 = Total: 27367
 = Failed: 0
 = Elapsed time: 1.053238347s
-++++
+----
 
 == dnstrace
 
 Result of benchmarking with 10000 query and 100 concurrent connections,
 
-++++
+----
 master ms 0 % dnstrace --recurse --codes --io-errors -s 127.0.0.1:53 -t A -n 10000 -c 100 redsift.io
 Benchmarking 127.0.0.1:53 via udp with 100 conncurrent requests
 
@@ -127,8 +127,8 @@ DNS distribution, 1000000 datapoints
   55.574527ms |                                             |      0
   57.671679ms |                                             |     35
   59.768831ms |                                             |     25
-++++
+----
 
-= Credits
+== Credits
 
 - https://github.com/redsift/dnstrace[dnstrace]
