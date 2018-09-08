@@ -3,6 +3,7 @@
 /cover.out
 /doc/rescached.cfg.5.gz
 /doc/resolver.1.gz
+/heap*
 /rescached
 /rescached.1.gz
 /resolver
