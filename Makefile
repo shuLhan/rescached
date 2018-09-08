@@ -2,13 +2,10 @@
 ## Use of this source code is governed by a BSD-style
 ## license that can be found in the LICENSE file.
 
-.PHONY: build debug install
+.PHONY: build debug install uninstall
 .PHONY: test test.prof coverbrowse lint
 .PHONY: doc
 .PHONY: clean distclean
-
-## Initialize by user for install, e.g. "make PREFIX=/path install"
-PREFIX=
 
 SRC:=$(shell go list -f '{{$$d:=.Dir}} {{ range .GoFiles }}{{$$d}}/{{.}} {{end}}' ./...)
 SRC_TEST:=$(shell go list -f '{{$$d:=.Dir}} {{ range .TestGoFiles }}{{$$d}}/{{.}} {{end}}' ./...)
@@ -95,27 +92,32 @@ install: build
 	mkdir -p $(PREFIX)/etc/rescached
 	mkdir -p $(PREFIX)/etc/rescached/hosts.d
 	mkdir -p $(PREFIX)/etc/rescached/master.d
-	cp $(RESCACHED_CFG) $(PREFIX)/etc/rescached/
+	cp $(RESCACHED_CFG)    $(PREFIX)/etc/rescached/
 	cp scripts/hosts.block $(PREFIX)/etc/rescached/hosts.d/
 
-	mkdir -p $(PREFIX)/usr/bin
+	mkdir -p               $(PREFIX)/usr/bin
 	cp -f $(RESCACHED_BIN) $(PREFIX)/usr/bin/
-	cp -f $(RESOLVER_BIN) $(PREFIX)/usr/bin/
+	cp -f $(RESOLVER_BIN)  $(PREFIX)/usr/bin/
 	cp scripts/rescached-update-hosts-block.sh $(PREFIX)/usr/bin/
 
-	mkdir -p $(PREFIX)/usr/share/man/man{1,5}
-	cp $(RESCACHED_MAN) $(PREFIX)/usr/share/man/man1/
+	mkdir -p                $(PREFIX)/usr/share/man/man{1,5}
+	cp $(RESCACHED_MAN)     $(PREFIX)/usr/share/man/man1/
+	cp $(RESOLVER_MAN)      $(PREFIX)/usr/share/man/man1/
 	cp $(RESCACHED_CFG_MAN) $(PREFIX)/usr/share/man/man5/
-	cp $(RESOLVER_MAN) $(PREFIX)/usr/share/man/man5/
 
-	mkdir -p $(PREFIX)/usr/share/rescached
+	mkdir -p   $(PREFIX)/usr/share/rescached
 	cp LICENSE $(PREFIX)/usr/share/rescached/
 
+	mkdir -p                     $(PREFIX)/usr/lib/systemd/system
+	cp scripts/rescached.service $(PREFIX)/usr/lib/systemd/system/
+
 uninstall:
-	rm $(PREFIX)/usr/bin/$(RESCACHED_BIN)
-	rm $(PREFIX)/usr/bin/rescached-update-hosts-block.sh
-	rm $(PREFIX)/usr/bin/$(RESOLVER_BIN)
-	rm $(PREFIX)/usr/share/man/man1/$(RESCACHED_MAN)
-	rm $(PREFIX)/usr/share/man/man5/$(RESCACHED_CFG_MAN)
-	rm $(PREFIX)/usr/share/man/man1/$(RESOLVER_MAN)
-	rm $(PREFIX)/usr/share/rescached/LICENSE
+	rm -f $(PREFIX)/usr/share/rescached/LICENSE
+
+	rm -f $(PREFIX)/usr/share/man/man5/$(RESCACHED_CFG_MAN)
+	rm -f $(PREFIX)/usr/share/man/man1/$(RESOLVER_MAN)
+	rm -f $(PREFIX)/usr/share/man/man1/$(RESCACHED_MAN)
+
+	rm -f $(PREFIX)/usr/bin/rescached-update-hosts-block.sh
+	rm -f $(PREFIX)/usr/bin/$(RESOLVER_BIN)
+	rm -f $(PREFIX)/usr/bin/$(RESCACHED_BIN)
