@@ -39,18 +39,28 @@ func (res *response) AccessedAt() int64 {
 }
 
 //
-// isExpired will return true if response message is expired, otherwise it
-// will return false.
+// checkExpiration will return true if response message is expired, otherwise
+// it will return false.
+// If response is not expired, decrease all TTL in RR to current time minus
+// time they were received.
 //
-func (res *response) isExpired() bool {
+func (res *response) checkExpiration() bool {
 	// Local responses from hosts file will never be expired.
 	if res.receivedAt == 0 {
 		return false
 	}
 
-	elapSeconds := uint32(time.Now().Unix() - res.receivedAt)
+	timeNow := time.Now().Unix()
+	elapSeconds := uint32(timeNow - res.receivedAt)
+	res.receivedAt = timeNow
 
-	return res.message.IsExpired(elapSeconds)
+	if res.message.IsExpired(elapSeconds) {
+		return true
+	}
+
+	res.message.SubTTL(elapSeconds)
+
+	return false
 }
 
 func (res *response) update(newMsg *dns.Message) *dns.Message {

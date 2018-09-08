@@ -190,7 +190,7 @@ func (srv *Server) processRequestQueue() {
 			continue
 		}
 
-		if res.isExpired() {
+		if res.checkExpiration() {
 			if DebugLevel >= 1 {
 				fmt.Printf("- expired: %s\n", res.message.Question)
 			}
