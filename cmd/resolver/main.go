@@ -19,6 +19,11 @@ const (
 	defResolvConf = "/etc/resolv.conf"
 )
 
+var (
+	opts *options
+	cl   *dns.UDPClient
+)
+
 func parseNameServers(nameservers []string) (udpAddrs []*net.UDPAddr) {
 	for _, ns := range nameservers {
 		addr, err := libnet.ParseUDPAddr(ns, dns.DefaultPort)
@@ -100,10 +105,38 @@ func messagePrint(nameserver string, msg *dns.Message) string {
 	return b.String()
 }
 
+func lookup(qname []byte) *dns.Message {
+	res, err := cl.Lookup(opts.qtype, opts.qclass, qname)
+	if err != nil {
+		log.Println("! Lookup: ", err)
+		return nil
+	}
+
+	if res.Header.RCode == 0 {
+		return res
+	}
+
+	switch res.Header.RCode {
+	case dns.RCodeErrFormat:
+		log.Println("! ResponseCode: Format error")
+	case dns.RCodeErrServer:
+		log.Println("! ResponseCode: Server failure")
+	case dns.RCodeErrName:
+		log.Println("! ResponseCode: Domain not exist")
+	case dns.RCodeNotImplemented:
+		log.Println("! ResponseCode: Not implemented")
+	case dns.RCodeRefused:
+		log.Println("! ResponseCode: Refused")
+	}
+	return nil
+}
+
 func main() {
+	var err error
+
 	log.SetFlags(0)
 
-	opts, err := newOptions()
+	opts, err = newOptions()
 	if err != nil {
 		log.Fatal("! newOptions: ", err)
 	}
@@ -124,7 +157,7 @@ func main() {
 		}
 	}
 
-	cl, err := dns.NewUDPClient("")
+	cl, err = dns.NewUDPClient("")
 	if err != nil {
 		log.Fatal("! dns.NewUDPClient: ", err)
 	}
@@ -148,20 +181,14 @@ func main() {
 		for x := 0; x < cr.Attempts; x++ {
 			for _, addr := range nsAddrs {
 				cl.Addr = addr
-				nameserver = addr.String()
+				nameserver = cl.Addr.String()
 
 				fmt.Printf("> Lookup %s at %s\n", qname, nameserver)
 
-				res, err = cl.Lookup(opts.qtype, opts.qclass, []byte(qname))
-				if err != nil {
-					log.Println("! Lookup: ", err)
-					continue
+				res = lookup([]byte(qname))
+				if res != nil {
+					goto out
 				}
-				if res.Header.ANCount == 0 {
-					continue
-				}
-
-				goto out
 			}
 		}
 	}
