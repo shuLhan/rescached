@@ -2,7 +2,7 @@ RESCACHED(1)
 ============
 :doctype: manpage
 :man source: rescached
-:man version: 2018.08.19
+:man version: 2018.09.09
 :man manual: rescached
 
 
@@ -36,12 +36,15 @@ network.
 
 === Features
 
-- Enable to handle request from UDP connections.
+List of current features,
+
+- Enable to handle request from UDP and TCP connections.
 - Load and serve addresses and hostnames in +/etc/hosts+.
-- Load and serve addresses and hostnames from all files inside directory
-  +/etc/rescached/hosts.d/+, recursively.
+- Load and serve hosts formated files inside directory
+  +/etc/rescached/hosts.d/+.
 - Blocking ads and/or malicious websites through list in
   +/etc/rescached/hosts.d/hosts.block+.
+- Load and serve master file format in +/etc/rescached/master.d+.
 
 === Behind The DNS
 
