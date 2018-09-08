@@ -7,6 +7,9 @@
 .PHONY: doc
 .PHONY: clean distclean
 
+## Initialize by user for install, e.g. "make PREFIX=/path install"
+PREFIX=
+
 SRC:=$(shell go list -f '{{$$d:=.Dir}} {{ range .GoFiles }}{{$$d}}/{{.}} {{end}}' ./...)
 SRC_TEST:=$(shell go list -f '{{$$d:=.Dir}} {{ range .TestGoFiles }}{{$$d}}/{{.}} {{end}}' ./...)
 
@@ -16,16 +19,16 @@ CPU_PROF:=cpu.prof
 MEM_PROF:=mem.prof
 DEBUG=
 
-RESCACHED_BIN:=./rescached
-RESCACHED_MAN:=./rescached.1.gz
+RESCACHED_BIN:=rescached
+RESCACHED_MAN:=rescached.1.gz
 
-RESCACHED_CFG:=./cmd/rescached/rescached.cfg
-RESCACHED_CFG_MAN:=./doc/rescached.cfg.5.gz
+RESCACHED_CFG:=cmd/rescached/rescached.cfg
+RESCACHED_CFG_MAN:=doc/rescached.cfg.5.gz
 
-RESOLVER_BIN:=./resolver
-RESOLVER_MAN:=./doc/resolver.1.gz
+RESOLVER_BIN:=resolver
+RESOLVER_MAN:=doc/resolver.1.gz
 
-RESOLVERBENCH_BIN:=./resolverbench
+RESOLVERBENCH_BIN:=resolverbench
 
 build: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
 
@@ -45,7 +48,7 @@ $(COVER_HTML): $(COVER_OUT)
 
 $(COVER_OUT): $(SRC) $(SRC_TEST)
 	export CGO_ENABLED=1 && \
-	go test $(DEBUG) -count=1 -coverprofile=$@ ./...
+		go test $(DEBUG) -count=1 -coverprofile=$@ ./...
 
 coverbrowse: $(COVER_HTML)
 	xdg-open $<
@@ -83,30 +86,36 @@ distclean: clean
 	go clean -i ./...
 
 clean:
-	rm -f ./testdata/rescached.pid
+	rm -f testdata/rescached.pid
 	rm -f $(COVER_OUT) $(COVER_HTML)
 	rm -f $(RESCACHED_MAN) $(RESOLVER_MAN) $(RESCACHED_CFG_MAN)
 	rm -f $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
 
 install: build
-	sudo mkdir -p /etc/rescached
-	sudo mkdir -p /etc/rescached/hosts.d
-	sudo cp $(RESCACHED_CFG)    /etc/rescached/
-	sudo cp scripts/hosts.block /etc/rescached/hosts.d/
+	mkdir -p $(PREFIX)/etc/rescached
+	mkdir -p $(PREFIX)/etc/rescached/hosts.d
+	mkdir -p $(PREFIX)/etc/rescached/master.d
+	cp $(RESCACHED_CFG) $(PREFIX)/etc/rescached/
+	cp scripts/hosts.block $(PREFIX)/etc/rescached/hosts.d/
 
-	sudo mkdir -p /usr/bin
-	sudo cp -f $(RESCACHED_BIN)                     /usr/bin/
-	sudo cp scripts/rescached-update-hosts-block.sh /usr/bin/
+	mkdir -p $(PREFIX)/usr/bin
+	cp -f $(RESCACHED_BIN) $(PREFIX)/usr/bin/
+	cp -f $(RESOLVER_BIN) $(PREFIX)/usr/bin/
+	cp scripts/rescached-update-hosts-block.sh $(PREFIX)/usr/bin/
 
-	sudo mkdir -p /usr/share/man/man{1,5}
-	sudo cp $(RESCACHED_MAN)     /usr/share/man/man1/
-	sudo cp $(RESCACHED_CFG_MAN) /usr/share/man/man5/
+	mkdir -p $(PREFIX)/usr/share/man/man{1,5}
+	cp $(RESCACHED_MAN) $(PREFIX)/usr/share/man/man1/
+	cp $(RESCACHED_CFG_MAN) $(PREFIX)/usr/share/man/man5/
+	cp $(RESOLVER_MAN) $(PREFIX)/usr/share/man/man5/
 
-	sudo mkdir -p /usr/share/rescached
-	sudo cp LICENSE /usr/share/rescached/
+	mkdir -p $(PREFIX)/usr/share/rescached
+	cp LICENSE $(PREFIX)/usr/share/rescached/
 
 uninstall:
-	sudo rm /usr/bin/$(RESCACHED_BIN)
-	sudo rm /usr/share/man/man1/$(RESCACHED_MAN)
-	sudo rm /usr/share/man/man5/$(RESCACHED_CFG_MAN)
-	sudo rm /usr/share/rescached/LICENSE
+	rm $(PREFIX)/usr/bin/$(RESCACHED_BIN)
+	rm $(PREFIX)/usr/bin/rescached-update-hosts-block.sh
+	rm $(PREFIX)/usr/bin/$(RESOLVER_BIN)
+	rm $(PREFIX)/usr/share/man/man1/$(RESCACHED_MAN)
+	rm $(PREFIX)/usr/share/man/man5/$(RESCACHED_CFG_MAN)
+	rm $(PREFIX)/usr/share/man/man1/$(RESOLVER_MAN)
+	rm $(PREFIX)/usr/share/rescached/LICENSE
