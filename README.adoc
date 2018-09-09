@@ -163,19 +163,17 @@ system binary directory.
 We use directory "/etc/rescached" as configuration directory.
 +
 	$ sudo mkdir -p /etc/rescached
-	$ sudo cp cmd/rescached/rescached.cfg /etc/rescached
+	$ sudo cp cmd/rescached/rescached.cfg /etc/rescached/
 
 * Copy rescached program to your system path.
 +
-	$ sudo cp cmd/rescached/rescached /usr/bin
+	$ sudo cp -f rescached /usr/bin/
 
 * Create system startup script.
 +
 If you want your program running each time the system is starting up you can
 create a system startup script (or system service).
-You can see an example for +init.d+ startup script in file
-+scripts/rescached.run+ and for +systemd+ service in
-+scripts/rescached.service+.
+You can see an example for +systemd+ service in +scripts/rescached.service+.
 +
 This step is really different between each system, consult your distribution
 wiki, forum, or mailing-list on how to create system startup script.
@@ -214,6 +212,56 @@ invoking,
 All rescached configuration located in file +/etc/rescached/rescached.cfg+.
 See manual page of *rescached.cfg*(5) for more information.
 
+== MASTER FILE
+
+Rescached support loading master file format.
+Unlike hosts file format, where each domain name is only mapped to type A
+(IPv4 address), in master file, one can define other type that known to
+rescached.
+All files defined `dir.master` configuration are considered as master file and
+will be loaded by rescached only if the config is not empty.
+
+Example of master file,
+
+----
+$ORIGIN my-site.vm.
+$TTL    3600
+
+; resource record (RR) address
+@ A 192.168.56.10
+
+; resource record alias
+dev CNAME @
+
+; resource record address for other sub-domain
+staging A 192.168.100.1
+
+; resource record address for other absolute domain.
+my-site.com A 10.8.0.1
+----
+
+Here we defined the variable origin for root domain "my-site.vm." with minimum
+time-to-live (TTL) to 3600 seconds.
+If no "$origin" variable is defined, rescached will use the file name as
+origin.
+
+The "@" character will be replaced with the value of origin.
+
+The first resource record (RR) is defining an IPv4 address for "my-site.vm."
+to "192.168.56.10".
+
+The second RR add an alias for relative subdomain "dev".
+Domain name that does not terminated with "." are called relative, and
+the origin will be appended to form the absolute domain "dev.my-site.vm".
+In this case IP address for "dev.my-site.vm." is equal to "my-site.vm.".
+
+The third RR define a mapping for another relative subdomain
+"staging.my-site.vm." to address "192.168.100.1".
+
+The last RR define a mapping for absolute domain "my-site.com." to IP
+address "10.8.0.1".
+
+For more information about format of master file see RFC 1035 section 5.
 
 == EXIT STATUS
 
@@ -289,7 +337,8 @@ in the LICENSE file.
 
 == LINKS
 
-Source code repository: https://github.com/shuLhan/rescached-go
+- Source code repository: https://github.com/shuLhan/rescached-go
+- RFC 1035: https://tools.ietf.org/html/rfc1035
 
 
 == SEE ALSO

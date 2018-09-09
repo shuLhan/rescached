@@ -1,8 +1,8 @@
+/README.html
 /TODO
 /cover.html
 /cover.out
 /doc/benchmark.html
-/doc/docbook-xsl.css
 /doc/rescached.cfg.5.gz
 /doc/resolver.1.gz
 /heap*
@@ -11,3 +11,4 @@
 /resolver
 /resolverbench
 /testdata/rescached.pid
+docbook-xsl.css
