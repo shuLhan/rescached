@@ -36,18 +36,6 @@ in square bracket:
 
 This group of options contain the main configuration.
 
-[[file.pid]]
-==== +file.pid+
-
-Value:: 	A path to process id file.
-Format:: 	/any/path/to/file
-Default:: 	rescached.pid (in current directory)
-Description:: 	When +rescached+ started, it will create this file as a
-mediator to any system service.
-Content of this file is the process ID (PID) of +rescached+ in system.
-If not set then the default name will be used, and it will be saved in current
-directory where user running +rescached+.
-
 [[server.parent]]
 ==== +server.parent+
 
@@ -132,6 +120,41 @@ Description::  Path to zone directory.
 If set, rescached will load all master files inside directory.
 If its empty or unset, it will not loading zone file even in default
 location.
+
+[[file.pid]]
+==== +file.pid+
+
+Format:: /any/path/to/file
+Default:: rescached.pid (in current directory)
+Description:: When +rescached+ started, it will create this file as a mediator
+to any system service.
+Content of this file is the process ID (PID) of +rescached+ in system.
+If not set then the default name will be used, and it will be saved in current
+directory where user running +rescached+.
+
+[[file.resolvconf]]
+==== +file.resolvconf+
+
+Format:: /any/path/to/file
+Default:: /etc/rescached/resolv.conf
+Description:: A path to dynamically generated resolv.conf (5) by
+resolvconf (8).  If set, the nameserver values in referenced file will
+replace "server.parent" value and "server.parent" will become a fallback in
+case the referenced file being deleted or can't be parsed.
+
+To use this config, you must set either "dnsmasq_resolv", "pdnsd_resolv", or
+"unbound_conf" in "/etc/resolvconf.conf" to point to
+"/etc/rescached/resolv.conf".
+
+For example,
+----
+resolv_conf=/etc/resolv.conf
+name_servers=127.0.0.1
+dnsmasq_resolv=/etc/rescached/resolv.conf
+#pdnsd_resolv=/etc/rescached/resolv.conf
+#unbound_conf=/etc/rescached/resolv.conf
+----
+
 
 [[debug]]
 ==== +debug+

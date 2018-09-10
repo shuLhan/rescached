@@ -25,6 +25,7 @@ const (
 	cfgKeyCacheThreshold  = "cache.threshold"
 	cfgKeyDebug           = "debug"
 	cfgKeyFilePID         = "file.pid"
+	cfgKeyFileResolvConf  = "file.resolvconf"
 	cfgKeyListen          = "server.listen"
 	cfgKeyNSNetwork       = "server.parent.connection"
 	cfgKeyNSParent        = "server.parent"
@@ -50,6 +51,7 @@ var (
 
 type config struct {
 	filePID         string
+	fileResolvConf  string
 	nsParents       []*net.UDPAddr
 	nsNetwork       string
 	listen          string
@@ -73,6 +75,8 @@ func newConfig(file string) (*config, error) {
 	}
 
 	cfg.filePID = cfg.in.GetString(cfgSecRescached, "", cfgKeyFilePID, defFilePID)
+	cfg.fileResolvConf = cfg.in.GetString(cfgSecRescached, "",
+		cfgKeyFileResolvConf, "")
 
 	err = cfg.parseNSParent()
 	if err != nil {

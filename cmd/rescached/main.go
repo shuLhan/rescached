@@ -46,7 +46,7 @@ func createRescachedServer(fileConfig string) {
 	rescached.DebugLevel = cfg.debugLevel
 
 	rcd, err = rescached.New(cfg.nsNetwork, cfg.nsParents,
-		cfg.cachePruneDelay, cfg.cacheThreshold)
+		cfg.cachePruneDelay, cfg.cacheThreshold, cfg.fileResolvConf)
 	if err != nil {
 		log.Fatal(err)
 	}

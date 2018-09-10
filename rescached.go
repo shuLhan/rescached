@@ -15,6 +15,7 @@ import (
 
 	libbytes "github.com/shuLhan/share/lib/bytes"
 	"github.com/shuLhan/share/lib/dns"
+	libio "github.com/shuLhan/share/lib/io"
 	libnet "github.com/shuLhan/share/lib/net"
 )
 
@@ -34,39 +35,55 @@ var (
 
 // Server implement caching DNS server.
 type Server struct {
-	netType   libnet.Type
-	dnsServer *dns.Server
-	nsParents []*net.UDPAddr
-	reqQueue  chan *dns.Request
-	fwQueue   chan *dns.Request
-	cw        *cacheWorker
+	netType        libnet.Type
+	dnsServer      *dns.Server
+	nsFallback     []*net.UDPAddr
+	nsParents      []*net.UDPAddr
+	reqQueue       chan *dns.Request
+	fwQueue        chan *dns.Request
+	fwStop         chan bool
+	cw             *cacheWorker
+	fileResolvConf string
 }
 
 //
 // New create and initialize new rescached server.
 //
-func New(network string, nsParents []*net.UDPAddr, cachePruneDelay, cacheThreshold time.Duration) (
-	srv *Server, err error,
-) {
+func New(network string, nsParents []*net.UDPAddr,
+	cachePruneDelay, cacheThreshold time.Duration, fileResolvConf string) (*Server, error) {
 	netType := libnet.ConvertStandard(network)
 	if !libnet.IsTypeTransport(netType) {
 		return nil, ErrNetworkType
 	}
 
-	srv = &Server{
-		netType:   netType,
-		dnsServer: new(dns.Server),
-		nsParents: nsParents,
-		reqQueue:  make(chan *dns.Request, _maxQueue),
-		fwQueue:   make(chan *dns.Request, _maxQueue),
-		cw:        newCacheWorker(cachePruneDelay, cacheThreshold),
+	srv := &Server{
+		netType:        netType,
+		dnsServer:      new(dns.Server),
+		nsFallback:     nsParents,
+		reqQueue:       make(chan *dns.Request, _maxQueue),
+		fwQueue:        make(chan *dns.Request, _maxQueue),
+		fwStop:         make(chan bool),
+		cw:             newCacheWorker(cachePruneDelay, cacheThreshold),
+		fileResolvConf: fileResolvConf,
 	}
+
+	if len(fileResolvConf) > 0 {
+		err := srv.loadResolvConf()
+		if err != nil {
+			log.Printf("! loadResolvConf: %s\n", err)
+			srv.nsParents = srv.nsFallback
+		}
+	} else {
+		srv.nsParents = srv.nsFallback
+	}
+
+	fmt.Printf("= Name servers fallback: %v\n", srv.nsFallback)
 
 	srv.dnsServer.Handler = srv
 
 	srv.LoadHostsFile("")
 
-	return
+	return srv, nil
 }
 
 //
@@ -101,6 +118,26 @@ func (srv *Server) LoadMasterFile(path string) {
 	srv.populateCaches(msgs)
 }
 
+func (srv *Server) loadResolvConf() error {
+	rc, err := libnet.NewResolvConf(srv.fileResolvConf)
+	if err != nil {
+		return err
+	}
+
+	nsAddrs, err := dns.ParseNameServers(rc.NameServers)
+	if err != nil {
+		return err
+	}
+
+	if len(nsAddrs) > 0 {
+		srv.nsParents = nsAddrs
+	} else {
+		srv.nsParents = srv.nsFallback
+	}
+
+	return nil
+}
+
 func (srv *Server) populateCaches(msgs []*dns.Message) {
 	n := 0
 	for x := 0; x < len(msgs); x++ {
@@ -133,6 +170,9 @@ func (srv *Server) Start(listenAddr string) (err error) {
 		return
 	}
 
+	if len(srv.fileResolvConf) > 0 {
+		go srv.watchResolvConf()
+	}
 	go srv.cw.start()
 	go srv.processRequestQueue()
 
@@ -142,6 +182,8 @@ func (srv *Server) Start(listenAddr string) (err error) {
 }
 
 func (srv *Server) runForwarders() (err error) {
+	fmt.Printf("= Name servers: %v\n", srv.nsParents)
+
 	max := _maxForwarder
 	if len(srv.nsParents) > max {
 		max = len(srv.nsParents)
@@ -164,6 +206,10 @@ func (srv *Server) runForwarders() (err error) {
 		go srv.processForwardQueue(cl, raddr)
 	}
 	return
+}
+
+func (srv *Server) stopForwarders() {
+	srv.fwStop <- true
 }
 
 func (srv *Server) processRequestQueue() {
@@ -210,7 +256,7 @@ func (srv *Server) processRequestQueue() {
 
 		_, err = req.Sender.Send(res.message, req.UDPAddr)
 		if err != nil {
-			log.Println("processRequestQueue: WriteToUDP:", err)
+			log.Println("! processRequestQueue: WriteToUDP:", err)
 		}
 
 		srv.dnsServer.FreeRequest(req)
@@ -229,82 +275,115 @@ func (srv *Server) processRequestQueue() {
 
 func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 	var (
-		ok  bool
 		err error
 		msg *dns.Message
 	)
-	for req := range srv.fwQueue {
-		ok = false
-		if libnet.IsTypeTCP(srv.netType) {
-			cl, err = dns.NewTCPClient(raddr.String())
-			if err != nil {
-				goto out
-			}
-		}
-
-		_, err = cl.Send(req.Message, raddr)
-		if err != nil {
-			log.Println("processForwardQueue: Send:", err)
-			goto out
-		}
-
-		msg = allocMessage()
-		msg.Reset()
-
-		_, err = cl.Recv(msg)
-		if err != nil {
-			log.Println("processForwardQueue: Recv:", err)
-			goto out
-		}
-
-		err = msg.Unpack()
-		if err != nil {
-			log.Println("processForwardQueue: UnmarshalBinary:", err)
-			goto out
-		}
-
-		if !bytes.Equal(req.Message.Question.Name, msg.Question.Name) {
-			goto out
-		}
-		if req.Message.Header.ID != msg.Header.ID {
-			goto out
-		}
-		if req.Message.Question.Type != msg.Question.Type {
-			goto out
-		}
-
-		ok = true
-
-	out:
-		if libnet.IsTypeTCP(srv.netType) {
-			if cl != nil {
-				cl.Close()
-			}
-		}
-
-		qname := string(req.Message.Question.Name)
-		reqs := srv.cw.cachesRequest.pops(qname,
-			req.Message.Question.Type, req.Message.Question.Class)
-
-		for x := 0; x < len(reqs); x++ {
-			if ok {
-				msg.SetID(reqs[x].Message.Header.ID)
-
-				_, err = reqs[x].Sender.Send(msg, reqs[x].UDPAddr)
+	for {
+		select {
+		case req := <-srv.fwQueue:
+			ok := false
+			if libnet.IsTypeTCP(srv.netType) {
+				cl, err = dns.NewTCPClient(raddr.String())
 				if err != nil {
-					log.Println("! processForwardQueue: Send:", err)
+					goto out
 				}
 			}
-			srv.dnsServer.FreeRequest(reqs[x])
-		}
 
-		if ok {
-			srv.cw.addQueue <- msg
+			_, err = cl.Send(req.Message, raddr)
+			if err != nil {
+				log.Println("! processForwardQueue: Send:", err)
+				goto out
+			}
+
+			msg = allocMessage()
+			msg.Reset()
+
+			_, err = cl.Recv(msg)
+			if err != nil {
+				log.Println("! processForwardQueue: Recv:", err)
+				goto out
+			}
+
+			err = msg.Unpack()
+			if err != nil {
+				log.Println("! processForwardQueue: UnmarshalBinary:", err)
+				goto out
+			}
+
+			if !bytes.Equal(req.Message.Question.Name, msg.Question.Name) {
+				goto out
+			}
+			if req.Message.Header.ID != msg.Header.ID {
+				goto out
+			}
+			if req.Message.Question.Type != msg.Question.Type {
+				goto out
+			}
+
+			ok = true
+
+		out:
+			if libnet.IsTypeTCP(srv.netType) {
+				if cl != nil {
+					cl.Close()
+				}
+			}
+
+			qname := string(req.Message.Question.Name)
+			reqs := srv.cw.cachesRequest.pops(qname,
+				req.Message.Question.Type, req.Message.Question.Class)
+
+			for x := 0; x < len(reqs); x++ {
+				if ok {
+					msg.SetID(reqs[x].Message.Header.ID)
+
+					_, err = reqs[x].Sender.Send(msg, reqs[x].UDPAddr)
+					if err != nil {
+						log.Println("! processForwardQueue: Send:", err)
+					}
+				}
+				srv.dnsServer.FreeRequest(reqs[x])
+			}
+
+			if ok {
+				srv.cw.addQueue <- msg
+			} else {
+				if msg != nil {
+					freeMessage(msg)
+					msg = nil
+				}
+			}
+		case <-srv.fwStop:
+			return
+		}
+	}
+}
+
+func (srv *Server) watchResolvConf() {
+	watcher, err := libio.NewWatcher(srv.fileResolvConf, 0)
+	if err != nil {
+		log.Fatal("! watchResolvConf: ", err)
+	}
+
+	for fi := range watcher.C {
+		if fi == nil {
+			if srv.nsParents[0] == srv.nsFallback[0] {
+				continue
+			}
+
+			log.Printf("= ResolvConf: file '%s' deleted\n",
+				srv.fileResolvConf)
+
+			srv.nsParents = srv.nsFallback
 		} else {
-			if msg != nil {
-				freeMessage(msg)
-				msg = nil
+			err := srv.loadResolvConf()
+			if err != nil {
+				log.Printf("! loadResolvConf: %s\n", err)
+				srv.nsParents = srv.nsFallback
 			}
 		}
+
+		srv.stopForwarders()
+		srv.runForwarders()
 	}
 }
