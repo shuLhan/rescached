@@ -79,15 +79,9 @@ func (cw *cacheWorker) pruneWorker() {
 // will return false.
 //
 func (cw *cacheWorker) add(msg *dns.Message, isLocal bool) bool {
-	if msg.Header.ANCount == 0 || len(msg.Answer) == 0 {
-		log.Printf("! Empty answers on %s\n", msg.Question)
-		return false
-	}
-	for x := 0; x < len(msg.Answer); x++ {
-		if msg.Answer[x].TTL == 0 {
-			log.Printf("! Zero TTL on %s\n", msg.Question)
-			return false
-		}
+	if msg.Header.RCode != dns.RCodeOK {
+		log.Printf("! Response error: %d %s\n", msg.Header.RCode,
+			msg.Question)
 	}
 
 	libbytes.ToLower(&msg.Question.Name)
