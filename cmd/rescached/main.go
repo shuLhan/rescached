@@ -26,9 +26,8 @@ const (
 )
 
 var (
-	rcd         *rescached.Server
-	_filePID    string
-	_listenAddr string
+	rcd      *rescached.Server
+	_filePID string
 )
 
 func createRescachedServer(fileConfig string) {
@@ -42,11 +41,23 @@ func createRescachedServer(fileConfig string) {
 	}
 
 	_filePID = cfg.filePID
-	_listenAddr = cfg.listen
 	rescached.DebugLevel = cfg.debugLevel
 
-	rcd, err = rescached.New(cfg.nsNetwork, cfg.nsParents,
-		cfg.cachePruneDelay, cfg.cacheThreshold, cfg.fileResolvConf)
+	opts := &rescached.Options{
+		ConnType:        cfg.connType,
+		ListenAddress:   cfg.listenAddress,
+		ListenPort:      cfg.listenPort,
+		ListenDoHPort:   cfg.listenDoHPort,
+		NSParents:       cfg.nsParents,
+		DoHParents:      cfg.dohParents,
+		CachePruneDelay: cfg.cachePruneDelay,
+		CacheThreshold:  cfg.cacheThreshold,
+		FileResolvConf:  cfg.fileResolvConf,
+		FileCert:        cfg.fileDoHCert,
+		FileCertKey:     cfg.fileDoHCertKey,
+	}
+
+	rcd, err = rescached.New(opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -203,7 +214,7 @@ func main() {
 	go handleSignal()
 	go profiling()
 
-	err = rcd.Start(_listenAddr)
+	err = rcd.Start()
 	if err != nil {
 		log.Println(err)
 		stop()

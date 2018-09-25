@@ -5,11 +5,14 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/shuLhan/rescached-go"
+	"github.com/shuLhan/share/lib/dns"
 	"github.com/shuLhan/share/lib/ini"
 	libnet "github.com/shuLhan/share/lib/net"
 )
@@ -26,7 +29,10 @@ const (
 	cfgKeyDebug           = "debug"
 	cfgKeyFilePID         = "file.pid"
 	cfgKeyFileResolvConf  = "file.resolvconf"
-	cfgKeyListen          = "server.listen"
+	cfgKeyFileCert        = "server.file.certificate"
+	cfgKeyFileCertKey     = "server.file.certificate.key"
+	cfgKeyListenAddress   = "server.listen"
+	cfgKeyListenPortDoH   = "server.listen.port.doh"
 	cfgKeyNSNetwork       = "server.parent.connection"
 	cfgKeyNSParent        = "server.parent"
 	cfgKeyTimeout         = "server.timeout"
@@ -37,24 +43,32 @@ const (
 	defCachePruneDelay = 5 * time.Minute
 	defCacheThreshold  = -1 * time.Hour
 	defFilePID         = "rescached.pid"
-	defListen          = "127.0.0.1:53"
+	defListenAddress   = "127.0.0.1"
 	defNSNetwork       = "udp"
-	defPort            = 53
+	defPortDoHString   = "443"
 	defTimeout         = 6
 	defTimeoutString   = "6"
 )
 
 // List of default values.
 var (
-	defNSParent = []string{"8.8.8.8:53", "8.8.4.4:53"}
+	defNameServers    = []string{"8.8.8.8:53", "8.8.4.4:53"}
+	defDoHNameServers = []string{
+		"https://1.1.1.1/dns-query",
+	}
 )
 
 type config struct {
+	connType        int
 	filePID         string
 	fileResolvConf  string
+	fileDoHCert     string
+	fileDoHCertKey  string
 	nsParents       []*net.UDPAddr
-	nsNetwork       string
-	listen          string
+	dohParents      []string
+	listenAddress   string
+	listenPort      uint16
+	listenDoHPort   uint16
 	timeout         time.Duration
 	dirHosts        string
 	dirMaster       string
@@ -75,18 +89,28 @@ func newConfig(file string) (*config, error) {
 	}
 
 	cfg.filePID = cfg.in.GetString(cfgSecRescached, "", cfgKeyFilePID, defFilePID)
-	cfg.fileResolvConf = cfg.in.GetString(cfgSecRescached, "",
-		cfgKeyFileResolvConf, "")
+	cfg.fileResolvConf = cfg.in.GetString(cfgSecRescached, "", cfgKeyFileResolvConf, "")
+	cfg.fileDoHCert = cfg.in.GetString(cfgSecRescached, "", cfgKeyFileCert, "")
+	cfg.fileDoHCertKey = cfg.in.GetString(cfgSecRescached, "", cfgKeyFileCertKey, "")
+
+	err = cfg.parseParentConnection()
+	if err != nil {
+		return nil, err
+	}
 
 	err = cfg.parseNSParent()
 	if err != nil {
 		return nil, err
 	}
 
-	cfg.nsNetwork = cfg.in.GetString(cfgSecRescached, "", cfgKeyNSNetwork, defNSNetwork)
-	cfg.listen = cfg.in.GetString(cfgSecRescached, "", cfgKeyListen, defListen)
+	err = cfg.parseListen()
+	if err != nil {
+		return nil, err
+	}
+
 	cfg.dirHosts = cfg.in.GetString(cfgSecRescached, "", "dir.hosts", "")
 	cfg.dirMaster = cfg.in.GetString(cfgSecRescached, "", "dir.master", "")
+	cfg.parseDoHPort()
 	cfg.parseTimeout()
 	cfg.parseCachePruneDelay()
 	cfg.parseCacheThreshold()
@@ -97,22 +121,82 @@ func newConfig(file string) (*config, error) {
 }
 
 func (cfg *config) parseNSParent() error {
-	nsParents := defNSParent
+	var nsParents []string
 
 	v, ok := cfg.in.Get(cfgSecRescached, "", cfgKeyNSParent)
 	if ok {
 		nsParents = strings.Split(v, ",")
 	}
+	if cfg.connType == rescached.ConnTypeTCP || cfg.connType == rescached.ConnTypeUDP {
+		nsParents = defNameServers
+	}
 
 	for _, ns := range nsParents {
-		addr, err := libnet.ParseUDPAddr(strings.TrimSpace(ns), defPort)
+		ns := strings.TrimSpace(ns)
+
+		if strings.HasPrefix(ns, "https://") {
+			cfg.dohParents = append(cfg.dohParents, ns)
+			continue
+		}
+
+		addr, err := libnet.ParseUDPAddr(ns, dns.DefaultPort)
 		if err != nil {
 			return err
 		}
+
 		cfg.nsParents = append(cfg.nsParents, addr)
 	}
 
+	if cfg.connType == rescached.ConnTypeDoH {
+		if len(cfg.nsParents) == 0 {
+			cfg.dohParents = defDoHNameServers
+		}
+	}
+
 	return nil
+}
+
+func (cfg *config) parseParentConnection() error {
+	network := cfg.in.GetString(cfgSecRescached, "", cfgKeyNSNetwork, defNSNetwork)
+	network = strings.ToLower(network)
+
+	switch network {
+	case "udp":
+		cfg.connType = rescached.ConnTypeUDP
+	case "tcp":
+		cfg.connType = rescached.ConnTypeTCP
+	case "doh":
+		cfg.connType = rescached.ConnTypeDoH
+	default:
+		err := fmt.Errorf("Invalid network: '%s'", network)
+		return err
+	}
+
+	return nil
+}
+
+func (cfg *config) parseListen() error {
+	listen := cfg.in.GetString(cfgSecRescached, "", cfgKeyListenAddress, defListenAddress)
+
+	ip, port, err := libnet.ParseIPPort(listen, dns.DefaultPort)
+	if err != nil {
+		return err
+	}
+
+	cfg.listenAddress = ip.String()
+	cfg.listenPort = port
+
+	return nil
+}
+
+func (cfg *config) parseDoHPort() {
+	v := cfg.in.GetString(cfgSecRescached, "", cfgKeyTimeout, defPortDoHString)
+	port, err := strconv.Atoi(v)
+	if err != nil {
+		port = int(dns.DefaultDoHPort)
+	}
+
+	cfg.listenDoHPort = uint16(port)
 }
 
 func (cfg *config) parseTimeout() {
@@ -120,7 +204,6 @@ func (cfg *config) parseTimeout() {
 	timeout, err := strconv.Atoi(v)
 	if err != nil {
 		timeout = defTimeout
-		return
 	}
 
 	cfg.timeout = time.Duration(timeout) * time.Second
