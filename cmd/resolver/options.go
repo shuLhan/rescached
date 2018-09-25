@@ -22,6 +22,7 @@ var (
 
 // List of command line usages.
 const (
+	usageDoH        = `Query parent name server over HTTPS`
 	usageNameServer = `Parent name server address, e.g. 192.168.1.1
 without port, 192.168.1.1:53 with port.  Default port is 53.`
 
@@ -37,6 +38,7 @@ type options struct {
 	sqtype  string
 	sqclass string
 
+	doh        bool
 	nameserver string
 	qname      string
 	qtype      uint16
@@ -46,6 +48,7 @@ type options struct {
 func newOptions() (*options, error) {
 	opts := new(options)
 
+	flag.BoolVar(&opts.doh, "doh", false, usageDoH)
 	flag.StringVar(&opts.nameserver, "ns", "", usageNameServer)
 	flag.StringVar(&opts.sqtype, "t", "A", usageType)
 	flag.StringVar(&opts.sqclass, "c", "IN", usageClass)

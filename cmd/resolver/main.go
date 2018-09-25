@@ -21,7 +21,6 @@ const (
 
 var (
 	opts *options
-	cl   *dns.UDPClient
 )
 
 func parseNameServers(nameservers []string) (udpAddrs []*net.UDPAddr) {
@@ -105,8 +104,34 @@ func messagePrint(nameserver string, msg *dns.Message) string {
 	return b.String()
 }
 
-func lookup(qname []byte) *dns.Message {
-	res, err := cl.Lookup(opts.qtype, opts.qclass, qname)
+func lookup(ns string, timeout time.Duration, qname []byte) *dns.Message {
+	var (
+		cl  dns.Client
+		err error
+	)
+	if opts.doh {
+		cl, err = dns.NewDoHClient(ns, true)
+		if err != nil {
+			log.Fatal("! dns.NewDoHClient: ", err)
+		}
+	} else {
+		cl, err = dns.NewUDPClient(ns)
+		if err != nil {
+			log.Fatal("! dns.NewUDPClient: ", err)
+		}
+	}
+	cl.SetTimeout(timeout)
+
+	req := dns.NewMessage()
+	req.Question.Name = qname
+	req.Question.Type = opts.qtype
+	req.Question.Class = opts.qclass
+	_, err = req.Pack()
+	if err != nil {
+		log.Fatal("! Pack:", err)
+	}
+
+	res, err := cl.Query(req, nil)
 	if err != nil {
 		log.Println("! Lookup: ", err)
 		return nil
@@ -157,11 +182,6 @@ func main() {
 		}
 	}
 
-	cl, err = dns.NewUDPClient("")
-	if err != nil {
-		log.Fatal("! dns.NewUDPClient: ", err)
-	}
-
 	var (
 		res        *dns.Message
 		nameserver string
@@ -169,7 +189,7 @@ func main() {
 
 	nsAddrs := parseNameServers(cr.NameServers)
 	queries := populateQueries(cr, string(opts.qname))
-	cl.Timeout = time.Duration(cr.Timeout) * time.Second
+	timeout := time.Duration(cr.Timeout) * time.Second
 
 	fmt.Printf("= resolv.conf: %+v\n", cr)
 
@@ -180,12 +200,16 @@ func main() {
 	for _, qname := range queries {
 		for x := 0; x < cr.Attempts; x++ {
 			for _, addr := range nsAddrs {
-				cl.Addr = addr
-				nameserver = cl.Addr.String()
+				var ns string
+				if opts.doh {
+					ns = fmt.Sprintf("https://%s/dns-query", addr.IP)
+				} else {
+					ns = addr.String()
+				}
 
-				fmt.Printf("> Lookup %s at %s\n", qname, nameserver)
+				fmt.Printf("> Lookup %s at %s\n", qname, ns)
 
-				res = lookup([]byte(qname))
+				res = lookup(ns, timeout, []byte(qname))
 				if res != nil {
 					goto out
 				}
