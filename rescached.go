@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 
 	libbytes "github.com/shuLhan/share/lib/bytes"
 	"github.com/shuLhan/share/lib/dns"
@@ -279,8 +280,15 @@ func (srv *Server) processRequestQueue() {
 			if err != nil {
 				log.Println("! processRequestQueue: WriteToUDP:", err)
 			}
-		} else if req.ChanMessage != nil {
-			req.ChanMessage <- res.message
+
+			dns.FreeRequest(req)
+		} else if req.ResponseWriter != nil {
+			_, err = req.ResponseWriter.Write(res.message.Packet)
+			if err != nil {
+				log.Println("! processRequestQueue: ResponseWriter.Write:", err)
+			}
+			req.ResponseWriter.(http.Flusher).Flush()
+			req.ChanResponded <- true
 		}
 
 		// Ignore update on local caches
@@ -308,6 +316,7 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 			case ConnTypeTCP:
 				cl, err = dns.NewTCPClient(raddr.String())
 				if err != nil {
+					dns.FreeRequest(req)
 					continue
 				}
 
@@ -322,6 +331,7 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 				msg, err = cl.Query(req.Message, nil)
 			}
 			if err != nil {
+				dns.FreeRequest(req)
 				continue
 			}
 
@@ -335,6 +345,7 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 					freeMessage(msg)
 					msg = nil
 				}
+				dns.FreeRequest(req)
 				continue
 			}
 
@@ -350,9 +361,20 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
 					if err != nil {
 						log.Println("! processForwardQueue: Send:", err)
 					}
-				} else if reqs[x].ChanMessage != nil {
-					reqs[x].ChanMessage <- msg
+
+					dns.FreeRequest(reqs[x])
+				} else if reqs[x].ResponseWriter != nil {
+					_, err = req.ResponseWriter.Write(msg.Packet)
+					if err != nil {
+						log.Println("! processRequestQueue: ResponseWriter.Write:", err)
+					}
+					req.ResponseWriter.(http.Flusher).Flush()
+					reqs[x].ChanResponded <- true
+				} else {
+					dns.FreeRequest(reqs[x])
 				}
+
+				reqs[x] = nil
 			}
 
 			srv.cw.addQueue <- msg
