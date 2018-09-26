@@ -68,6 +68,14 @@ When +rescached+ receive query from client it will forward the query to the
 +server.parent+ using default protocol (UDP).
 In case UDP is blocked, you can set this variable to "tcp".
 
+[[server.parent.allow_insecure]]
+==== +server.parent.allow_insecure+
+
+Format:: true | false
+Default:: false
+Description:: If its true, allow insecure TLS connection
+to parent server when connection is "doh".
+
 [[server.listen]]
 ==== +server.listen+
 

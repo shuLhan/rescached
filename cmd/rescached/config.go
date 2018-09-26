@@ -24,18 +24,19 @@ const (
 
 // List of config keys.
 const (
-	cfgKeyCachePruneDelay = "cache.prune_delay"
-	cfgKeyCacheThreshold  = "cache.threshold"
-	cfgKeyDebug           = "debug"
-	cfgKeyFilePID         = "file.pid"
-	cfgKeyFileResolvConf  = "file.resolvconf"
-	cfgKeyFileCert        = "server.file.certificate"
-	cfgKeyFileCertKey     = "server.file.certificate.key"
-	cfgKeyListenAddress   = "server.listen"
-	cfgKeyListenPortDoH   = "server.listen.port.doh"
-	cfgKeyNSNetwork       = "server.parent.connection"
-	cfgKeyNSParent        = "server.parent"
-	cfgKeyTimeout         = "server.timeout"
+	cfgKeyCachePruneDelay     = "cache.prune_delay"
+	cfgKeyCacheThreshold      = "cache.threshold"
+	cfgKeyDebug               = "debug"
+	cfgKeyFilePID             = "file.pid"
+	cfgKeyFileResolvConf      = "file.resolvconf"
+	cfgKeyFileCert            = "server.file.certificate"
+	cfgKeyFileCertKey         = "server.file.certificate.key"
+	cfgKeyListenAddress       = "server.listen"
+	cfgKeyListenPortDoH       = "server.listen.port.doh"
+	cfgKeyParentAllowInsecure = "server.parent.allow_insecure"
+	cfgKeyNSNetwork           = "server.parent.connection"
+	cfgKeyNSParent            = "server.parent"
+	cfgKeyTimeout             = "server.timeout"
 )
 
 // List of default values.
@@ -59,23 +60,24 @@ var (
 )
 
 type config struct {
-	connType        int
-	filePID         string
-	fileResolvConf  string
-	fileDoHCert     string
-	fileDoHCertKey  string
-	nsParents       []*net.UDPAddr
-	dohParents      []string
-	listenAddress   string
-	listenPort      uint16
-	listenDoHPort   uint16
-	timeout         time.Duration
-	dirHosts        string
-	dirMaster       string
-	cachePruneDelay time.Duration
-	cacheThreshold  time.Duration
-	debugLevel      byte
-	in              *ini.Ini
+	connType         int
+	filePID          string
+	fileResolvConf   string
+	fileDoHCert      string
+	fileDoHCertKey   string
+	nsParents        []*net.UDPAddr
+	dohParents       []string
+	dohAllowInsecure bool
+	listenAddress    string
+	listenPort       uint16
+	listenDoHPort    uint16
+	timeout          time.Duration
+	dirHosts         string
+	dirMaster        string
+	cachePruneDelay  time.Duration
+	cacheThreshold   time.Duration
+	debugLevel       byte
+	in               *ini.Ini
 }
 
 func newConfig(file string) (*config, error) {
@@ -92,6 +94,7 @@ func newConfig(file string) (*config, error) {
 	cfg.fileResolvConf = cfg.in.GetString(cfgSecRescached, "", cfgKeyFileResolvConf, "")
 	cfg.fileDoHCert = cfg.in.GetString(cfgSecRescached, "", cfgKeyFileCert, "")
 	cfg.fileDoHCertKey = cfg.in.GetString(cfgSecRescached, "", cfgKeyFileCertKey, "")
+	cfg.dohAllowInsecure = cfg.in.GetBool(cfgSecRescached, "", cfgKeyParentAllowInsecure, false)
 
 	err = cfg.parseParentConnection()
 	if err != nil {

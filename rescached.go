@@ -171,12 +171,13 @@ func (srv *Server) Start() (err error) {
 	go srv.processRequestQueue()
 
 	serverOptions := &dns.ServerOptions{
-		IPAddress:   srv.opts.ListenAddress,
-		UDPPort:     srv.opts.ListenPort,
-		TCPPort:     srv.opts.ListenPort,
-		DoHPort:     srv.opts.ListenDoHPort,
-		DoHCertFile: srv.opts.FileCert,
-		DoHKeyFile:  srv.opts.FileCertKey,
+		IPAddress:        srv.opts.ListenAddress,
+		UDPPort:          srv.opts.ListenPort,
+		TCPPort:          srv.opts.ListenPort,
+		DoHPort:          srv.opts.ListenDoHPort,
+		DoHCertFile:      srv.opts.FileCert,
+		DoHKeyFile:       srv.opts.FileCertKey,
+		DoHAllowInsecure: srv.opts.DoHAllowInsecure,
 	}
 
 	err = srv.dnsServer.ListenAndServe(serverOptions)
@@ -215,7 +216,7 @@ func (srv *Server) runForwarders() (err error) {
 		case ConnTypeDoH:
 			dohIdx := x % len(srv.opts.DoHParents)
 			dohAddr := srv.opts.DoHParents[dohIdx]
-			cl, err = dns.NewDoHClient(dohAddr, false)
+			cl, err = dns.NewDoHClient(dohAddr, srv.opts.DoHAllowInsecure)
 			if err != nil {
 				log.Fatal("processForwardQueue: NewDoHClient:", err)
 				return

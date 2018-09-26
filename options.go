@@ -17,15 +17,16 @@ const (
 )
 
 type Options struct {
-	ListenAddress   string
-	ListenPort      uint16
-	ListenDoHPort   uint16
-	ConnType        int
-	NSParents       []*net.UDPAddr
-	DoHParents      []string
-	CachePruneDelay time.Duration
-	CacheThreshold  time.Duration
-	FileResolvConf  string
-	FileCert        string
-	FileCertKey     string
+	ListenAddress    string
+	ListenPort       uint16
+	ListenDoHPort    uint16
+	ConnType         int
+	NSParents        []*net.UDPAddr
+	DoHParents       []string
+	DoHAllowInsecure bool
+	CachePruneDelay  time.Duration
+	CacheThreshold   time.Duration
+	FileResolvConf   string
+	FileCert         string
+	FileCertKey      string
 }
