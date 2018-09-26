@@ -148,7 +148,7 @@ func (cfg *config) parseNSParent() error {
 	}
 
 	if cfg.connType == rescached.ConnTypeDoH {
-		if len(cfg.nsParents) == 0 {
+		if len(cfg.dohParents) == 0 {
 			cfg.dohParents = defDoHNameServers
 		}
 	}
