@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
 )
 
@@ -56,7 +57,7 @@ func (res *response) checkExpiration() bool {
 	res.receivedAt = timeNow
 
 	if res.message.IsExpired(elapSeconds) {
-		if DebugLevel >= 1 {
+		if debug.Value >= 1 {
 			fmt.Printf("- expired: %4d %10d %s\n", elapSeconds,
 				res.receivedAt, res.message.Question)
 		}

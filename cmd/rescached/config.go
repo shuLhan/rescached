@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
 	"github.com/shuLhan/share/lib/ini"
 	libnet "github.com/shuLhan/share/lib/net"
@@ -78,7 +79,6 @@ type config struct {
 	dirMaster        string
 	cachePruneDelay  time.Duration
 	cacheThreshold   time.Duration
-	debugLevel       byte
 	in               *ini.Ini
 }
 
@@ -284,10 +284,10 @@ func (cfg *config) parseDebugLevel() {
 		return
 	}
 
-	debug, err := strconv.Atoi(v)
+	var err error
+
+	debug.Value, err = strconv.Atoi(v)
 	if err != nil {
 		return
 	}
-
-	cfg.debugLevel = byte(debug)
 }

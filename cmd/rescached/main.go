@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/shuLhan/rescached-go"
+	"github.com/shuLhan/share/lib/debug"
 )
 
 const (
@@ -36,12 +37,11 @@ func createRescachedServer(fileConfig string) {
 		log.Fatal(err)
 	}
 
-	if cfg.debugLevel >= 1 {
+	if debug.Value >= 1 {
 		fmt.Printf("= config: %+v\n", cfg)
 	}
 
 	_filePID = cfg.filePID
-	rescached.DebugLevel = cfg.debugLevel
 
 	opts := &rescached.Options{
 		ConnType:        cfg.connType,

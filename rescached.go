@@ -14,6 +14,7 @@ import (
 	"net/http"
 
 	libbytes "github.com/shuLhan/share/lib/bytes"
+	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
 	libio "github.com/shuLhan/share/lib/io"
 	libnet "github.com/shuLhan/share/lib/net"
@@ -22,10 +23,6 @@ import (
 const (
 	_maxQueue     = 512
 	_maxForwarder = 4
-)
-
-var (
-	DebugLevel byte = 0
 )
 
 // List of error messages.
@@ -244,7 +241,7 @@ func (srv *Server) processRequestQueue() {
 	var err error
 
 	for req := range srv.reqQueue {
-		if DebugLevel >= 1 {
+		if debug.Value >= 1 {
 			fmt.Printf("< request: %4d %10c %s\n", req.Kind, '-', req.Message.Question)
 		}
 
@@ -321,7 +318,7 @@ func (srv *Server) processRequestQueue() {
 
 		// Ignore update on local caches
 		if res.receivedAt == 0 {
-			if DebugLevel >= 1 {
+			if debug.Value >= 1 {
 				fmt.Printf("= local  : %s\n", res.message.Question)
 			}
 			continue

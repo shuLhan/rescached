@@ -10,6 +10,7 @@ import (
 	"time"
 
 	libbytes "github.com/shuLhan/share/lib/bytes"
+	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
 )
 
@@ -100,7 +101,7 @@ func (cw *cacheWorker) add(msg *dns.Message, isLocal bool) bool {
 			cw.cachesList.push(res)
 		}
 
-		if DebugLevel >= 1 && !isLocal {
+		if debug.Value >= 1 && !isLocal {
 			fmt.Printf("+ caching: %4d %10d %s\n",
 				cw.cachesList.length(), res.accessedAt,
 				res.message.Question)
@@ -119,7 +120,7 @@ func (cw *cacheWorker) add(msg *dns.Message, isLocal bool) bool {
 	if !isLocal {
 		cw.cachesList.fix(res)
 
-		if DebugLevel >= 1 {
+		if debug.Value >= 1 {
 			fmt.Printf("+ update : %4c %10d %s\n", '-', res.accessedAt,
 				res.message.Question)
 		}
@@ -131,7 +132,7 @@ func (cw *cacheWorker) add(msg *dns.Message, isLocal bool) bool {
 func (cw *cacheWorker) update(res *response) {
 	cw.cachesList.fix(res)
 
-	if DebugLevel >= 1 {
+	if debug.Value >= 1 {
 		fmt.Printf("= cache  : %4d %10d %s\n", cw.cachesList.length(),
 			res.accessedAt, res.message.Question)
 	}
