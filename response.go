@@ -6,6 +6,7 @@ package rescached
 
 import (
 	"container/list"
+	"fmt"
 	"sync/atomic"
 	"time"
 
@@ -55,6 +56,11 @@ func (res *response) checkExpiration() bool {
 	res.receivedAt = timeNow
 
 	if res.message.IsExpired(elapSeconds) {
+		if DebugLevel >= 1 {
+			fmt.Printf("- expired: %4d %10d %s\n", elapSeconds,
+				res.receivedAt, res.message.Question)
+		}
+
 		return true
 	}
 

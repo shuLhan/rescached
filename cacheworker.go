@@ -120,7 +120,7 @@ func (cw *cacheWorker) add(msg *dns.Message, isLocal bool) bool {
 		cw.cachesList.fix(res)
 
 		if DebugLevel >= 1 {
-			fmt.Printf("+ update : %10d %s\n", res.accessedAt,
+			fmt.Printf("+ update : %4c %10d %s\n", '-', res.accessedAt,
 				res.message.Question)
 		}
 	}

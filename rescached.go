@@ -245,7 +245,7 @@ func (srv *Server) processRequestQueue() {
 
 	for req := range srv.reqQueue {
 		if DebugLevel >= 1 {
-			fmt.Printf("< request: %s\n", req.Message.Question)
+			fmt.Printf("< request: %4d %10c %s\n", req.Kind, '-', req.Message.Question)
 		}
 
 		// Check if request query name exist in cache.
