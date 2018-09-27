@@ -44,18 +44,19 @@ func createRescachedServer(fileConfig string) {
 	rescached.DebugLevel = cfg.debugLevel
 
 	opts := &rescached.Options{
-		ConnType:         cfg.connType,
-		ListenAddress:    cfg.listenAddress,
-		ListenPort:       cfg.listenPort,
-		ListenDoHPort:    cfg.listenDoHPort,
-		NSParents:        cfg.nsParents,
+		ConnType:        cfg.connType,
+		ListenAddress:   cfg.listenAddress,
+		ListenPort:      cfg.listenPort,
+		NSParents:       cfg.nsParents,
+		CachePruneDelay: cfg.cachePruneDelay,
+		CacheThreshold:  cfg.cacheThreshold,
+		FileResolvConf:  cfg.fileResolvConf,
+
+		DoHPort:          cfg.listenDoHPort,
 		DoHParents:       cfg.dohParents,
 		DoHAllowInsecure: cfg.dohAllowInsecure,
-		CachePruneDelay:  cfg.cachePruneDelay,
-		CacheThreshold:   cfg.cacheThreshold,
-		FileResolvConf:   cfg.fileResolvConf,
-		FileCert:         cfg.fileDoHCert,
-		FileCertKey:      cfg.fileDoHCertKey,
+		DoHCert:          cfg.fileDoHCert,
+		DoHCertKey:       cfg.fileDoHCertKey,
 	}
 
 	rcd, err = rescached.New(opts)

@@ -57,6 +57,7 @@ This will make +rescached+ caching a false data.
 To check if your parent server reply the unknown host-name with no answer, use
 *resolver*(1) tool.
 
+
 [[server.parent.connection]]
 ==== +server.parent.connection+
 
@@ -68,13 +69,6 @@ When +rescached+ receive query from client it will forward the query to the
 +server.parent+ using default protocol (UDP).
 In case UDP is blocked, you can set this variable to "tcp".
 
-[[server.parent.allow_insecure]]
-==== +server.parent.allow_insecure+
-
-Format:: true | false
-Default:: false
-Description:: If its true, allow insecure TLS connection
-to parent server when connection is "doh".
 
 [[server.listen]]
 ==== +server.listen+
@@ -85,6 +79,51 @@ Description:: 	Address in local network where +rescached+ will listening for
 query from client.
 If you want rescached to serve a query from another host in your local
 network, change this value to +0.0.0.0:53+.
+
+
+[[server.doh.parent]]
+==== +server.doh.parent+
+
+Format:: https://<domain-name>/dns-query, ...
+Default:: https://cloudflare-dns.com/dns-query
+Description:: List of parent DNS over HTTPS (DoH), separated by commas.
+To be able to use DNS over HTTPS, rescached must also run DoH server.
+That means, DoH certificate and private key files must not be empties.
+
+Only queries from DoH server will be forwarded to the parent DoH name server,
+other queries (from UDP or TCP) will be forwarded to +server.parent+.
+
+[[server.doh.allow_insecure]]
+==== +server.doh.allow_insecure+
+
+Format:: true | false
+Default:: false
+Description:: If its true, allow insecure TLS connection to parent DoH server.
+
+
+[[server.doh.certificate]]
+==== +server.doh.certificate+
+
+Format:: /path/to/file
+Default:: (empty)
+Description:: Path to certificate file to serve DNS over HTTPS.
+
+
+[[server.doh.certificate.key]]
+==== +server.doh.certificate.key+
+
+Format:: /path/to/file
+Default:: (empty)
+Description:: Path to certificate private key file to serve DNS over HTTPS.
+
+
+[[server.doh.listen.port]]
+==== +server.doh.listen.port+
+
+Format:: Number
+Default:: 443
+Description:: Port to serve DNS over HTTPS.
+
 
 [[server.timeout]]
 ==== +server.timeout+

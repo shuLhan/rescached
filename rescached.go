@@ -35,13 +35,14 @@ var (
 
 // Server implement caching DNS server.
 type Server struct {
-	dnsServer *dns.Server
-	nsParents []*net.UDPAddr
-	reqQueue  chan *dns.Request
-	fwQueue   chan *dns.Request
-	fwStop    chan bool
-	cw        *cacheWorker
-	opts      *Options
+	dnsServer  *dns.Server
+	nsParents  []*net.UDPAddr
+	reqQueue   chan *dns.Request
+	fwQueue    chan *dns.Request
+	fwDoHQueue chan *dns.Request
+	fwStop     chan bool
+	cw         *cacheWorker
+	opts       *Options
 }
 
 //
@@ -49,23 +50,22 @@ type Server struct {
 //
 func New(opts *Options) (*Server, error) {
 	srv := &Server{
-		dnsServer: new(dns.Server),
-		reqQueue:  make(chan *dns.Request, _maxQueue),
-		fwQueue:   make(chan *dns.Request, _maxQueue),
-		fwStop:    make(chan bool),
-		cw:        newCacheWorker(opts.CachePruneDelay, opts.CacheThreshold),
-		opts:      opts,
+		dnsServer:  new(dns.Server),
+		reqQueue:   make(chan *dns.Request, _maxQueue),
+		fwQueue:    make(chan *dns.Request, _maxQueue),
+		fwDoHQueue: make(chan *dns.Request, _maxQueue),
+		fwStop:     make(chan bool),
+		cw:         newCacheWorker(opts.CachePruneDelay, opts.CacheThreshold),
+		opts:       opts,
 	}
 
-	if opts.ConnType != ConnTypeDoH && len(opts.FileResolvConf) > 0 {
-		err := srv.loadResolvConf()
-		if err != nil {
-			log.Printf("! loadResolvConf: %s\n", err)
-			srv.nsParents = srv.opts.NSParents
-		}
+	err := srv.loadResolvConf()
+	if err != nil {
+		log.Printf("! loadResolvConf: %s\n", err)
+		srv.nsParents = srv.opts.NSParents
+	} else {
+		fmt.Printf("= Name servers fallback: %v\n", srv.opts.NSParents)
 	}
-
-	fmt.Printf("= Name servers fallback: %v\n", srv.opts.NSParents)
 
 	srv.dnsServer.Handler = srv
 
@@ -154,19 +154,22 @@ func (srv *Server) Start() (err error) {
 	fmt.Printf("= Listening on '%s:%d'\n", srv.opts.ListenAddress,
 		srv.opts.ListenPort)
 
-	if len(srv.opts.FileCert) > 0 && len(srv.opts.FileCertKey) > 0 {
-		fmt.Printf("= Listening on DoH '%s:%d'\n",
-			srv.opts.ListenAddress, srv.opts.ListenDoHPort)
-	}
-
 	err = srv.runForwarders()
 	if err != nil {
 		return
 	}
 
-	if srv.opts.ConnType != ConnTypeDoH && len(srv.opts.FileResolvConf) > 0 {
-		go srv.watchResolvConf()
+	if len(srv.opts.DoHCert) > 0 && len(srv.opts.DoHCertKey) > 0 {
+		fmt.Printf("= DoH listening on '%s:%d'\n",
+			srv.opts.ListenAddress, srv.opts.DoHPort)
+
+		err = srv.runDoHForwarders()
+		if err != nil {
+			return
+		}
 	}
+
+	go srv.watchResolvConf()
 
 	go srv.cw.start()
 	go srv.processRequestQueue()
@@ -175,9 +178,9 @@ func (srv *Server) Start() (err error) {
 		IPAddress:        srv.opts.ListenAddress,
 		UDPPort:          srv.opts.ListenPort,
 		TCPPort:          srv.opts.ListenPort,
-		DoHPort:          srv.opts.ListenDoHPort,
-		DoHCertFile:      srv.opts.FileCert,
-		DoHKeyFile:       srv.opts.FileCertKey,
+		DoHPort:          srv.opts.DoHPort,
+		DoHCert:          srv.opts.DoHCert,
+		DoHCertKey:       srv.opts.DoHCertKey,
 		DoHAllowInsecure: srv.opts.DoHAllowInsecure,
 	}
 
@@ -189,13 +192,10 @@ func (srv *Server) Start() (err error) {
 func (srv *Server) runForwarders() (err error) {
 	max := _maxForwarder
 
-	if srv.opts.ConnType == ConnTypeDoH {
-		fmt.Printf("= Name servers: %v\n", srv.opts.DoHParents)
-	} else {
-		fmt.Printf("= Name servers: %v\n", srv.nsParents)
-		if len(srv.nsParents) > max {
-			max = len(srv.nsParents)
-		}
+	fmt.Printf("= Name servers: %v\n", srv.nsParents)
+
+	if len(srv.nsParents) > max {
+		max = len(srv.nsParents)
 	}
 
 	for x := 0; x < max; x++ {
@@ -204,22 +204,13 @@ func (srv *Server) runForwarders() (err error) {
 			raddr *net.UDPAddr
 		)
 
-		switch srv.opts.ConnType {
-		case ConnTypeUDP:
-			nsIdx := x % len(srv.nsParents)
-			raddr = srv.nsParents[nsIdx]
+		nsIdx := x % len(srv.nsParents)
+		raddr = srv.nsParents[nsIdx]
+
+		if srv.opts.ConnType == dns.ConnTypeUDP {
 			cl, err = dns.NewUDPClient(raddr.String())
 			if err != nil {
 				log.Fatal("processForwardQueue: NewUDPClient:", err)
-				return
-			}
-
-		case ConnTypeDoH:
-			dohIdx := x % len(srv.opts.DoHParents)
-			dohAddr := srv.opts.DoHParents[dohIdx]
-			cl, err = dns.NewDoHClient(dohAddr, srv.opts.DoHAllowInsecure)
-			if err != nil {
-				log.Fatal("processForwardQueue: NewDoHClient:", err)
 				return
 			}
 		}
@@ -227,6 +218,22 @@ func (srv *Server) runForwarders() (err error) {
 		go srv.processForwardQueue(cl, raddr)
 	}
 	return
+}
+
+func (srv *Server) runDoHForwarders() error {
+	fmt.Printf("= DoH name servers: %v\n", srv.opts.DoHParents)
+
+	for x := 0; x < len(srv.opts.DoHParents); x++ {
+		cl, err := dns.NewDoHClient(srv.opts.DoHParents[x], srv.opts.DoHAllowInsecure)
+		if err != nil {
+			log.Fatal("processForwardQueue: NewDoHClient:", err)
+			return err
+		}
+
+		go srv.processDoHForwardQueue(cl)
+	}
+
+	return nil
 }
 
 func (srv *Server) stopForwarders() {
@@ -253,15 +260,15 @@ func (srv *Server) processRequestQueue() {
 				continue
 			}
 
-			srv.fwQueue <- req
+			if req.Kind == dns.ConnTypeDoH {
+				srv.fwDoHQueue <- req
+			} else {
+				srv.fwQueue <- req
+			}
 			continue
 		}
 
 		if res.checkExpiration() {
-			if DebugLevel >= 1 {
-				fmt.Printf("- expired: %s\n", res.message.Question)
-			}
-
 			// Check and/or push if the same request already
 			// forwarded before.
 			dup := srv.cw.cachesRequest.push(qname, req)
@@ -269,26 +276,47 @@ func (srv *Server) processRequestQueue() {
 				continue
 			}
 
-			srv.fwQueue <- req
+			if req.Kind == dns.ConnTypeDoH {
+				srv.fwDoHQueue <- req
+			} else {
+				srv.fwQueue <- req
+			}
 			continue
 		}
 
 		res.message.SetID(req.Message.Header.ID)
 
-		if req.Sender != nil {
-			_, err = req.Sender.Send(res.message, req.UDPAddr)
-			if err != nil {
-				log.Println("! processRequestQueue: WriteToUDP:", err)
+		switch req.Kind {
+		case dns.ConnTypeUDP:
+			if req.Sender != nil {
+				_, err = req.Sender.Send(res.message, req.UDPAddr)
+				if err != nil {
+					log.Println("! processRequestQueue: Sender.Send:", err)
+				}
+			}
+			dns.FreeRequest(req)
+
+		case dns.ConnTypeTCP:
+			if req.Sender != nil {
+				_, err = req.Sender.Send(res.message, nil)
+				if err != nil {
+					log.Println("! processRequestQueue: Sender.Send:", err)
+				}
+			}
+			dns.FreeRequest(req)
+
+		case dns.ConnTypeDoH:
+			if req.ResponseWriter != nil {
+				_, err = req.ResponseWriter.Write(res.message.Packet)
+				if err != nil {
+					log.Println("! processRequestQueue: ResponseWriter.Write:", err)
+				}
+				req.ResponseWriter.(http.Flusher).Flush()
+				req.ChanResponded <- true
 			}
 
+		default:
 			dns.FreeRequest(req)
-		} else if req.ResponseWriter != nil {
-			_, err = req.ResponseWriter.Write(res.message.Packet)
-			if err != nil {
-				log.Println("! processRequestQueue: ResponseWriter.Write:", err)
-			}
-			req.ResponseWriter.(http.Flusher).Flush()
-			req.ChanResponded <- true
 		}
 
 		// Ignore update on local caches
@@ -304,85 +332,116 @@ func (srv *Server) processRequestQueue() {
 }
 
 func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
-	var (
-		err error
-		msg *dns.Message
-	)
 	for {
 		select {
 		case req := <-srv.fwQueue:
-			ok := false
+			var (
+				err error
+				res *dns.Message
+			)
+
 			switch srv.opts.ConnType {
-			case ConnTypeTCP:
+			case dns.ConnTypeUDP:
+				res, err = cl.Query(req.Message, raddr)
+
+			case dns.ConnTypeTCP:
 				cl, err = dns.NewTCPClient(raddr.String())
 				if err != nil {
 					dns.FreeRequest(req)
 					continue
 				}
 
-				msg, err = cl.Query(req.Message, nil)
+				res, err = cl.Query(req.Message, nil)
 
 				cl.Close()
-
-			case ConnTypeUDP:
-				msg, err = cl.Query(req.Message, raddr)
-
-			case ConnTypeDoH:
-				msg, err = cl.Query(req.Message, nil)
 			}
 			if err != nil {
 				dns.FreeRequest(req)
 				continue
 			}
 
-			if bytes.Equal(req.Message.Question.Name, msg.Question.Name) {
-				if req.Message.Question.Type == msg.Question.Type {
-					ok = true
-				}
-			}
-			if !ok {
-				if msg != nil {
-					freeMessage(msg)
-					msg = nil
-				}
-				dns.FreeRequest(req)
-				continue
-			}
-
-			qname := string(req.Message.Question.Name)
-			reqs := srv.cw.cachesRequest.pops(qname,
-				req.Message.Question.Type, req.Message.Question.Class)
-
-			for x := 0; x < len(reqs); x++ {
-				msg.SetID(reqs[x].Message.Header.ID)
-
-				if reqs[x].Sender != nil {
-					_, err = reqs[x].Sender.Send(msg, reqs[x].UDPAddr)
-					if err != nil {
-						log.Println("! processForwardQueue: Send:", err)
-					}
-
-					dns.FreeRequest(reqs[x])
-				} else if reqs[x].ResponseWriter != nil {
-					_, err = req.ResponseWriter.Write(msg.Packet)
-					if err != nil {
-						log.Println("! processRequestQueue: ResponseWriter.Write:", err)
-					}
-					req.ResponseWriter.(http.Flusher).Flush()
-					reqs[x].ChanResponded <- true
-				} else {
-					dns.FreeRequest(reqs[x])
-				}
-
-				reqs[x] = nil
-			}
-
-			srv.cw.addQueue <- msg
+			srv.processForwardResponse(req, res)
 
 		case <-srv.fwStop:
 			return
 		}
 	}
+}
+
+func (srv *Server) processDoHForwardQueue(cl *dns.DoHClient) {
+	for {
+		select {
+		case req := <-srv.fwDoHQueue:
+			res, err := cl.Query(req.Message, nil)
+			if err != nil {
+				dns.FreeRequest(req)
+				continue
+			}
+
+			srv.processForwardResponse(req, res)
+		}
+	}
+}
+
+func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
+	var ok bool
+
+	if bytes.Equal(req.Message.Question.Name, res.Question.Name) {
+		if req.Message.Question.Type == res.Question.Type {
+			ok = true
+		}
+	}
+	if !ok {
+		if res != nil {
+			freeMessage(res)
+		}
+		dns.FreeRequest(req)
+		return
+	}
+
+	qname := string(req.Message.Question.Name)
+	reqs := srv.cw.cachesRequest.pops(qname, req.Message.Question.Type, req.Message.Question.Class)
+
+	for x := 0; x < len(reqs); x++ {
+		res.SetID(reqs[x].Message.Header.ID)
+
+		switch reqs[x].Kind {
+		case dns.ConnTypeUDP:
+			if reqs[x].Sender != nil {
+				_, err := reqs[x].Sender.Send(res, reqs[x].UDPAddr)
+				if err != nil {
+					log.Println("! processForwardQueue: Send:", err)
+				}
+			}
+			dns.FreeRequest(reqs[x])
+
+		case dns.ConnTypeTCP:
+			if reqs[x].Sender != nil {
+				_, err := reqs[x].Sender.Send(res, nil)
+				if err != nil {
+					log.Println("! processForwardQueue: Send:", err)
+				}
+			}
+			dns.FreeRequest(reqs[x])
+
+		case dns.ConnTypeDoH:
+			if reqs[x].ResponseWriter != nil {
+				_, err := req.ResponseWriter.Write(res.Packet)
+				if err != nil {
+					log.Println("! processRequestQueue: ResponseWriter.Write:", err)
+				}
+				req.ResponseWriter.(http.Flusher).Flush()
+				reqs[x].ChanResponded <- true
+			}
+
+		default:
+			dns.FreeRequest(reqs[x])
+		}
+
+		reqs[x] = nil
+	}
+
+	srv.cw.addQueue <- res
 }
 
 func (srv *Server) watchResolvConf() {

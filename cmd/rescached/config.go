@@ -7,11 +7,11 @@ package main
 import (
 	"fmt"
 	"net"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/shuLhan/rescached-go"
 	"github.com/shuLhan/share/lib/dns"
 	"github.com/shuLhan/share/lib/ini"
 	libnet "github.com/shuLhan/share/lib/net"
@@ -24,19 +24,21 @@ const (
 
 // List of config keys.
 const (
-	cfgKeyCachePruneDelay     = "cache.prune_delay"
-	cfgKeyCacheThreshold      = "cache.threshold"
-	cfgKeyDebug               = "debug"
-	cfgKeyFilePID             = "file.pid"
-	cfgKeyFileResolvConf      = "file.resolvconf"
-	cfgKeyFileCert            = "server.file.certificate"
-	cfgKeyFileCertKey         = "server.file.certificate.key"
-	cfgKeyListenAddress       = "server.listen"
-	cfgKeyListenPortDoH       = "server.listen.port.doh"
-	cfgKeyParentAllowInsecure = "server.parent.allow_insecure"
-	cfgKeyNSNetwork           = "server.parent.connection"
-	cfgKeyNSParent            = "server.parent"
-	cfgKeyTimeout             = "server.timeout"
+	cfgKeyCachePruneDelay = "cache.prune_delay"
+	cfgKeyCacheThreshold  = "cache.threshold"
+	cfgKeyDebug           = "debug"
+	cfgKeyFilePID         = "file.pid"
+	cfgKeyFileResolvConf  = "file.resolvconf"
+	cfgKeyListenAddress   = "server.listen"
+	cfgKeyNSNetwork       = "server.parent.connection"
+	cfgKeyNSParent        = "server.parent"
+	cfgKeyTimeout         = "server.timeout"
+
+	cfgKeyDoHAllowInsecure = "server.doh.allow_insecure"
+	cfgKeyDoHCert          = "server.doh.certificate"
+	cfgKeyDoHCertKey       = "server.doh.certificate.key"
+	cfgKeyDoHListenPort    = "server.doh.listen.port"
+	cfgKeyDoHParent        = "server.doh.parent"
 )
 
 // List of default values.
@@ -55,7 +57,7 @@ const (
 var (
 	defNameServers    = []string{"8.8.8.8:53", "8.8.4.4:53"}
 	defDoHNameServers = []string{
-		"https://1.1.1.1/dns-query",
+		"https://cloudflare-dns.com/dns-query",
 	}
 )
 
@@ -92,9 +94,9 @@ func newConfig(file string) (*config, error) {
 
 	cfg.filePID = cfg.in.GetString(cfgSecRescached, "", cfgKeyFilePID, defFilePID)
 	cfg.fileResolvConf = cfg.in.GetString(cfgSecRescached, "", cfgKeyFileResolvConf, "")
-	cfg.fileDoHCert = cfg.in.GetString(cfgSecRescached, "", cfgKeyFileCert, "")
-	cfg.fileDoHCertKey = cfg.in.GetString(cfgSecRescached, "", cfgKeyFileCertKey, "")
-	cfg.dohAllowInsecure = cfg.in.GetBool(cfgSecRescached, "", cfgKeyParentAllowInsecure, false)
+	cfg.fileDoHCert = cfg.in.GetString(cfgSecRescached, "", cfgKeyDoHCert, "")
+	cfg.fileDoHCertKey = cfg.in.GetString(cfgSecRescached, "", cfgKeyDoHCertKey, "")
+	cfg.dohAllowInsecure = cfg.in.GetBool(cfgSecRescached, "", cfgKeyDoHAllowInsecure, false)
 
 	err = cfg.parseParentConnection()
 	if err != nil {
@@ -102,6 +104,11 @@ func newConfig(file string) (*config, error) {
 	}
 
 	err = cfg.parseNSParent()
+	if err != nil {
+		return nil, err
+	}
+
+	err = cfg.parseDoHParent()
 	if err != nil {
 		return nil, err
 	}
@@ -130,17 +137,12 @@ func (cfg *config) parseNSParent() error {
 	if ok {
 		nsParents = strings.Split(v, ",")
 	}
-	if cfg.connType == rescached.ConnTypeTCP || cfg.connType == rescached.ConnTypeUDP {
+	if len(nsParents) == 0 {
 		nsParents = defNameServers
 	}
 
 	for _, ns := range nsParents {
 		ns := strings.TrimSpace(ns)
-
-		if strings.HasPrefix(ns, "https://") {
-			cfg.dohParents = append(cfg.dohParents, ns)
-			continue
-		}
 
 		addr, err := libnet.ParseUDPAddr(ns, dns.DefaultPort)
 		if err != nil {
@@ -150,13 +152,35 @@ func (cfg *config) parseNSParent() error {
 		cfg.nsParents = append(cfg.nsParents, addr)
 	}
 
-	if cfg.connType == rescached.ConnTypeDoH {
-		if len(cfg.dohParents) == 0 {
-			cfg.dohParents = defDoHNameServers
-		}
+	return nil
+}
+
+func (cfg *config) parseDoHParent() (err error) {
+	var dohParents []string
+
+	v, ok := cfg.in.Get(cfgSecRescached, "", cfgKeyDoHParent)
+	if ok {
+		dohParents = strings.Split(v, ",")
+	}
+	if len(dohParents) == 0 {
+		dohParents = defDoHNameServers
 	}
 
-	return nil
+	for _, ns := range dohParents {
+		ns := strings.TrimSpace(ns)
+
+		if !strings.HasPrefix(ns, "https://") {
+			continue
+		}
+		_, err = url.Parse(ns)
+		if err != nil {
+			return
+		}
+
+		cfg.dohParents = append(cfg.dohParents, ns)
+	}
+
+	return
 }
 
 func (cfg *config) parseParentConnection() error {
@@ -165,11 +189,9 @@ func (cfg *config) parseParentConnection() error {
 
 	switch network {
 	case "udp":
-		cfg.connType = rescached.ConnTypeUDP
+		cfg.connType = dns.ConnTypeUDP
 	case "tcp":
-		cfg.connType = rescached.ConnTypeTCP
-	case "doh":
-		cfg.connType = rescached.ConnTypeDoH
+		cfg.connType = dns.ConnTypeTCP
 	default:
 		err := fmt.Errorf("Invalid network: '%s'", network)
 		return err

@@ -9,24 +9,18 @@ import (
 	"time"
 )
 
-// List of known parent connection type.
-const (
-	ConnTypeUDP int = 1
-	ConnTypeTCP int = 2
-	ConnTypeDoH int = 4
-)
-
 type Options struct {
-	ListenAddress    string
-	ListenPort       uint16
-	ListenDoHPort    uint16
-	ConnType         int
-	NSParents        []*net.UDPAddr
+	ListenAddress   string
+	ListenPort      uint16
+	ConnType        int
+	NSParents       []*net.UDPAddr
+	CachePruneDelay time.Duration
+	CacheThreshold  time.Duration
+	FileResolvConf  string
+
+	DoHPort          uint16
 	DoHParents       []string
 	DoHAllowInsecure bool
-	CachePruneDelay  time.Duration
-	CacheThreshold   time.Duration
-	FileResolvConf   string
-	FileCert         string
-	FileCertKey      string
+	DoHCert          string
+	DoHCertKey       string
 }
