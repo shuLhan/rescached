@@ -2,7 +2,7 @@ RESCACHED(1)
 ============
 :doctype: manpage
 :man source: rescached
-:man version: 2018.09.11
+:man version: 2018.09.29
 :man manual: rescached
 
 
@@ -43,10 +43,12 @@ List of current features,
 - Load and serve addresses and hostnames in +/etc/hosts+
 - Load and serve hosts formated files inside directory
   +/etc/rescached/hosts.d/+
-- Blocking ads and/or malicious websites through list in
+- Blocking ads and/or malicious websites through host list in
   +/etc/rescached/hosts.d/hosts.block+
-- Load and serve master file format in +/etc/rescached/master.d+
+- Support loading and serving master (zone) file format from
+  +/etc/rescached/master.d+
 - Integration with openresolv
+- Support DNS over HTTPS (DoH) (draft 14)
 
 
 === BEHIND THE DNS
@@ -130,7 +132,7 @@ If the accessed-at value of record in cache is less than,
 	current-time + cache.threshold
 ----
 
-(remember than +cache.threshold+ value must be negative) it will remove the
+(remember that "+cache.threshold+" value must be negative) it will remove the
 record from cache.
 
 
@@ -277,6 +279,41 @@ either "dnsmasq_resolv", "pdnsd_resolv", or "unbound_conf" in
 For more information see  *rescached.cfg*(5).
 
 
+=== INTEGRATION WITH DNS OVER HTTPS
+
+DNS over HTTPS (DoH) is the new protocol to query DNS through HTTPS layer.
+To enable this feature rescached must run as DoH server using the provided
+self-signed certificate or your own certificate.
+
+Example configuration in *rescached.cfg*,
+
+----
+	server.doh.parent = https://cloudflare-dns.com/dns-query
+	server.doh.certificate = /etc/rescached/cert.crt
+	server.doh.certificate.key = /etc/rescached/cert.key
+----
+
+If the "server.doh.parent" is using self-signed certificate, you can set
+"server.doh.allow_insecure" to true.
+
+Using the above configuration, rescached will serve DoH queries on
+*https://127.0.0.1/dns-query*.
+Only query to port 443 will be forwarded to "+server.doh.parent+".
+Queries to port 53, either with UDP or TCP, will be forwarded to
+"+server.parent+" name servers as usual.
+
+This feature can be tested using Firefox Nightly by updating the configuration
+in "about:config" into,
+
+----
+	network.trr.mode;2
+	network.trr.uri;https://127.0.0.1/dns-query
+----
+
+If you use provided self-signed certificate, you must import it manually to
+Firefox.
+
+
 == EXIT STATUS
 
 Upon success, +rescached+ will return 0, or 1 otherwise.
@@ -306,6 +343,7 @@ This program developed with references to,
 'RFC1035':: Domain Names - Implementation and Specification.
 'RFC1886':: DNS Extensions to support IP version 6.
 'RFC2782':: A DNS RR for specifying the location of services (DNS SRV)
+'draft-ietf-doh-dns-over-https-14':: DNS Queries over HTTPS (DoH)
 
 == BUGS
 
@@ -353,6 +391,7 @@ in the LICENSE file.
 
 - Source code repository: https://github.com/shuLhan/rescached-go
 - RFC 1035: https://tools.ietf.org/html/rfc1035
+- Improving DNS Privacy in Firefox: https://blog.nightly.mozilla.org/2018/06/01/improving-dns-privacy-in-firefox/
 
 
 == SEE ALSO

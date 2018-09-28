@@ -2,7 +2,7 @@ RESCACHED.CONF(5)
 =================
 :doctype: manpage
 :man source: rescached.cfg
-:man version: 2018.08.26
+:man version: 2018.09.29
 :man manual: rescached.cfg
 
 
@@ -91,7 +91,7 @@ To be able to use DNS over HTTPS, rescached must also run DoH server.
 That means, DoH certificate and private key files must not be empties.
 
 Only queries from DoH server will be forwarded to the parent DoH name server,
-other queries (from UDP or TCP) will be forwarded to +server.parent+.
+other queries (from UDP or TCP) will be forwarded to "+server.parent+".
 
 [[server.doh.allow_insecure]]
 ==== +server.doh.allow_insecure+
