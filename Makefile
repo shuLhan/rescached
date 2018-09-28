@@ -92,7 +92,9 @@ install: build
 	mkdir -p $(PREFIX)/etc/rescached
 	mkdir -p $(PREFIX)/etc/rescached/hosts.d
 	mkdir -p $(PREFIX)/etc/rescached/master.d
-	cp $(RESCACHED_CFG)    $(PREFIX)/etc/rescached/
+	cp $(RESCACHED_CFG)            $(PREFIX)/etc/rescached/
+	cp testdata/example.cert.crt   $(PREFIX)/etc/rescached/
+	cp testdata/example.cert.key   $(PREFIX)/etc/rescached/
 	cp scripts/hosts.block $(PREFIX)/etc/rescached/hosts.d/
 
 	mkdir -p               $(PREFIX)/usr/bin

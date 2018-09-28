@@ -289,8 +289,8 @@ Example configuration in *rescached.cfg*,
 
 ----
 	server.doh.parent = https://cloudflare-dns.com/dns-query
-	server.doh.certificate = /etc/rescached/cert.crt
-	server.doh.certificate.key = /etc/rescached/cert.key
+	server.doh.certificate = /etc/rescached/example.cert.crt
+	server.doh.certificate.key = /etc/rescached/example.cert.key
 ----
 
 If the "server.doh.parent" is using self-signed certificate, you can set
