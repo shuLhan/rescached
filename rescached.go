@@ -56,12 +56,16 @@ func New(opts *Options) (*Server, error) {
 		opts:       opts,
 	}
 
-	err := srv.loadResolvConf()
-	if err != nil {
-		log.Printf("! loadResolvConf: %s\n", err)
+	if len(srv.opts.FileResolvConf) == 0 {
 		srv.nsParents = srv.opts.NSParents
 	} else {
-		fmt.Printf("= Name servers fallback: %v\n", srv.opts.NSParents)
+		err := srv.loadResolvConf()
+		if err != nil {
+			log.Printf("! loadResolvConf: %s\n", err)
+			srv.nsParents = srv.opts.NSParents
+		} else {
+			fmt.Printf("= Name servers fallback: %v\n", srv.opts.NSParents)
+		}
 	}
 
 	srv.dnsServer.Handler = srv
@@ -166,7 +170,9 @@ func (srv *Server) Start() (err error) {
 		}
 	}
 
-	go srv.watchResolvConf()
+	if len(srv.opts.FileResolvConf) > 0 {
+		go srv.watchResolvConf()
+	}
 
 	go srv.cw.start()
 	go srv.processRequestQueue()
