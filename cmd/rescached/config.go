@@ -44,7 +44,7 @@ const (
 
 // List of default values.
 const (
-	defCachePruneDelay = 5 * time.Minute
+	defCachePruneDelay = 1 * time.Hour
 	defCacheThreshold  = -1 * time.Hour
 	defFilePID         = "rescached.pid"
 	defListenAddress   = "127.0.0.1"

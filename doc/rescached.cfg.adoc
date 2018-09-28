@@ -136,7 +136,7 @@ Description:: 	This option set the server read and write timeout value.
 ==== +cache.prune_delay+
 
 Format:: 	Duration
-Default:: 	5m
+Default:: 	1h
 Description::   Every N seconds/minutes/hours, rescached will traverse all
 caches and remove response that has not been accessed less than
 +cache.threshold+.
