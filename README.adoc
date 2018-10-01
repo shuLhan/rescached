@@ -151,7 +151,7 @@ Steps to compile from source,
 
 ----
 	$ go get -u github.com/shuLhan/rescached-go
-	$ cd ${GOPATH}/src/github.com/shuLhan/rescached-go.git
+	$ cd ${GOPATH}/src/github.com/shuLhan/rescached-go
 	$ go build ./cmd/rescached
 ----
 
