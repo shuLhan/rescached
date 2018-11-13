@@ -200,7 +200,7 @@ of +cache.prune_delay+ and/or +cache.threshold+ to match your needs.
 In UNIX system,
 +
 	$ sudo mv /etc/resolv.conf /etc/resolv.conf.org
-	$ sudo echo "nameserver 127.0.0.1" > /etc/resolv.conf
+	$ echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf
 
 * If you use +systemd+, run +rescached+ service by invoking,
 +
