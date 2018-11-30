@@ -62,23 +62,25 @@ var (
 )
 
 type config struct {
-	connType         int
-	filePID          string
-	fileResolvConf   string
-	fileDoHCert      string
-	fileDoHCertKey   string
-	nsParents        []*net.UDPAddr
-	dohParents       []string
+	connType        int
+	filePID         string
+	fileResolvConf  string
+	fileDoHCert     string
+	fileDoHCertKey  string
+	nsParents       []*net.UDPAddr
+	listenAddress   string
+	timeout         time.Duration
+	dirHosts        string
+	dirMaster       string
+	cachePruneDelay time.Duration
+	cacheThreshold  time.Duration
+	in              *ini.Ini
+	dohParents      []string
+
+	listenPort    uint16
+	listenDoHPort uint16
+
 	dohAllowInsecure bool
-	listenAddress    string
-	listenPort       uint16
-	listenDoHPort    uint16
-	timeout          time.Duration
-	dirHosts         string
-	dirMaster        string
-	cachePruneDelay  time.Duration
-	cacheThreshold   time.Duration
-	in               *ini.Ini
 }
 
 func newConfig(file string) (*config, error) {

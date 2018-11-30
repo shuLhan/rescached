@@ -11,16 +11,18 @@ import (
 
 type Options struct {
 	ListenAddress   string
-	ListenPort      uint16
 	ConnType        int
 	NSParents       []*net.UDPAddr
 	CachePruneDelay time.Duration
 	CacheThreshold  time.Duration
 	FileResolvConf  string
 
-	DoHPort          uint16
-	DoHParents       []string
+	DoHParents []string
+	DoHCert    string
+	DoHCertKey string
+
+	ListenPort uint16
+	DoHPort    uint16
+
 	DoHAllowInsecure bool
-	DoHCert          string
-	DoHCertKey       string
 }

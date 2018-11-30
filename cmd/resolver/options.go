@@ -38,11 +38,11 @@ type options struct {
 	sqtype  string
 	sqclass string
 
-	doh        bool
 	nameserver string
 	qname      string
 	qtype      uint16
 	qclass     uint16
+	doh        bool
 }
 
 func newOptions() (*options, error) {
