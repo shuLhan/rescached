@@ -51,7 +51,7 @@ coverbrowse: $(COVER_HTML)
 	xdg-open $<
 
 lint:
-	golangci-lint run ./...
+	golangci-lint run --enable-all ./...
 
 $(RESCACHED_BIN): $(SRC)
 	export CGO_ENABLED=1 && \
