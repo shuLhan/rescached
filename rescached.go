@@ -151,13 +151,13 @@ func (srv *Server) ServeDNS(req *dns.Request) {
 // Start the server, waiting for DNS query from clients, read it and response
 // it.
 //
-func (srv *Server) Start() (err error) {
+func (srv *Server) Start() error {
 	fmt.Printf("= Listening on '%s:%d'\n", srv.opts.ListenAddress,
 		srv.opts.ListenPort)
 
-	err = srv.runForwarders()
+	err := srv.runForwarders()
 	if err != nil {
-		return
+		return err
 	}
 
 	if len(srv.opts.DoHCert) > 0 && len(srv.opts.DoHCertKey) > 0 {
@@ -166,7 +166,7 @@ func (srv *Server) Start() (err error) {
 
 		err = srv.runDoHForwarders()
 		if err != nil {
-			return
+			return err
 		}
 	}
 
@@ -189,7 +189,7 @@ func (srv *Server) Start() (err error) {
 
 	err = srv.dnsServer.ListenAndServe(serverOptions)
 
-	return
+	return err
 }
 
 func (srv *Server) runForwarders() (err error) {
