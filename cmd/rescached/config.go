@@ -38,7 +38,6 @@ const (
 	cfgKeyDoHAllowInsecure = "server.doh.allow_insecure"
 	cfgKeyDoHCert          = "server.doh.certificate"
 	cfgKeyDoHCertKey       = "server.doh.certificate.key"
-	cfgKeyDoHListenPort    = "server.doh.listen.port"
 	cfgKeyDoHParent        = "server.doh.parent"
 )
 

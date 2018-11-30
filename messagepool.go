@@ -17,16 +17,6 @@ var _messagePool = sync.Pool{
 }
 
 //
-// allocMessage from pool.
-//
-func allocMessage() (msg *dns.Message) {
-	msg = _messagePool.Get().(*dns.Message)
-	msg.Reset()
-
-	return
-}
-
-//
 // freeMessage put the message back to the pool.
 //
 func freeMessage(msg *dns.Message) {
