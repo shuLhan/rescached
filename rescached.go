@@ -334,7 +334,7 @@ func (srv *Server) processRequestQueue() {
 	}
 }
 
-func (srv *Server) processForwardQueue(cl dns.Client, raddr *net.UDPAddr) {
+func (srv *Server) processForwardQueue(cl dns.Client, raddr net.Addr) {
 	for {
 		select {
 		case req := <-srv.fwQueue:
