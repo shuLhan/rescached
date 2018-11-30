@@ -372,17 +372,14 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr net.Addr) {
 }
 
 func (srv *Server) processDoHForwardQueue(cl *dns.DoHClient) {
-	for {
-		select {
-		case req := <-srv.fwDoHQueue:
-			res, err := cl.Query(req.Message, nil)
-			if err != nil {
-				srv.freeRequests(req)
-				continue
-			}
-
-			srv.processForwardResponse(req, res)
+	for req := range srv.fwDoHQueue {
+		res, err := cl.Query(req.Message, nil)
+		if err != nil {
+			srv.freeRequests(req)
+			continue
 		}
+
+		srv.processForwardResponse(req, res)
 	}
 }
 
