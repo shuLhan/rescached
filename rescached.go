@@ -431,9 +431,6 @@ func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
 		}
 	}
 	if !ok {
-		if res != nil {
-			freeMessage(res)
-		}
 		srv.freeRequests(req)
 		return
 	}

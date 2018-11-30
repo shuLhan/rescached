@@ -48,10 +48,7 @@ func (cw *cacheWorker) start() {
 	for {
 		select {
 		case msg := <-cw.addQueue:
-			added := cw.add(msg, false)
-			if !added {
-				freeMessage(msg)
-			}
+			_ = cw.add(msg, false)
 
 		case res := <-cw.updateQueue:
 			cw.update(res)
@@ -114,8 +111,7 @@ func (cw *cacheWorker) add(msg *dns.Message, isLocal bool) bool {
 		return true
 	}
 
-	oldMsg := lres.update(res, msg)
-	freeMessage(oldMsg)
+	_ = lres.update(res, msg)
 
 	if !isLocal {
 		cw.cachesList.fix(res)
