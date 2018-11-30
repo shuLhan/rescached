@@ -15,7 +15,9 @@ type Options struct {
 	NSParents       []*net.UDPAddr
 	CachePruneDelay time.Duration
 	CacheThreshold  time.Duration
-	FileResolvConf  string
+
+	FilePID        string
+	FileResolvConf string
 
 	DoHParents []string
 	DoHCert    string

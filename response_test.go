@@ -8,7 +8,7 @@ import (
 	"github.com/shuLhan/share/lib/dns"
 )
 
-var _testResponses = []*response{{
+var _testResponses = []*response{{ // nolint
 	message: &dns.Message{
 		Packet: []byte{1},
 		Header: &dns.SectionHeader{

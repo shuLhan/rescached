@@ -7,14 +7,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"path/filepath"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -26,12 +24,7 @@ const (
 	defConfig = "/etc/rescached/rescached.cfg"
 )
 
-var (
-	rcd      *rescached.Server
-	_filePID string
-)
-
-func createRescachedServer(fileConfig string) {
+func createRescachedServer(fileConfig string) *rescached.Server {
 	cfg, err := newConfig(fileConfig)
 	if err != nil {
 		log.Fatal(err)
@@ -41,8 +34,6 @@ func createRescachedServer(fileConfig string) {
 		fmt.Printf("= config: %+v\n", cfg)
 	}
 
-	_filePID = cfg.filePID
-
 	opts := &rescached.Options{
 		ConnType:        cfg.connType,
 		ListenAddress:   cfg.listenAddress,
@@ -50,7 +41,9 @@ func createRescachedServer(fileConfig string) {
 		NSParents:       cfg.nsParents,
 		CachePruneDelay: cfg.cachePruneDelay,
 		CacheThreshold:  cfg.cacheThreshold,
-		FileResolvConf:  cfg.fileResolvConf,
+
+		FileResolvConf: cfg.fileResolvConf,
+		FilePID:        cfg.filePID,
 
 		DoHPort:          cfg.listenDoHPort,
 		DoHParents:       cfg.dohParents,
@@ -59,21 +52,23 @@ func createRescachedServer(fileConfig string) {
 		DoHCertKey:       cfg.fileDoHCertKey,
 	}
 
-	rcd, err = rescached.New(opts)
+	rcd, err := rescached.New(opts)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = writePID()
+	err = rcd.WritePID()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	loadHostsDir(cfg)
-	loadMasterDir(cfg)
+	loadHostsDir(rcd, cfg)
+	loadMasterDir(rcd, cfg)
+
+	return rcd
 }
 
-func loadHostsDir(cfg *config) {
+func loadHostsDir(rcd *rescached.Server, cfg *config) {
 	if len(cfg.dirHosts) == 0 {
 		return
 	}
@@ -110,7 +105,7 @@ func loadHostsDir(cfg *config) {
 	}
 }
 
-func loadMasterDir(cfg *config) {
+func loadMasterDir(rcd *rescached.Server, cfg *config) {
 	if len(cfg.dirMaster) == 0 {
 		return
 	}
@@ -147,37 +142,12 @@ func loadMasterDir(cfg *config) {
 	}
 }
 
-func removePID() {
-	err := os.Remove(_filePID)
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-//
-// writePID will write current process PID to file `_filePID` only if the
-// file is not exist, otherwise it will return an error.
-//
-func writePID() (err error) {
-	_, err = os.Stat(_filePID)
-	if err == nil {
-		err = fmt.Errorf("writePID: pid file '%s' exist", _filePID)
-		return
-	}
-
-	pid := strconv.Itoa(os.Getpid())
-
-	err = ioutil.WriteFile(_filePID, []byte(pid), 0400)
-
-	return
-}
-
-func handleSignal() {
+func handleSignal(rcd *rescached.Server) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGQUIT, syscall.SIGSEGV, syscall.SIGTERM,
 		syscall.SIGINT)
 	<-c
-	stop()
+	rcd.Stop()
 }
 
 func profiling() {
@@ -195,11 +165,6 @@ func profiling() {
 	log.Println(srv.ListenAndServe())
 }
 
-func stop() {
-	removePID()
-	os.Exit(0)
-}
-
 func main() {
 	var (
 		err        error
@@ -211,14 +176,14 @@ func main() {
 	flag.StringVar(&fileConfig, "f", defConfig, "path to configuration")
 	flag.Parse()
 
-	createRescachedServer(fileConfig)
+	rcd := createRescachedServer(fileConfig)
 
-	go handleSignal()
+	go handleSignal(rcd)
 	go profiling()
 
 	err = rcd.Start()
 	if err != nil {
 		log.Println(err)
-		stop()
+		rcd.Stop()
 	}
 }

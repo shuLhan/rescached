@@ -13,7 +13,7 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
-var _testListResponse = newListResponse(nil)
+var _testListResponse = newListResponse(nil) // nolint
 
 func TestListResponseAdd(t *testing.T) {
 	cases := []struct {

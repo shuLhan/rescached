@@ -53,14 +53,6 @@ const (
 	defTimeoutString   = "6"
 )
 
-// List of default values.
-var (
-	defNameServers    = []string{"8.8.8.8:53", "8.8.4.4:53"}
-	defDoHNameServers = []string{
-		"https://cloudflare-dns.com/dns-query",
-	}
-)
-
 type config struct {
 	connType        int
 	filePID         string
@@ -139,7 +131,7 @@ func (cfg *config) parseNSParent() error {
 		nsParents = strings.Split(v, ",")
 	}
 	if len(nsParents) == 0 {
-		nsParents = defNameServers
+		nsParents = []string{"8.8.8.8:53", "8.8.4.4:53"}
 	}
 
 	for _, ns := range nsParents {
@@ -164,7 +156,7 @@ func (cfg *config) parseDoHParent() (err error) {
 		dohParents = strings.Split(v, ",")
 	}
 	if len(dohParents) == 0 {
-		dohParents = defDoHNameServers
+		dohParents = []string{"https://cloudflare-dns.com/dns-query"}
 	}
 
 	for _, ns := range dohParents {
