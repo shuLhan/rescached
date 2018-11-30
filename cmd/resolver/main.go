@@ -188,7 +188,7 @@ func main() {
 	)
 
 	nsAddrs := parseNameServers(cr.NameServers)
-	queries := populateQueries(cr, string(opts.qname))
+	queries := populateQueries(cr, opts.qname)
 	timeout := time.Duration(cr.Timeout) * time.Second
 
 	fmt.Printf("= resolv.conf: %+v\n", cr)
