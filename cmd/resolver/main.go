@@ -19,10 +19,6 @@ const (
 	defResolvConf = "/etc/resolv.conf"
 )
 
-var (
-	opts *options
-)
-
 func parseNameServers(nameservers []string) (udpAddrs []*net.UDPAddr) {
 	for _, ns := range nameservers {
 		addr, err := libnet.ParseUDPAddr(ns, dns.DefaultPort)
@@ -104,7 +100,7 @@ func messagePrint(nameserver string, msg *dns.Message) string {
 	return b.String()
 }
 
-func lookup(ns string, timeout time.Duration, qname []byte) *dns.Message {
+func lookup(opts *options, ns string, timeout time.Duration, qname []byte) *dns.Message {
 	var (
 		cl  dns.Client
 		err error
@@ -157,11 +153,9 @@ func lookup(ns string, timeout time.Duration, qname []byte) *dns.Message {
 }
 
 func main() {
-	var err error
-
 	log.SetFlags(0)
 
-	opts, err = newOptions()
+	opts, err := newOptions()
 	if err != nil {
 		log.Fatal("! newOptions: ", err)
 	}
@@ -209,7 +203,7 @@ func main() {
 
 				fmt.Printf("> Lookup %s at %s\n", qname, ns)
 
-				res = lookup(ns, timeout, []byte(qname))
+				res = lookup(opts, ns, timeout, []byte(qname))
 				if res != nil {
 					goto out
 				}
