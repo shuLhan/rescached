@@ -68,15 +68,15 @@ $(RESOLVERBENCH_BIN): $(SRC)
 doc: $(RESCACHED_MAN) $(RESCACHED_CFG_MAN) $(RESOLVER_MAN)
 
 $(RESCACHED_MAN): README.adoc
-	a2x --doctype manpage --format manpage $< >/dev/null 2>&1
+	asciidoctor --backend manpage $<
 	gzip -f rescached.1
 
 $(RESCACHED_CFG_MAN): doc/rescached.cfg.adoc
-	a2x --doctype manpage --format manpage $< >/dev/null 2>&1
+	asciidoctor --backend manpage $<
 	gzip -f doc/rescached.cfg.5
 
 $(RESOLVER_MAN): doc/resolver.adoc
-	a2x --doctype manpage --format manpage $< >/dev/null 2>&1
+	asciidoctor --backend manpage $<
 	gzip -f doc/resolver.1
 
 distclean: clean

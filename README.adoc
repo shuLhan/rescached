@@ -1,9 +1,10 @@
 RESCACHED(1)
 ============
+M. Shulhan
+2018.09.29
 :doctype: manpage
-:man source: rescached
-:man version: 2018.09.29
-:man manual: rescached
+:mansource: rescached
+:manmanual: rescached
 
 
 == NAME
