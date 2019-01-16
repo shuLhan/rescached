@@ -1,0 +1,15 @@
+= Rescached v2.0.0 (2019-01-16)
+
+== Features
+
+-  Enable to handle request from UDP and TCP connections
+-  Enable to forward request using UDP or TCP connection
+-  Load and serve addresses and hostnames in `/etc/hosts`
+-  Load and serve hosts formated files inside directory
+   `/etc/rescached/hosts.d/`
+-  Blocking ads and/or malicious websites through host list in
+   `/etc/rescached/hosts.d/hosts.block`
+-  Support loading and serving master (zone) file format from
+   `/etc/rescached/master.d`
+-  Integration with openresolv
+-  Support DNS over HTTPS (DoH) (draft 14)
