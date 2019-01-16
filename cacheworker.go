@@ -80,6 +80,7 @@ func (cw *cacheWorker) add(msg *dns.Message, isLocal bool) bool {
 	if msg.Header.RCode != dns.RCodeOK {
 		log.Printf("! Response error: %d %s\n", msg.Header.RCode,
 			msg.Question)
+		return false
 	}
 
 	libbytes.ToLower(&msg.Question.Name)
