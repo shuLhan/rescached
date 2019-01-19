@@ -36,6 +36,9 @@ func newResponse(msg *dns.Message) *response {
 	}
 }
 
+//
+// AccessedAt return the timestamp when response last accessed in cache.
+//
 func (res *response) AccessedAt() int64 {
 	return atomic.LoadInt64(&res.accessedAt)
 }
