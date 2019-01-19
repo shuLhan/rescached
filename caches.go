@@ -51,10 +51,11 @@ func (c *caches) remove(qname string, qtype, qclass uint16) *response {
 	}
 
 	lres := v.(*listResponse)
+
+	res := lres.remove(qtype, qclass)
 	if lres.v.Len() == 0 {
 		c.v.Delete(qname)
-		return nil
 	}
 
-	return lres.remove(qtype, qclass)
+	return res
 }

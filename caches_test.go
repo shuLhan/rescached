@@ -99,10 +99,22 @@ func TestCachesGet(t *testing.T) {
 		qclass: 1,
 		exp:    _testResponses[2],
 	}, {
-		desc:   "Cache miss",
+		desc:   "Cache miss on qname",
+		qname:  "3",
+		qtype:  1,
+		qclass: 1,
+		exp:    nil,
+	}, {
+		desc:   "Cache miss on qtype",
 		qname:  "1",
 		qtype:  0,
 		qclass: 1,
+		exp:    nil,
+	}, {
+		desc:   "Cache miss on qclass",
+		qname:  "1",
+		qtype:  1,
+		qclass: 0,
 		exp:    nil,
 	}}
 
@@ -116,5 +128,53 @@ func TestCachesGet(t *testing.T) {
 		}
 
 		test.Assert(t, "caches.get", c.exp.message, got.message, true)
+	}
+}
+
+func TestCachesRemove(t *testing.T) {
+	cases := []struct {
+		desc   string
+		qname  string
+		qtype  uint16
+		qclass uint16
+		exp    *response
+	}{{
+		desc:   "With qname not exist",
+		qname:  "3",
+		qtype:  1,
+		qclass: 1,
+	}, {
+		desc:   "With qtype not exist",
+		qname:  "1",
+		qtype:  0,
+		qclass: 1,
+	}, {
+		desc:   "With qclass not exist",
+		qname:  "1",
+		qtype:  1,
+		qclass: 0,
+	}, {
+		desc:   "With record exist",
+		qname:  "1",
+		qtype:  1,
+		qclass: 1,
+		exp:    _testResponses[2],
+	}, {
+		desc:   "With record exist, again",
+		qname:  "1",
+		qtype:  1,
+		qclass: 1,
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		got := _testCaches.remove(c.qname, c.qtype, c.qclass)
+		if got == nil {
+			test.Assert(t, "caches.remove", c.exp, got, true)
+			continue
+		}
+
+		test.Assert(t, "caches.remove", c.exp.message, got.message, true)
 	}
 }
