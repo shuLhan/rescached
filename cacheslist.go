@@ -12,6 +12,12 @@ import (
 	"time"
 )
 
+//
+// cachesList maintain cache of response using list.List where it will be
+// pruned based on threshold (time where item is last accessed).
+// The list is ordered in FIFO based on last accessed time, where the old item
+// reside at the top of list and the new item at the end of list.
+//
 type cachesList struct {
 	threshold time.Duration
 	sync.Mutex
@@ -50,6 +56,9 @@ func (cl *cachesList) items() (items []*response) {
 	return
 }
 
+//
+// length return the number of item in list.
+//
 func (cl *cachesList) length() (n int) {
 	cl.Lock()
 	n = cl.v.Len()
@@ -71,6 +80,10 @@ func (cl *cachesList) push(res *response) {
 	cl.Unlock()
 }
 
+//
+// fix update the accessedAt value to current timestamp and move or push the
+// response to the end of list.
+//
 func (cl *cachesList) fix(res *response) {
 	if res == nil {
 		return
@@ -88,6 +101,10 @@ func (cl *cachesList) fix(res *response) {
 	cl.Unlock()
 }
 
+//
+// prune remove response in list that have accessed time less than current
+// time + -threshold.
+//
 func (cl *cachesList) prune() (lres []*response) {
 	cl.Lock()
 
