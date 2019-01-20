@@ -62,7 +62,14 @@ func (lres *listResponse) add(msg *dns.Message, isLocal bool) *response {
 	return res
 }
 
+//
+// update the message field in response with "msg" and return the replaced
+// message.
+//
 func (lres *listResponse) update(res *response, msg *dns.Message) *dns.Message {
+	if res == nil || msg == nil {
+		return nil
+	}
 	lres.Lock()
 	oldMsg := res.update(msg)
 	lres.Unlock()

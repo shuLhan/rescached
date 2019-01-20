@@ -69,6 +69,48 @@ func TestListResponseAdd(t *testing.T) {
 	}
 }
 
+func TestListResponseUpdate(t *testing.T) {
+	testListResponse := newListResponse(nil)
+	testResponse := &response{
+		receivedAt: 0,
+	}
+	testMessages := []*dns.Message{{
+		Packet: []byte{1},
+	}, {
+		Packet: []byte{2},
+	}}
+
+	cases := []struct {
+		desc string
+		res  *response
+		msg  *dns.Message
+		exp  *dns.Message
+	}{{
+		desc: "With empty response",
+		msg:  &dns.Message{},
+	}, {
+		desc: "With empty message",
+		res:  testResponse,
+	}, {
+		desc: "With nil return",
+		res:  testResponse,
+		msg:  testMessages[0],
+	}, {
+		desc: "With non nil return",
+		res:  testResponse,
+		msg:  testMessages[1],
+		exp:  testMessages[0],
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		got := testListResponse.update(c.res, c.msg)
+
+		test.Assert(t, "message", c.exp, got, true)
+	}
+}
+
 func TestListResponseGet(t *testing.T) {
 	cases := []struct {
 		desc   string
