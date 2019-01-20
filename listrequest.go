@@ -29,7 +29,13 @@ func newListRequest(req *dns.Request) (listReq *listRequest) {
 	return
 }
 
+//
+// push new request to the end of list only if its not nil.
+//
 func (listReq *listRequest) push(req *dns.Request) {
+	if req == nil {
+		return
+	}
 	listReq.Lock()
 	listReq.v.PushBack(req)
 	listReq.Unlock()
