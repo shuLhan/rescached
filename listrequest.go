@@ -12,13 +12,18 @@ import (
 )
 
 //
-// listRequest represent cached DNS request.
+// listRequest represent list of active DNS requests.
+// Each request is maintained as FIFO, where new request will be at the end of
+// list.
 //
 type listRequest struct {
 	sync.Mutex
 	v *list.List
 }
 
+//
+// newListRequest create and initialize new listRequest.
+//
 func newListRequest(req *dns.Request) (listReq *listRequest) {
 	listReq = &listRequest{
 		v: list.New(),
@@ -65,10 +70,23 @@ func (listReq *listRequest) isExist(qtype, qclass uint16) (yes bool) {
 }
 
 //
-// pops detach request have the same query type and class from list and return
-// it.
+// items return list of request as slice.
 //
-func (listReq *listRequest) pops(qtype, qclass uint16) (reqs []*dns.Request, isEmpty bool) {
+func (listReq *listRequest) items() (items []*dns.Request) {
+	for e := listReq.v.Front(); e != nil; e = e.Next() {
+		req := e.Value.(*dns.Request)
+		items = append(items, req)
+	}
+	return
+}
+
+//
+// pops detach requests that have the same query type and class from list and
+// return it.
+//
+func (listReq *listRequest) pops(qtype, qclass uint16) (
+	reqs []*dns.Request, isEmpty bool,
+) {
 	listReq.Lock()
 
 	e := listReq.v.Front()
