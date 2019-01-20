@@ -12,11 +12,8 @@ import (
 )
 
 //
-// cachesRequest contains list of request that has the same query name, type,
-// and class.  When server read request from client, it must check the caches
-// first and the this list.  If there is no cached response for request, check
-// if request has been asked by before.  If request has been asked before,
-// add.
+// cachesRequest contains map of key (domain name) with list of request that
+// have the same query type and class.
 //
 type cachesRequest struct {
 	v sync.Map
@@ -24,6 +21,22 @@ type cachesRequest struct {
 
 func newCachesRequest() *cachesRequest {
 	return new(cachesRequest)
+}
+
+//
+// items return map of key and their list of request.
+//
+func (cachesReq *cachesRequest) items() (items map[string][]*dns.Request) {
+	cachesReq.v.Range(func(k, v interface{}) bool {
+		key := k.(string)
+		if items == nil {
+			items = make(map[string][]*dns.Request)
+		}
+		listReq := v.(*listRequest)
+		items[key] = listReq.items()
+		return true
+	})
+	return items
 }
 
 //
@@ -59,7 +72,9 @@ func (cachesReq *cachesRequest) push(key string, req *dns.Request) (dup bool) {
 // pops remove request from cache that have the same query name, type, and
 // class.
 //
-func (cachesReq *cachesRequest) pops(key string, qtype, qclass uint16) (reqs []*dns.Request) {
+func (cachesReq *cachesRequest) pops(key string, qtype, qclass uint16) (
+	reqs []*dns.Request,
+) {
 	v, ok := cachesReq.v.Load(key)
 	if !ok {
 		return nil
