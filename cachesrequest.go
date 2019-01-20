@@ -5,6 +5,7 @@
 package rescached
 
 import (
+	"log"
 	"sync"
 
 	"github.com/shuLhan/share/lib/dns"
@@ -30,6 +31,14 @@ func newCachesRequest() *cachesRequest {
 // true; otherwise it will return false.
 //
 func (cachesReq *cachesRequest) push(key string, req *dns.Request) (dup bool) {
+	if len(key) == 0 {
+		log.Println("cachesRequest.push: empty key")
+		return false
+	}
+	if req == nil {
+		log.Println("cachesRequest.push: empty request")
+		return false
+	}
 	v, ok := cachesReq.v.Load(key)
 	if !ok {
 		listReq := newListRequest(req)
