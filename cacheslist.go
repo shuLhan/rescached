@@ -40,7 +40,15 @@ func (cl *cachesList) length() (n int) {
 	return n
 }
 
+//
+// push the new response to the end of list.
+// This function assume that the response.accessedAt time is using current
+// timestamp (greater or equal with last item in list).
+//
 func (cl *cachesList) push(res *response) {
+	if res == nil {
+		return
+	}
 	cl.Lock()
 	res.el = cl.v.PushBack(res)
 	cl.Unlock()
