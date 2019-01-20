@@ -18,7 +18,15 @@ type cachesList struct {
 	v *list.List
 }
 
+//
+// newCachesList create and initialize new cachesList.
+// The threshold value MUST be negative duration or it will be converted to
+// negative based on current value.
+//
 func newCachesList(threshold time.Duration) *cachesList {
+	if threshold > 0 {
+		threshold *= -1
+	}
 	return &cachesList{
 		threshold: threshold,
 		v:         list.New(),
