@@ -33,6 +33,23 @@ func newCachesList(threshold time.Duration) *cachesList {
 	}
 }
 
+//
+// items return content of list as slice of response.
+//
+func (cl *cachesList) items() (items []*response) {
+	el := cl.v.Front()
+
+	for el != nil {
+		res := el.Value.(*response)
+
+		items = append(items, res)
+
+		el = el.Next()
+	}
+
+	return
+}
+
 func (cl *cachesList) length() (n int) {
 	cl.Lock()
 	n = cl.v.Len()
