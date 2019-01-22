@@ -83,6 +83,9 @@ func (cw *cacheWorker) pruneWorker() {
 // will return false.
 //
 func (cw *cacheWorker) add(msg *dns.Message, isLocal bool) bool {
+	if msg == nil {
+		return false
+	}
 	if msg.Header.RCode != dns.RCodeOK {
 		log.Printf("! Response error: %d %s\n", msg.Header.RCode,
 			msg.Question)
