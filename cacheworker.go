@@ -23,7 +23,7 @@ const (
 // Any addition, update, or remove to cache go through this worker.
 //
 type cacheWorker struct {
-	addQueue      chan *dns.Message
+	upsertQueue   chan *dns.Message
 	updateQueue   chan *response
 	removeQueue   chan *response
 	caches        *caches
@@ -38,7 +38,7 @@ type cacheWorker struct {
 //
 func newCacheWorker(pruneDelay, cacheThreshold time.Duration) *cacheWorker {
 	return &cacheWorker{
-		addQueue:      make(chan *dns.Message, maxWorkerQueue),
+		upsertQueue:   make(chan *dns.Message, maxWorkerQueue),
 		updateQueue:   make(chan *response, maxWorkerQueue),
 		removeQueue:   make(chan *response, maxWorkerQueue),
 		caches:        &caches{},
@@ -53,8 +53,8 @@ func (cw *cacheWorker) start() {
 
 	for {
 		select {
-		case msg := <-cw.addQueue:
-			_ = cw.add(msg, false)
+		case msg := <-cw.upsertQueue:
+			_ = cw.upsert(msg, false)
 
 		case res := <-cw.updateQueue:
 			cw.update(res)
@@ -78,11 +78,11 @@ func (cw *cacheWorker) pruneWorker() {
 }
 
 //
-// add DNS response to caches in map and in the list.
+// upsert update or insert a DNS message to caches in map and in the list.
 // It will return true if response is added or updated in cache, otherwise it
 // will return false.
 //
-func (cw *cacheWorker) add(msg *dns.Message, isLocal bool) bool {
+func (cw *cacheWorker) upsert(msg *dns.Message, isLocal bool) bool {
 	if msg == nil {
 		return false
 	}
@@ -97,22 +97,7 @@ func (cw *cacheWorker) add(msg *dns.Message, isLocal bool) bool {
 
 	lres, res := cw.caches.get(qname, msg.Question.Type, msg.Question.Class)
 	if lres == nil {
-		res = newResponse(msg)
-		if isLocal {
-			res.receivedAt = 0
-		}
-
-		cw.caches.add(qname, res)
-
-		if !isLocal {
-			cw.cachesList.push(res)
-		}
-
-		if debug.Value >= 1 && !isLocal {
-			fmt.Printf("+ caching: %4d %10d %s\n",
-				cw.cachesList.length(), res.accessedAt,
-				res.message.Question)
-		}
+		cw.push(qname, msg, isLocal)
 		return true
 	}
 	// Cache list contains other type.
@@ -133,6 +118,29 @@ func (cw *cacheWorker) add(msg *dns.Message, isLocal bool) bool {
 	}
 
 	return true
+}
+
+//
+// push new DNS message with domain-name "qname" as a key on map.
+// If isLocal is false, the message will also pushed to cachesList.
+//
+func (cw *cacheWorker) push(qname string, msg *dns.Message, isLocal bool) {
+	res := newResponse(msg)
+	if isLocal {
+		res.receivedAt = 0
+	}
+
+	cw.caches.add(qname, res)
+
+	if !isLocal {
+		cw.cachesList.push(res)
+
+		if debug.Value >= 1 {
+			fmt.Printf("+ caching: %4d %10d %s\n",
+				cw.cachesList.length(), res.accessedAt,
+				res.message.Question)
+		}
+	}
 }
 
 func (cw *cacheWorker) update(res *response) {

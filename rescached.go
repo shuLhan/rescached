@@ -133,7 +133,7 @@ func (srv *Server) loadResolvConf() error {
 func (srv *Server) populateCaches(msgs []*dns.Message) {
 	n := 0
 	for x := 0; x < len(msgs); x++ {
-		ok := srv.cw.add(msgs[x], true)
+		ok := srv.cw.upsert(msgs[x], true)
 		if ok {
 			n++
 		}
@@ -477,7 +477,7 @@ func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
 		reqs[x] = nil
 	}
 
-	srv.cw.addQueue <- res
+	srv.cw.upsertQueue <- res
 }
 
 //
