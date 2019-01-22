@@ -18,27 +18,33 @@ const (
 	maxWorkerQueue = 32
 )
 
+//
+// cacheWorker is a worker that manage cache in map and list.
+// Any addition, update, or remove to cache go through this worker.
+//
 type cacheWorker struct {
-	addQueue       chan *dns.Message
-	updateQueue    chan *response
-	removeQueue    chan *response
-	caches         *caches
-	cachesRequest  *cachesRequest
-	cachesList     *cachesList
-	pruneDelay     time.Duration
-	cacheThreshold time.Duration
+	addQueue      chan *dns.Message
+	updateQueue   chan *response
+	removeQueue   chan *response
+	caches        *caches
+	cachesRequest *cachesRequest
+	cachesList    *cachesList
+	pruneDelay    time.Duration
 }
 
+//
+// newCacheWorker create and initialize worker with a timer to prune the cache
+// (cacheDelay) and a duration for cache to be considered to be pruned.
+//
 func newCacheWorker(pruneDelay, cacheThreshold time.Duration) *cacheWorker {
 	return &cacheWorker{
-		addQueue:       make(chan *dns.Message, maxWorkerQueue),
-		updateQueue:    make(chan *response, maxWorkerQueue),
-		removeQueue:    make(chan *response, maxWorkerQueue),
-		caches:         &caches{},
-		cachesRequest:  newCachesRequest(),
-		cachesList:     newCachesList(cacheThreshold),
-		pruneDelay:     pruneDelay,
-		cacheThreshold: cacheThreshold,
+		addQueue:      make(chan *dns.Message, maxWorkerQueue),
+		updateQueue:   make(chan *response, maxWorkerQueue),
+		removeQueue:   make(chan *response, maxWorkerQueue),
+		caches:        &caches{},
+		cachesRequest: newCachesRequest(),
+		cachesList:    newCachesList(cacheThreshold),
+		pruneDelay:    pruneDelay,
 	}
 }
 
