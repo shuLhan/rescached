@@ -156,6 +156,9 @@ func (cw *cacheWorker) update(res *response) {
 }
 
 func (cw *cacheWorker) remove(res *response) {
+	if res == nil || res.message == nil {
+		return
+	}
 	if res.el != nil {
 		return
 	}
