@@ -5,7 +5,9 @@
 package rescached
 
 import (
+	"fmt"
 	"log"
+	"strings"
 	"sync"
 
 	"github.com/shuLhan/share/lib/dns"
@@ -24,19 +26,27 @@ func newCachesRequest() *cachesRequest {
 }
 
 //
-// items return map of key and their list of request.
+// String return the string intepretation of content of cachesRequest.
 //
-func (cachesReq *cachesRequest) items() (items map[string][]*dns.Request) {
+func (cachesReq *cachesRequest) String() string {
+	var out strings.Builder
+
+	out.WriteString("cachesRequest[")
+	x := 0
 	cachesReq.v.Range(func(k, v interface{}) bool {
-		key := k.(string)
-		if items == nil {
-			items = make(map[string][]*dns.Request)
+		if x == 0 {
+			x++
+		} else {
+			out.WriteByte(' ')
 		}
-		listReq := v.(*listRequest)
-		items[key] = listReq.items()
+		key := k.(string)
+		val := v.(*listRequest)
+		fmt.Fprintf(&out, "%s:%v", key, val.String())
 		return true
 	})
-	return items
+	out.WriteByte(']')
+
+	return out.String()
 }
 
 //

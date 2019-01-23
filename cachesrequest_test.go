@@ -19,57 +19,41 @@ func TestCachesRequestPush(t *testing.T) {
 		key    string
 		req    *dns.Request
 		expDup bool
-		exp    map[string][]*dns.Request
+		exp    string
 	}{{
 		desc: "With empty key",
 		req:  testRequests[0],
+		exp:  `cachesRequest[]`,
 	}, {
 		desc: "With empty request",
 		key:  "1",
+		exp:  `cachesRequest[]`,
 	}, {
 		desc: "With valid key and request (0)",
 		key:  "0",
 		req:  testRequests[0],
-		exp: map[string][]*dns.Request{
-			"0": {
-				testRequests[0],
-			},
-		},
+		exp:  `cachesRequest[0:[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}}]]`,
 	}, {
 		desc:   "With duplicate key and request",
 		key:    "0",
 		req:    testRequests[0],
 		expDup: true,
-		exp: map[string][]*dns.Request{
-			"0": {
-				testRequests[0],
-				testRequests[0],
-			},
-		},
+		exp:    `cachesRequest[0:[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}} &{Kind:0 Message.Question:&{Name: Type:1 Class:1}}]]`,
 	}, {
 		desc:   "With valid key and request (1)",
 		key:    "1",
 		req:    testRequests[1],
 		expDup: false,
-		exp: map[string][]*dns.Request{
-			"0": {
-				testRequests[0],
-				testRequests[0],
-			},
-			"1": {
-				testRequests[1],
-			},
-		},
+		exp:    `cachesRequest[0:[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}} &{Kind:0 Message.Question:&{Name: Type:1 Class:1}}] 1:[&{Kind:0 Message.Question:&{Name: Type:2 Class:1}}]]`,
 	}}
 
 	for _, c := range cases {
 		t.Log(c.desc)
 
 		gotDup := testCachesReq.push(c.key, c.req)
-		got := testCachesReq.items()
 
 		test.Assert(t, "dup", c.expDup, gotDup, true)
-		test.Assert(t, "map key and request", c.exp, got, true)
+		test.Assert(t, "String", c.exp, testCachesReq.String(), true)
 	}
 }
 
