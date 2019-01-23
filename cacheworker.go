@@ -102,7 +102,10 @@ func (cw *cacheWorker) upsert(msg *dns.Message, isLocal bool) bool {
 	}
 	// Cache list contains other type.
 	if res == nil {
-		lres.add(msg, isLocal)
+		res = lres.add(msg, isLocal)
+		if !isLocal {
+			cw.cachesList.push(res)
+		}
 		return true
 	}
 
