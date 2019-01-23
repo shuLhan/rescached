@@ -18,11 +18,14 @@ import (
 // have the same query type and class.
 //
 type cachesRequest struct {
-	v sync.Map
+	sync.Mutex
+	v map[string]*listRequest
 }
 
 func newCachesRequest() *cachesRequest {
-	return new(cachesRequest)
+	return &cachesRequest{
+		v: make(map[string]*listRequest),
+	}
 }
 
 //
@@ -33,17 +36,16 @@ func (cachesReq *cachesRequest) String() string {
 
 	out.WriteString("cachesRequest[")
 	x := 0
-	cachesReq.v.Range(func(k, v interface{}) bool {
+	cachesReq.Lock()
+	for key, val := range cachesReq.v {
 		if x == 0 {
 			x++
 		} else {
 			out.WriteByte(' ')
 		}
-		key := k.(string)
-		val := v.(*listRequest)
 		fmt.Fprintf(&out, "%s:%v", key, val.String())
-		return true
-	})
+	}
+	cachesReq.Unlock()
 	out.WriteByte(']')
 
 	return out.String()
@@ -62,14 +64,16 @@ func (cachesReq *cachesRequest) push(key string, req *dns.Request) (dup bool) {
 		log.Println("cachesRequest.push: empty request")
 		return false
 	}
-	v, ok := cachesReq.v.Load(key)
+
+	cachesReq.Lock()
+	listReq, ok := cachesReq.v[key]
 	if !ok {
-		listReq := newListRequest(req)
-		cachesReq.v.Store(key, listReq)
+		listReq = newListRequest(req)
+		cachesReq.v[key] = listReq
+		cachesReq.Unlock()
 		return false
 	}
-
-	listReq := v.(*listRequest)
+	cachesReq.Unlock()
 
 	dup = listReq.isExist(req.Message.Question.Type, req.Message.Question.Class)
 
@@ -85,20 +89,22 @@ func (cachesReq *cachesRequest) push(key string, req *dns.Request) (dup bool) {
 func (cachesReq *cachesRequest) pops(key string, qtype, qclass uint16) (
 	reqs []*dns.Request,
 ) {
-	v, ok := cachesReq.v.Load(key)
+	cachesReq.Lock()
+	listReq, ok := cachesReq.v[key]
 	if !ok {
+		cachesReq.Unlock()
 		return nil
 	}
+	cachesReq.Unlock()
 
-	var (
-		isEmpty bool
-		listReq = v.(*listRequest)
-	)
+	var isEmpty bool
 
 	reqs, isEmpty = listReq.pops(qtype, qclass)
 
 	if isEmpty {
-		cachesReq.v.Delete(key)
+		cachesReq.Lock()
+		delete(cachesReq.v, key)
+		cachesReq.Unlock()
 	}
 
 	return
