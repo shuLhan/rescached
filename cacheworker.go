@@ -25,7 +25,6 @@ const (
 type cacheWorker struct {
 	upsertQueue   chan *dns.Message
 	updateQueue   chan *response
-	removeQueue   chan *response
 	caches        *caches
 	cachesRequest *cachesRequest
 	cachesList    *cachesList
@@ -40,7 +39,6 @@ func newCacheWorker(pruneDelay, cacheThreshold time.Duration) *cacheWorker {
 	return &cacheWorker{
 		upsertQueue:   make(chan *dns.Message, maxWorkerQueue),
 		updateQueue:   make(chan *response, maxWorkerQueue),
-		removeQueue:   make(chan *response, maxWorkerQueue),
 		caches:        &caches{},
 		cachesRequest: newCachesRequest(),
 		cachesList:    newCachesList(cacheThreshold),
@@ -58,9 +56,6 @@ func (cw *cacheWorker) start() {
 
 		case res := <-cw.updateQueue:
 			cw.update(res)
-
-		case res := <-cw.removeQueue:
-			cw.remove(res)
 		}
 	}
 }
@@ -182,6 +177,6 @@ func (cw *cacheWorker) prune() {
 	}
 
 	for _, res := range lres {
-		cw.removeQueue <- res
+		cw.remove(res)
 	}
 }
