@@ -41,42 +41,30 @@ func TestListRequestPush(t *testing.T) {
 		desc   string
 		req    *dns.Request
 		expLen int
-		exp    []*dns.Request
+		exp    string
 	}{{
 		desc:   "With empty request",
 		expLen: 1,
-		exp: []*dns.Request{
-			testRequests[0],
-		},
+		exp:    `[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}}]`,
 	}, {
 		desc:   "With non empty request (1)",
 		req:    testRequests[1],
 		expLen: 2,
-		exp: []*dns.Request{
-			testRequests[0],
-			testRequests[1],
-		},
+		exp:    `[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}} &{Kind:0 Message.Question:&{Name: Type:2 Class:1}}]`,
 	}, {
 		desc:   "With non empty request (2)",
 		req:    testRequests[2],
 		expLen: 3,
-		exp: []*dns.Request{
-			testRequests[0],
-			testRequests[1],
-			testRequests[2],
-		},
+		exp:    `[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}} &{Kind:0 Message.Question:&{Name: Type:2 Class:1}} &{Kind:0 Message.Question:&{Name: Type:3 Class:1}}]`,
 	}}
 
 	for _, c := range cases {
 		t.Log(c.desc)
 
 		testListRequest.push(c.req)
-		gots := testListRequest.items()
 
 		test.Assert(t, "length", c.expLen, testListRequest.v.Len(), true)
-		for x, got := range gots {
-			test.Assert(t, "request", c.exp[x], got, true)
-		}
+		test.Assert(t, "String", c.exp, testListRequest.String(), true)
 	}
 }
 

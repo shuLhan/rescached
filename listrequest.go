@@ -6,6 +6,8 @@ package rescached
 
 import (
 	"container/list"
+	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/shuLhan/share/lib/dns"
@@ -32,6 +34,31 @@ func newListRequest(req *dns.Request) (listReq *listRequest) {
 		listReq.v.PushBack(req)
 	}
 	return
+}
+
+//
+// String return string interpretation of listRequest as a slice.
+//
+func (listReq *listRequest) String() string {
+	var out strings.Builder
+
+	out.WriteByte('[')
+	x := 0
+	listReq.Lock()
+	for e := listReq.v.Front(); e != nil; e = e.Next() {
+		if x == 0 {
+			x++
+		} else {
+			out.WriteByte(' ')
+		}
+		req := e.Value.(*dns.Request)
+		fmt.Fprintf(&out, "&{Kind:%d Message.Question:%s}", req.Kind,
+			req.Message.Question)
+	}
+	listReq.Unlock()
+	out.WriteByte(']')
+
+	return out.String()
 }
 
 //
@@ -66,17 +93,6 @@ func (listReq *listRequest) isExist(qtype, qclass uint16) (yes bool) {
 	}
 
 	listReq.Unlock()
-	return
-}
-
-//
-// items return list of request as slice.
-//
-func (listReq *listRequest) items() (items []*dns.Request) {
-	for e := listReq.v.Front(); e != nil; e = e.Next() {
-		req := e.Value.(*dns.Request)
-		items = append(items, req)
-	}
 	return
 }
 
