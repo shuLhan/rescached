@@ -44,6 +44,15 @@ func (res *response) AccessedAt() int64 {
 }
 
 //
+// String return the interpretation of response as text.
+// The message field only representated by the Question section.
+//
+func (res *response) String() string {
+	return fmt.Sprintf("{%d %d %s}", res.receivedAt, res.accessedAt,
+		res.message.Question.String())
+}
+
+//
 // checkExpiration will return true if response message is expired, otherwise
 // it will return false.
 // If response is not expired, decrease all TTL in RR to current time minus

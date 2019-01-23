@@ -5,8 +5,6 @@
 package rescached
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/shuLhan/share/lib/dns"
@@ -20,31 +18,22 @@ func TestListResponseAdd(t *testing.T) {
 		desc   string
 		msg    *dns.Message
 		expLen int
-		exp    []*dns.Message
+		exp    string
 	}{{
-		desc: "New",
-		msg:  _testResponses[0].message,
-		exp: []*dns.Message{
-			_testResponses[0].message,
-		},
+		desc:   "New",
+		msg:    _testResponses[0].message,
 		expLen: 1,
+		exp:    `[{0 0 &{Name:1 Type:1 Class:1}}]`,
 	}, {
-		desc: "New",
-		msg:  _testResponses[1].message,
-		exp: []*dns.Message{
-			_testResponses[0].message,
-			_testResponses[1].message,
-		},
+		desc:   "New",
+		msg:    _testResponses[1].message,
 		expLen: 2,
+		exp:    `[{0 0 &{Name:1 Type:1 Class:1}} {0 0 &{Name:2 Type:2 Class:1}}]`,
 	}, {
-		desc: "Replace",
-		msg:  _testResponses[2].message,
-		exp: []*dns.Message{
-			_testResponses[0].message,
-			_testResponses[1].message,
-			_testResponses[2].message,
-		},
+		desc:   "Replace",
+		msg:    _testResponses[2].message,
 		expLen: 3,
+		exp:    `[{0 0 &{Name:1 Type:1 Class:1}} {0 0 &{Name:2 Type:2 Class:1}} {0 0 &{Name:1 Type:1 Class:1}}]`,
 	}}
 
 	for _, c := range cases {
@@ -54,18 +43,7 @@ func TestListResponseAdd(t *testing.T) {
 		res.accessedAt = 0
 
 		test.Assert(t, "listResponse.Len", c.expLen, _testListResponse.v.Len(), true)
-
-		var b strings.Builder
-		b.WriteByte('[')
-		for x, exp := range c.exp {
-			if x > 0 {
-				b.WriteByte(' ')
-			}
-			fmt.Fprintf(&b, "%+v", exp)
-		}
-		b.WriteByte(']')
-
-		test.Assert(t, "listResponse", b.String(), _testListResponse.String(), true)
+		test.Assert(t, "listResponse", c.exp, _testListResponse.String(), true)
 	}
 }
 

@@ -6,7 +6,6 @@ package rescached
 
 import (
 	"container/list"
-	"fmt"
 	"strings"
 	"sync"
 
@@ -111,7 +110,7 @@ func (lres *listResponse) String() string {
 			b.WriteByte(' ')
 		}
 		ev := e.Value.(*response)
-		fmt.Fprintf(&b, "%+v", ev.message)
+		b.WriteString(ev.String())
 	}
 	lres.Unlock()
 
