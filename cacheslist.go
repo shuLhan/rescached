@@ -7,6 +7,7 @@ package rescached
 import (
 	"container/list"
 	"fmt"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -37,6 +38,32 @@ func newCachesList(threshold time.Duration) *cachesList {
 		threshold: threshold,
 		v:         list.New(),
 	}
+}
+
+//
+// String return string interpretation of cachesList.
+//
+func (cl *cachesList) String() string {
+	var out strings.Builder
+
+	out.WriteString("cachesList[")
+	x := 0
+	cl.Lock()
+	for el := cl.v.Front(); el != nil; el = el.Next() {
+		if x == 0 {
+			x++
+		} else {
+			out.WriteByte(' ')
+		}
+
+		res := el.Value.(*response)
+		fmt.Fprintf(&out, "&{%d %d %s}", res.receivedAt,
+			res.accessedAt, res.message.Question)
+	}
+	cl.Unlock()
+	out.WriteByte(']')
+
+	return out.String()
 }
 
 //
