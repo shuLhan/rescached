@@ -14,7 +14,17 @@ import (
 // caches represent a mapping between domain-name and cached responses.
 //
 type caches struct {
-	v sync.Map
+	sync.Mutex
+	v map[string]*listResponse
+}
+
+//
+// newCaches create and initialize new caches.
+//
+func newCaches() *caches {
+	return &caches{
+		v: make(map[string]*listResponse),
+	}
 }
 
 //
@@ -23,12 +33,13 @@ type caches struct {
 func (c *caches) get(qname string, qtype, qclass uint16) (
 	lres *listResponse, res *response,
 ) {
-	v, ok := c.v.Load(qname)
+	c.Lock()
+	lres, ok := c.v[qname]
+	c.Unlock()
 	if !ok {
 		return
 	}
 
-	lres = v.(*listResponse)
 	res = lres.get(qtype, qclass)
 
 	return
@@ -39,7 +50,9 @@ func (c *caches) get(qname string, qtype, qclass uint16) (
 //
 func (c *caches) add(key string, res *response) {
 	lres := newListResponse(res)
-	c.v.Store(key, lres)
+	c.Lock()
+	c.v[key] = lres
+	c.Unlock()
 }
 
 //
@@ -47,16 +60,18 @@ func (c *caches) add(key string, res *response) {
 // If no record found it will return nil.
 //
 func (c *caches) remove(qname string, qtype, qclass uint16) *response {
-	v, ok := c.v.Load(qname)
+	c.Lock()
+	lres, ok := c.v[qname]
+	c.Unlock()
 	if !ok {
 		return nil
 	}
 
-	lres := v.(*listResponse)
-
 	res := lres.remove(qtype, qclass)
 	if lres.v.Len() == 0 {
-		c.v.Delete(qname)
+		c.Lock()
+		delete(c.v, qname)
+		c.Unlock()
 	}
 
 	return res
@@ -72,20 +87,17 @@ func (c *caches) String() string {
 		keys []string
 	)
 
-	c.v.Range(func(k, v interface{}) bool {
-		key := k.(string)
+	for key := range c.v {
 		keys = append(keys, key)
-		return true
-	})
+	}
 
 	sort.Strings(keys)
 
 	out.WriteString("caches[")
+	c.Lock()
 	for x, k := range keys {
-		v, ok := c.v.Load(k)
+		val, ok := c.v[k]
 		if ok {
-			val := v.(*listResponse)
-
 			if x > 0 {
 				out.WriteByte(' ')
 			}
@@ -94,6 +106,7 @@ func (c *caches) String() string {
 			out.WriteString(val.String())
 		}
 	}
+	c.Unlock()
 	out.WriteByte(']')
 
 	return out.String()
