@@ -8,7 +8,7 @@ if [[ ${UID} != 0 ]]; then
 	exit 1
 fi
 
-HOSTS_BLOCK=/etc/rescached/hosts.block
+HOSTS_BLOCK=/etc/rescached/hosts.d/hosts.block
 TMP_HOSTS=/tmp/hosts.raw
 
 wget -O - "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext" > $TMP_HOSTS
