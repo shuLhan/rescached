@@ -24,7 +24,6 @@ const (
 //
 type cacheWorker struct {
 	upsertQueue   chan *dns.Message
-	updateQueue   chan *response
 	caches        *caches
 	cachesRequest *cachesRequest
 	cachesList    *cachesList
@@ -38,7 +37,6 @@ type cacheWorker struct {
 func newCacheWorker(pruneDelay, cacheThreshold time.Duration) *cacheWorker {
 	return &cacheWorker{
 		upsertQueue:   make(chan *dns.Message, maxWorkerQueue),
-		updateQueue:   make(chan *response, maxWorkerQueue),
 		caches:        newCaches(),
 		cachesRequest: newCachesRequest(),
 		cachesList:    newCachesList(cacheThreshold),
@@ -53,9 +51,6 @@ func (cw *cacheWorker) start() {
 		select {
 		case msg := <-cw.upsertQueue:
 			_ = cw.upsert(msg, false)
-
-		case res := <-cw.updateQueue:
-			cw.update(res)
 		}
 	}
 }

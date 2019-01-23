@@ -369,7 +369,7 @@ func (srv *Server) processRequestQueue() {
 			continue
 		}
 
-		srv.cw.updateQueue <- res
+		srv.cw.update(res)
 	}
 }
 
