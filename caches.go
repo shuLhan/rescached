@@ -5,6 +5,8 @@
 package rescached
 
 import (
+	"sort"
+	"strings"
 	"sync"
 )
 
@@ -58,4 +60,41 @@ func (c *caches) remove(qname string, qtype, qclass uint16) *response {
 	}
 
 	return res
+}
+
+//
+// String return the string interpretation of content of caches ordered in
+// ascending order by keys.
+//
+func (c *caches) String() string {
+	var (
+		out  strings.Builder
+		keys []string
+	)
+
+	c.v.Range(func(k, v interface{}) bool {
+		key := k.(string)
+		keys = append(keys, key)
+		return true
+	})
+
+	sort.Strings(keys)
+
+	out.WriteString("caches[")
+	for x, k := range keys {
+		v, ok := c.v.Load(k)
+		if ok {
+			val := v.(*listResponse)
+
+			if x > 0 {
+				out.WriteByte(' ')
+			}
+			out.WriteString(k)
+			out.WriteByte(':')
+			out.WriteString(val.String())
+		}
+	}
+	out.WriteByte(']')
+
+	return out.String()
 }
