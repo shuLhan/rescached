@@ -20,36 +20,14 @@ import (
 	"github.com/shuLhan/share/lib/debug"
 )
 
-const (
-	defConfig = "/etc/rescached/rescached.cfg"
-)
-
 func createRescachedServer(fileConfig string) *rescached.Server {
-	cfg, err := newConfig(fileConfig)
+	opts, err := parseConfig(fileConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if debug.Value >= 1 {
-		fmt.Printf("= config: %+v\n", cfg)
-	}
-
-	opts := &rescached.Options{
-		ConnType:        cfg.connType,
-		ListenAddress:   cfg.listenAddress,
-		ListenPort:      cfg.listenPort,
-		NSParents:       cfg.nsParents,
-		CachePruneDelay: cfg.cachePruneDelay,
-		CacheThreshold:  cfg.cacheThreshold,
-
-		FileResolvConf: cfg.fileResolvConf,
-		FilePID:        cfg.filePID,
-
-		DoHPort:          cfg.listenDoHPort,
-		DoHParents:       cfg.dohParents,
-		DoHAllowInsecure: cfg.dohAllowInsecure,
-		DoHCert:          cfg.fileDoHCert,
-		DoHCertKey:       cfg.fileDoHCertKey,
+		fmt.Printf("= config: %+v\n", opts)
 	}
 
 	rcd, err := rescached.New(opts)
@@ -62,18 +40,18 @@ func createRescachedServer(fileConfig string) *rescached.Server {
 		log.Fatal(err)
 	}
 
-	loadHostsDir(rcd, cfg)
-	loadMasterDir(rcd, cfg)
+	loadHostsDir(rcd, opts)
+	loadMasterDir(rcd, opts)
 
 	return rcd
 }
 
-func loadHostsDir(rcd *rescached.Server, cfg *config) {
-	if len(cfg.dirHosts) == 0 {
+func loadHostsDir(rcd *rescached.Server, opts *rescached.Options) {
+	if len(opts.DirHosts) == 0 {
 		return
 	}
 
-	d, err := os.Open(cfg.dirHosts)
+	d, err := os.Open(opts.DirHosts)
 	if err != nil {
 		log.Println("! loadHostsDir: Open:", err)
 		return
@@ -94,7 +72,7 @@ func loadHostsDir(rcd *rescached.Server, cfg *config) {
 			continue
 		}
 
-		hostsFile := filepath.Join(cfg.dirHosts, fis[x].Name())
+		hostsFile := filepath.Join(opts.DirHosts, fis[x].Name())
 
 		rcd.LoadHostsFile(hostsFile)
 	}
@@ -105,12 +83,12 @@ func loadHostsDir(rcd *rescached.Server, cfg *config) {
 	}
 }
 
-func loadMasterDir(rcd *rescached.Server, cfg *config) {
-	if len(cfg.dirMaster) == 0 {
+func loadMasterDir(rcd *rescached.Server, opts *rescached.Options) {
+	if len(opts.DirMaster) == 0 {
 		return
 	}
 
-	d, err := os.Open(cfg.dirMaster)
+	d, err := os.Open(opts.DirMaster)
 	if err != nil {
 		log.Println("! loadMasterDir: ", err)
 		return
@@ -131,7 +109,7 @@ func loadMasterDir(rcd *rescached.Server, cfg *config) {
 			continue
 		}
 
-		masterFile := filepath.Join(cfg.dirMaster, fis[x].Name())
+		masterFile := filepath.Join(opts.DirMaster, fis[x].Name())
 
 		rcd.LoadMasterFile(masterFile)
 	}
@@ -169,6 +147,7 @@ func main() {
 	var (
 		err        error
 		fileConfig string
+		defConfig  = "/etc/rescached/rescached.cfg"
 	)
 
 	log.SetFlags(0)
