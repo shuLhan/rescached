@@ -15,9 +15,9 @@ import (
 
 // List of error messages.
 var (
-	errQueryName  = errors.New("Missing or invalid query name")
-	errQueryType  = errors.New("Unknown query type")
-	errQueryClass = errors.New("Unknown query class")
+	errQueryName  = errors.New("missing or invalid query name")
+	errQueryType  = errors.New("unknown query type")
+	errQueryClass = errors.New("unknown query class")
 )
 
 // List of command line usages.

@@ -30,7 +30,7 @@ const (
 
 // List of error messages.
 var (
-	ErrNetworkType = errors.New("Invalid network type")
+	ErrNetworkType = errors.New("invalid network type")
 )
 
 // Server implement caching DNS server.
