@@ -82,11 +82,10 @@ func (c *caches) remove(qname string, qtype, qclass uint16) *response {
 // ascending order by keys.
 //
 func (c *caches) String() string {
-	var (
-		out  strings.Builder
-		keys []string
-	)
+	c.Lock()
+	var out strings.Builder
 
+	keys := make([]string, 0, len(c.v))
 	for key := range c.v {
 		keys = append(keys, key)
 	}
@@ -94,7 +93,6 @@ func (c *caches) String() string {
 	sort.Strings(keys)
 
 	out.WriteString("caches[")
-	c.Lock()
 	for x, k := range keys {
 		val, ok := c.v[k]
 		if ok {
@@ -106,8 +104,8 @@ func (c *caches) String() string {
 			out.WriteString(val.String())
 		}
 	}
-	c.Unlock()
 	out.WriteByte(']')
+	c.Unlock()
 
 	return out.String()
 }
