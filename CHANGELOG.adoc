@@ -1,3 +1,17 @@
+= Rescached v2.0.1 (2019-01-xx)
+
+== Enhancements
+
+-  Improve response performance.  Previously we can serve around 93k request
+per second (RPS).  The new enhancement increase the RPS to around 115k.
+
+== Bug Fixes
+
+-  Fix the example certificate and key for DNS over HTTPS
+-  Fix the hosts.block destination file in script to update blocked host file
+-  Fix response with different query type that may not get pruned
+
+
 = Rescached v2.0.0 (2019-01-16)
 
 == Features
