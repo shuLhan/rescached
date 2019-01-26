@@ -27,10 +27,10 @@ RESOLVER_MAN:=doc/resolver.1.gz
 
 RESOLVERBENCH_BIN:=resolverbench
 
-build: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
+build: test lint $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
 
 debug: DEBUG=-race -v
-debug: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
+debug: test lint $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
 
 test: $(COVER_HTML)
 
@@ -51,7 +51,7 @@ coverbrowse: $(COVER_HTML)
 	xdg-open $<
 
 lint:
-	golangci-lint run --enable-all ./...
+	-golangci-lint run --enable-all ./...
 
 $(RESCACHED_BIN): $(SRC)
 	export CGO_ENABLED=1 && \
