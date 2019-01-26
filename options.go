@@ -42,8 +42,9 @@ type Options struct {
 //
 func NewOptions() *Options {
 	return &Options{
+		ListenAddress:   "127.0.0.1",
 		ConnType:        dns.ConnTypeUDP,
-		Timeout:         5 * time.Second,
+		Timeout:         6 * time.Second,
 		CachePruneDelay: time.Hour,
 		CacheThreshold:  -1 * time.Hour,
 		FilePID:         "rescached.pid",

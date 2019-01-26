@@ -5,7 +5,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/url"
 	"strconv"
 	"strings"
@@ -24,24 +24,6 @@ const (
 	cfgSecRescached = "rescached"
 )
 
-// List of config keys.
-const (
-	cfgKeyCachePruneDelay = "cache.prune_delay"
-	cfgKeyCacheThreshold  = "cache.threshold"
-	cfgKeyDebug           = "debug"
-	cfgKeyFilePID         = "file.pid"
-	cfgKeyFileResolvConf  = "file.resolvconf"
-	cfgKeyListenAddress   = "server.listen"
-	cfgKeyNSNetwork       = "server.parent.connection"
-	cfgKeyNSParent        = "server.parent"
-	cfgKeyTimeout         = "server.timeout"
-
-	cfgKeyDoHAllowInsecure = "server.doh.allow_insecure"
-	cfgKeyDoHCert          = "server.doh.certificate"
-	cfgKeyDoHCertKey       = "server.doh.certificate.key"
-	cfgKeyDoHParent        = "server.doh.parent"
-)
-
 func parseConfig(file string) (opts *rescached.Options, err error) {
 	cfg, err := ini.Open(file)
 	if err != nil {
@@ -50,16 +32,18 @@ func parseConfig(file string) (opts *rescached.Options, err error) {
 
 	opts = rescached.NewOptions()
 
-	opts.FilePID = cfg.GetString(cfgSecRescached, "", cfgKeyFilePID, "rescached.pid")
-	opts.FileResolvConf = cfg.GetString(cfgSecRescached, "", cfgKeyFileResolvConf, "")
-	opts.DoHCert = cfg.GetString(cfgSecRescached, "", cfgKeyDoHCert, "")
-	opts.DoHCertKey = cfg.GetString(cfgSecRescached, "", cfgKeyDoHCertKey, "")
-	opts.DoHAllowInsecure = cfg.GetBool(cfgSecRescached, "", cfgKeyDoHAllowInsecure, false)
+	opts.FilePID = cfg.GetString(cfgSecRescached, "", "file.pid",
+		"rescached.pid")
+	opts.FileResolvConf = cfg.GetString(cfgSecRescached, "",
+		"file.resolvconf", "")
+	opts.DoHCert = cfg.GetString(cfgSecRescached, "",
+		"server.doh.certificate", "")
+	opts.DoHCertKey = cfg.GetString(cfgSecRescached, "",
+		"server.doh.certificate.key", "")
+	opts.DoHAllowInsecure = cfg.GetBool(cfgSecRescached, "",
+		"server.doh.allow_insecure", false)
 
-	err = parseParentConnection(cfg, opts)
-	if err != nil {
-		return nil, err
-	}
+	parseParentConnection(cfg, opts)
 
 	err = parseNSParent(cfg, opts)
 	if err != nil {
@@ -71,10 +55,7 @@ func parseConfig(file string) (opts *rescached.Options, err error) {
 		return nil, err
 	}
 
-	err = parseListen(cfg, opts)
-	if err != nil {
-		return nil, err
-	}
+	parseListen(cfg, opts)
 
 	opts.DirHosts = cfg.GetString(cfgSecRescached, "", "dir.hosts", "")
 	opts.DirMaster = cfg.GetString(cfgSecRescached, "", "dir.master", "")
@@ -90,7 +71,7 @@ func parseConfig(file string) (opts *rescached.Options, err error) {
 func parseNSParent(cfg *ini.Ini, opts *rescached.Options) (err error) {
 	var nsParents []string
 
-	v, ok := cfg.Get(cfgSecRescached, "", cfgKeyNSParent)
+	v, ok := cfg.Get(cfgSecRescached, "", "server.parent")
 	if ok {
 		nsParents = strings.Split(v, ",")
 	}
@@ -115,7 +96,7 @@ func parseNSParent(cfg *ini.Ini, opts *rescached.Options) (err error) {
 func parseDoHParent(cfg *ini.Ini, opts *rescached.Options) (err error) {
 	var dohParents []string
 
-	v, ok := cfg.Get(cfgSecRescached, "", cfgKeyDoHParent)
+	v, ok := cfg.Get(cfgSecRescached, "", "server.doh.parent")
 	if ok {
 		dohParents = strings.Split(v, ",")
 	}
@@ -140,8 +121,9 @@ func parseDoHParent(cfg *ini.Ini, opts *rescached.Options) (err error) {
 	return nil
 }
 
-func parseParentConnection(cfg *ini.Ini, opts *rescached.Options) (err error) {
-	network := cfg.GetString(cfgSecRescached, "", cfgKeyNSNetwork, "udp")
+func parseParentConnection(cfg *ini.Ini, opts *rescached.Options) {
+	network := cfg.GetString(cfgSecRescached, "",
+		"server.parent.connection", "udp")
 	network = strings.ToLower(network)
 
 	switch network {
@@ -150,29 +132,28 @@ func parseParentConnection(cfg *ini.Ini, opts *rescached.Options) (err error) {
 	case "tcp":
 		opts.ConnType = dns.ConnTypeTCP
 	default:
-		return fmt.Errorf("Invalid network: '%s'", network)
+		log.Printf("Invalid network: '%s', using default 'udp'\n",
+			network)
 	}
-
-	return nil
 }
 
-func parseListen(cfg *ini.Ini, opts *rescached.Options) (err error) {
-	listen := cfg.GetString(cfgSecRescached, "", cfgKeyListenAddress,
+func parseListen(cfg *ini.Ini, opts *rescached.Options) {
+	listen := cfg.GetString(cfgSecRescached, "", "server.listen",
 		"127.0.0.1")
 
 	ip, port, err := libnet.ParseIPPort(listen, dns.DefaultPort)
 	if err != nil {
-		return err
+		log.Printf("Invalid server.listen: '%s', using default\n",
+			listen)
+		return
 	}
 
 	opts.ListenAddress = ip.String()
 	opts.ListenPort = port
-
-	return nil
 }
 
 func parseDoHPort(cfg *ini.Ini, opts *rescached.Options) {
-	v := cfg.GetString(cfgSecRescached, "", cfgKeyTimeout, "443")
+	v := cfg.GetString(cfgSecRescached, "", "server.doh.listen.port", "443")
 	port, err := strconv.Atoi(v)
 	if err != nil {
 		port = int(dns.DefaultDoHPort)
@@ -182,9 +163,12 @@ func parseDoHPort(cfg *ini.Ini, opts *rescached.Options) {
 }
 
 func parseTimeout(cfg *ini.Ini, opts *rescached.Options) {
-	v := cfg.GetString(cfgSecRescached, "", cfgKeyTimeout, "6")
+	v := cfg.GetString(cfgSecRescached, "", "server.timeout", "6")
 	timeout, err := strconv.Atoi(v)
 	if err != nil {
+		return
+	}
+	if timeout < 3 || timeout > 6 {
 		timeout = 6
 	}
 
@@ -194,7 +178,7 @@ func parseTimeout(cfg *ini.Ini, opts *rescached.Options) {
 func parseCachePruneDelay(cfg *ini.Ini, opts *rescached.Options) {
 	defCachePruneDelay := 1 * time.Hour
 
-	v, ok := cfg.Get(cfgSecRescached, "", cfgKeyCachePruneDelay)
+	v, ok := cfg.Get(cfgSecRescached, "", "cache.prune_delay")
 	if !ok {
 		opts.CachePruneDelay = defCachePruneDelay
 		return
@@ -218,7 +202,7 @@ func parseCachePruneDelay(cfg *ini.Ini, opts *rescached.Options) {
 func parseCacheThreshold(cfg *ini.Ini, opts *rescached.Options) {
 	defCacheThreshold := -1 * time.Hour
 
-	v, ok := cfg.Get(cfgSecRescached, "", cfgKeyCacheThreshold)
+	v, ok := cfg.Get(cfgSecRescached, "", "cache.threshold")
 	if !ok {
 		opts.CacheThreshold = defCacheThreshold
 		return
@@ -240,7 +224,7 @@ func parseCacheThreshold(cfg *ini.Ini, opts *rescached.Options) {
 }
 
 func parseDebugLevel(cfg *ini.Ini) {
-	v, ok := cfg.Get(cfgSecRescached, "", cfgKeyDebug)
+	v, ok := cfg.Get(cfgSecRescached, "", "debug")
 	if !ok {
 		return
 	}
