@@ -170,10 +170,8 @@ func main() {
 	if len(opts.nameserver) > 0 {
 		cr.NameServers = cr.NameServers[:0]
 		cr.NameServers = append(cr.NameServers, opts.nameserver)
-	} else {
-		if len(cr.NameServers) == 0 {
-			cr.NameServers = append(cr.NameServers, "127.0.0.1:53")
-		}
+	} else if len(cr.NameServers) == 0 {
+		cr.NameServers = append(cr.NameServers, "127.0.0.1:53")
 	}
 
 	var (
