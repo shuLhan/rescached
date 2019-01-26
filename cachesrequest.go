@@ -29,7 +29,7 @@ func newCachesRequest() *cachesRequest {
 }
 
 //
-// String return the string intepretation of content of cachesRequest.
+// String return the string interpretation of content of cachesRequest.
 //
 func (cachesReq *cachesRequest) String() string {
 	var out strings.Builder
