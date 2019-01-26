@@ -38,13 +38,13 @@ func TestCachesRequestPush(t *testing.T) {
 		key:    "0",
 		req:    testRequests[0],
 		expDup: true,
-		exp:    `cachesRequest[0:[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}} &{Kind:0 Message.Question:&{Name: Type:1 Class:1}}]]`,
+		exp:    `cachesRequest[0:[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}} &{Kind:0 Message.Question:&{Name: Type:1 Class:1}}]]`, // nolint: lll
 	}, {
 		desc:   "With valid key and request (1)",
 		key:    "1",
 		req:    testRequests[1],
 		expDup: false,
-		exp:    `cachesRequest[0:[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}} &{Kind:0 Message.Question:&{Name: Type:1 Class:1}}] 1:[&{Kind:0 Message.Question:&{Name: Type:2 Class:1}}]]`,
+		exp:    `cachesRequest[0:[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}} &{Kind:0 Message.Question:&{Name: Type:1 Class:1}}] 1:[&{Kind:0 Message.Question:&{Name: Type:2 Class:1}}]]`, // nolint: lll
 	}}
 
 	for _, c := range cases {
