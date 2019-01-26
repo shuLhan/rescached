@@ -49,6 +49,9 @@ type Server struct {
 // New create and initialize new rescached server.
 //
 func New(opts *Options) (*Server, error) {
+	if opts == nil {
+		opts = NewOptions()
+	}
 	srv := &Server{
 		dnsServer:  new(dns.Server),
 		reqQueue:   make(chan *dns.Request, _maxQueue),
