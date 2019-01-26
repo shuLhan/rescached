@@ -16,8 +16,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/shuLhan/rescached-go"
 	"github.com/shuLhan/share/lib/debug"
+
+	rescached "github.com/shuLhan/rescached-go"
 )
 
 func createRescachedServer(fileConfig string) *rescached.Server {
