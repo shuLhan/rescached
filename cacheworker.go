@@ -47,11 +47,8 @@ func newCacheWorker(pruneDelay, cacheThreshold time.Duration) *cacheWorker {
 func (cw *cacheWorker) start() {
 	go cw.pruneWorker()
 
-	for {
-		select {
-		case msg := <-cw.upsertQueue:
-			_ = cw.upsert(msg, false)
-		}
+	for msg := range cw.upsertQueue {
+		_ = cw.upsert(msg, false)
 	}
 }
 
