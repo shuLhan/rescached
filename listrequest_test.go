@@ -11,7 +11,7 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
-var testRequests = []*dns.Request{{
+var testRequests = []*dns.Request{{ // nolint: gochecknoglobals
 	Message: &dns.Message{
 		Question: &dns.SectionQuestion{
 			Type:  1,
@@ -34,7 +34,7 @@ var testRequests = []*dns.Request{{
 	},
 }}
 
-var testListRequest = newListRequest(testRequests[0])
+var testListRequest = newListRequest(testRequests[0]) // nolint: gochecknoglobals
 
 func TestListRequestPush(t *testing.T) {
 	cases := []struct {

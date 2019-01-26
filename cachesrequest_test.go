@@ -11,7 +11,7 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
-var testCachesReq = newCachesRequest()
+var testCachesReq = newCachesRequest() // nolint: gochecknoglobals
 
 func TestCachesRequestPush(t *testing.T) {
 	cases := []struct {

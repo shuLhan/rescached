@@ -14,7 +14,7 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
-var testCacheWorker = newCacheWorker(10*time.Second, -10*time.Second)
+var testCacheWorker = newCacheWorker(10*time.Second, -10*time.Second) // nolint: gochecknoglobals
 
 func assertCaches(t *testing.T, exp string) {
 	got := testCacheWorker.caches.String()
