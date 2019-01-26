@@ -14,6 +14,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	libbytes "github.com/shuLhan/share/lib/bytes"
@@ -97,6 +98,86 @@ func (srv *Server) LoadHostsFile(path string) {
 	}
 
 	srv.populateCaches(msgs)
+}
+
+//
+// LoadHostsDir load all host formatted files in directory.
+//
+func (srv *Server) LoadHostsDir(dir string) {
+	if len(dir) == 0 {
+		return
+	}
+
+	d, err := os.Open(dir)
+	if err != nil {
+		log.Println("! loadHostsDir: Open:", err)
+		return
+	}
+
+	fis, err := d.Readdir(0)
+	if err != nil {
+		log.Println("! loadHostsDir: Readdir:", err)
+		err = d.Close()
+		if err != nil {
+			log.Println("! loadHostsDir: Close:", err)
+		}
+		return
+	}
+
+	for x := 0; x < len(fis); x++ {
+		if fis[x].IsDir() {
+			continue
+		}
+
+		hostsFile := filepath.Join(dir, fis[x].Name())
+
+		srv.LoadHostsFile(hostsFile)
+	}
+
+	err = d.Close()
+	if err != nil {
+		log.Println("! loadHostsDir: Close:", err)
+	}
+}
+
+//
+// LoadMasterDir load all master formatted files in directory.
+//
+func (srv *Server) LoadMasterDir(dir string) {
+	if len(dir) == 0 {
+		return
+	}
+
+	d, err := os.Open(dir)
+	if err != nil {
+		log.Println("! loadMasterDir: ", err)
+		return
+	}
+
+	fis, err := d.Readdir(0)
+	if err != nil {
+		log.Println("! loadMasterDir: ", err)
+		err = d.Close()
+		if err != nil {
+			log.Println("! loadMasterDir: Close:", err)
+		}
+		return
+	}
+
+	for x := 0; x < len(fis); x++ {
+		if fis[x].IsDir() {
+			continue
+		}
+
+		masterFile := filepath.Join(dir, fis[x].Name())
+
+		srv.LoadMasterFile(masterFile)
+	}
+
+	err = d.Close()
+	if err != nil {
+		log.Println("! loadHostsDir: Close:", err)
+	}
 }
 
 //

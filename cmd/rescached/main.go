@@ -12,7 +12,6 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
@@ -41,84 +40,10 @@ func createRescachedServer(fileConfig string) *rescached.Server {
 		log.Fatal(err)
 	}
 
-	loadHostsDir(rcd, opts)
-	loadMasterDir(rcd, opts)
+	rcd.LoadHostsDir(opts.DirHosts)
+	rcd.LoadMasterDir(opts.DirMaster)
 
 	return rcd
-}
-
-func loadHostsDir(rcd *rescached.Server, opts *rescached.Options) {
-	if len(opts.DirHosts) == 0 {
-		return
-	}
-
-	d, err := os.Open(opts.DirHosts)
-	if err != nil {
-		log.Println("! loadHostsDir: Open:", err)
-		return
-	}
-
-	fis, err := d.Readdir(0)
-	if err != nil {
-		log.Println("! loadHostsDir: Readdir:", err)
-		err = d.Close()
-		if err != nil {
-			log.Println("! loadHostsDir: Close:", err)
-		}
-		return
-	}
-
-	for x := 0; x < len(fis); x++ {
-		if fis[x].IsDir() {
-			continue
-		}
-
-		hostsFile := filepath.Join(opts.DirHosts, fis[x].Name())
-
-		rcd.LoadHostsFile(hostsFile)
-	}
-
-	err = d.Close()
-	if err != nil {
-		log.Println("! loadHostsDir: Close:", err)
-	}
-}
-
-func loadMasterDir(rcd *rescached.Server, opts *rescached.Options) {
-	if len(opts.DirMaster) == 0 {
-		return
-	}
-
-	d, err := os.Open(opts.DirMaster)
-	if err != nil {
-		log.Println("! loadMasterDir: ", err)
-		return
-	}
-
-	fis, err := d.Readdir(0)
-	if err != nil {
-		log.Println("! loadMasterDir: ", err)
-		err = d.Close()
-		if err != nil {
-			log.Println("! loadMasterDir: Close:", err)
-		}
-		return
-	}
-
-	for x := 0; x < len(fis); x++ {
-		if fis[x].IsDir() {
-			continue
-		}
-
-		masterFile := filepath.Join(opts.DirMaster, fis[x].Name())
-
-		rcd.LoadMasterFile(masterFile)
-	}
-
-	err = d.Close()
-	if err != nil {
-		log.Println("! loadHostsDir: Close:", err)
-	}
 }
 
 func handleSignal(rcd *rescached.Server) {
