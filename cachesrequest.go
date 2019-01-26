@@ -7,6 +7,7 @@ package rescached
 import (
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 	"sync"
 
@@ -32,21 +33,25 @@ func newCachesRequest() *cachesRequest {
 // String return the string interpretation of content of cachesRequest.
 //
 func (cachesReq *cachesRequest) String() string {
+	cachesReq.Lock()
 	var out strings.Builder
 
+	keys := make([]string, 0, len(cachesReq.v))
+	for key := range cachesReq.v {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+
 	out.WriteString("cachesRequest[")
-	x := 0
-	cachesReq.Lock()
-	for key, val := range cachesReq.v {
-		if x == 0 {
-			x++
-		} else {
+	for x, k := range keys {
+		if x > 0 {
 			out.WriteByte(' ')
 		}
-		fmt.Fprintf(&out, "%s:%v", key, val.String())
+		fmt.Fprintf(&out, "%s:%v", k, cachesReq.v[k])
 	}
-	cachesReq.Unlock()
 	out.WriteByte(']')
+	cachesReq.Unlock()
 
 	return out.String()
 }
