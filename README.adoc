@@ -290,15 +290,15 @@ Example configuration in *rescached.cfg*,
 
 ----
 	server.doh.parent = https://cloudflare-dns.com/dns-query
-	server.doh.certificate = /etc/rescached/example.cert.crt
-	server.doh.certificate.key = /etc/rescached/example.cert.key
+	server.doh.certificate = /etc/rescached/localhost.cert.pem
+	server.doh.certificate.key = /etc/rescached/localhost.key.pem
 ----
 
 If the "server.doh.parent" is using self-signed certificate, you can set
 "server.doh.allow_insecure" to true.
 
 Using the above configuration, rescached will serve DoH queries on
-*https://127.0.0.1/dns-query*.
+*https://localhost/dns-query*.
 Only query to port 443 will be forwarded to "+server.doh.parent+".
 Queries to port 53, either with UDP or TCP, will be forwarded to
 "+server.parent+" name servers as usual.
@@ -307,12 +307,30 @@ This feature can be tested using Firefox Nightly by updating the configuration
 in "about:config" into,
 
 ----
-	network.trr.mode;2
-	network.trr.uri;https://127.0.0.1/dns-query
+	network.trr.bootstrapAddress;127.0.0.1
+	network.trr.mode;3
+	network.trr.uri;https://localhost/dns-query
 ----
 
+Since we are using `mode=3`, the `network.trr.bootstrapAddress` is required so
+Firefox can resolve "localhost" to "127.0.0.1".
 If you use provided self-signed certificate, you must import it manually to
 Firefox.
+
+To check if DoH works, first you must set the `debug` option to `1`, and
+restart the rescached.
+Open a new terminal and run `sudo journalctl -xf`, to show current system log.
+Open Firefox Nightly and any random website.
+At the terminal you will see output from rescached which looks like these,
+
+----
+... rescached[10742]: < request:    4          - &{Name:cs2...
+... rescached[10742]: - expired:  413 1548503139 &{Name:cs2...
+... rescached[10742]: + update :    - 1548503139 &{Name:cs2...
+----
+
+If you see number "4" in request line, "< request: 4", thats indicated that
+request is from HTTPS connection and its working.
 
 
 == EXIT STATUS
