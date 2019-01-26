@@ -155,8 +155,10 @@ func (cw *cacheWorker) remove(res *response) {
 	cw.caches.remove(qname, res.message.Question.Type,
 		res.message.Question.Class)
 
-	fmt.Printf("= pruning: %4d %10d %s\n", cw.cachesList.length(),
-		res.accessedAt, res.message.Question)
+	if debug.Value > 0 {
+		fmt.Printf("= pruning: %4d %10d %s\n", cw.cachesList.length(),
+			res.accessedAt, res.message.Question)
+	}
 
 	res.el = nil
 	res.message = nil
@@ -171,4 +173,5 @@ func (cw *cacheWorker) prune() {
 	for _, res := range lres {
 		cw.remove(res)
 	}
+	fmt.Printf("= pruning %d records\n", len(lres))
 }
