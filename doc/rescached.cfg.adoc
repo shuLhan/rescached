@@ -41,7 +41,7 @@ This group of options contain the main configuration.
 
 Format:: IP-ADDRESS:PORT, IP-ADDRESS:PORT, ...
 Default::
-* Address: 8.8.8.8 and 8.8.4.4
+* Address: 1.1.1.1 and 1.0.0.1
 * Port: 53
 Description:: List of parent DNS servers, separated by commas.
 When +rescached+ receive a query from client and when it does

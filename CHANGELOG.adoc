@@ -1,4 +1,12 @@
-= Rescached v2.0.1 (2019-01-xx)
+= Rescached v2.1.0 (2019-01-xx)
+
+== New Features
+
+-  Change default parent nameservers to Cloudflare DNS.
+We believe in Cloudflare!
+Please read Cloudflare DNS policy for more information,
+
+	https://developers.cloudflare.com/1.1.1.1/commitment-to-privacy/privacy-policy/privacy-policy/
 
 == Enhancements
 
