@@ -69,15 +69,12 @@ func parseConfig(file string) (opts *rescached.Options, err error) {
 }
 
 func parseNSParent(cfg *ini.Ini, opts *rescached.Options) (err error) {
-	var nsParents []string
-
 	v, ok := cfg.Get(cfgSecRescached, "", "server.parent")
-	if ok {
-		nsParents = strings.Split(v, ",")
+	if !ok {
+		return
 	}
-	if len(nsParents) == 0 {
-		nsParents = []string{"8.8.8.8:53", "8.8.4.4:53"}
-	}
+
+	nsParents := strings.Split(v, ",")
 
 	for _, ns := range nsParents {
 		ns := strings.TrimSpace(ns)
@@ -94,15 +91,12 @@ func parseNSParent(cfg *ini.Ini, opts *rescached.Options) (err error) {
 }
 
 func parseDoHParent(cfg *ini.Ini, opts *rescached.Options) (err error) {
-	var dohParents []string
-
 	v, ok := cfg.Get(cfgSecRescached, "", "server.doh.parent")
-	if ok {
-		dohParents = strings.Split(v, ",")
+	if !ok {
+		return
 	}
-	if len(dohParents) == 0 {
-		dohParents = []string{"https://cloudflare-dns.com/dns-query"}
-	}
+
+	dohParents := strings.Split(v, ",")
 
 	for _, ns := range dohParents {
 		ns := strings.TrimSpace(ns)
@@ -115,7 +109,16 @@ func parseDoHParent(cfg *ini.Ini, opts *rescached.Options) (err error) {
 			return err
 		}
 
-		opts.DoHParents = append(opts.DoHParents, ns)
+		found := false
+		for _, known := range opts.DoHParents {
+			if ns == known {
+				found = true
+				break
+			}
+		}
+		if !found {
+			opts.DoHParents = append(opts.DoHParents, ns)
+		}
 	}
 
 	return nil
@@ -168,19 +171,13 @@ func parseTimeout(cfg *ini.Ini, opts *rescached.Options) {
 	if err != nil {
 		return
 	}
-	if timeout < 3 || timeout > 6 {
-		timeout = 6
-	}
 
 	opts.Timeout = time.Duration(timeout) * time.Second
 }
 
 func parseCachePruneDelay(cfg *ini.Ini, opts *rescached.Options) {
-	defCachePruneDelay := 1 * time.Hour
-
 	v, ok := cfg.Get(cfgSecRescached, "", "cache.prune_delay")
 	if !ok {
-		opts.CachePruneDelay = defCachePruneDelay
 		return
 	}
 
@@ -190,21 +187,13 @@ func parseCachePruneDelay(cfg *ini.Ini, opts *rescached.Options) {
 
 	opts.CachePruneDelay, err = time.ParseDuration(v)
 	if err != nil {
-		opts.CachePruneDelay = defCachePruneDelay
 		return
-	}
-
-	if opts.CachePruneDelay == 0 {
-		opts.CachePruneDelay = defCachePruneDelay
 	}
 }
 
 func parseCacheThreshold(cfg *ini.Ini, opts *rescached.Options) {
-	defCacheThreshold := -1 * time.Hour
-
 	v, ok := cfg.Get(cfgSecRescached, "", "cache.threshold")
 	if !ok {
-		opts.CacheThreshold = defCacheThreshold
 		return
 	}
 
@@ -214,12 +203,7 @@ func parseCacheThreshold(cfg *ini.Ini, opts *rescached.Options) {
 
 	opts.CacheThreshold, err = time.ParseDuration(v)
 	if err != nil {
-		opts.CacheThreshold = defCacheThreshold
 		return
-	}
-
-	if opts.CacheThreshold >= 0 {
-		opts.CacheThreshold = defCacheThreshold
 	}
 }
 

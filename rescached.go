@@ -49,10 +49,13 @@ type Server struct {
 //
 // New create and initialize new rescached server.
 //
-func New(opts *Options) (*Server, error) {
+func New(opts *Options) *Server {
 	if opts == nil {
 		opts = NewOptions()
 	}
+
+	opts.init()
+
 	srv := &Server{
 		dnsServer:  new(dns.Server),
 		reqQueue:   make(chan *dns.Request, _maxQueue),
@@ -70,8 +73,6 @@ func New(opts *Options) (*Server, error) {
 		if err != nil {
 			log.Printf("! loadResolvConf: %s\n", err)
 			srv.nsParents = srv.opts.NSParents
-		} else {
-			fmt.Printf("= Name servers fallback: %v\n", srv.opts.NSParents)
 		}
 	}
 
@@ -79,7 +80,7 @@ func New(opts *Options) (*Server, error) {
 
 	srv.LoadHostsFile("")
 
-	return srv, nil
+	return srv
 }
 
 //

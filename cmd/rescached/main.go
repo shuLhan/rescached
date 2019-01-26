@@ -30,10 +30,7 @@ func createRescachedServer(fileConfig string) *rescached.Server {
 		fmt.Printf("= config: %+v\n", opts)
 	}
 
-	rcd, err := rescached.New(opts)
-	if err != nil {
-		log.Fatal(err)
-	}
+	rcd := rescached.New(opts)
 
 	err = rcd.WritePID()
 	if err != nil {
