@@ -89,7 +89,7 @@ func TestResponseAccessedAt(t *testing.T) {
 	}
 }
 
-func TestResponseCheckExpiration(t *testing.T) {
+func TestResponseIsExpired(t *testing.T) {
 	cases := []struct {
 		desc string
 		res  *response
@@ -111,8 +111,7 @@ func TestResponseCheckExpiration(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		test.Assert(t, "checkExpiration", c.exp,
-			c.res.checkExpiration(), true)
+		test.Assert(t, "isExpired", c.exp, c.res.isExpired(), true)
 	}
 }
 

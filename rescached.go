@@ -303,7 +303,7 @@ func (srv *Server) RemovePID() {
 func (srv *Server) WritePID() error {
 	_, err := os.Stat(srv.opts.FilePID)
 	if err == nil {
-		return fmt.Errorf("writePID: pid file '%s' exist",
+		return fmt.Errorf("writePID: PID file '%s' exist",
 			srv.opts.FilePID)
 	}
 
@@ -377,23 +377,7 @@ func (srv *Server) processRequestQueue() {
 		libbytes.ToLower(&req.Message.Question.Name)
 		qname := string(req.Message.Question.Name)
 		_, res := srv.cw.caches.get(qname, req.Message.Question.Type, req.Message.Question.Class)
-		if res == nil {
-			// Check and/or push if the same request already
-			// forwarded before.
-			dup := srv.cw.cachesRequest.push(qname, req)
-			if dup {
-				continue
-			}
-
-			if req.Kind == dns.ConnTypeDoH {
-				srv.fwDoHQueue <- req
-			} else {
-				srv.fwQueue <- req
-			}
-			continue
-		}
-
-		if res.checkExpiration() {
+		if res == nil || res.isExpired() {
 			// Check and/or push if the same request already
 			// forwarded before.
 			dup := srv.cw.cachesRequest.push(qname, req)

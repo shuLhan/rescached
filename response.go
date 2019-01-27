@@ -53,12 +53,12 @@ func (res *response) String() string {
 }
 
 //
-// checkExpiration will return true if response message is expired, otherwise
+// isExpired will return true if response message is expired, otherwise
 // it will return false.
-// If response is not expired, decrease all TTL in RR to current time minus
-// time they were received.
+// If response is not expired, all TTL in RR will be decreased to current time
+// minus time they were received.
 //
-func (res *response) checkExpiration() bool {
+func (res *response) isExpired() bool {
 	// Local responses from hosts file will never be expired.
 	if res.receivedAt == 0 {
 		return false
