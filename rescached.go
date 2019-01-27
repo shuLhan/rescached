@@ -335,7 +335,7 @@ func (srv *Server) runForwarders() (err error) {
 		if srv.opts.ConnType == dns.ConnTypeUDP {
 			cl, err = dns.NewUDPClient(raddr.String())
 			if err != nil {
-				log.Fatal("processForwardQueue: NewUDPClient:", err)
+				log.Fatal("runForwarders: NewUDPClient:", err)
 				return
 			}
 		}
@@ -351,7 +351,7 @@ func (srv *Server) runDoHForwarders() error {
 	for x := 0; x < len(srv.opts.DoHParents); x++ {
 		cl, err := dns.NewDoHClient(srv.opts.DoHParents[x], srv.opts.DoHAllowInsecure)
 		if err != nil {
-			log.Fatal("processForwardQueue: NewDoHClient:", err)
+			log.Fatal("runDoHForwarders: NewDoHClient:", err)
 			return err
 		}
 
@@ -512,7 +512,7 @@ func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
 			if reqs[x].Sender != nil {
 				_, err := reqs[x].Sender.Send(res, reqs[x].UDPAddr)
 				if err != nil {
-					log.Println("! processForwardQueue: Send:", err)
+					log.Println("! processForwardResponse: Send:", err)
 				}
 			}
 			dns.FreeRequest(reqs[x])
@@ -521,7 +521,7 @@ func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
 			if reqs[x].Sender != nil {
 				_, err := reqs[x].Sender.Send(res, nil)
 				if err != nil {
-					log.Println("! processForwardQueue: Send:", err)
+					log.Println("! processForwardResponse: Send:", err)
 				}
 			}
 			dns.FreeRequest(reqs[x])
@@ -530,7 +530,7 @@ func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
 			if reqs[x].ResponseWriter != nil {
 				_, err := req.ResponseWriter.Write(res.Packet)
 				if err != nil {
-					log.Println("! processRequestQueue: ResponseWriter.Write:", err)
+					log.Println("! processForwardResponse: ResponseWriter.Write:", err)
 				}
 				req.ResponseWriter.(http.Flusher).Flush()
 				reqs[x].ChanResponded <- true
