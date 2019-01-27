@@ -78,8 +78,6 @@ func New(opts *Options) *Server {
 
 	srv.dnsServer.Handler = srv
 
-	srv.LoadHostsFile("")
-
 	return srv
 }
 

@@ -39,6 +39,7 @@ func createRescachedServer(fileConfig string) *rescached.Server {
 
 	rcd.LoadHostsDir(opts.DirHosts)
 	rcd.LoadMasterDir(opts.DirMaster)
+	rcd.LoadHostsFile("")
 
 	return rcd
 }
