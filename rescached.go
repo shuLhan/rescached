@@ -365,78 +365,77 @@ func (srv *Server) stopForwarders() {
 	srv.fwStop <- true
 }
 
-func (srv *Server) processRequestQueue() {
-	var err error
+//
+// processRequest process request from any connection, forward it to parent
+// name server if no response from cache or if cache is expired; or send the
+// cached response back to request.
+//
+func (srv *Server) processRequest(req *dns.Request) {
+	if req == nil {
+		return
+	}
+	if debug.Value >= 1 {
+		fmt.Printf("< request: %4d %10c %s\n", req.Kind, '-', req.Message.Question)
+	}
 
-	for req := range srv.reqQueue {
+	// Check if request query name exist in cache.
+	libbytes.ToLower(&req.Message.Question.Name)
+	qname := string(req.Message.Question.Name)
+	_, res := srv.cw.caches.get(qname, req.Message.Question.Type, req.Message.Question.Class)
+	if res == nil || res.isExpired() {
+		// Check and/or push if the same request already
+		// forwarded before.
+		dup := srv.cw.cachesRequest.push(qname, req)
+		if dup {
+			return
+		}
+
+		if req.Kind == dns.ConnTypeDoH {
+			srv.fwDoHQueue <- req
+		} else {
+			srv.fwQueue <- req
+		}
+		return
+	}
+
+	res.message.SetID(req.Message.Header.ID)
+
+	switch req.Kind {
+	case dns.ConnTypeUDP, dns.ConnTypeTCP:
+		if req.Sender != nil {
+			_, err := req.Sender.Send(res.message, req.UDPAddr)
+			if err != nil {
+				log.Println("! processRequest: Sender.Send:", err)
+			}
+		}
+
+	case dns.ConnTypeDoH:
+		if req.ResponseWriter != nil {
+			_, err := req.ResponseWriter.Write(res.message.Packet)
+			if err != nil {
+				log.Println("! processRequest: ResponseWriter.Write:", err)
+			}
+			req.ResponseWriter.(http.Flusher).Flush()
+			req.ChanResponded <- true
+		}
+	}
+
+	// Ignore update on local caches
+	if res.receivedAt == 0 {
 		if debug.Value >= 1 {
-			fmt.Printf("< request: %4d %10c %s\n", req.Kind, '-', req.Message.Question)
+			fmt.Printf("= local  : %s\n", res.message.Question)
 		}
-
-		// Check if request query name exist in cache.
-		libbytes.ToLower(&req.Message.Question.Name)
-		qname := string(req.Message.Question.Name)
-		_, res := srv.cw.caches.get(qname, req.Message.Question.Type, req.Message.Question.Class)
-		if res == nil || res.isExpired() {
-			// Check and/or push if the same request already
-			// forwarded before.
-			dup := srv.cw.cachesRequest.push(qname, req)
-			if dup {
-				continue
-			}
-
-			if req.Kind == dns.ConnTypeDoH {
-				srv.fwDoHQueue <- req
-			} else {
-				srv.fwQueue <- req
-			}
-			continue
-		}
-
-		res.message.SetID(req.Message.Header.ID)
-
-		switch req.Kind {
-		case dns.ConnTypeUDP:
-			if req.Sender != nil {
-				_, err = req.Sender.Send(res.message, req.UDPAddr)
-				if err != nil {
-					log.Println("! processRequestQueue: Sender.Send:", err)
-				}
-			}
-			dns.FreeRequest(req)
-
-		case dns.ConnTypeTCP:
-			if req.Sender != nil {
-				_, err = req.Sender.Send(res.message, nil)
-				if err != nil {
-					log.Println("! processRequestQueue: Sender.Send:", err)
-				}
-			}
-			dns.FreeRequest(req)
-
-		case dns.ConnTypeDoH:
-			if req.ResponseWriter != nil {
-				_, err = req.ResponseWriter.Write(res.message.Packet)
-				if err != nil {
-					log.Println("! processRequestQueue: ResponseWriter.Write:", err)
-				}
-				req.ResponseWriter.(http.Flusher).Flush()
-				req.ChanResponded <- true
-			}
-
-		default:
-			dns.FreeRequest(req)
-		}
-
-		// Ignore update on local caches
-		if res.receivedAt == 0 {
-			if debug.Value >= 1 {
-				fmt.Printf("= local  : %s\n", res.message.Question)
-			}
-			continue
-		}
-
+	} else {
 		srv.cw.update(res)
+	}
+}
+
+func (srv *Server) processRequestQueue() {
+	for req := range srv.reqQueue {
+		isResponded := srv.processRequest(req)
+		if isResponded {
+			dns.FreeRequest(req)
+		}
 	}
 }
 
