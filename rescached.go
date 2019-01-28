@@ -80,6 +80,12 @@ func New(opts *Options) *Server {
 	return srv
 }
 
+func (srv *Server) CachesStats() string {
+	return fmt.Sprintf("= rescached.CachesStats: {caches:%d cachesList:%d request:%d}",
+		srv.cw.caches.length(), srv.cw.cachesList.length(),
+		srv.cw.cachesRequest.length())
+}
+
 //
 // LoadHostsFile parse hosts formatted file and put it into caches.
 //

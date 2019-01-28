@@ -8,8 +8,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
@@ -52,19 +50,17 @@ func handleSignal(rcd *rescached.Server) {
 	rcd.Stop()
 }
 
-func profiling() {
-	pprofAddr := os.Getenv("RESCACHED_HTTP_PPROF")
-	if len(pprofAddr) == 0 {
-		pprofAddr = "127.0.0.1:5380"
-	}
+func debugRuntime(rcd *rescached.Server) {
+	ticker := time.NewTicker(30 * time.Second)
+	memHeap := debug.NewMemHeap()
 
-	srv := &http.Server{
-		Addr:        pprofAddr,
-		ReadTimeout: 5 * time.Second,
-		IdleTimeout: 120 * time.Second,
+	for range ticker.C {
+		memHeap.Collect()
+		println(rcd.CachesStats())
+		fmt.Printf("= rescached.MemHeap: {RelHeapAlloc:%d RelHeapObjects:%d DiffHeapObjects:%d}\n",
+			memHeap.RelHeapAlloc, memHeap.RelHeapObjects,
+			memHeap.DiffHeapObjects)
 	}
-
-	log.Println(srv.ListenAndServe())
 }
 
 func main() {
@@ -82,7 +78,10 @@ func main() {
 	rcd := createRescachedServer(fileConfig)
 
 	go handleSignal(rcd)
-	go profiling()
+
+	if debug.Value >= 1 {
+		go debugRuntime(rcd)
+	}
 
 	err = rcd.Start()
 	if err != nil {

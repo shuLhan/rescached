@@ -46,6 +46,16 @@ func (c *caches) get(qname string, qtype, qclass uint16) (
 }
 
 //
+// length return the number of keys in map.
+//
+func (c *caches) length() (n int) {
+	c.Lock()
+	n = len(c.v)
+	c.Unlock()
+	return
+}
+
+//
 // add response to caches.
 //
 func (c *caches) add(key string, res *response) {

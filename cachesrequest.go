@@ -57,6 +57,16 @@ func (cachesReq *cachesRequest) String() string {
 }
 
 //
+// length return number of keys in caches request.
+//
+func (cachesReq *cachesRequest) length() (n int) {
+	cachesReq.Lock()
+	n = len(cachesReq.v)
+	cachesReq.Unlock()
+	return
+}
+
+//
 // push request to cache.  If the same request already exist, it will return
 // true; otherwise it will return false.
 //
