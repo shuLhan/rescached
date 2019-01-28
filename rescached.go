@@ -12,7 +12,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -415,7 +414,6 @@ func (srv *Server) processRequest(req *dns.Request) {
 			if err != nil {
 				log.Println("! processRequest: ResponseWriter.Write:", err)
 			}
-			req.ResponseWriter.(http.Flusher).Flush()
 			req.ChanResponded <- true
 		}
 	}
