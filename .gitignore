@@ -11,4 +11,5 @@
 /resolver
 /resolverbench
 /testdata/rescached.pid
+/testdata/test.pid
 docbook-xsl.css
