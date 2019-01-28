@@ -432,10 +432,7 @@ func (srv *Server) processRequest(req *dns.Request) {
 
 func (srv *Server) processRequestQueue() {
 	for req := range srv.reqQueue {
-		isResponded := srv.processRequest(req)
-		if isResponded {
-			dns.FreeRequest(req)
-		}
+		srv.processRequest(req)
 	}
 }
 
@@ -455,7 +452,6 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr net.Addr) {
 			case dns.ConnTypeTCP:
 				cl, err = dns.NewTCPClient(raddr.String())
 				if err != nil {
-					dns.FreeRequest(req)
 					continue
 				}
 
@@ -515,7 +511,6 @@ func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
 					log.Println("! processForwardResponse: Send:", err)
 				}
 			}
-			dns.FreeRequest(reqs[x])
 
 		case dns.ConnTypeTCP:
 			if reqs[x].Sender != nil {
@@ -524,7 +519,6 @@ func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
 					log.Println("! processForwardResponse: Send:", err)
 				}
 			}
-			dns.FreeRequest(reqs[x])
 
 		case dns.ConnTypeDoH:
 			if reqs[x].ResponseWriter != nil {
@@ -532,15 +526,9 @@ func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
 				if err != nil {
 					log.Println("! processForwardResponse: ResponseWriter.Write:", err)
 				}
-				req.ResponseWriter.(http.Flusher).Flush()
 				reqs[x].ChanResponded <- true
 			}
-
-		default:
-			dns.FreeRequest(reqs[x])
 		}
-
-		reqs[x] = nil
 	}
 
 	srv.cw.upsertQueue <- res
@@ -554,11 +542,6 @@ func (srv *Server) freeRequests(req *dns.Request) {
 	reqs := srv.cw.cachesRequest.pops(qname, req.Message.Question.Type, req.Message.Question.Class)
 
 	log.Printf("! freeReq: %4d %10c %s\n", len(reqs), '-', req.Message.Question)
-
-	for x := 0; x < len(reqs); x++ {
-		dns.FreeRequest(reqs[x])
-		reqs[x] = nil
-	}
 }
 
 func (srv *Server) watchResolvConf() {
