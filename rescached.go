@@ -464,7 +464,6 @@ func (srv *Server) processForwardQueue(cl dns.Client, raddr net.Addr) {
 				cl.Close()
 			}
 			if err != nil {
-				srv.freeRequests(req)
 				continue
 			}
 
@@ -480,7 +479,6 @@ func (srv *Server) processDoHForwardQueue(cl *dns.DoHClient) {
 	for req := range srv.fwDoHQueue {
 		res, err := cl.Query(req.Message, nil)
 		if err != nil {
-			srv.freeRequests(req)
 			continue
 		}
 
@@ -497,7 +495,6 @@ func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
 		}
 	}
 	if !ok {
-		srv.freeRequests(req)
 		return
 	}
 
@@ -536,16 +533,6 @@ func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
 	}
 
 	srv.cw.upsertQueue <- res
-}
-
-//
-// freeRequests clear all failed request from forward queue.
-//
-func (srv *Server) freeRequests(req *dns.Request) {
-	qname := string(req.Message.Question.Name)
-	reqs := srv.cw.cachesRequest.pops(qname, req.Message.Question.Type, req.Message.Question.Class)
-
-	log.Printf("! freeReq: %4d %10c %s\n", len(reqs), '-', req.Message.Question)
 }
 
 func (srv *Server) watchResolvConf() {
