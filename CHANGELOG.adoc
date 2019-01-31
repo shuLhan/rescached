@@ -1,6 +1,6 @@
-= Rescached v2.1.0 (2019-01-xx)
+=  Rescached v2.1.0 (2019-02-01)
 
-== New Features
+==  New Features
 
 -  Change default parent nameservers to Cloudflare DNS.
 We believe in Cloudflare!
@@ -8,21 +8,21 @@ Please read Cloudflare DNS policy for more information,
 
 	https://developers.cloudflare.com/1.1.1.1/commitment-to-privacy/privacy-policy/privacy-policy/
 
-== Enhancements
+==  Enhancements
 
 -  Improve response performance.  Previously we can serve around 93k request
 per second (RPS).  The new enhancement increase the RPS to around 115k.
 
-== Bug Fixes
+==  Bug Fixes
 
 -  Fix the example certificate and key for DNS over HTTPS
 -  Fix the hosts.block destination file in script to update blocked host file
 -  Fix response with different query type that may not get pruned
 
 
-= Rescached v2.0.0 (2019-01-16)
+=  Rescached v2.0.0 (2019-01-16)
 
-== Features
+==  Features
 
 -  Enable to handle request from UDP and TCP connections
 -  Enable to forward request using UDP or TCP connection
