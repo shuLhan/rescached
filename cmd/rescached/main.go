@@ -55,8 +55,11 @@ func debugRuntime(rcd *rescached.Server) {
 	memHeap := debug.NewMemHeap()
 
 	for range ticker.C {
+		debug.WriteHeapProfile("rescached", true)
+
 		memHeap.Collect()
 		println(rcd.CachesStats())
+
 		fmt.Printf("= rescached.MemHeap: {RelHeapAlloc:%d RelHeapObjects:%d DiffHeapObjects:%d}\n",
 			memHeap.RelHeapAlloc, memHeap.RelHeapObjects,
 			memHeap.DiffHeapObjects)
@@ -79,7 +82,7 @@ func main() {
 
 	go handleSignal(rcd)
 
-	if debug.Value >= 1 {
+	if debug.Value >= 2 {
 		go debugRuntime(rcd)
 	}
 
