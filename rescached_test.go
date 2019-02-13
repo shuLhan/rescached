@@ -289,14 +289,12 @@ func TestWritePID(t *testing.T) {
 
 func TestProcessRequest(t *testing.T) {
 	cases := []struct {
-		desc             string
-		req              *dns.Request
-		expCachesRequest string
-		expFw            *dns.Request
-		expFwDoH         *dns.Request
+		desc     string
+		req      *dns.Request
+		expFw    *dns.Request
+		expFwDoH *dns.Request
 	}{{
-		desc:             "With nil request",
-		expCachesRequest: `cachesRequest\[\]`,
+		desc: "With nil request",
 	}, {
 		desc: "With request type UDP and not exist in cache",
 		req: &dns.Request{
@@ -309,7 +307,6 @@ func TestProcessRequest(t *testing.T) {
 				},
 			},
 		},
-		expCachesRequest: `cachesRequest\[notexist:\[&{Kind:1 Message.Question:&{.*}}\]\]`,
 		expFw: &dns.Request{
 			Kind: dns.ConnTypeUDP,
 			Message: &dns.Message{
@@ -332,7 +329,6 @@ func TestProcessRequest(t *testing.T) {
 				},
 			},
 		},
-		expCachesRequest: `cachesRequest\[notexist:\[&{.*} &{.*}\]\]`,
 	}, {
 		desc: "With request type DoH and not exist in cache",
 		req: &dns.Request{
@@ -345,7 +341,6 @@ func TestProcessRequest(t *testing.T) {
 				},
 			},
 		},
-		expCachesRequest: `cachesRequest\[doh:\[&{.*}\] notexist:\[&{.*} &{.*}\]\]`,
 		expFwDoH: &dns.Request{
 			Kind: dns.ConnTypeDoH,
 			Message: &dns.Message{
@@ -371,26 +366,12 @@ func TestProcessRequest(t *testing.T) {
 				},
 			},
 		},
-		expCachesRequest: `cachesRequest\[doh:\[&{.*}\] notexist:\[&{.*} &{.*}\]\]`,
 	}}
 
 	for _, c := range cases {
 		t.Log(c.desc)
 
 		testServer.processRequest(c.req)
-
-		// Wait for request to be send to cachesRequest.
-		time.Sleep(100 * time.Millisecond)
-
-		gotCachesRequest := testServer.cw.cachesRequest.String()
-		re, err := regexp.Compile(c.expCachesRequest)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !re.MatchString(gotCachesRequest) {
-			t.Fatalf("Expecting cachesRequest:\n%s,\ngot:\n%s\n",
-				c.expCachesRequest, gotCachesRequest)
-		}
 
 		if c.expFw != nil {
 			gotFw := <-testServer.fwQueue

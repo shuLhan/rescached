@@ -23,11 +23,10 @@ const (
 // Any addition, update, or remove to cache go through this worker.
 //
 type cacheWorker struct {
-	upsertQueue   chan *dns.Message
-	caches        *caches
-	cachesRequest *cachesRequest
-	cachesList    *cachesList
-	pruneDelay    time.Duration
+	upsertQueue chan *dns.Message
+	caches      *caches
+	cachesList  *cachesList
+	pruneDelay  time.Duration
 }
 
 //
@@ -36,11 +35,10 @@ type cacheWorker struct {
 //
 func newCacheWorker(pruneDelay, cacheThreshold time.Duration) *cacheWorker {
 	return &cacheWorker{
-		upsertQueue:   make(chan *dns.Message, maxWorkerQueue),
-		caches:        newCaches(),
-		cachesRequest: newCachesRequest(),
-		cachesList:    newCachesList(cacheThreshold),
-		pruneDelay:    pruneDelay,
+		upsertQueue: make(chan *dns.Message, maxWorkerQueue),
+		caches:      newCaches(),
+		cachesList:  newCachesList(cacheThreshold),
+		pruneDelay:  pruneDelay,
 	}
 }
 

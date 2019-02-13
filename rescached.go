@@ -81,9 +81,8 @@ func New(opts *Options) *Server {
 }
 
 func (srv *Server) CachesStats() string {
-	return fmt.Sprintf("= rescached.CachesStats: {caches:%d cachesList:%d request:%d}",
-		srv.cw.caches.length(), srv.cw.cachesList.length(),
-		srv.cw.cachesRequest.length())
+	return fmt.Sprintf("= rescached.CachesStats: {caches:%d cachesList:%d}",
+		srv.cw.caches.length(), srv.cw.cachesList.length())
 }
 
 //
@@ -388,13 +387,6 @@ func (srv *Server) processRequest(req *dns.Request) {
 	qname := string(req.Message.Question.Name)
 	_, res := srv.cw.caches.get(qname, req.Message.Question.Type, req.Message.Question.Class)
 	if res == nil || res.isExpired() {
-		// Check and/or push if the same request already
-		// forwarded before.
-		dup := srv.cw.cachesRequest.push(qname, req)
-		if dup {
-			return
-		}
-
 		if req.Kind == dns.ConnTypeDoH {
 			srv.fwDoHQueue <- req
 		} else {
@@ -403,26 +395,7 @@ func (srv *Server) processRequest(req *dns.Request) {
 		return
 	}
 
-	res.message.SetID(req.Message.Header.ID)
-
-	switch req.Kind {
-	case dns.ConnTypeUDP, dns.ConnTypeTCP:
-		if req.Sender != nil {
-			_, err := req.Sender.Send(res.message, req.UDPAddr)
-			if err != nil {
-				log.Println("! processRequest: Sender.Send:", err)
-			}
-		}
-
-	case dns.ConnTypeDoH:
-		if req.ResponseWriter != nil {
-			_, err := req.ResponseWriter.Write(res.message.Packet)
-			if err != nil {
-				log.Println("! processRequest: ResponseWriter.Write:", err)
-			}
-			req.ChanResponded <- true
-		}
-	}
+	srv.processRequestResponse(req, res.message)
 
 	// Ignore update on local caches
 	if res.receivedAt == 0 {
@@ -431,6 +404,29 @@ func (srv *Server) processRequest(req *dns.Request) {
 		}
 	} else {
 		srv.cw.update(res)
+	}
+}
+
+func (srv *Server) processRequestResponse(req *dns.Request, res *dns.Message) {
+	res.SetID(req.Message.Header.ID)
+
+	switch req.Kind {
+	case dns.ConnTypeUDP, dns.ConnTypeTCP:
+		if req.Sender != nil {
+			_, err := req.Sender.Send(res, req.UDPAddr)
+			if err != nil {
+				log.Println("! processRequest: Sender.Send:", err)
+			}
+		}
+
+	case dns.ConnTypeDoH:
+		if req.ResponseWriter != nil {
+			_, err := req.ResponseWriter.Write(res.Packet)
+			if err != nil {
+				log.Println("! processRequest: ResponseWriter.Write:", err)
+			}
+			req.ChanResponded <- true
+		}
 	}
 }
 
@@ -498,39 +494,7 @@ func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
 		return
 	}
 
-	qname := string(req.Message.Question.Name)
-	reqs := srv.cw.cachesRequest.pops(qname, req.Message.Question.Type, req.Message.Question.Class)
-
-	for x := 0; x < len(reqs); x++ {
-		res.SetID(reqs[x].Message.Header.ID)
-
-		switch reqs[x].Kind {
-		case dns.ConnTypeUDP:
-			if reqs[x].Sender != nil {
-				_, err := reqs[x].Sender.Send(res, reqs[x].UDPAddr)
-				if err != nil {
-					log.Println("! processForwardResponse: Send:", err)
-				}
-			}
-
-		case dns.ConnTypeTCP:
-			if reqs[x].Sender != nil {
-				_, err := reqs[x].Sender.Send(res, nil)
-				if err != nil {
-					log.Println("! processForwardResponse: Send:", err)
-				}
-			}
-
-		case dns.ConnTypeDoH:
-			if reqs[x].ResponseWriter != nil {
-				_, err := req.ResponseWriter.Write(res.Packet)
-				if err != nil {
-					log.Println("! processForwardResponse: ResponseWriter.Write:", err)
-				}
-				reqs[x].ChanResponded <- true
-			}
-		}
-	}
+	srv.processRequestResponse(req, res)
 
 	srv.cw.upsertQueue <- res
 }
