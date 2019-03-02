@@ -100,7 +100,8 @@ func (cw *cacheWorker) upsert(msg *dns.Message, isLocal bool) bool {
 		cw.cachesList.fix(res)
 
 		if debug.Value >= 1 {
-			fmt.Printf("+ update : %4c %10d %s\n", '-', res.accessedAt,
+			fmt.Printf("+ update :  Total:%-4d ID:%-5d %s\n",
+				cw.cachesList.length(), res.message.Header.ID,
 				res.message.Question)
 		}
 	}
@@ -124,19 +125,10 @@ func (cw *cacheWorker) push(qname string, msg *dns.Message, isLocal bool) {
 		cw.cachesList.push(res)
 
 		if debug.Value >= 1 {
-			fmt.Printf("+ caching: %4d %10d %s\n",
-				cw.cachesList.length(), res.accessedAt,
+			fmt.Printf("+ insert :  Total:%-4d ID:%-5d %s\n",
+				cw.cachesList.length(), res.message.Header.ID,
 				res.message.Question)
 		}
-	}
-}
-
-func (cw *cacheWorker) update(res *response) {
-	cw.cachesList.fix(res)
-
-	if debug.Value >= 1 {
-		fmt.Printf("= cache  : %4d %10d %s\n", cw.cachesList.length(),
-			res.accessedAt, res.message.Question)
 	}
 }
 

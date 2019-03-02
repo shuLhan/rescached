@@ -60,7 +60,7 @@ func debugRuntime(rcd *rescached.Server) {
 		memHeap.Collect()
 		println(rcd.CachesStats())
 
-		fmt.Printf("= rescached.MemHeap: {RelHeapAlloc:%d RelHeapObjects:%d DiffHeapObjects:%d}\n",
+		fmt.Printf("= rescached: MemHeap{RelHeapAlloc:%d RelHeapObjects:%d DiffHeapObjects:%d}\n",
 			memHeap.RelHeapAlloc, memHeap.RelHeapObjects,
 			memHeap.DiffHeapObjects)
 	}

@@ -151,19 +151,14 @@ func TestCacheWorkerUpsert(t *testing.T) {
 		test.Assert(t, "return value", c.expReturn, gotReturn, true)
 
 		assertCaches(t, c.expCaches)
-
 		assertCachesList(t, c.expCachesList)
 	}
-}
 
-func TestCacheWorkerUpdate(t *testing.T) {
 	first := testCacheWorker.cachesList.v.Front()
-	res := first.Value.(*response)
-
-	testCacheWorker.update(res)
-
-	exp := `^cachesList\[&{\d{10} \d{10} &{Name:test1 Type:1 Class:1}} &{\d{10} \d{10} &{Name:test2 Type:1 Class:1}} &{\d{10} \d{10} &{Name:test1 Type:2 Class:1}}\]$` // nolint: lll
-	assertCachesList(t, exp)
+	if first != nil {
+		res := first.Value.(*response)
+		testCacheWorker.cachesList.fix(res)
+	}
 }
 
 func TestCacheWorkerRemove(t *testing.T) {

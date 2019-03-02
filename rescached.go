@@ -81,7 +81,7 @@ func New(opts *Options) *Server {
 }
 
 func (srv *Server) CachesStats() string {
-	return fmt.Sprintf("= rescached.CachesStats: {caches:%d cachesList:%d}",
+	return fmt.Sprintf("= rescached: CachesStats{caches:%d cachesList:%d}",
 		srv.cw.caches.length(), srv.cw.cachesList.length())
 }
 
@@ -379,7 +379,9 @@ func (srv *Server) processRequest(req *dns.Request) {
 		return
 	}
 	if debug.Value >= 1 {
-		fmt.Printf("< request: %4d %10c %s\n", req.Kind, '-', req.Message.Question)
+		fmt.Printf("< request:   Kind:%-4s ID:%-5d %s\n",
+			dns.ConnTypeNames[req.Kind],
+			req.Message.Header.ID, req.Message.Question)
 	}
 
 	// Check if request query name exist in cache.
@@ -400,10 +402,17 @@ func (srv *Server) processRequest(req *dns.Request) {
 	// Ignore update on local caches
 	if res.receivedAt == 0 {
 		if debug.Value >= 1 {
-			fmt.Printf("= local  : %s\n", res.message.Question)
+			fmt.Printf("= local  : ID:%-5d %s\n",
+				res.message.Header.ID, res.message.Question)
 		}
 	} else {
-		srv.cw.update(res)
+		if debug.Value >= 1 {
+			fmt.Printf("= cache  :  Total:%-4d ID:%-5d %s\n",
+				srv.cw.cachesList.length(),
+				res.message.Header.ID, res.message.Question)
+		}
+
+		srv.cw.cachesList.fix(res)
 	}
 }
 

@@ -70,8 +70,9 @@ func (res *response) isExpired() bool {
 
 	if res.message.IsExpired(elapSeconds) {
 		if debug.Value >= 1 {
-			fmt.Printf("- expired: %4d %10d %s\n", elapSeconds,
-				res.receivedAt, res.message.Question)
+			fmt.Printf("- expired:  Elaps:%-4d ID:%-5d %s\n",
+				elapSeconds,
+				res.message.Header.ID, res.message.Question)
 		}
 
 		return true
