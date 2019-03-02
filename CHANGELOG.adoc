@@ -1,3 +1,15 @@
+=  Rescached v2.1.1 (2019-03-02)
+
+==  Enhancements
+
+*  Run multiple (4) go routines to handle request
+*  Make the debug output to be more human readable
+
+==  Bug Fixes
+
+*  cmd/resolver: fix query with zero ID
+
+
 =  Rescached v2.1.0 (2019-02-01)
 
 ==  New Features
