@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"strings"
 	"time"
@@ -116,9 +117,13 @@ func lookup(opts *options, ns string, timeout time.Duration, qname []byte) *dns.
 			log.Fatal("! dns.NewUDPClient: ", err)
 		}
 	}
+
+	rand.Seed(time.Now().Unix())
+
 	cl.SetTimeout(timeout)
 
 	req := dns.NewMessage()
+	req.Header.ID = uint16(rand.Intn(65535))
 	req.Question.Name = qname
 	req.Question.Type = opts.qtype
 	req.Question.Class = opts.qclass
@@ -175,8 +180,8 @@ func main() {
 	}
 
 	var (
-		res        *dns.Message
-		nameserver string
+		res *dns.Message
+		ns  string
 	)
 
 	nsAddrs := parseNameServers(cr.NameServers)
@@ -192,7 +197,6 @@ func main() {
 	for _, qname := range queries {
 		for x := 0; x < cr.Attempts; x++ {
 			for _, addr := range nsAddrs {
-				var ns string
 				if opts.doh {
 					ns = fmt.Sprintf("https://%s/dns-query", addr.IP)
 				} else {
@@ -211,6 +215,6 @@ func main() {
 
 out:
 	if res != nil {
-		println(messagePrint(nameserver, res))
+		println(messagePrint(ns, res))
 	}
 }
