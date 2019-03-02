@@ -27,10 +27,10 @@ RESOLVER_MAN:=doc/resolver.1.gz
 
 RESOLVERBENCH_BIN:=resolverbench
 
-build: test lint $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
+build: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
 
 debug: DEBUG=-race -v
-debug: test lint $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
+debug: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
 
 test: $(COVER_HTML)
 
