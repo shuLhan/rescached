@@ -313,14 +313,15 @@ in "about:config" into,
 ----
 
 Since we are using `mode=3`, the `network.trr.bootstrapAddress` is required so
-Firefox can resolve "localhost" to "127.0.0.1".
-If you use provided self-signed certificate, you must import it manually to
-Firefox.
+Firefox Nightly can resolve "localhost" to "127.0.0.1".
+If you use the provided self-signed certificate, you must import and/or enable
+an exception for it manually in Firefox Nightly (e.g. by opening
+`https://localhost/dns-query` in new tab and accept security risk).
 
-To check if DoH works, first you must set the `debug` option to `1`, and
+To check if DoH works, first, set the `debug` option to `1`, and
 restart the rescached.
 Open a new terminal and run `sudo journalctl -xf`, to show current system log.
-Open Firefox Nightly and any random website.
+Run Firefox Nightly and open any random website.
 At the terminal you will see output from rescached which looks like these,
 
 ----
