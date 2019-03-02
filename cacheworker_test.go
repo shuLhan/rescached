@@ -75,7 +75,7 @@ func TestCacheWorkerUpsert(t *testing.T) {
 		},
 		isLocal:       true,
 		expReturn:     true,
-		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:1 Class:1}}\]\]$`,
+		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:A}}\]\]$`,
 		expCachesList: `^cachesList\[\]$`,
 	}, {
 		desc: "With new message, test1 - A",
@@ -91,8 +91,8 @@ func TestCacheWorkerUpsert(t *testing.T) {
 			},
 		},
 		expReturn:     true,
-		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:1 Class:1}}\] test1:\[{\d+ \d+ &{Name:test1 Type:1 Class:1}}\]\]$`, // nolint: lll
-		expCachesList: `^cachesList\[&{\d+ \d+ &{Name:test1 Type:1 Class:1}}\]$`,
+		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:A}}\] test1:\[{\d+ \d+ &{Name:test1 Type:A}}\]\]$`, // nolint: lll
+		expCachesList: `^cachesList\[&{\d+ \d+ &{Name:test1 Type:A}}\]$`,
 	}, {
 		desc: "With new message, different type, test1 - NS",
 		msg: &dns.Message{
@@ -107,8 +107,8 @@ func TestCacheWorkerUpsert(t *testing.T) {
 			},
 		},
 		expReturn:     true,
-		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:1 Class:1}}\] test1:\[{\d+ \d+ &{Name:test1 Type:1 Class:1}} {\d+ \d+ &{Name:test1 Type:2 Class:1}}\]\]$`, // nolint: lll
-		expCachesList: `^cachesList\[&{\d+ \d+ &{Name:test1 Type:1 Class:1}} &{\d+ \d+ &{Name:test1 Type:2 Class:1}}\]$`,                                                      // nolint: lll
+		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:A}}\] test1:\[{\d+ \d+ &{Name:test1 Type:A}} {\d+ \d+ &{Name:test1 Type:NS}}\]\]$`, // nolint: lll
+		expCachesList: `^cachesList\[&{\d+ \d+ &{Name:test1 Type:A}} &{\d+ \d+ &{Name:test1 Type:NS}}\]$`,                                              // nolint: lll
 	}, {
 		desc: "With updated message, test1 - A",
 		msg: &dns.Message{
@@ -123,8 +123,8 @@ func TestCacheWorkerUpsert(t *testing.T) {
 			},
 		},
 		expReturn:     true,
-		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:1 Class:1}}\] test1:\[{\d+ \d+ &{Name:test1 Type:1 Class:1}} {\d+ \d+ &{Name:test1 Type:2 Class:1}}\]\]$`, // nolint: lll
-		expCachesList: `^cachesList\[&{\d+ \d+ &{Name:test1 Type:2 Class:1}} &{\d+ \d+ &{Name:test1 Type:1 Class:1}}\]$`,                                                      // nolint: lll
+		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:A}}\] test1:\[{\d+ \d+ &{Name:test1 Type:A}} {\d+ \d+ &{Name:test1 Type:NS}}\]\]$`, // nolint: lll
+		expCachesList: `^cachesList\[&{\d+ \d+ &{Name:test1 Type:NS}} &{\d+ \d+ &{Name:test1 Type:A}}\]$`,                                              // nolint: lll
 	}, {
 		desc: "With new message, test2 - A",
 		msg: &dns.Message{
@@ -139,8 +139,8 @@ func TestCacheWorkerUpsert(t *testing.T) {
 			},
 		},
 		expReturn:     true,
-		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:1 Class:1}}\] test1:\[{\d+ \d+ &{Name:test1 Type:1 Class:1}} {\d+ \d+ &{Name:test1 Type:2 Class:1}}\] test2:\[{\d+ \d+ &{Name:test2 Type:1 Class:1}}\]\]$`, // nolint: lll
-		expCachesList: `^cachesList\[&{\d+ \d+ &{Name:test1 Type:2 Class:1}} &{\d+ \d+ &{Name:test1 Type:1 Class:1}} &{\d+ \d+ &{Name:test2 Type:1 Class:1}}\]$`,                                                               // nolint: lll
+		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:A}}\] test1:\[{\d+ \d+ &{Name:test1 Type:A}} {\d+ \d+ &{Name:test1 Type:NS}}\] test2:\[{\d+ \d+ &{Name:test2 Type:A}}\]\]$`, // nolint: lll
+		expCachesList: `^cachesList\[&{\d+ \d+ &{Name:test1 Type:NS}} &{\d+ \d+ &{Name:test1 Type:A}} &{\d+ \d+ &{Name:test2 Type:A}}\]$`,                                                       // nolint: lll
 	}}
 
 	for _, c := range cases {
@@ -174,13 +174,13 @@ func TestCacheWorkerRemove(t *testing.T) {
 		expCachesList string
 	}{{
 		desc:          "With nil response",
-		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:1 Class:1}}\] test1:\[{\d+ \d+ &{Name:test1 Type:1 Class:1}} {\d+ \d+ &{Name:test1 Type:2 Class:1}}\] test2:\[{\d+ \d+ &{Name:test2 Type:1 Class:1}}\]\]$`, // nolint: lll
-		expCachesList: `^cachesList\[&{\d{10} \d{10} &{Name:test1 Type:1 Class:1}} &{\d{10} \d{10} &{Name:test2 Type:1 Class:1}} &{\d{10} \d{10} &{Name:test1 Type:2 Class:1}}\]$`,                                             // nolint: lll
+		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:A}}\] test1:\[{\d+ \d+ &{Name:test1 Type:A}} {\d+ \d+ &{Name:test1 Type:NS}}\] test2:\[{\d+ \d+ &{Name:test2 Type:A}}\]\]$`, // nolint: lll
+		expCachesList: `^cachesList\[&{\d{10} \d{10} &{Name:test1 Type:A}} &{\d{10} \d{10} &{Name:test2 Type:A}} &{\d{10} \d{10} &{Name:test1 Type:NS}}\]$`,                                     // nolint: lll
 	}, {
 		desc:          "Removing one element",
 		el:            testCacheWorker.cachesList.v.Front(),
-		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:1 Class:1}}\] test1:\[{\d+ \d+ &{Name:test1 Type:2 Class:1}}\] test2:\[{\d+ \d+ &{Name:test2 Type:1 Class:1}}\]\]$`, // nolint: lll
-		expCachesList: `^cachesList\[&{\d{10} \d{10} &{Name:test2 Type:1 Class:1}} &{\d{10} \d{10} &{Name:test1 Type:2 Class:1}}\]$`,                                                    // nolint: lll
+		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:A}}\] test1:\[{\d+ \d+ &{Name:test1 Type:NS}}\] test2:\[{\d+ \d+ &{Name:test2 Type:A}}\]\]$`, // nolint: lll
+		expCachesList: `^cachesList\[&{\d{10} \d{10} &{Name:test2 Type:A}} &{\d{10} \d{10} &{Name:test1 Type:NS}}\]$`,                                            // nolint: lll
 	}}
 
 	for _, c := range cases {
@@ -209,13 +209,13 @@ func TestCacheWorkerPrune(t *testing.T) {
 		expCachesList string
 	}{{
 		desc:          "With no items pruned",
-		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:1 Class:1}}\] test1:\[{\d+ \d+ &{Name:test1 Type:2 Class:1}}\] test2:\[{\d+ \d+ &{Name:test2 Type:1 Class:1}}\]\]$`, // nolint: lll
-		expCachesList: `^cachesList\[&{\d{10} \d{10} &{Name:test2 Type:1 Class:1}} &{\d{10} \d{10} &{Name:test1 Type:2 Class:1}}\]$`,                                                    // nolint: lll
+		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:A}}\] test1:\[{\d+ \d+ &{Name:test1 Type:NS}}\] test2:\[{\d+ \d+ &{Name:test2 Type:A}}\]\]$`, // nolint: lll
+		expCachesList: `^cachesList\[&{\d{10} \d{10} &{Name:test2 Type:A}} &{\d{10} \d{10} &{Name:test1 Type:NS}}\]$`,                                            // nolint: lll
 	}, {
 		desc:          "Pruning one element",
 		res:           testCacheWorker.cachesList.v.Front().Value.(*response),
-		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:1 Class:1}}\] test1:\[{\d+ \d+ &{Name:test1 Type:2 Class:1}}\]\]$`, // nolint: lll
-		expCachesList: `^cachesList\[&{\d+ \d+ &{Name:test1 Type:2 Class:1}}\]$`,                                                       // nolint: lll
+		expCaches:     `^caches\[local:\[{\d+ \d+ &{Name:local Type:A}}\] test1:\[{\d+ \d+ &{Name:test1 Type:NS}}\]\]$`, // nolint: lll
+		expCachesList: `^cachesList\[&{\d+ \d+ &{Name:test1 Type:NS}}\]$`,                                               // nolint: lll
 	}}
 
 	for _, c := range cases {

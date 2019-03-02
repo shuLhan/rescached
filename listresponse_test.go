@@ -23,17 +23,17 @@ func TestListResponseAdd(t *testing.T) {
 		desc:   "New",
 		msg:    _testResponses[0].message,
 		expLen: 1,
-		exp:    `[{0 0 &{Name:1 Type:1 Class:1}}]`,
+		exp:    `[{0 0 &{Name:1 Type:A}}]`,
 	}, {
 		desc:   "New",
 		msg:    _testResponses[1].message,
 		expLen: 2,
-		exp:    `[{0 0 &{Name:1 Type:1 Class:1}} {0 0 &{Name:2 Type:2 Class:1}}]`,
+		exp:    `[{0 0 &{Name:1 Type:A}} {0 0 &{Name:2 Type:NS}}]`,
 	}, {
 		desc:   "Replace",
 		msg:    _testResponses[2].message,
 		expLen: 3,
-		exp:    `[{0 0 &{Name:1 Type:1 Class:1}} {0 0 &{Name:2 Type:2 Class:1}} {0 0 &{Name:1 Type:1 Class:1}}]`,
+		exp:    `[{0 0 &{Name:1 Type:A}} {0 0 &{Name:2 Type:NS}} {0 0 &{Name:1 Type:A}}]`,
 	}}
 
 	for _, c := range cases {

@@ -45,17 +45,17 @@ func TestListRequestPush(t *testing.T) {
 	}{{
 		desc:   "With empty request",
 		expLen: 1,
-		exp:    `[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}}]`,
+		exp:    `[&{Kind:0 Message.Question:&{Name: Type:A}}]`,
 	}, {
 		desc:   "With non empty request (1)",
 		req:    testRequests[1],
 		expLen: 2,
-		exp:    `[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}} &{Kind:0 Message.Question:&{Name: Type:2 Class:1}}]`, // nolint: lll
+		exp:    `[&{Kind:0 Message.Question:&{Name: Type:A}} &{Kind:0 Message.Question:&{Name: Type:NS}}]`, // nolint: lll
 	}, {
 		desc:   "With non empty request (2)",
 		req:    testRequests[2],
 		expLen: 3,
-		exp:    `[&{Kind:0 Message.Question:&{Name: Type:1 Class:1}} &{Kind:0 Message.Question:&{Name: Type:2 Class:1}} &{Kind:0 Message.Question:&{Name: Type:3 Class:1}}]`, // nolint: lll
+		exp:    `[&{Kind:0 Message.Question:&{Name: Type:A}} &{Kind:0 Message.Question:&{Name: Type:NS}} &{Kind:0 Message.Question:&{Name: Type:}}]`, // nolint: lll
 	}}
 
 	for _, c := range cases {

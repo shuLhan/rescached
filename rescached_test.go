@@ -194,7 +194,7 @@ func TestLoadHostsDir(t *testing.T) {
 	}, {
 		desc:      "With non empty directory",
 		dir:       "testdata/hosts.d",
-		expCaches: `caches\[1.test:\[{0 \d+ &{Name:1.test Type:1 Class:1}}\] 2.test:\[{0 \d+ &{Name:2.test Type:1 Class:1}}\]\]`, // nolint: lll
+		expCaches: `caches\[1.test:\[{0 \d+ &{Name:1.test Type:A}}\] 2.test:\[{0 \d+ &{Name:2.test Type:A}}\]\]`, // nolint: lll
 	}}
 
 	srv := New(nil)
@@ -231,7 +231,7 @@ func TestLoadMasterDir(t *testing.T) {
 	}, {
 		desc:      "With non empty directory",
 		dir:       "testdata/master.d",
-		expCaches: `caches\[test.x:\[{0 \d+ &{Name:test.x Type:1 Class:1}}\]\]`, // nolint: lll
+		expCaches: `caches\[test.x:\[{0 \d+ &{Name:test.x Type:A}}\]\]`, // nolint: lll
 	}}
 
 	srv := New(nil)
@@ -300,6 +300,7 @@ func TestProcessRequest(t *testing.T) {
 		req: &dns.Request{
 			Kind: dns.ConnTypeUDP,
 			Message: &dns.Message{
+				Header: &dns.SectionHeader{},
 				Question: &dns.SectionQuestion{
 					Name:  []byte("notexist"),
 					Type:  dns.QueryTypeA,
@@ -310,6 +311,7 @@ func TestProcessRequest(t *testing.T) {
 		expFw: &dns.Request{
 			Kind: dns.ConnTypeUDP,
 			Message: &dns.Message{
+				Header: &dns.SectionHeader{},
 				Question: &dns.SectionQuestion{
 					Name:  []byte("notexist"),
 					Type:  dns.QueryTypeA,
@@ -322,6 +324,7 @@ func TestProcessRequest(t *testing.T) {
 		req: &dns.Request{
 			Kind: dns.ConnTypeUDP,
 			Message: &dns.Message{
+				Header: &dns.SectionHeader{},
 				Question: &dns.SectionQuestion{
 					Name:  []byte("notexist"),
 					Type:  dns.QueryTypeA,
@@ -334,6 +337,7 @@ func TestProcessRequest(t *testing.T) {
 		req: &dns.Request{
 			Kind: dns.ConnTypeDoH,
 			Message: &dns.Message{
+				Header: &dns.SectionHeader{},
 				Question: &dns.SectionQuestion{
 					Name:  []byte("doh"),
 					Type:  dns.QueryTypeA,
@@ -344,6 +348,7 @@ func TestProcessRequest(t *testing.T) {
 		expFwDoH: &dns.Request{
 			Kind: dns.ConnTypeDoH,
 			Message: &dns.Message{
+				Header: &dns.SectionHeader{},
 				Question: &dns.SectionQuestion{
 					Name:  []byte("doh"),
 					Type:  dns.QueryTypeA,
