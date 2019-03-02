@@ -495,15 +495,10 @@ func (srv *Server) processDoHForwardQueue(cl *dns.DoHClient) {
 }
 
 func (srv *Server) processForwardResponse(req *dns.Request, res *dns.Message) {
-	var ok bool
-
 	if bytes.Equal(req.Message.Question.Name, res.Question.Name) {
-		if req.Message.Question.Type == res.Question.Type {
-			ok = true
+		if req.Message.Question.Type != res.Question.Type {
+			return
 		}
-	}
-	if !ok {
-		return
 	}
 
 	srv.processRequestResponse(req, res)
