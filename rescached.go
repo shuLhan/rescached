@@ -265,10 +265,7 @@ func (srv *Server) Start() error {
 	}
 
 	go srv.cw.start()
-
-	for x := 0; x < _maxForwarder; x++ {
-		go srv.processRequestQueue()
-	}
+	go srv.processRequestQueue()
 
 	serverOptions := &dns.ServerOptions{
 		IPAddress:        srv.opts.ListenAddress,
