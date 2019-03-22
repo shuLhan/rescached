@@ -1,3 +1,11 @@
+=  Rescached v2.1.2 (2019-03-22)
+
+==  Bug Fix
+
+Use single Go routine to handle request.  This fix mismatched ID in
+response due to single response is being use by multiple routines.
+
+
 =  Rescached v2.1.1 (2019-03-02)
 
 ==  Enhancements
