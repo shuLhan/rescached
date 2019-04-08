@@ -144,8 +144,8 @@ func parseListen(cfg *ini.Ini, opts *rescached.Options) {
 	listen := cfg.GetString(cfgSecRescached, "", "server.listen",
 		"127.0.0.1")
 
-	ip, port, err := libnet.ParseIPPort(listen, dns.DefaultPort)
-	if err != nil {
+	_, ip, port := libnet.ParseIPPort(listen, dns.DefaultPort)
+	if ip == nil {
 		log.Printf("Invalid server.listen: '%s', using default\n",
 			listen)
 		return
