@@ -33,34 +33,15 @@ func main() {
 	}
 
 	var nfail int
-	res := libdns.NewMessage()
 
 	fmt.Printf("= Benchmarking with %d messages\n", len(msgs))
 
 	timeStart := time.Now()
 	for x := 0; x < len(msgs); x++ {
-		//fmt.Printf("< Request: %6d %s\n", x, msgs[x].Question)
-
-		_, err = cl.Send(msgs[x], cl.Addr)
+		res, err := cl.Query(msgs[x])
 		if err != nil {
 			nfail++
 			log.Println("! Send error: ", err)
-			continue
-		}
-
-		res.Reset()
-
-		_, err = cl.Recv(res)
-		if err != nil {
-			nfail++
-			log.Println("! Recv error: ", err)
-			continue
-		}
-
-		err = res.Unpack()
-		if err != nil {
-			nfail++
-			log.Println("! Unpack:", err)
 			continue
 		}
 
@@ -69,10 +50,10 @@ func main() {
 
 		if !bytes.Equal(exp, got) {
 			nfail++
-			log.Printf(`! Answer not matched:
+			log.Printf(`! Answer not matched %s:
 expecting: %s
 got: %s
-`, exp, got)
+`, msgs[x].Question, exp, got)
 		}
 	}
 	timeEnd := time.Now()

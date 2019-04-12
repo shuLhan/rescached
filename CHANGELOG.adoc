@@ -1,3 +1,22 @@
+=  Rescached v3.0.0 (2019-05-xx)
+
+All the server core functionalities (caches and forwarding) now
+implemented inside "dns.Server".  The main function of this package are
+for reading options from configuration file (or from command line options)
+and watching changes from system resolv.conf.
+
+There are also some major changes on configuration file,
+
+*  "server.parent" option now use URI format instead of IP:PORT.
+   This will allow parent name servers to be UDP, TCP, and/or DoH
+   simultaneusly.
+
+*  "server.doh.parent" and "server.parent.connection" are removed,
+   redundant with new "server.parent" format.
+
+*  "cache.threshold" is renamed to "cache.prune_threshold".
+
+
 =  Rescached v2.1.2 (2019-03-22)
 
 ==  Bug Fix

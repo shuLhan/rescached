@@ -24,20 +24,15 @@ func createRescachedServer(fileConfig string) *rescached.Server {
 		log.Fatal(err)
 	}
 
-	if debug.Value >= 1 {
-		fmt.Printf("= config: %+v\n", opts)
+	rcd, err := rescached.New(opts)
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	rcd := rescached.New(opts)
 
 	err = rcd.WritePID()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	rcd.LoadHostsDir(opts.DirHosts)
-	rcd.LoadMasterDir(opts.DirMaster)
-	rcd.LoadHostsFile("")
 
 	return rcd
 }
@@ -58,7 +53,6 @@ func debugRuntime(rcd *rescached.Server) {
 		debug.WriteHeapProfile("rescached", true)
 
 		memHeap.Collect()
-		println(rcd.CachesStats())
 
 		fmt.Printf("= rescached: MemHeap{RelHeapAlloc:%d RelHeapObjects:%d DiffHeapObjects:%d}\n",
 			memHeap.RelHeapAlloc, memHeap.RelHeapObjects,
@@ -68,7 +62,6 @@ func debugRuntime(rcd *rescached.Server) {
 
 func main() {
 	var (
-		err        error
 		fileConfig string
 		defConfig  = "/etc/rescached/rescached.cfg"
 	)
@@ -86,7 +79,7 @@ func main() {
 		go debugRuntime(rcd)
 	}
 
-	err = rcd.Start()
+	err := rcd.Start()
 	if err != nil {
 		log.Println(err)
 		rcd.Stop()

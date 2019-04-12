@@ -132,7 +132,7 @@ func lookup(opts *options, ns string, timeout time.Duration, qname []byte) *dns.
 		log.Fatal("! Pack:", err)
 	}
 
-	res, err := cl.Query(req, nil)
+	res, err := cl.Query(req)
 	if err != nil {
 		log.Println("! Lookup: ", err)
 		return nil
