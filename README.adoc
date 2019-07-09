@@ -14,7 +14,7 @@ rescached - DNS resolver cache daemon.
 
 == SYNOPSIS
 
-+rescached+ 'rescached.cfg'
++rescached+ [-config 'rescached.cfg']
 
 
 == OPTIONS

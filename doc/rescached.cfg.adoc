@@ -228,7 +228,7 @@ cache.prune_threshold=60s
 
 Save the above script into +rescached.cfg+ and run it,
 
-	$ sudo rescached -f rescached.cfg
+	$ sudo rescached -config rescached.cfg
 
 
 == AUTHOR

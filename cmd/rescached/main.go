@@ -64,7 +64,7 @@ func main() {
 
 	log.SetFlags(0)
 
-	flag.StringVar(&fileConfig, "f", "", "path to configuration")
+	flag.StringVar(&fileConfig, "config", "", "path to configuration")
 	flag.Parse()
 
 	rcd := createRescachedServer(fileConfig)

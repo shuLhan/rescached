@@ -7,7 +7,7 @@ Before=nss-lookup.target
 [Service]
 Type=simple
 PIDFile=/var/run/rescached.pid
-ExecStart=/usr/bin/rescached -f /etc/rescached/rescached.cfg
+ExecStart=/usr/bin/rescached -config /etc/rescached/rescached.cfg
 Restart=on-failure
 StandardError=journal
 
