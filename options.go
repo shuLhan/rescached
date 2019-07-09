@@ -54,7 +54,7 @@ func (opts *Options) init() {
 		opts.FilePID = "rescached.pid"
 	}
 	if len(opts.FileResolvConf) > 0 {
-		opts.loadResolvConf()
+		_, _ = opts.loadResolvConf()
 	}
 }
 
