@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
 	libnet "github.com/shuLhan/share/lib/net"
 	libstrings "github.com/shuLhan/share/lib/strings"
@@ -63,7 +64,9 @@ func (opts *Options) loadResolvConf() (ok bool, err error) {
 		return false, err
 	}
 
-	fmt.Printf("loadResolvConf: %+v\n", rc)
+	if debug.Value > 0 {
+		fmt.Printf("rescached: loadResolvConf: %+v\n", rc)
+	}
 
 	if len(rc.NameServers) == 0 {
 		return false, nil

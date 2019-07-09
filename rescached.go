@@ -34,7 +34,7 @@ func New(opts *Options) (srv *Server, err error) {
 	opts.init()
 
 	if debug.Value >= 1 {
-		fmt.Printf("= config: %+v\n", opts)
+		fmt.Printf("rescached: config: %+v\n", opts)
 	}
 
 	dnsServer, err := dns.NewServer(&opts.ServerOptions)
