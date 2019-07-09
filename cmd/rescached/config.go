@@ -40,11 +40,7 @@ func parseConfig(file string) (opts *rescached.Options) {
 	opts.DoHAllowInsecure = cfg.GetBool(cfgSecRescached, "",
 		"server.doh.allow_insecure", false)
 
-	err = parseNSParent(cfg, opts)
-	if err != nil {
-		log.Println("rescached: parseConfig: " + err.Error())
-	}
-
+	parseNSParent(cfg, opts)
 	parseListen(cfg, opts)
 
 	opts.DirHosts, _ = cfg.Get(cfgSecRescached, "", "dir.hosts", "")
@@ -67,7 +63,7 @@ func parseConfig(file string) (opts *rescached.Options) {
 	return opts
 }
 
-func parseNSParent(cfg *ini.Ini, opts *rescached.Options) (err error) {
+func parseNSParent(cfg *ini.Ini, opts *rescached.Options) {
 	parents := cfg.Gets(cfgSecRescached, "", "server.parent")
 
 	for _, ns := range parents {
@@ -76,8 +72,6 @@ func parseNSParent(cfg *ini.Ini, opts *rescached.Options) (err error) {
 			opts.NameServers = append(opts.NameServers, ns)
 		}
 	}
-
-	return nil
 }
 
 func parseListen(cfg *ini.Ini, opts *rescached.Options) {
