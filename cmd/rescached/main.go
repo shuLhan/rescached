@@ -42,7 +42,7 @@ func handleSignal(rcd *rescached.Server) {
 	rcd.Stop()
 }
 
-func debugRuntime(rcd *rescached.Server) {
+func debugRuntime() {
 	ticker := time.NewTicker(30 * time.Second)
 	memHeap := debug.NewMemHeap()
 
@@ -72,7 +72,7 @@ func main() {
 	go handleSignal(rcd)
 
 	if debug.Value >= 2 {
-		go debugRuntime(rcd)
+		go debugRuntime()
 	}
 
 	err := rcd.Start()
