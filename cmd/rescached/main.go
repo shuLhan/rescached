@@ -19,10 +19,7 @@ import (
 )
 
 func createRescachedServer(fileConfig string) *rescached.Server {
-	opts, err := parseConfig(fileConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
+	opts := parseConfig(fileConfig)
 
 	rcd, err := rescached.New(opts)
 	if err != nil {
@@ -63,12 +60,11 @@ func debugRuntime(rcd *rescached.Server) {
 func main() {
 	var (
 		fileConfig string
-		defConfig  = "/etc/rescached/rescached.cfg"
 	)
 
 	log.SetFlags(0)
 
-	flag.StringVar(&fileConfig, "f", defConfig, "path to configuration")
+	flag.StringVar(&fileConfig, "f", "", "path to configuration")
 	flag.Parse()
 
 	rcd := createRescachedServer(fileConfig)

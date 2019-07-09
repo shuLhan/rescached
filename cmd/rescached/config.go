@@ -6,7 +6,6 @@ package main
 
 import (
 	"crypto/tls"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -25,13 +24,13 @@ const (
 	cfgSecRescached = "rescached"
 )
 
-func parseConfig(file string) (opts *rescached.Options, err error) {
+func parseConfig(file string) (opts *rescached.Options) {
+	opts = rescached.NewOptions()
+
 	cfg, err := ini.Open(file)
 	if err != nil {
-		return nil, err
+		return opts
 	}
-
-	opts = rescached.NewOptions()
 
 	opts.FilePID, _ = cfg.Get(cfgSecRescached, "", "file.pid", "rescached.pid")
 	opts.FileResolvConf, _ = cfg.Get(cfgSecRescached, "", "file.resolvconf", "")
@@ -43,7 +42,7 @@ func parseConfig(file string) (opts *rescached.Options, err error) {
 
 	err = parseNSParent(cfg, opts)
 	if err != nil {
-		return nil, err
+		log.Println("rescached: parseConfig: " + err.Error())
 	}
 
 	parseListen(cfg, opts)
@@ -59,12 +58,13 @@ func parseConfig(file string) (opts *rescached.Options, err error) {
 	if len(dohCertFile) > 0 && len(dohPrivateKey) > 0 {
 		cert, err := tls.LoadX509KeyPair(dohCertFile, dohPrivateKey)
 		if err != nil {
-			return nil, fmt.Errorf("rescached: error loading certificate: " + err.Error())
+			log.Println("rescached: error loading certificate: " + err.Error())
+		} else {
+			opts.DoHCertificate = &cert
 		}
-		opts.DoHCertificate = &cert
 	}
 
-	return opts, nil
+	return opts
 }
 
 func parseNSParent(cfg *ini.Ini, opts *rescached.Options) (err error) {
