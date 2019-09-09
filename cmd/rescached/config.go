@@ -16,7 +16,7 @@ import (
 	"github.com/shuLhan/share/lib/ini"
 	libnet "github.com/shuLhan/share/lib/net"
 
-	rescached "github.com/shuLhan/rescached-go"
+	rescached "github.com/shuLhan/rescached-go/v3"
 )
 
 // List of config sections.

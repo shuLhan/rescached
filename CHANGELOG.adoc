@@ -1,4 +1,4 @@
-=  Rescached v3.0.0 (2019-05-xx)
+=  Rescached v3.0.0 (2019-09-xx)
 
 All the server core functionalities (caches and forwarding) now
 implemented inside "dns.Server".  The main function of this package are
@@ -9,7 +9,7 @@ There are also some major changes on configuration file,
 
 *  "server.parent" option now use URI format instead of IP:PORT.
    This will allow parent name servers to be UDP, TCP, and/or DoH
-   simultaneusly.
+   simultaneously.
 
 *  "server.doh.parent" and "server.parent.connection" are removed,
    redundant with new "server.parent" format.

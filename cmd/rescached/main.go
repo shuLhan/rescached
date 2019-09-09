@@ -15,7 +15,7 @@ import (
 
 	"github.com/shuLhan/share/lib/debug"
 
-	rescached "github.com/shuLhan/rescached-go"
+	rescached "github.com/shuLhan/rescached-go/v3"
 )
 
 func createRescachedServer(fileConfig string) *rescached.Server {

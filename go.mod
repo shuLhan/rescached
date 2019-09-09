@@ -1,4 +1,4 @@
-module github.com/shuLhan/rescached-go
+module github.com/shuLhan/rescached-go/v3
 
 go 1.11
 
