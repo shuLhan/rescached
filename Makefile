@@ -2,7 +2,8 @@
 ## Use of this source code is governed by a BSD-style
 ## license that can be found in the LICENSE file.
 
-.PHONY: build debug install uninstall
+.PHONY: build debug install install-common install-macos
+.PHONY: uninstall uninstall-macos
 .PHONY: test test.prof coverbrowse lint
 .PHONY: doc
 .PHONY: clean distclean
@@ -26,6 +27,10 @@ RESOLVER_BIN:=resolver
 RESOLVER_MAN:=doc/resolver.1.gz
 
 RESOLVERBENCH_BIN:=resolverbench
+
+DIR_BIN=/usr/bin
+DIR_MAN=/usr/share/man
+DIR_RESCACHED=/usr/share/rescached
 
 build: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
 
@@ -88,7 +93,8 @@ clean:
 	rm -f $(RESCACHED_MAN) $(RESOLVER_MAN) $(RESCACHED_CFG_MAN)
 	rm -f $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
 
-install: build
+
+install-common:
 	mkdir -p $(PREFIX)/etc/rescached
 	mkdir -p $(PREFIX)/etc/rescached/hosts.d
 	mkdir -p $(PREFIX)/etc/rescached/master.d
@@ -97,29 +103,51 @@ install: build
 	cp testdata/localhost.key.pem  $(PREFIX)/etc/rescached/
 	cp scripts/hosts.block $(PREFIX)/etc/rescached/hosts.d/
 
-	mkdir -p               $(PREFIX)/usr/bin
-	cp -f $(RESCACHED_BIN) $(PREFIX)/usr/bin/
-	cp -f $(RESOLVER_BIN)  $(PREFIX)/usr/bin/
-	cp scripts/rescached-update-hosts-block.sh $(PREFIX)/usr/bin/
+	mkdir -p               $(PREFIX)$(DIR_BIN)
+	cp -f $(RESCACHED_BIN) $(PREFIX)$(DIR_BIN)
+	cp -f $(RESOLVER_BIN)  $(PREFIX)$(DIR_BIN)
+	cp scripts/rescached-update-hosts-block.sh $(PREFIX)$(DIR_BIN)
 
-	mkdir -p                $(PREFIX)/usr/share/man/man{1,5}
-	cp $(RESCACHED_MAN)     $(PREFIX)/usr/share/man/man1/
-	cp $(RESOLVER_MAN)      $(PREFIX)/usr/share/man/man1/
-	cp $(RESCACHED_CFG_MAN) $(PREFIX)/usr/share/man/man5/
+	mkdir -p                $(PREFIX)$(DIR_MAN)/man{1,5}
+	cp $(RESCACHED_MAN)     $(PREFIX)$(DIR_MAN)/man1/
+	cp $(RESOLVER_MAN)      $(PREFIX)$(DIR_MAN)/man1/
+	cp $(RESCACHED_CFG_MAN) $(PREFIX)$(DIR_MAN)/man5/
 
-	mkdir -p   $(PREFIX)/usr/share/rescached
-	cp LICENSE $(PREFIX)/usr/share/rescached/
+	mkdir -p   $(PREFIX)$(DIR_RESCACHED)
+	cp LICENSE $(PREFIX)$(DIR_RESCACHED)
 
+
+install: build install-common install-service-systemd
 	mkdir -p                     $(PREFIX)/usr/lib/systemd/system
 	cp scripts/rescached.service $(PREFIX)/usr/lib/systemd/system/
 
-uninstall:
-	rm -f $(PREFIX)/usr/share/rescached/LICENSE
 
-	rm -f $(PREFIX)/usr/share/man/man5/$(RESCACHED_CFG_MAN)
-	rm -f $(PREFIX)/usr/share/man/man1/$(RESOLVER_MAN)
-	rm -f $(PREFIX)/usr/share/man/man1/$(RESCACHED_MAN)
+install-macos: DIR_BIN=/usr/local/bin
+install-macos: DIR_MAN=/usr/local/share/man
+install-macos: DIR_RESCACHED=/usr/local/share/rescached
+install-macos: build install-common
+	cp scripts/info.kilabit.rescached.plist /Library/LaunchDaemons/
 
-	rm -f $(PREFIX)/usr/bin/rescached-update-hosts-block.sh
-	rm -f $(PREFIX)/usr/bin/$(RESOLVER_BIN)
-	rm -f $(PREFIX)/usr/bin/$(RESCACHED_BIN)
+
+uninstall-common:
+	rm -f $(PREFIX)$(DIR_RESCACHED)/LICENSE
+
+	rm -f $(PREFIX)$(DIR_MAN)/man5/$(RESCACHED_CFG_MAN)
+	rm -f $(PREFIX)$(DIR_MAN)/man1/$(RESOLVER_MAN)
+	rm -f $(PREFIX)$(DIR_MAN)/man1/$(RESCACHED_MAN)
+
+	rm -f $(PREFIX)$(DIR_BIN)/rescached-update-hosts-block.sh
+	rm -f $(PREFIX)$(DIR_BIN)/$(RESOLVER_BIN)
+	rm -f $(PREFIX)$(DIR_BIN)/$(RESCACHED_BIN)
+
+
+uninstall: uninstall-common
+	systemctl stop rescached
+	systemctl disable rescached
+	rm -f /usr/lib/systemd/system/rescached.service
+
+
+uninstall-macos: uninstall-common
+	launchctl stop info.kilabit.rescached
+	launchctl unload info.kilabit.rescached
+	rm -f /Library/LaunchDaemons/info.kilabit.rescached.plist

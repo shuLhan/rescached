@@ -143,8 +143,8 @@ record from cache.
 
 * https://golang.org[Go compiler]
 * https://git-scm.com[git, version control system]
-* asciidoc, to generate manual page
-* systemd or system V init tool for service
+* asciidoc, to generate manual pages
+* systemd or system V init tool for service on Linux
 
 === COMPILING
 
@@ -179,10 +179,37 @@ We use directory "/etc/rescached" as configuration directory.
 +
 If you want your program running each time the system is starting up you can
 create a system startup script (or system service).
-You can see an example for +systemd+ service in +scripts/rescached.service+.
+For system using systemd, uou can see an example for +systemd+ service in
++scripts/rescached.service+.
+For system using launchd (macOS), you can see an example in
++scripts/info.kilabit.rescached.plist+.
 +
 This step is really different between each system, consult your distribution
 wiki, forum, or mailing-list on how to create system startup script.
+
+====  AUTOMATIC INSTALLATION ON LINUX
+
+Automatic installation on Linux require systemd.
+Run the following command
+
+	$ sudo make install
+
+to setup and copies all required files and binaries to system directories.
+You can then start the rescached service using systemd,
+
+	$ sudo systemctl start rescached
+
+====  AUTOMATIC INSTALLATION ON MACOS
+
+Run the following command
+
+	$ sudo make install-macos
+
+to setup and copies all required files and binaries to system directories.
+You can then load the rescached service using launchd,
+
+	$ sudo launchctl load info.kilabit.rescached
+
 
 ==== POST INSTALLATION
 

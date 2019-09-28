@@ -5,6 +5,13 @@ implemented inside "dns.Server".  The main function of this package are
 for reading options from configuration file (or from command line options)
 and watching changes from system resolv.conf.
 
+==  New Features
+
+*  Add launchd script for macOS and make tasks to install and uninstall on
+   macOS
+
+==  Breaking Changes
+
 There are also some major changes on configuration file,
 
 *  "server.parent" option now use URI format instead of IP:PORT.
