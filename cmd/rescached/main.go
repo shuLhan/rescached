@@ -26,11 +26,6 @@ func createRescachedServer(fileConfig string) *rescached.Server {
 		log.Fatal(err)
 	}
 
-	err = rcd.WritePID()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	return rcd
 }
 

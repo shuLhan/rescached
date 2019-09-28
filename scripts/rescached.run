@@ -54,10 +54,7 @@ start)
 stop)
 	echo -n "Shutting down rescached "
 
-	RESCACHED_PID=`pidof ${RESCACHED_BIN}`
-	if [[ "${RESCACHED_PID}" != "" ]]; then
-		kill ${RESCACHED_PID};
-	fi
+	killall ${RESCACHED_PID};
 
 	if test $? = 0; then
 		echo "[OK]";
@@ -73,8 +70,8 @@ restart)
 
 status)
 	echo -n "Checking for service rescached "
-	RESCACHED_PID=`pidof ${RESCACHED_BIN}`
-	if [[ "${RESCACHED_PID}" -ne "" ]]; then
+	RESCACHED_PS=`ps -ef | grep "rescached -config"`
+	if [[ "${RESCACHED_PS}" -ne "" ]]; then
 		echo "[running]";
 	else
 		echo "[not running]";

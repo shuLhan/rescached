@@ -7,10 +7,8 @@ package rescached
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
@@ -79,36 +77,7 @@ func (srv *Server) Start() (err error) {
 // Stop the server.
 //
 func (srv *Server) Stop() {
-	srv.RemovePID()
 	os.Exit(0)
-}
-
-//
-// RemovePID remove server PID file.
-//
-func (srv *Server) RemovePID() {
-	err := os.Remove(srv.opts.FilePID)
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-//
-// WritePID will write current process PID to file `FilePID` only if the
-// file is not exist, otherwise it will return an error.
-//
-func (srv *Server) WritePID() error {
-	_, err := os.Stat(srv.opts.FilePID)
-	if err == nil {
-		return fmt.Errorf("writePID: PID file '%s' exist",
-			srv.opts.FilePID)
-	}
-
-	pid := strconv.Itoa(os.Getpid())
-
-	err = ioutil.WriteFile(srv.opts.FilePID, []byte(pid), 0400)
-
-	return err
 }
 
 func (srv *Server) watchResolvConf(ns *libio.NodeState) {

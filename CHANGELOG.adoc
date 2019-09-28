@@ -23,6 +23,13 @@ There are also some major changes on configuration file,
 
 *  "cache.threshold" is renamed to "cache.prune_threshold".
 
+*  "file.pid" is removed.
++
+The concept of writing PID file when the program start on networking
+service is not applicable or relevant anymore on systemd or launchd.
+If the program already started, the second program will fail because
+the port is already used.
+
 
 =  Rescached v2.1.2 (2019-03-22)
 

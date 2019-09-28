@@ -32,7 +32,6 @@ func parseConfig(file string) (opts *rescached.Options) {
 		return opts
 	}
 
-	opts.FilePID, _ = cfg.Get(cfgSecRescached, "", "file.pid", "rescached.pid")
 	opts.FileResolvConf, _ = cfg.Get(cfgSecRescached, "", "file.resolvconf", "")
 
 	dohCertFile, _ := cfg.Get(cfgSecRescached, "", "server.doh.certificate", "")

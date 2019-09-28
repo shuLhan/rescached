@@ -20,7 +20,6 @@ import (
 type Options struct {
 	dns.ServerOptions
 	Timeout        time.Duration
-	FilePID        string
 	FileResolvConf string
 	DirHosts       string
 	DirMaster      string
@@ -36,7 +35,6 @@ func NewOptions() *Options {
 		},
 
 		Timeout: 6 * time.Second,
-		FilePID: "rescached.pid",
 	}
 }
 
@@ -49,9 +47,6 @@ func (opts *Options) init() {
 	}
 	if opts.Timeout <= 0 || opts.Timeout > (6*time.Second) {
 		opts.Timeout = 6 * time.Second
-	}
-	if len(opts.FilePID) == 0 {
-		opts.FilePID = "rescached.pid"
 	}
 	if len(opts.FileResolvConf) > 0 {
 		_, _ = opts.loadResolvConf()
