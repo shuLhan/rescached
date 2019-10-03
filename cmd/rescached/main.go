@@ -70,9 +70,18 @@ func main() {
 		go debugRuntime()
 	}
 
-	err := rcd.Start()
-	if err != nil {
-		log.Println(err)
-		rcd.Stop()
+	for {
+		defer func() {
+			err := recover()
+			if err != nil {
+				log.Println("panic: ", err)
+			}
+		}()
+
+		err := rcd.Start()
+		if err != nil {
+			log.Println(err)
+			rcd.Stop()
+		}
 	}
 }
