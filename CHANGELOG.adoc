@@ -12,9 +12,15 @@ and watching changes from system resolv.conf.
 
 ==  Breaking Changes
 
-There are also some major changes on configuration file,
+There are also some major changes on configuration file.
+All configuration now break into two section '[rescached]' and
+'[dns "server"]'.
+For more information see new rescached.cfg manual page or an example in
+`cmd/rescached/rescached.cfg`.
 
-*  "server.parent" option now use URI format instead of IP:PORT.
+Some detailed changes are,
+
+*  "parent" option now use URI format instead of IP:PORT.
    This will allow parent name servers to be UDP, TCP, and/or DoH
    simultaneously.
 

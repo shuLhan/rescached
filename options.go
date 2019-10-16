@@ -6,7 +6,6 @@ package rescached
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
@@ -19,10 +18,12 @@ import (
 //
 type Options struct {
 	dns.ServerOptions
-	Timeout        time.Duration
-	FileResolvConf string
-	DirHosts       string
-	DirMaster      string
+	TLSCertFile    string `ini:"rescached::tls.certificate"`
+	TLSPrivateKey  string `ini:"rescached::tls.private_key"`
+	DirHosts       string `ini:"rescached::dir.hosts"`
+	DirMaster      string `ini:"rescached::dir.master"`
+	FileResolvConf string `ini:"rescached::file.resolvconf"`
+	Debug          int    `ini:"rescached::debug"`
 }
 
 //
@@ -31,10 +32,8 @@ type Options struct {
 func NewOptions() *Options {
 	return &Options{
 		ServerOptions: dns.ServerOptions{
-			IPAddress: "127.0.0.1",
+			ListenAddress: "127.0.0.1:53",
 		},
-
-		Timeout: 6 * time.Second,
 	}
 }
 
@@ -42,11 +41,8 @@ func NewOptions() *Options {
 // init check and initialize the Options instance with default values.
 //
 func (opts *Options) init() {
-	if len(opts.IPAddress) == 0 {
-		opts.IPAddress = "127.0.0.1"
-	}
-	if opts.Timeout <= 0 || opts.Timeout > (6*time.Second) {
-		opts.Timeout = 6 * time.Second
+	if len(opts.ListenAddress) == 0 {
+		opts.ListenAddress = "127.0.0.1:53"
 	}
 	if len(opts.FileResolvConf) > 0 {
 		_, _ = opts.loadResolvConf()

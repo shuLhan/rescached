@@ -57,10 +57,8 @@ func New(opts *Options) (srv *Server, err error) {
 // it.
 //
 func (srv *Server) Start() (err error) {
-	fmt.Printf("= Listening on UDP and TCP at '%s:%d'\n",
-		srv.opts.IPAddress, srv.opts.Port)
-	fmt.Printf("= Listening on DoH at '%s:%d'\n", srv.opts.IPAddress,
-		srv.opts.DoHPort)
+	fmt.Printf("= Listening on %q (UDP and TCP) and port %d for HTTP(S)\n",
+		srv.opts.ListenAddress, srv.opts.HTTPPort)
 
 	if len(srv.opts.FileResolvConf) > 0 {
 		_, err = libio.NewWatcher(srv.opts.FileResolvConf, 0, srv.watchResolvConf)

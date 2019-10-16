@@ -5,8 +5,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -14,9 +16,37 @@ import (
 	"time"
 
 	"github.com/shuLhan/share/lib/debug"
+	"github.com/shuLhan/share/lib/ini"
 
 	rescached "github.com/shuLhan/rescached-go/v3"
 )
+
+func parseConfig(file string) (opts *rescached.Options) {
+	opts = rescached.NewOptions()
+
+	cfg, err := ioutil.ReadFile(file)
+	if err != nil {
+		return opts
+	}
+
+	err = ini.Unmarshal(cfg, opts)
+	if err != nil {
+		return opts
+	}
+
+	if len(opts.TLSCertFile) > 0 && len(opts.TLSPrivateKey) > 0 {
+		cert, err := tls.LoadX509KeyPair(opts.TLSCertFile, opts.TLSPrivateKey)
+		if err != nil {
+			log.Println("rescached: error loading certificate: " + err.Error())
+		} else {
+			opts.TLSCertificate = &cert
+		}
+	}
+
+	debug.Value = opts.Debug
+
+	return opts
+}
 
 func createRescachedServer(fileConfig string) *rescached.Server {
 	opts := parseConfig(fileConfig)
