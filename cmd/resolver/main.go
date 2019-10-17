@@ -222,16 +222,16 @@ func main() {
 
 	log.SetFlags(0)
 
-	rc, systemResolver := initSystemResolver()
-
-	fmt.Printf("= resolv.conf: %+v\n", rc)
-
 	opts, err := newOptions()
 	if err != nil {
 		log.Fatal("! ", err)
 	}
 
 	fmt.Printf("= options: %+v\n", opts)
+
+	rc, systemResolver := initSystemResolver()
+
+	fmt.Printf("= resolv.conf: %+v\n", rc)
 
 	if len(opts.nameserver) == 0 {
 		cl = systemResolver
