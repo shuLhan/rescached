@@ -37,21 +37,6 @@ in square bracket:
 This group of options contain the main configuration that related to
 rescached.
 
-[[tls.certificate]]
-==== +tls.certificate+
-
-Format:: /path/to/file
-Default:: (empty)
-Description:: Path to certificate file to serve DNS over HTTPS.
-
-
-[[tls.private_key]]
-==== +tls.private_key+
-
-Format:: /path/to/file
-Default:: (empty)
-Description:: Path to certificate private key file to serve DNS over HTTPS.
-
 [[dir.hosts]]
 ==== +dir.hosts+
 
@@ -165,6 +150,35 @@ query from client.
 If you want rescached to serve a query from another host in your local
 network, change this value to +0.0.0.0:53+.
 
+[[http.port]]
+==== +http.port+
+
+Format:: Number
+Default:: 443
+Description:: Port to serve DNS over HTTPS.
+
+[[tls.port]]
+==== +tls.port+
+
+Format:: Number
+Default:: 853
+Description:: Port to listen for DNS over TLS
+
+[[tls.certificate]]
+==== +tls.certificate+
+
+Format:: /path/to/file
+Default:: (empty)
+Description:: Path to certificate file to serve DNS over TLS and HTTPS.
+
+
+[[tls.private_key]]
+==== +tls.private_key+
+
+Format:: /path/to/file
+Default:: (empty)
+Description:: Path to certificate private key file to serve DNS over TLS and
+HTTPS.
 
 [[tls.allow_insecure]]
 ==== +tls.allow_insecure+
@@ -173,14 +187,14 @@ Format:: true | false
 Default:: false
 Description:: If its true, the certificate is self-signed.
 
+[[doh.behind_proxy]]
+==== +doh.behind_proxy+
 
-[[http.port]]
-==== +http.port+
-
-Format:: Number
-Default:: 443
-Description:: Port to serve DNS over HTTPS.
-
+Format:: true | false
+Default:: false
+Description:: If its true, serve DNS over HTTP only, even if
+certificate files is defined.
+This allow serving DNS request forwarded by another proxy server.
 
 [[cache.prune_delay]]
 ==== +cache.prune_delay+

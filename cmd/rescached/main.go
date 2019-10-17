@@ -5,7 +5,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -32,15 +31,6 @@ func parseConfig(file string) (opts *rescached.Options) {
 	err = ini.Unmarshal(cfg, opts)
 	if err != nil {
 		return opts
-	}
-
-	if len(opts.TLSCertFile) > 0 && len(opts.TLSPrivateKey) > 0 {
-		cert, err := tls.LoadX509KeyPair(opts.TLSCertFile, opts.TLSPrivateKey)
-		if err != nil {
-			log.Println("rescached: error loading certificate: " + err.Error())
-		} else {
-			opts.TLSCertificate = &cert
-		}
 	}
 
 	debug.Value = opts.Debug

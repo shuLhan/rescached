@@ -317,12 +317,10 @@ To enable this feature rescached provided TLS certificate and private key.
 Example configuration in *rescached.cfg*,
 
 ----
-	[rescached]
-	tls.certificate = /etc/rescached/localhost.cert.pem
-	tls.private_key = /etc/rescached/localhost.key.pem
-
 	[dns "server"]
 	parent = https://kilabit.info/dns-query
+	tls.certificate = /etc/rescached/localhost.cert.pem
+	tls.private_key = /etc/rescached/localhost.key.pem
 	tls.allow_insecure = false
 ----
 

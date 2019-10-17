@@ -18,8 +18,6 @@ import (
 //
 type Options struct {
 	dns.ServerOptions
-	TLSCertFile    string `ini:"rescached::tls.certificate"`
-	TLSPrivateKey  string `ini:"rescached::tls.private_key"`
 	DirHosts       string `ini:"rescached::dir.hosts"`
 	DirMaster      string `ini:"rescached::dir.master"`
 	FileResolvConf string `ini:"rescached::file.resolvconf"`

@@ -7,6 +7,8 @@ and watching changes from system resolv.conf.
 
 ==  New Features
 
+*  Support serving and forwarding DNS over TLS
+
 *  Add launchd script for macOS and make tasks to install and uninstall on
    macOS
 
