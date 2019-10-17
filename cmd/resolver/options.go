@@ -10,25 +10,28 @@ import (
 	"strings"
 
 	"github.com/shuLhan/share/lib/dns"
-	libnet "github.com/shuLhan/share/lib/net"
 )
 
 // List of error messages.
 var (
-	errQueryName  = errors.New("missing or invalid query name")
+	errQueryName  = errors.New("invalid or empty query name")
 	errQueryType  = errors.New("unknown query type")
 	errQueryClass = errors.New("unknown query class")
 )
 
 // List of command line usages.
 const (
-	usageDoH        = `Query parent name server over HTTPS`
-	usageNameServer = `Parent name server address, e.g. 192.168.1.1
-without port, 192.168.1.1:53 with port.  Default port is 53.`
+	usageInsecure   = `skip verifying server certificate`
+	usageNameServer = `Parent name server address using scheme based.
+For example,
+udp://35.240.172.103:53 for querying with UDP,
+tcp://35.240.172.103:53 for querying with TCP,
+https://35.240.172:103:853 for querying with DNS over TLS, and
+https://kilabit.info/dns-query for querying with DNS over HTTPS.`
 
 	usageType = `Query type.  Valid values are either A, NS, CNAME, SOA,
 MB, MG, MR, NULL, WKS, PTR, HINFO, MINFO, MX, TXT, AAAA, or SRV.
-Default value in A.`
+Default value is A.`
 
 	usageClass = `Query class.  Valid values are either IN, CS, HS.
 Default value is IN.`
@@ -39,17 +42,17 @@ type options struct {
 	sqclass string
 
 	nameserver string
+	insecure   bool
 	qname      string
 	qtype      uint16
 	qclass     uint16
-	doh        bool
 }
 
 func newOptions() (*options, error) {
 	opts := new(options)
 
-	flag.BoolVar(&opts.doh, "doh", false, usageDoH)
 	flag.StringVar(&opts.nameserver, "ns", "", usageNameServer)
+	flag.BoolVar(&opts.insecure, "insecure", false, usageInsecure)
 	flag.StringVar(&opts.sqtype, "t", "A", usageType)
 	flag.StringVar(&opts.sqclass, "c", "IN", usageClass)
 
@@ -63,12 +66,7 @@ func newOptions() (*options, error) {
 
 	opts.qname = args[0]
 
-	err := opts.parseNameServer()
-	if err != nil {
-		return nil, err
-	}
-
-	err = opts.parseQType()
+	err := opts.parseQType()
 	if err != nil {
 		return nil, err
 	}
@@ -79,21 +77,6 @@ func newOptions() (*options, error) {
 	}
 
 	return opts, nil
-}
-
-func (opts *options) parseNameServer() error {
-	if len(opts.nameserver) == 0 {
-		return nil
-	}
-
-	addr, err := libnet.ParseUDPAddr(opts.nameserver, dns.DefaultPort)
-	if err != nil {
-		return err
-	}
-
-	opts.nameserver = addr.String()
-
-	return nil
 }
 
 func (opts *options) parseQType() error {

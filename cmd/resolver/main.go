@@ -9,6 +9,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"net/url"
 	"strings"
 	"time"
 
@@ -20,15 +21,81 @@ const (
 	defResolvConf = "/etc/resolv.conf"
 )
 
-func parseNameServers(nameservers []string) (udpAddrs []*net.UDPAddr) {
-	for _, ns := range nameservers {
-		addr, err := libnet.ParseUDPAddr(ns, dns.DefaultPort)
-		if err != nil {
-			log.Fatal("! parseNameServers: ", err)
-		}
-		udpAddrs = append(udpAddrs, addr)
+//
+// initSystemResolver read the system resolv.conf to create fallback DNS
+// resolver.
+//
+func initSystemResolver() (rc *libnet.ResolvConf, cl dns.Client) {
+	var (
+		err error
+		ns  string
+	)
+
+	rc, err = libnet.NewResolvConf(defResolvConf)
+	if err != nil {
+		log.Fatal("! ", err)
 	}
+
+	if len(rc.NameServers) == 0 {
+		ns = "127.0.0.1:53"
+	} else {
+		ns = rc.NameServers[0]
+	}
+
+	cl, err = dns.NewUDPClient(ns)
+	if err != nil {
+		log.Fatal("! ", err)
+	}
+
 	return
+}
+
+func createDNSClient(opts *options) (cl dns.Client) {
+	var (
+		ns     = opts.nameserver
+		iphost string
+		port   string
+	)
+
+	nsurl, err := url.Parse(ns)
+	if err != nil {
+		log.Fatalf("! invalid name server: %q\n", ns)
+	}
+
+	ipport := strings.Split(nsurl.Host, ":")
+	switch len(ipport) {
+	case 1:
+		iphost = ipport[0]
+	case 2:
+		iphost = ipport[0]
+		port = ipport[1]
+	default:
+		log.Fatalf("! invalid name server: %q\n", ns)
+	}
+
+	switch nsurl.Scheme {
+	case "udp":
+		cl, err = dns.NewUDPClient(nsurl.Host)
+	case "tcp":
+		cl, err = dns.NewTCPClient(nsurl.Host)
+	case "https":
+		ip := net.ParseIP(iphost)
+		if ip != nil {
+			if len(port) == 0 {
+				port = "853"
+			}
+			cl, err = dns.NewDoTClient(iphost+":"+port, opts.insecure)
+		} else {
+			cl, err = dns.NewDoHClient(ns, opts.insecure)
+		}
+	default:
+		log.Fatalf("! createDNSClient: unknown scheme %q", nsurl.Scheme)
+	}
+	if err != nil {
+		log.Fatal("! createDNSClient: " + err.Error())
+	}
+
+	return cl
 }
 
 func populateQueries(cr *libnet.ResolvConf, qname string) (queries []string) {
@@ -101,22 +168,10 @@ func messagePrint(nameserver string, msg *dns.Message) string {
 	return b.String()
 }
 
-func lookup(opts *options, ns string, timeout time.Duration, qname []byte) *dns.Message {
+func lookup(opts *options, cl dns.Client, timeout time.Duration, qname []byte) *dns.Message {
 	var (
-		cl  dns.Client
 		err error
 	)
-	if opts.doh {
-		cl, err = dns.NewDoHClient(ns, true)
-		if err != nil {
-			log.Fatal("! dns.NewDoHClient: ", err)
-		}
-	} else {
-		cl, err = dns.NewUDPClient(ns)
-		if err != nil {
-			log.Fatal("! dns.NewUDPClient: ", err)
-		}
-	}
 
 	rand.Seed(time.Now().Unix())
 
@@ -158,63 +213,52 @@ func lookup(opts *options, ns string, timeout time.Duration, qname []byte) *dns.
 }
 
 func main() {
+	var (
+		cl  dns.Client
+		rc  *libnet.ResolvConf
+		res *dns.Message
+		err error
+	)
+
 	log.SetFlags(0)
+
+	rc, systemResolver := initSystemResolver()
+
+	fmt.Printf("= resolv.conf: %+v\n", rc)
 
 	opts, err := newOptions()
 	if err != nil {
-		log.Fatal("! newOptions: ", err)
+		log.Fatal("! ", err)
 	}
 
 	fmt.Printf("= options: %+v\n", opts)
 
-	cr, err := libnet.NewResolvConf(defResolvConf)
-	if err != nil {
-		log.Fatal("! NewResolvConf: ", err)
+	if len(opts.nameserver) == 0 {
+		cl = systemResolver
+	} else {
+		cl = createDNSClient(opts)
 	}
 
-	if len(opts.nameserver) > 0 {
-		cr.NameServers = cr.NameServers[:0]
-		cr.NameServers = append(cr.NameServers, opts.nameserver)
-	} else if len(cr.NameServers) == 0 {
-		cr.NameServers = append(cr.NameServers, "127.0.0.1:53")
-	}
-
-	var (
-		res *dns.Message
-		ns  string
-	)
-
-	nsAddrs := parseNameServers(cr.NameServers)
-	queries := populateQueries(cr, opts.qname)
-	timeout := time.Duration(cr.Timeout) * time.Second
-
-	fmt.Printf("= resolv.conf: %+v\n", cr)
+	queries := populateQueries(rc, opts.qname)
+	timeout := time.Duration(rc.Timeout) * time.Second
 
 	// The algorithm used is to try a name server, and  if  the  query
 	// times out, try the next, until out of name servers, then repeat
 	// trying all the name servers until a maximum number of retries are
 	// made.)
 	for _, qname := range queries {
-		for x := 0; x < cr.Attempts; x++ {
-			for _, addr := range nsAddrs {
-				if opts.doh {
-					ns = fmt.Sprintf("https://%s/dns-query", addr.IP)
-				} else {
-					ns = addr.String()
-				}
+		for x := 0; x < rc.Attempts; x++ {
+			fmt.Printf("> Lookup %s at %s\n", qname, cl.RemoteAddr())
 
-				fmt.Printf("> Lookup %s at %s\n", qname, ns)
-
-				res = lookup(opts, ns, timeout, []byte(qname))
-				if res != nil {
-					goto out
-				}
+			res = lookup(opts, cl, timeout, []byte(qname))
+			if res != nil {
+				goto out
 			}
 		}
 	}
 
 out:
 	if res != nil {
-		println(messagePrint(ns, res))
+		println(messagePrint(cl.RemoteAddr(), res))
 	}
 }
