@@ -65,9 +65,8 @@ func (srv *Server) Start() (err error) {
 	}
 
 	srv.dns.Start()
-	srv.dns.Wait()
 
-	return nil
+	return srv.dns.Wait()
 }
 
 //
