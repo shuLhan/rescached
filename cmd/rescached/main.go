@@ -91,17 +91,21 @@ func main() {
 	}
 
 	for {
-		defer func() {
-			err := recover()
-			if err != nil {
-				log.Println("panic: ", err)
-			}
-		}()
+		run(rcd)
+	}
+}
 
-		err := rcd.Start()
+func run(rcd *rescached.Server) {
+	defer func() {
+		err := recover()
 		if err != nil {
-			log.Println(err)
-			rcd.Stop()
+			log.Println("panic: ", err)
 		}
+	}()
+
+	err := rcd.Start()
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
 	}
 }
