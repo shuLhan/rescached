@@ -108,7 +108,8 @@ install-common:
 	cp -f $(RESOLVER_BIN)  $(PREFIX)$(DIR_BIN)
 	cp scripts/rescached-update-hosts-block.sh $(PREFIX)$(DIR_BIN)
 
-	mkdir -p                $(PREFIX)$(DIR_MAN)/man{1,5}
+	mkdir -p                $(PREFIX)$(DIR_MAN)/man1
+	mkdir -p                $(PREFIX)$(DIR_MAN)/man5
 	cp $(RESCACHED_MAN)     $(PREFIX)$(DIR_MAN)/man1/
 	cp $(RESOLVER_MAN)      $(PREFIX)$(DIR_MAN)/man1/
 	cp $(RESCACHED_CFG_MAN) $(PREFIX)$(DIR_MAN)/man5/
