@@ -1,4 +1,4 @@
-=  Rescached v3.0.0 (2019-09-xx)
+=  Rescached v3.0.0-alpha (2019-12-26)
 
 All the server core functionalities (caches and forwarding) now
 implemented inside "dns.Server".  The main function of this package are
