@@ -53,7 +53,7 @@ func main() {
 			log.Printf(`! Answer not matched %s:
 expecting: %s
 got: %s
-`, msgs[x].Question, exp, got)
+`, msgs[x].Question.String(), exp, got)
 		}
 	}
 	timeEnd := time.Now()

@@ -127,7 +127,7 @@ func messagePrint(nameserver string, msg *dns.Message) string {
 
 	fmt.Fprintf(&b, "< From: %s", nameserver)
 	fmt.Fprintf(&b, "\n> Header: %+v", msg.Header)
-	fmt.Fprintf(&b, "\n> Question: %s", msg.Question)
+	fmt.Fprintf(&b, "\n> Question: %s", msg.Question.String())
 
 	b.WriteString("\n> Status:")
 	switch msg.Header.RCode {
