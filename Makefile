@@ -40,17 +40,15 @@ debug: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
 test: $(COVER_HTML)
 
 test.prof:
-	export CGO_ENABLED=0 && \
-		go test $(DEBUG) -count=1 \
-			-cpuprofile $(CPU_PROF) \
-			-memprofile $(MEM_PROF) ./...
+	go test $(DEBUG) -count=1 \
+		-cpuprofile $(CPU_PROF) \
+		-memprofile $(MEM_PROF) ./...
 
 $(COVER_HTML): $(COVER_OUT)
 	go tool cover -html=$< -o $@
 
 $(COVER_OUT): $(SRC) $(SRC_TEST)
-	export CGO_ENABLED=0 && \
-		go test $(DEBUG) -count=1 -coverprofile=$@ ./...
+	go test $(DEBUG) -count=1 -coverprofile=$@ ./...
 
 coverbrowse: $(COVER_HTML)
 	xdg-open $<
@@ -59,16 +57,13 @@ lint:
 	-golangci-lint run --enable-all ./...
 
 $(RESCACHED_BIN): $(SRC)
-	export CGO_ENABLED=0 && \
-		go build $(DEBUG) ./cmd/rescached
+	go build $(DEBUG) ./cmd/rescached
 
 $(RESOLVER_BIN): $(SRC)
-	export CGO_ENABLED=0 && \
-		go build $(DEBUG) ./cmd/resolver
+	go build $(DEBUG) ./cmd/resolver
 
 $(RESOLVERBENCH_BIN): $(SRC)
-	export CGO_ENABLED=0 && \
-		go build $(DEBUG) ./cmd/resolverbench
+	go build $(DEBUG) ./cmd/resolverbench
 
 doc: $(RESCACHED_MAN) $(RESCACHED_CFG_MAN) $(RESOLVER_MAN)
 
