@@ -118,7 +118,7 @@ install-common:
 	cp LICENSE $(PREFIX)$(DIR_RESCACHED)
 
 
-install: build install-common install-service-systemd
+install: build install-common
 	mkdir -p                     $(PREFIX)/usr/lib/systemd/system
 	cp scripts/rescached.service $(PREFIX)/usr/lib/systemd/system/
 
