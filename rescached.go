@@ -8,7 +8,6 @@ package rescached
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
@@ -64,16 +63,14 @@ func (srv *Server) Start() (err error) {
 		}
 	}
 
-	srv.dns.Start()
-
-	return srv.dns.Wait()
+	return srv.dns.ListenAndServe()
 }
 
 //
 // Stop the server.
 //
 func (srv *Server) Stop() {
-	os.Exit(0)
+	srv.dns.Stop()
 }
 
 func (srv *Server) watchResolvConf(ns *libio.NodeState) {
