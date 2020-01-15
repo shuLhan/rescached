@@ -1,3 +1,16 @@
+=  Rescached v3.0.0 (2020-01-15)
+
+==  Enhancements
+
+* Makefile: remove unused option "CGO_ENABLED=0"
+
+==  Bug Fixes
+
+* Makefile: remove invalid task "install-service-systemd"
+
+* cmd: fix formatting arguments
+
+
 =  Rescached v3.0.0-alpha (2019-12-26)
 
 All the server core functionalities (caches and forwarding) now
