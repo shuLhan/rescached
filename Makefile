@@ -7,6 +7,7 @@
 .PHONY: test test.prof coverbrowse lint
 .PHONY: doc
 .PHONY: clean distclean
+.PHONY: deploy
 
 SRC:=$(shell go list -f '{{$$d:=.Dir}} {{ range .GoFiles }}{{$$d}}/{{.}} {{end}}' ./...)
 SRC_TEST:=$(shell go list -f '{{$$d:=.Dir}} {{ range .TestGoFiles }}{{$$d}}/{{.}} {{end}}' ./...)
@@ -147,3 +148,7 @@ uninstall-macos: uninstall-common
 	launchctl stop info.kilabit.rescached
 	launchctl unload info.kilabit.rescached
 	rm -f /Library/LaunchDaemons/info.kilabit.rescached.plist
+
+deploy:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./cmd/rescached
+	rsync --progress ./rescached dns-server:~/bin/rescached
