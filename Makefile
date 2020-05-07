@@ -22,10 +22,10 @@ RESCACHED_BIN:=rescached
 RESCACHED_MAN:=rescached.1.gz
 
 RESCACHED_CFG:=cmd/rescached/rescached.cfg
-RESCACHED_CFG_MAN:=doc/rescached.cfg.5.gz
+RESCACHED_CFG_MAN:=_doc/rescached.cfg.5.gz
 
 RESOLVER_BIN:=resolver
-RESOLVER_MAN:=doc/resolver.1.gz
+RESOLVER_MAN:=_doc/resolver.1.gz
 
 RESOLVERBENCH_BIN:=resolverbench
 
@@ -72,13 +72,13 @@ $(RESCACHED_MAN): README.adoc
 	asciidoctor --backend manpage $<
 	gzip -f rescached.1
 
-$(RESCACHED_CFG_MAN): doc/rescached.cfg.adoc
+$(RESCACHED_CFG_MAN): _doc/rescached.cfg.adoc
 	asciidoctor --backend manpage $<
-	gzip -f doc/rescached.cfg.5
+	gzip -f _doc/rescached.cfg.5
 
-$(RESOLVER_MAN): doc/resolver.adoc
+$(RESOLVER_MAN): _doc/resolver.adoc
 	asciidoctor --backend manpage $<
-	gzip -f doc/resolver.1
+	gzip -f _doc/resolver.1
 
 distclean: clean
 	go clean -i ./...

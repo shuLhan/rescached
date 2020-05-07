@@ -2,9 +2,9 @@
 /TODO
 /cover.html
 /cover.out
-/doc/benchmark.html
-/doc/rescached.cfg.5.gz
-/doc/resolver.1.gz
+/_doc/benchmark.html
+/_doc/rescached.cfg.5.gz
+/_doc/resolver.1.gz
 /heap*
 /rescached
 /rescached.1.gz
