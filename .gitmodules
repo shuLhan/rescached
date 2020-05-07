@@ -1,3 +1,3 @@
 [submodule "AUR"]
-	path = AUR
+	path = _AUR
 	url = https://aur.archlinux.org/rescached-git.git
