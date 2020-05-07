@@ -11,10 +11,10 @@ fi
 HOSTS_BLOCK=/etc/rescached/hosts.d/hosts.block
 TMP_HOSTS=/tmp/hosts.raw
 
-wget -O - "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext" > $TMP_HOSTS
-wget -O - "http://www.malwaredomainlist.com/hostslist/hosts.txt" >> $TMP_HOSTS
-wget -O - "http://winhelp2002.mvps.org/hosts.txt" >> $TMP_HOSTS
-wget -O - "http://someonewhocares.org/hosts/hosts" >> $TMP_HOSTS
+curl -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext" > $TMP_HOSTS
+curl -L "http://www.malwaredomainlist.com/hostslist/hosts.txt" >> $TMP_HOSTS
+curl -L "http://winhelp2002.mvps.org/hosts.txt" >> $TMP_HOSTS
+curl -L "http://someonewhocares.org/hosts/hosts" >> $TMP_HOSTS
 
 echo ">> generating '$HOSTS_BLOCK' from '$TMP_HOSTS'"
 
@@ -25,5 +25,5 @@ cat $TMP_HOSTS | \
 		-e '/^$/ d' \
 		-e 's/[ 	][ 	]*/ /g' \
 		-e 's/0\.0\.0\.0/127.0.0.2/' \
-		-e 's/127\.0\.0\.1/127.0.0.2/' - \
+		-e 's/127\.0\.0\.1/127.0.0.2/' \
 | sort | uniq > $HOSTS_BLOCK
