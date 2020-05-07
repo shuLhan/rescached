@@ -97,12 +97,12 @@ install-common:
 	cp $(RESCACHED_CFG)            $(PREFIX)/etc/rescached/
 	cp testdata/localhost.cert.pem $(PREFIX)/etc/rescached/
 	cp testdata/localhost.key.pem  $(PREFIX)/etc/rescached/
-	cp scripts/hosts.block $(PREFIX)/etc/rescached/hosts.d/
+	cp _scripts/hosts.block $(PREFIX)/etc/rescached/hosts.d/
 
 	mkdir -p               $(PREFIX)$(DIR_BIN)
 	cp -f $(RESCACHED_BIN) $(PREFIX)$(DIR_BIN)
 	cp -f $(RESOLVER_BIN)  $(PREFIX)$(DIR_BIN)
-	cp scripts/rescached-update-hosts-block.sh $(PREFIX)$(DIR_BIN)
+	cp _scripts/rescached-update-hosts-block.sh $(PREFIX)$(DIR_BIN)
 
 	mkdir -p                $(PREFIX)$(DIR_MAN)/man1
 	mkdir -p                $(PREFIX)$(DIR_MAN)/man5
@@ -116,14 +116,14 @@ install-common:
 
 install: build install-common
 	mkdir -p                     $(PREFIX)/usr/lib/systemd/system
-	cp scripts/rescached.service $(PREFIX)/usr/lib/systemd/system/
+	cp _scripts/rescached.service $(PREFIX)/usr/lib/systemd/system/
 
 
 install-macos: DIR_BIN=/usr/local/bin
 install-macos: DIR_MAN=/usr/local/share/man
 install-macos: DIR_RESCACHED=/usr/local/share/rescached
 install-macos: build install-common
-	cp scripts/info.kilabit.rescached.plist /Library/LaunchDaemons/
+	cp _scripts/info.kilabit.rescached.plist /Library/LaunchDaemons/
 
 
 uninstall-common:
