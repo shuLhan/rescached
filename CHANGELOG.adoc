@@ -1,3 +1,24 @@
+=  Rescached v3.0.1 (2020-05-07)
+
+==  Enhancements
+
+*  dns: change the mark of input/output in log output
+   Previously, the character '<' is used to indicate incoming request
+   from client and '>' to indicate outgoing response.
+   This change reverse it because '<' make more sense for output and '>'
+   is for input (looks like cin and cout on C++ world)
+
+==  Bug fixes
+
+*  dns: fix index out of range when unpacking OPT RR
+*  dns: forward the request to fallback queue if there is no forwarders
+
+==  Chores
+
+*  Add prefix "_" to all non-Go source directories.
+   This is to ignore the directory being scanned by Go tools.
+
+
 =  Rescached v3.0.0 (2020-01-15)
 
 ==  Enhancements
