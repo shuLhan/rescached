@@ -20,6 +20,36 @@ import (
 	rescached "github.com/shuLhan/rescached-go/v3"
 )
 
+func main() {
+	var (
+		fileConfig string
+	)
+
+	log.SetFlags(0)
+
+	flag.StringVar(&fileConfig, "config", "", "path to configuration")
+	flag.Parse()
+
+	opts := parseConfig(fileConfig)
+
+	rcd, err := rescached.New(opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go run(rcd)
+
+	if debug.Value >= 2 {
+		go debugRuntime()
+	}
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGQUIT, syscall.SIGSEGV, syscall.SIGTERM,
+		syscall.SIGINT)
+	<-c
+	rcd.Stop()
+}
+
 func parseConfig(file string) (opts *rescached.Options) {
 	opts = rescached.NewOptions()
 
@@ -38,25 +68,6 @@ func parseConfig(file string) (opts *rescached.Options) {
 	return opts
 }
 
-func createRescachedServer(fileConfig string) *rescached.Server {
-	opts := parseConfig(fileConfig)
-
-	rcd, err := rescached.New(opts)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return rcd
-}
-
-func handleSignal(rcd *rescached.Server) {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGQUIT, syscall.SIGSEGV, syscall.SIGTERM,
-		syscall.SIGINT)
-	<-c
-	rcd.Stop()
-}
-
 func debugRuntime() {
 	ticker := time.NewTicker(30 * time.Second)
 	memHeap := debug.NewMemHeap()
@@ -72,29 +83,6 @@ func debugRuntime() {
 	}
 }
 
-func main() {
-	var (
-		fileConfig string
-	)
-
-	log.SetFlags(0)
-
-	flag.StringVar(&fileConfig, "config", "", "path to configuration")
-	flag.Parse()
-
-	rcd := createRescachedServer(fileConfig)
-
-	go handleSignal(rcd)
-
-	if debug.Value >= 2 {
-		go debugRuntime()
-	}
-
-	for {
-		run(rcd)
-	}
-}
-
 func run(rcd *rescached.Server) {
 	defer func() {
 		err := recover()
@@ -106,6 +94,5 @@ func run(rcd *rescached.Server) {
 	err := rcd.Start()
 	if err != nil {
 		log.Println(err)
-		os.Exit(1)
 	}
 }
