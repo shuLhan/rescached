@@ -2,7 +2,7 @@ RESCACHED.CONF(5)
 =================
 :doctype: manpage
 :man source: rescached.cfg
-:man version: 2018.09.29
+:man version: 2020.05.10
 :man manual: rescached.cfg
 
 
@@ -53,7 +53,7 @@ location.
 Format:: string
 Default:: /etc/rescached/master.d
 Description::  Path to master directory.
-If set, rescached will load all master files inside directory.
+If set, rescached will load all master files inside the directory.
 If its empty or unset, it will not loading master file even in default
 location.
 
@@ -84,12 +84,12 @@ dnsmasq_resolv=/etc/rescached/resolv.conf
 ==== +debug+
 
 Value::
-0::: log nothing.
-1::: log startup, request, response, caches, and exit status.
+0::: log startup and errors.
+1::: log startup, errors, request, response, caches, and exit status.
 Format:: 	Number (0 or 1).
 Default:: 	0
-Description:: 	This option only used by developer for debugging program or if
-user want to monitor what kind of traffic goes out, set this option to 1.
+Description:: 	This option only used for debugging program or if user want to
+monitor what kind of traffic goes in and out of rescached.
 
 [[dns_server]]
 === DNS Server options
@@ -110,15 +110,11 @@ scheme  = ( "tcp" / "udp" / "https")
 Default::
 * Address: udp://35.240.172.103
 * Port: 53
-Description:: List of parent DNS servers, separated by commas.
+Description:: List of parent DNS servers.
 +
 When +rescached+ receive a query from client and when it does
-not have a cached address of query, it will pass the query to those parent
-server.
-+rescached+ use its own public servers as a default parent name servers
-if not set.
-The reason for this is that its public server use a simple and
-small size of response/answer without logging client requests.
+not have a cached address of query, it will forward the query to those parent
+servers.
 +
 Please, do not use OpenDNS server.
 If certain host-name not found (i.e. typo in host-name), OpenDNS will reply
@@ -155,14 +151,14 @@ network, change this value to +0.0.0.0:53+.
 
 Format:: Number
 Default:: 443
-Description:: Port to serve DNS over HTTPS.
+Description:: Port to serve DNS over HTTP.
 
 [[tls.port]]
 ==== +tls.port+
 
 Format:: Number
 Default:: 853
-Description:: Port to listen for DNS over TLS
+Description:: Port to listen for DNS over TLS.
 
 [[tls.certificate]]
 ==== +tls.certificate+
@@ -185,7 +181,8 @@ HTTPS.
 
 Format:: true | false
 Default:: false
-Description:: If its true, the certificate is self-signed.
+Description:: If its true, allow serving DoH and DoT with self-signed
+certificate.
 
 [[doh.behind_proxy]]
 ==== +doh.behind_proxy+
@@ -199,19 +196,21 @@ This allow serving DNS request forwarded by another proxy server.
 [[cache.prune_delay]]
 ==== +cache.prune_delay+
 
-Format:: 	Duration
+Format:: 	Duration with time unit. Valid time units are "s", "m", "h".
 Default:: 	1h
-Description::   Every N seconds/minutes/hours, rescached will traverse all
+Description::   Delay for pruning caches.
+Every N seconds/minutes/hours, rescached will traverse all
 caches and remove response that has not been accessed less than
 +cache.prune_threshold+.
 
 [[cache.prune_threshold]]
 ==== +cache.prune_threshold+
 
-Format:: 	Duration
+Format:: 	Duration with time unit. Valid time units are "s", "m", "h".
 Default:: 	-1h
 Description:: 	The duration when the cache will be considered expired.
-Its value must negative and less than -1 minute.
+Its value must be negative and less than -1 minute.
+
 
 == EXAMPLE
 
