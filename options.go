@@ -6,9 +6,12 @@ package rescached
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
+	"github.com/shuLhan/share/lib/ini"
 	libnet "github.com/shuLhan/share/lib/net"
 	libstrings "github.com/shuLhan/share/lib/strings"
 )
@@ -22,6 +25,32 @@ type Options struct {
 	DirMaster      string `ini:"rescached::dir.master"`
 	FileResolvConf string `ini:"rescached::file.resolvconf"`
 	Debug          int    `ini:"rescached::debug"`
+}
+
+func loadOptions(file string) (opts *Options) {
+	opts = NewOptions()
+
+	if len(file) == 0 {
+		opts.init()
+		return opts
+	}
+
+	cfg, err := ioutil.ReadFile(file)
+	if err != nil {
+		log.Printf("rescached: loadOptions %q: %s", file, err)
+		return opts
+	}
+
+	err = ini.Unmarshal(cfg, opts)
+	if err != nil {
+		log.Println("rescached: loadOptions %q: %s", file, err)
+		return opts
+	}
+
+	opts.init()
+	debug.Value = opts.Debug
+
+	return opts
 }
 
 //

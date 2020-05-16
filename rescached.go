@@ -16,19 +16,16 @@ import (
 
 // Server implement caching DNS server.
 type Server struct {
-	dns  *dns.Server
-	opts *Options
+	fileConfig string
+	dns        *dns.Server
+	opts       *Options
 }
 
 //
 // New create and initialize new rescached server.
 //
-func New(opts *Options) (srv *Server, err error) {
-	if opts == nil {
-		opts = NewOptions()
-	}
-
-	opts.init()
+func New(fileConfig string) (srv *Server, err error) {
+	opts := loadOptions(fileConfig)
 
 	if debug.Value >= 1 {
 		fmt.Printf("rescached: config: %+v\n", opts)
@@ -44,8 +41,9 @@ func New(opts *Options) (srv *Server, err error) {
 	dnsServer.LoadHostsFile("")
 
 	srv = &Server{
-		dns:  dnsServer,
-		opts: opts,
+		fileConfig: fileConfig,
+		dns:        dnsServer,
+		opts:       opts,
 	}
 
 	return srv, nil

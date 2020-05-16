@@ -7,7 +7,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -15,7 +14,6 @@ import (
 	"time"
 
 	"github.com/shuLhan/share/lib/debug"
-	"github.com/shuLhan/share/lib/ini"
 
 	rescached "github.com/shuLhan/rescached-go/v3"
 )
@@ -30,9 +28,7 @@ func main() {
 	flag.StringVar(&fileConfig, "config", "", "path to configuration")
 	flag.Parse()
 
-	opts := parseConfig(fileConfig)
-
-	rcd, err := rescached.New(opts)
+	rcd, err := rescached.New(fileConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,24 +44,6 @@ func main() {
 		syscall.SIGINT)
 	<-c
 	rcd.Stop()
-}
-
-func parseConfig(file string) (opts *rescached.Options) {
-	opts = rescached.NewOptions()
-
-	cfg, err := ioutil.ReadFile(file)
-	if err != nil {
-		return opts
-	}
-
-	err = ini.Unmarshal(cfg, opts)
-	if err != nil {
-		return opts
-	}
-
-	debug.Value = opts.Debug
-
-	return opts
 }
 
 func debugRuntime() {
