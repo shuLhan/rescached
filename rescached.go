@@ -19,6 +19,7 @@ type Server struct {
 	fileConfig string
 	dns        *dns.Server
 	opts       *Options
+	rcWatcher  *libio.Watcher
 }
 
 //
@@ -55,7 +56,8 @@ func New(fileConfig string) (srv *Server, err error) {
 //
 func (srv *Server) Start() (err error) {
 	if len(srv.opts.FileResolvConf) > 0 {
-		_, err = libio.NewWatcher(srv.opts.FileResolvConf, 0, srv.watchResolvConf)
+		srv.rcWatcher, err = libio.NewWatcher(
+			srv.opts.FileResolvConf, 0, srv.watchResolvConf)
 		if err != nil {
 			log.Fatal("rescached: Start:", err)
 		}
@@ -68,6 +70,9 @@ func (srv *Server) Start() (err error) {
 // Stop the server.
 //
 func (srv *Server) Stop() {
+	if srv.rcWatcher != nil {
+		srv.rcWatcher.Stop()
+	}
 	srv.dns.Stop()
 }
 
