@@ -20,7 +20,7 @@ import (
 type Server struct {
 	fileConfig string
 	dns        *dns.Server
-	opts       *Options
+	env        *environment
 	rcWatcher  *libio.Watcher
 
 	httpd       *http.Server
@@ -31,15 +31,15 @@ type Server struct {
 // New create and initialize new rescached server.
 //
 func New(fileConfig string) (srv *Server, err error) {
-	opts := loadOptions(fileConfig)
+	env := loadEnvironment(fileConfig)
 
 	if debug.Value >= 1 {
-		fmt.Printf("rescached: config: %+v\n", opts)
+		fmt.Printf("rescached: config: %+v\n", env)
 	}
 
 	srv = &Server{
 		fileConfig: fileConfig,
-		opts:       opts,
+		env:        env,
 	}
 
 	err = srv.httpdInit()
@@ -55,18 +55,18 @@ func New(fileConfig string) (srv *Server, err error) {
 // it.
 //
 func (srv *Server) Start() (err error) {
-	srv.dns, err = dns.NewServer(&srv.opts.ServerOptions)
+	srv.dns, err = dns.NewServer(&srv.env.ServerOptions)
 	if err != nil {
 		return err
 	}
 
-	srv.dns.LoadHostsDir(srv.opts.DirHosts)
-	srv.dns.LoadMasterDir(srv.opts.DirMaster)
+	srv.dns.LoadHostsDir(srv.env.DirHosts)
+	srv.dns.LoadMasterDir(srv.env.DirMaster)
 	srv.dns.LoadHostsFile("")
 
-	if len(srv.opts.FileResolvConf) > 0 {
+	if len(srv.env.FileResolvConf) > 0 {
 		srv.rcWatcher, err = libio.NewWatcher(
-			srv.opts.FileResolvConf, 0, srv.watchResolvConf)
+			srv.env.FileResolvConf, 0, srv.watchResolvConf)
 		if err != nil {
 			log.Fatal("rescached: Start:", err)
 		}
@@ -108,10 +108,10 @@ func (srv *Server) Stop() {
 func (srv *Server) watchResolvConf(ns *libio.NodeState) {
 	switch ns.State {
 	case libio.FileStateDeleted:
-		log.Printf("= ResolvConf: file %q deleted\n", srv.opts.FileResolvConf)
+		log.Printf("= ResolvConf: file %q deleted\n", srv.env.FileResolvConf)
 		return
 	default:
-		ok, err := srv.opts.loadResolvConf()
+		ok, err := srv.env.loadResolvConf()
 		if err != nil {
 			log.Println("rescached: loadResolvConf: " + err.Error())
 			break
@@ -120,6 +120,6 @@ func (srv *Server) watchResolvConf(ns *libio.NodeState) {
 			break
 		}
 
-		srv.dns.RestartForwarders(srv.opts.NameServers, srv.opts.FallbackNS)
+		srv.dns.RestartForwarders(srv.env.NameServers, srv.env.FallbackNS)
 	}
 }

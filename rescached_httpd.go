@@ -19,9 +19,9 @@ const (
 )
 
 func (srv *Server) httpdInit() (err error) {
-	opts := &http.ServerOptions{
+	env := &http.ServerOptions{
 		Root:    defHTTPDRootDir,
-		Address: srv.opts.WuiListen,
+		Address: srv.env.WuiListen,
 		Includes: []string{
 			`.*\.css`,
 			`.*\.html`,
@@ -35,7 +35,7 @@ func (srv *Server) httpdInit() (err error) {
 		},
 	}
 
-	srv.httpd, err = http.NewServer(opts)
+	srv.httpd, err = http.NewServer(env)
 	if err != nil {
 		return fmt.Errorf("newHTTPServer: %w", err)
 	}
@@ -86,7 +86,7 @@ func (srv *Server) httpdRun() {
 		}
 	}()
 
-	log.Printf("=== rescached: httpd listening at %s", srv.opts.WuiListen)
+	log.Printf("=== rescached: httpd listening at %s", srv.env.WuiListen)
 
 	err := srv.httpd.Start()
 	if err != nil {
@@ -99,7 +99,7 @@ func (srv *Server) httpdAPIGetEnvironment(
 ) (
 	resBody []byte, err error,
 ) {
-	return json.Marshal(srv.opts)
+	return json.Marshal(srv.env)
 }
 
 func (srv *Server) httpdAPIPostEnvironment(
@@ -107,7 +107,7 @@ func (srv *Server) httpdAPIPostEnvironment(
 ) (
 	resBody []byte, err error,
 ) {
-	newOpts := new(Options)
+	newOpts := new(environment)
 	err = json.Unmarshal(reqBody, newOpts)
 	if err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func (srv *Server) httpdAPIPostEnvironment(
 		return json.Marshal(res)
 	}
 
-	srv.opts = newOpts
+	srv.env = newOpts
 
 	srv.Stop()
 	err = srv.Start()

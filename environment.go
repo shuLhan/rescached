@@ -43,9 +43,9 @@ const (
 )
 
 //
-// Options for running rescached.
+// environment for running rescached.
 //
-type Options struct {
+type environment struct {
 	dns.ServerOptions
 	WuiListen      string `ini:"rescached::wui.listen"`
 	DirHosts       string `ini:"rescached::dir.hosts"`
@@ -54,37 +54,37 @@ type Options struct {
 	Debug          int    `ini:"rescached::debug"`
 }
 
-func loadOptions(file string) (opts *Options) {
-	opts = NewOptions()
+func loadEnvironment(file string) (env *environment) {
+	env = newEnvironment()
 
 	if len(file) == 0 {
-		opts.init()
-		return opts
+		env.init()
+		return env
 	}
 
 	cfg, err := ioutil.ReadFile(file)
 	if err != nil {
-		log.Printf("rescached: loadOptions %q: %s", file, err)
-		return opts
+		log.Printf("rescached: loadEnvironment %q: %s", file, err)
+		return env
 	}
 
-	err = ini.Unmarshal(cfg, opts)
+	err = ini.Unmarshal(cfg, env)
 	if err != nil {
-		log.Printf("rescached: loadOptions %q: %s", file, err)
-		return opts
+		log.Printf("rescached: loadEnvironment %q: %s", file, err)
+		return env
 	}
 
-	opts.init()
-	debug.Value = opts.Debug
+	env.init()
+	debug.Value = env.Debug
 
-	return opts
+	return env
 }
 
 //
-// NewOptions create and initialize options with default values.
+// newEnvironment create and initialize options with default values.
 //
-func NewOptions() *Options {
-	return &Options{
+func newEnvironment() *environment {
+	return &environment{
 		ServerOptions: dns.ServerOptions{
 			ListenAddress: "127.0.0.1:53",
 		},
@@ -92,22 +92,22 @@ func NewOptions() *Options {
 }
 
 //
-// init check and initialize the Options instance with default values.
+// init check and initialize the environment instance with default values.
 //
-func (opts *Options) init() {
-	if len(opts.WuiListen) == 0 {
-		opts.WuiListen = defWuiAddress
+func (env *environment) init() {
+	if len(env.WuiListen) == 0 {
+		env.WuiListen = defWuiAddress
 	}
-	if len(opts.ListenAddress) == 0 {
-		opts.ListenAddress = "127.0.0.1:53"
+	if len(env.ListenAddress) == 0 {
+		env.ListenAddress = "127.0.0.1:53"
 	}
-	if len(opts.FileResolvConf) > 0 {
-		_, _ = opts.loadResolvConf()
+	if len(env.FileResolvConf) > 0 {
+		_, _ = env.loadResolvConf()
 	}
 }
 
-func (opts *Options) loadResolvConf() (ok bool, err error) {
-	rc, err := libnet.NewResolvConf(opts.FileResolvConf)
+func (env *environment) loadResolvConf() (ok bool, err error) {
+	rc, err := libnet.NewResolvConf(env.FileResolvConf)
 	if err != nil {
 		return false, err
 	}
@@ -124,14 +124,14 @@ func (opts *Options) loadResolvConf() (ok bool, err error) {
 		rc.NameServers[x] = "udp://" + rc.NameServers[x]
 	}
 
-	if libstrings.IsEqual(opts.NameServers, rc.NameServers) {
+	if libstrings.IsEqual(env.NameServers, rc.NameServers) {
 		return false, nil
 	}
 
-	if len(opts.NameServers) == 0 {
-		opts.NameServers = rc.NameServers
+	if len(env.NameServers) == 0 {
+		env.NameServers = rc.NameServers
 	} else {
-		opts.FallbackNS = rc.NameServers
+		env.FallbackNS = rc.NameServers
 	}
 
 	return true, nil
@@ -140,41 +140,41 @@ func (opts *Options) loadResolvConf() (ok bool, err error) {
 //
 // write the options values back to file.
 //
-func (opts *Options) write(file string) (err error) {
+func (env *environment) write(file string) (err error) {
 	in, err := ini.Open(file)
 	if err != nil {
 		return fmt.Errorf("write: %w", err)
 	}
 
-	in.Set(sectionNameRescached, "", keyFileResolvConf, opts.FileResolvConf)
-	in.Set(sectionNameRescached, "", keyDebug, strconv.Itoa(opts.Debug))
+	in.Set(sectionNameRescached, "", keyFileResolvConf, env.FileResolvConf)
+	in.Set(sectionNameRescached, "", keyDebug, strconv.Itoa(env.Debug))
 
 	in.UnsetAll(sectionNameDNS, subNameServer, keyParent)
-	for _, ns := range opts.NameServers {
+	for _, ns := range env.NameServers {
 		in.Add(sectionNameDNS, subNameServer, keyParent, ns)
 	}
 
 	in.Set(sectionNameDNS, subNameServer, keyListen,
-		opts.ServerOptions.ListenAddress)
+		env.ServerOptions.ListenAddress)
 
 	in.Set(sectionNameDNS, subNameServer, keyHTTPPort,
-		strconv.Itoa(int(opts.ServerOptions.HTTPPort)))
+		strconv.Itoa(int(env.ServerOptions.HTTPPort)))
 
 	in.Set(sectionNameDNS, subNameServer, keyTLSPort,
-		strconv.Itoa(int(opts.ServerOptions.TLSPort)))
+		strconv.Itoa(int(env.ServerOptions.TLSPort)))
 	in.Set(sectionNameDNS, subNameServer, keyTLSCertificate,
-		opts.ServerOptions.TLSCertFile)
+		env.ServerOptions.TLSCertFile)
 	in.Set(sectionNameDNS, subNameServer, keyTLSPrivateKey,
-		opts.ServerOptions.TLSPrivateKey)
+		env.ServerOptions.TLSPrivateKey)
 	in.Set(sectionNameDNS, subNameServer, keyTLSAllowInsecure,
-		fmt.Sprintf("%t", opts.ServerOptions.TLSAllowInsecure))
+		fmt.Sprintf("%t", env.ServerOptions.TLSAllowInsecure))
 	in.Set(sectionNameDNS, subNameServer, keyDohBehindProxy,
-		fmt.Sprintf("%t", opts.ServerOptions.DoHBehindProxy))
+		fmt.Sprintf("%t", env.ServerOptions.DoHBehindProxy))
 
 	in.Set(sectionNameDNS, subNameServer, keyCachePruneDelay,
-		fmt.Sprintf("%s", opts.ServerOptions.PruneDelay))
+		fmt.Sprintf("%s", env.ServerOptions.PruneDelay))
 	in.Set(sectionNameDNS, subNameServer, keyCachePruneThreshold,
-		fmt.Sprintf("%s", opts.ServerOptions.PruneThreshold))
+		fmt.Sprintf("%s", env.ServerOptions.PruneThreshold))
 
 	return in.Save(file)
 }

@@ -12,15 +12,15 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
-func TestOptions(t *testing.T) {
+func TestEnvironment(t *testing.T) {
 	cases := []struct {
 		desc     string
 		content  string
-		exp      *Options
+		exp      *environment
 		expError string
 	}{{
 		desc: "With empty content",
-		exp:  &Options{},
+		exp:  &environment{},
 	}, {
 		desc: "With multiple parents",
 		content: `[dns "server"]
@@ -28,7 +28,7 @@ listen = 127.0.0.1:53
 parent = udp://35.240.172.103
 parent = https://kilabit.info/dns-query
 `,
-		exp: &Options{
+		exp: &environment{
 			ServerOptions: dns.ServerOptions{
 				ListenAddress: "127.0.0.1:53",
 				NameServers: []string{
@@ -42,7 +42,7 @@ parent = https://kilabit.info/dns-query
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		got := &Options{
+		got := &environment{
 			ServerOptions: dns.ServerOptions{},
 		}
 
@@ -52,6 +52,6 @@ parent = https://kilabit.info/dns-query
 			continue
 		}
 
-		test.Assert(t, "Options", c.exp, got, true)
+		test.Assert(t, "environment", c.exp, got, true)
 	}
 }
