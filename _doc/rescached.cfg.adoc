@@ -19,7 +19,6 @@ rescached.cfg - Configuration for rescached service
 == DESCRIPTION
 
 These file configure the behaviour of *rescached*(1) service.
-In those file you can see some comment for any option and some possible value.
 This section will explain more about each option and how they effect
 +rescached+.
 
@@ -36,6 +35,13 @@ in square bracket:
 
 This group of options contain the main configuration that related to
 rescached.
+
+[[wui.listen]]
+==== +wui.listen+
+
+Format:: [host]:port
+Default:: 127.0.0.1:5380
+Description:: The address to listen for web user interface.
 
 [[dir.hosts]]
 ==== +dir.hosts+
@@ -158,7 +164,7 @@ Description:: Port to serve DNS over HTTP.
 
 Format:: Number
 Default:: 853
-Description:: Port to listen for DNS over TLS.
+Description:: Port to serve DNS over TLS.
 
 [[tls.certificate]]
 ==== +tls.certificate+
@@ -202,6 +208,7 @@ Description::   Delay for pruning caches.
 Every N seconds/minutes/hours, rescached will traverse all
 caches and remove response that has not been accessed less than
 +cache.prune_threshold+.
+Its value must be equal or greater than 1 hour (3600 seconds).
 
 [[cache.prune_threshold]]
 ==== +cache.prune_threshold+
@@ -209,7 +216,7 @@ caches and remove response that has not been accessed less than
 Format:: 	Duration with time unit. Valid time units are "s", "m", "h".
 Default:: 	-1h
 Description:: 	The duration when the cache will be considered expired.
-Its value must be negative and less than -1 minute.
+Its value must be negative and greater or equal than -1 hour (-3600 seconds).
 
 
 == EXAMPLE

@@ -1,10 +1,11 @@
 /README.html
 /TODO
-/cover.html
-/cover.out
 /_doc/benchmark.html
 /_doc/rescached.cfg.5.gz
 /_doc/resolver.1.gz
+/cmd/rescached/memfs.go
+/cover.html
+/cover.out
 /heap*
 /rescached
 /rescached.1.gz

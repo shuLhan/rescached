@@ -57,8 +57,11 @@ coverbrowse: $(COVER_HTML)
 lint:
 	-golangci-lint run --enable-all ./...
 
-$(RESCACHED_BIN): $(SRC)
+$(RESCACHED_BIN): cmd/rescached/memfs.go $(SRC)
 	go build $(DEBUG) ./cmd/rescached
+
+cmd/rescached/memfs.go: internal/generate_memfs.go _www/public/*
+	go run ./internal/generate_memfs.go
 
 $(RESOLVER_BIN): $(SRC)
 	go build $(DEBUG) ./cmd/resolver

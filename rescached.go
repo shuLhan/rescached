@@ -8,9 +8,11 @@ package rescached
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
+	"github.com/shuLhan/share/lib/http"
 	libio "github.com/shuLhan/share/lib/io"
 )
 
@@ -20,6 +22,9 @@ type Server struct {
 	dns        *dns.Server
 	opts       *Options
 	rcWatcher  *libio.Watcher
+
+	httpd       *http.Server
+	httpdRunner sync.Once
 }
 
 //
@@ -32,19 +37,14 @@ func New(fileConfig string) (srv *Server, err error) {
 		fmt.Printf("rescached: config: %+v\n", opts)
 	}
 
-	dnsServer, err := dns.NewServer(&opts.ServerOptions)
-	if err != nil {
-		return nil, err
-	}
-
-	dnsServer.LoadHostsDir(opts.DirHosts)
-	dnsServer.LoadMasterDir(opts.DirMaster)
-	dnsServer.LoadHostsFile("")
-
 	srv = &Server{
 		fileConfig: fileConfig,
-		dns:        dnsServer,
 		opts:       opts,
+	}
+
+	err = srv.httpdInit()
+	if err != nil {
+		return nil, err
 	}
 
 	return srv, nil
@@ -55,6 +55,15 @@ func New(fileConfig string) (srv *Server, err error) {
 // it.
 //
 func (srv *Server) Start() (err error) {
+	srv.dns, err = dns.NewServer(&srv.opts.ServerOptions)
+	if err != nil {
+		return err
+	}
+
+	srv.dns.LoadHostsDir(srv.opts.DirHosts)
+	srv.dns.LoadMasterDir(srv.opts.DirMaster)
+	srv.dns.LoadHostsFile("")
+
 	if len(srv.opts.FileResolvConf) > 0 {
 		srv.rcWatcher, err = libio.NewWatcher(
 			srv.opts.FileResolvConf, 0, srv.watchResolvConf)
@@ -63,7 +72,27 @@ func (srv *Server) Start() (err error) {
 		}
 	}
 
-	return srv.dns.ListenAndServe()
+	go func() {
+		srv.httpdRunner.Do(srv.httpdRun)
+	}()
+
+	go srv.run()
+
+	return nil
+}
+
+func (srv *Server) run() {
+	defer func() {
+		err := recover()
+		if err != nil {
+			log.Println("panic: ", err)
+		}
+	}()
+
+	err := srv.dns.ListenAndServe()
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 //

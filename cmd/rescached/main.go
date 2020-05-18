@@ -33,9 +33,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go run(rcd)
+	err = rcd.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	if debug.Value >= 2 {
+	if debug.Value >= 3 {
 		go debugRuntime()
 	}
 
@@ -58,19 +61,5 @@ func debugRuntime() {
 		fmt.Printf("= rescached: MemHeap{RelHeapAlloc:%d RelHeapObjects:%d DiffHeapObjects:%d}\n",
 			memHeap.RelHeapAlloc, memHeap.RelHeapObjects,
 			memHeap.DiffHeapObjects)
-	}
-}
-
-func run(rcd *rescached.Server) {
-	defer func() {
-		err := recover()
-		if err != nil {
-			log.Println("panic: ", err)
-		}
-	}()
-
-	err := rcd.Start()
-	if err != nil {
-		log.Println(err)
 	}
 }

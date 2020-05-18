@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strconv"
 
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
@@ -16,11 +17,37 @@ import (
 	libstrings "github.com/shuLhan/share/lib/strings"
 )
 
+const (
+	defWuiAddress = "127.0.0.1:5380"
+)
+
+const (
+	sectionNameDNS       = "dns"
+	sectionNameRescached = "rescached"
+
+	subNameServer = "server"
+
+	keyDebug          = "debug"
+	keyFileResolvConf = "file.resolvconf"
+
+	keyCachePruneDelay     = "cache.prune_delay"
+	keyCachePruneThreshold = "cache.prune_threshold"
+	keyDohBehindProxy      = "doh.behind_proxy"
+	keyHTTPPort            = "http.port"
+	keyListen              = "listen"
+	keyParent              = "parent"
+	keyTLSAllowInsecure    = "tls.allow_insecure"
+	keyTLSCertificate      = "tls.certificate"
+	keyTLSPort             = "tls.port"
+	keyTLSPrivateKey       = "tls.private_key"
+)
+
 //
 // Options for running rescached.
 //
 type Options struct {
 	dns.ServerOptions
+	WuiListen      string `ini:"rescached::wui.listen"`
 	DirHosts       string `ini:"rescached::dir.hosts"`
 	DirMaster      string `ini:"rescached::dir.master"`
 	FileResolvConf string `ini:"rescached::file.resolvconf"`
@@ -43,7 +70,7 @@ func loadOptions(file string) (opts *Options) {
 
 	err = ini.Unmarshal(cfg, opts)
 	if err != nil {
-		log.Println("rescached: loadOptions %q: %s", file, err)
+		log.Printf("rescached: loadOptions %q: %s", file, err)
 		return opts
 	}
 
@@ -68,6 +95,9 @@ func NewOptions() *Options {
 // init check and initialize the Options instance with default values.
 //
 func (opts *Options) init() {
+	if len(opts.WuiListen) == 0 {
+		opts.WuiListen = defWuiAddress
+	}
 	if len(opts.ListenAddress) == 0 {
 		opts.ListenAddress = "127.0.0.1:53"
 	}
@@ -105,4 +135,46 @@ func (opts *Options) loadResolvConf() (ok bool, err error) {
 	}
 
 	return true, nil
+}
+
+//
+// write the options values back to file.
+//
+func (opts *Options) write(file string) (err error) {
+	in, err := ini.Open(file)
+	if err != nil {
+		return fmt.Errorf("write: %w", err)
+	}
+
+	in.Set(sectionNameRescached, "", keyFileResolvConf, opts.FileResolvConf)
+	in.Set(sectionNameRescached, "", keyDebug, strconv.Itoa(opts.Debug))
+
+	in.UnsetAll(sectionNameDNS, subNameServer, keyParent)
+	for _, ns := range opts.NameServers {
+		in.Add(sectionNameDNS, subNameServer, keyParent, ns)
+	}
+
+	in.Set(sectionNameDNS, subNameServer, keyListen,
+		opts.ServerOptions.ListenAddress)
+
+	in.Set(sectionNameDNS, subNameServer, keyHTTPPort,
+		strconv.Itoa(int(opts.ServerOptions.HTTPPort)))
+
+	in.Set(sectionNameDNS, subNameServer, keyTLSPort,
+		strconv.Itoa(int(opts.ServerOptions.TLSPort)))
+	in.Set(sectionNameDNS, subNameServer, keyTLSCertificate,
+		opts.ServerOptions.TLSCertFile)
+	in.Set(sectionNameDNS, subNameServer, keyTLSPrivateKey,
+		opts.ServerOptions.TLSPrivateKey)
+	in.Set(sectionNameDNS, subNameServer, keyTLSAllowInsecure,
+		fmt.Sprintf("%t", opts.ServerOptions.TLSAllowInsecure))
+	in.Set(sectionNameDNS, subNameServer, keyDohBehindProxy,
+		fmt.Sprintf("%t", opts.ServerOptions.DoHBehindProxy))
+
+	in.Set(sectionNameDNS, subNameServer, keyCachePruneDelay,
+		fmt.Sprintf("%s", opts.ServerOptions.PruneDelay))
+	in.Set(sectionNameDNS, subNameServer, keyCachePruneThreshold,
+		fmt.Sprintf("%s", opts.ServerOptions.PruneThreshold))
+
+	return in.Save(file)
 }
