@@ -40,6 +40,9 @@ const (
 	keyTLSCertificate      = "tls.certificate"
 	keyTLSPort             = "tls.port"
 	keyTLSPrivateKey       = "tls.private_key"
+
+	dirHosts  = "/etc/rescached/hosts.d"
+	dirMaster = "/etc/rescached/master.d"
 )
 
 //
@@ -48,8 +51,6 @@ const (
 type environment struct {
 	dns.ServerOptions
 	WuiListen      string `ini:"rescached::wui.listen"`
-	DirHosts       string `ini:"rescached::dir.hosts"`
-	DirMaster      string `ini:"rescached::dir.master"`
 	FileResolvConf string `ini:"rescached::file.resolvconf"`
 	Debug          int    `ini:"rescached::debug"`
 }

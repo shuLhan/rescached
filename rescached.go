@@ -60,8 +60,8 @@ func (srv *Server) Start() (err error) {
 		return err
 	}
 
-	srv.dns.LoadHostsDir(srv.env.DirHosts)
-	srv.dns.LoadMasterDir(srv.env.DirMaster)
+	srv.dns.LoadHostsDir(dirHosts)
+	srv.dns.LoadMasterDir(dirMaster)
 	srv.dns.LoadHostsFile("")
 
 	if len(srv.env.FileResolvConf) > 0 {

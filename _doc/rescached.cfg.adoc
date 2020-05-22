@@ -43,26 +43,6 @@ Format:: [host]:port
 Default:: 127.0.0.1:5380
 Description:: The address to listen for web user interface.
 
-[[dir.hosts]]
-==== +dir.hosts+
-
-Format:: string
-Default:: /etc/rescached/hosts.d
-Description:: Path to hosts directory.
-If set, rescached will load all hosts formatted files inside the directory.
-If its empty or unset, it will not loading hosts files even in default
-location.
-
-[[dir.master]]
-==== +dir.master+
-
-Format:: string
-Default:: /etc/rescached/master.d
-Description::  Path to master directory.
-If set, rescached will load all master files inside the directory.
-If its empty or unset, it will not loading master file even in default
-location.
-
 [[file.resolvconf]]
 ==== +file.resolvconf+
 
@@ -217,6 +197,19 @@ Format:: 	Duration with time unit. Valid time units are "s", "m", "h".
 Default:: 	-1h
 Description:: 	The duration when the cache will be considered expired.
 Its value must be negative and greater or equal than -1 hour (-3600 seconds).
+
+== FILES
+
+[[dir.hosts]]
+=== /etc/rescached/hosts.d
+
+Path to hosts directory where rescached will load all hosts formatted files.
+
+
+[[dir.master]]
+=== /etc/rescached/master.d
+
+Path to master directory where rescached will load all master files.
 
 
 == EXAMPLE
