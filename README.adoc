@@ -45,7 +45,7 @@ List of current features,
 - Load and serve hosts formatted files inside directory
   +/etc/rescached/hosts.d/+
 - Blocking ads and/or malicious websites through host list in
-  +/etc/rescached/hosts.d/hosts.block+
+  +/etc/rescached/hosts.d/+
 - Support loading and serving master (zone) file format from
   +/etc/rescached/master.d+
 - Integration with openresolv

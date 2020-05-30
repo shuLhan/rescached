@@ -1,3 +1,17 @@
+=  Rescached v4.0.0 (2020-06-xx)
+
+==  New features
+
+Rescached now have a web user interface that can be accessed at
+http://127.0.0.1:5380.
+
+==  Breaking changes
+
+*  The `rescached::dir.hosts` now default to "/etc/rescached/hosts.d".
+
+*  The `rescached::dir.master` now default to "/etc/rescached/master.d".
+
+
 =  Rescached v3.0.2 (2020-05-08)
 
 *  go.mod: comment replace directive

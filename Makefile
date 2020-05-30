@@ -100,12 +100,10 @@ install-common:
 	cp $(RESCACHED_CFG)            $(PREFIX)/etc/rescached/
 	cp testdata/localhost.cert.pem $(PREFIX)/etc/rescached/
 	cp testdata/localhost.key.pem  $(PREFIX)/etc/rescached/
-	cp _scripts/hosts.block $(PREFIX)/etc/rescached/hosts.d/
 
 	mkdir -p               $(PREFIX)$(DIR_BIN)
 	cp -f $(RESCACHED_BIN) $(PREFIX)$(DIR_BIN)
 	cp -f $(RESOLVER_BIN)  $(PREFIX)$(DIR_BIN)
-	cp _scripts/rescached-update-hosts-block.sh $(PREFIX)$(DIR_BIN)
 
 	mkdir -p                $(PREFIX)$(DIR_MAN)/man1
 	mkdir -p                $(PREFIX)$(DIR_MAN)/man5
@@ -136,7 +134,6 @@ uninstall-common:
 	rm -f $(PREFIX)$(DIR_MAN)/man1/$(RESOLVER_MAN)
 	rm -f $(PREFIX)$(DIR_MAN)/man1/$(RESCACHED_MAN)
 
-	rm -f $(PREFIX)$(DIR_BIN)/rescached-update-hosts-block.sh
 	rm -f $(PREFIX)$(DIR_BIN)/$(RESOLVER_BIN)
 	rm -f $(PREFIX)$(DIR_BIN)/$(RESCACHED_BIN)
 
