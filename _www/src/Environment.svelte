@@ -1,23 +1,20 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 
+	import { apiEnvironment, environment, nanoSeconds } from './environment.js';
 	import LabelHint from "./LabelHint.svelte";
 	import InputNumber from "./InputNumber.svelte";
 	import InputAddress from "./InputAddress.svelte";
 
-	const nanoSeconds = 1000000000;
-	let apiEnvironment = "http://127.0.0.1:5380/api/environment"
 	let env = {
 		NameServers: [],
 	};
 
-	onMount(async () => {
-		const res = await fetch(apiEnvironment);
-		let got = await res.json();
-		got.PruneDelay = got.PruneDelay / nanoSeconds;
-		got.PruneThreshold = got.PruneThreshold / nanoSeconds;
-		env = Object.assign(env, got)
+	const envUnsubscribe = environment.subscribe(value => {
+		env = value;
 	});
+
+	onDestroy(envUnsubscribe);
 
 	function addNameServer() {
 		env.NameServers = [...env.NameServers, '']
@@ -37,6 +34,8 @@
 		let got = {};
 
 		Object.assign(got, env)
+		environment.set(env)
+
 		got.PruneDelay = got.PruneDelay * nanoSeconds;
 		got.PruneThreshold = got.PruneThreshold * nanoSeconds;
 

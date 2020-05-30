@@ -26,6 +26,7 @@ func (srv *Server) httpdInit() (err error) {
 			`.*\.css`,
 			`.*\.html`,
 			`.*\.js`,
+			`.*\.png`,
 		},
 		CORSAllowOrigins: []string{
 			"http://127.0.0.1:5000",
@@ -33,6 +34,7 @@ func (srv *Server) httpdInit() (err error) {
 		CORSAllowHeaders: []string{
 			http.HeaderContentType,
 		},
+		Development: srv.env.Debug >= 3,
 	}
 
 	srv.httpd, err = http.NewServer(env)
@@ -71,6 +73,19 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 
 	err = srv.httpd.RegisterEndpoint(epAPIPostEnvironment)
+	if err != nil {
+		return err
+	}
+
+	epAPIPostHostsBlock := &http.Endpoint{
+		Method:       http.RequestMethodPost,
+		Path:         "/api/hosts_block",
+		RequestType:  http.RequestTypeJSON,
+		ResponseType: http.ResponseTypeJSON,
+		Call:         srv.apiPostHostsBlock,
+	}
+
+	err = srv.httpd.RegisterEndpoint(epAPIPostHostsBlock)
 	if err != nil {
 		return err
 	}
@@ -138,6 +153,56 @@ func (srv *Server) httpdAPIPostEnvironment(
 		log.Println("httpdAPIPostEnvironment:", err.Error())
 		res.Code = stdhttp.StatusInternalServerError
 		res.Message = err.Error()
+	}
+
+	return json.Marshal(res)
+}
+
+func (srv *Server) apiPostHostsBlock(
+	httpRes stdhttp.ResponseWriter, req *stdhttp.Request, reqBody []byte,
+) (
+	resBody []byte, err error,
+) {
+	hostsBlocks := make([]*hostsBlock, 0)
+
+	err = json.Unmarshal(reqBody, &hostsBlocks)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &liberrors.E{
+		Code:    stdhttp.StatusOK,
+		Message: "Restarting DNS server",
+	}
+
+	for x, hb := range hostsBlocks {
+		fmt.Printf("apiPostHostsBlock[%d]: %+v\n", x, hb)
+	}
+
+	var mustRestart bool
+	for _, hb := range srv.env.HostsBlocks {
+		isUpdated := hb.update(hostsBlocks)
+		if isUpdated {
+			mustRestart = true
+		}
+	}
+
+	err = srv.env.write(srv.fileConfig)
+	if err != nil {
+		log.Println("apiPostHostsBlock:", err.Error())
+		res.Code = stdhttp.StatusInternalServerError
+		res.Message = err.Error()
+		return json.Marshal(res)
+	}
+
+	if mustRestart {
+		srv.Stop()
+		err = srv.Start()
+		if err != nil {
+			log.Println("apiPostHostsBlock:", err.Error())
+			res.Code = stdhttp.StatusInternalServerError
+			res.Message = err.Error()
+		}
 	}
 
 	return json.Marshal(res)

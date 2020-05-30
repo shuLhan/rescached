@@ -6,9 +6,9 @@ package rescached
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
@@ -33,7 +33,11 @@ const (
 	keyCachePruneDelay     = "cache.prune_delay"
 	keyCachePruneThreshold = "cache.prune_threshold"
 	keyDohBehindProxy      = "doh.behind_proxy"
+	keyHostsBlock          = "hosts_block"
 	keyHTTPPort            = "http.port"
+	keyIsEnabled           = "is_enabled"
+	keyIsSystem            = "is_system"
+	keyLastUpdated         = "last_updated"
 	keyListen              = "listen"
 	keyParent              = "parent"
 	keyTLSAllowInsecure    = "tls.allow_insecure"
@@ -50,9 +54,11 @@ const (
 //
 type environment struct {
 	dns.ServerOptions
-	WuiListen      string `ini:"rescached::wui.listen"`
-	FileResolvConf string `ini:"rescached::file.resolvconf"`
-	Debug          int    `ini:"rescached::debug"`
+	WuiListen      string   `ini:"rescached::wui.listen"`
+	FileResolvConf string   `ini:"rescached::file.resolvconf"`
+	Debug          int      `ini:"rescached::debug"`
+	HostsBlocksRaw []string `ini:"rescached::hosts_block" json:"-"`
+	HostsBlocks    []*hostsBlock
 }
 
 func loadEnvironment(file string) (env *environment) {
@@ -63,19 +69,20 @@ func loadEnvironment(file string) (env *environment) {
 		return env
 	}
 
-	cfg, err := ioutil.ReadFile(file)
+	cfg, err := ini.Open(file)
 	if err != nil {
 		log.Printf("rescached: loadEnvironment %q: %s", file, err)
 		return env
 	}
 
-	err = ini.Unmarshal(cfg, env)
+	err = cfg.Unmarshal(env)
 	if err != nil {
 		log.Printf("rescached: loadEnvironment %q: %s", file, err)
 		return env
 	}
 
 	env.init()
+	env.initHostsBlock(cfg)
 	debug.Value = env.Debug
 
 	return env
@@ -104,6 +111,18 @@ func (env *environment) init() {
 	}
 	if len(env.FileResolvConf) > 0 {
 		_, _ = env.loadResolvConf()
+	}
+}
+
+func (env *environment) initHostsBlock(cfg *ini.Ini) {
+	env.HostsBlocks = hostsBlockSources
+
+	for x, v := range env.HostsBlocksRaw {
+		env.HostsBlocksRaw[x] = strings.ToLower(v)
+	}
+
+	for _, hb := range env.HostsBlocks {
+		hb.init(env.HostsBlocksRaw)
 	}
 }
 
@@ -149,6 +168,13 @@ func (env *environment) write(file string) (err error) {
 
 	in.Set(sectionNameRescached, "", keyFileResolvConf, env.FileResolvConf)
 	in.Set(sectionNameRescached, "", keyDebug, strconv.Itoa(env.Debug))
+
+	in.UnsetAll(sectionNameRescached, "", keyHostsBlock)
+	for _, hb := range env.HostsBlocks {
+		if hb.IsEnabled {
+			in.Add(sectionNameRescached, "", keyHostsBlock, hb.URL)
+		}
+	}
 
 	in.UnsetAll(sectionNameDNS, subNameServer, keyParent)
 	for _, ns := range env.NameServers {
