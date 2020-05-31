@@ -18,7 +18,6 @@
 		border: 1px solid grey;
 		cursor: pointer;
 		display: inline-block;
-		float: right;
 		font-size: 12px;
 		height: 14px;
 		line-height: 14px;

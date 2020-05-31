@@ -21,32 +21,13 @@
 		environment.set(env)
 		console.log("Environment:", environment)
 	});
-
-	function showEnvironment() {
-		if (state === stateEnvironment) {
-			state = '';
-		} else {
-			state = stateEnvironment;
-		}
-	}
-
-	function showHostsBlock() {
-		state = stateHostsBlock
-	}
 </script>
 
 <style>
 	div.main {
-		padding: 1em;
+		padding: 0px 1em;
 		max-width: 800px;
 		margin: 0px auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: normal;
-		font-weight: 100;
 	}
 
 	@media (width: 640px) {
@@ -59,11 +40,13 @@
 <div class="main">
 	<h1> {name} </h1>
 	<nav class="menu">
-	<a href="#environment" on:click={showEnvironment}>
+	<a href="#home" on:click={()=>state=""}>Home</a>
+	/
+	<a href="#{stateEnvironment}" on:click={()=>state=stateEnvironment}>
 		Environment
 	</a>
 	/
-	<a href="#hostsblock" on:click={showHostsBlock}>
+	<a href="#{stateHostsBlock}" on:click={()=>state=stateHostsBlock}>
 		HostsBlock
 	</a>
 	</nav>
