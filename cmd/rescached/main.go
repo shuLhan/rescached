@@ -24,6 +24,7 @@ func main() {
 	)
 
 	log.SetFlags(0)
+	log.SetPrefix("rescached")
 
 	flag.StringVar(&fileConfig, "config", "", "path to configuration")
 	flag.Parse()
@@ -58,7 +59,7 @@ func debugRuntime() {
 
 		memHeap.Collect()
 
-		fmt.Printf("= rescached: MemHeap{RelHeapAlloc:%d RelHeapObjects:%d DiffHeapObjects:%d}\n",
+		fmt.Printf("=== rescached: MemHeap{RelHeapAlloc:%d RelHeapObjects:%d DiffHeapObjects:%d}\n",
 			memHeap.RelHeapAlloc, memHeap.RelHeapObjects,
 			memHeap.DiffHeapObjects)
 	}

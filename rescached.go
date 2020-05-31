@@ -34,7 +34,7 @@ func New(fileConfig string) (srv *Server, err error) {
 	env := loadEnvironment(fileConfig)
 
 	if debug.Value >= 1 {
-		fmt.Printf("rescached: config: %+v\n", env)
+		fmt.Printf("--- rescached: config: %+v\n", env)
 	}
 
 	srv = &Server{
@@ -68,7 +68,7 @@ func (srv *Server) Start() (err error) {
 		srv.rcWatcher, err = libio.NewWatcher(
 			srv.env.FileResolvConf, 0, srv.watchResolvConf)
 		if err != nil {
-			log.Fatal("rescached: Start:", err)
+			log.Fatal("Start:", err)
 		}
 	}
 
@@ -113,7 +113,7 @@ func (srv *Server) watchResolvConf(ns *libio.NodeState) {
 	default:
 		ok, err := srv.env.loadResolvConf()
 		if err != nil {
-			log.Println("rescached: loadResolvConf: " + err.Error())
+			log.Println("loadResolvConf: " + err.Error())
 			break
 		}
 		if !ok {

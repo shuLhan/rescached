@@ -71,13 +71,13 @@ func loadEnvironment(file string) (env *environment) {
 
 	cfg, err := ini.Open(file)
 	if err != nil {
-		log.Printf("rescached: loadEnvironment %q: %s", file, err)
+		log.Printf("loadEnvironment %q: %s", file, err)
 		return env
 	}
 
 	err = cfg.Unmarshal(env)
 	if err != nil {
-		log.Printf("rescached: loadEnvironment %q: %s", file, err)
+		log.Printf("loadEnvironment %q: %s", file, err)
 		return env
 	}
 
@@ -133,7 +133,7 @@ func (env *environment) loadResolvConf() (ok bool, err error) {
 	}
 
 	if debug.Value > 0 {
-		fmt.Printf("rescached: loadResolvConf: %+v\n", rc)
+		fmt.Printf("loadResolvConf: %+v\n", rc)
 	}
 
 	if len(rc.NameServers) == 0 {
