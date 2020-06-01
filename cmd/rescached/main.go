@@ -24,7 +24,7 @@ func main() {
 	)
 
 	log.SetFlags(0)
-	log.SetPrefix("rescached")
+	log.SetPrefix("rescached: ")
 
 	flag.StringVar(&fileConfig, "config", "", "path to configuration")
 	flag.Parse()
