@@ -25,6 +25,9 @@ type Server struct {
 
 	httpd       *http.Server
 	httpdRunner sync.Once
+
+	hostsFiles  map[string]*dns.HostsFile
+	masterFiles map[string]*dns.MasterFile
 }
 
 //
@@ -60,9 +63,28 @@ func (srv *Server) Start() (err error) {
 		return err
 	}
 
-	srv.dns.LoadHostsDir(dirHosts)
-	srv.dns.LoadMasterDir(dirMaster)
-	srv.dns.LoadHostsFile("")
+	hostsFile, err := dns.ParseHostsFile(dns.GetSystemHosts())
+	if err != nil {
+		return err
+	}
+	srv.dns.PopulateCaches(hostsFile.Messages)
+
+	srv.hostsFiles, err = dns.LoadHostsDir(dirHosts)
+	if err != nil {
+		return err
+	}
+
+	for _, hostsFile := range srv.hostsFiles {
+		srv.dns.PopulateCaches(hostsFile.Messages)
+	}
+
+	srv.masterFiles, err = dns.LoadMasterDir(dirMaster)
+	if err != nil {
+		return err
+	}
+	for _, masterFile := range srv.masterFiles {
+		srv.dns.PopulateCaches(masterFile.Messages)
+	}
 
 	if len(srv.env.FileResolvConf) > 0 {
 		srv.rcWatcher, err = libio.NewWatcher(
