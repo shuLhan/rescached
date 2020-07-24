@@ -59,6 +59,7 @@ type environment struct {
 	Debug          int      `ini:"rescached::debug"`
 	HostsBlocksRaw []string `ini:"rescached::hosts_block" json:"-"`
 	HostsBlocks    []*hostsBlock
+	HostsFiles     []*hostsFile
 }
 
 func loadEnvironment(file string) (env *environment) {

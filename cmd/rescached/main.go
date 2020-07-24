@@ -39,7 +39,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if debug.Value >= 3 {
+	if debug.Value >= 4 {
 		go debugRuntime()
 	}
 

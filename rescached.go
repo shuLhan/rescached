@@ -26,7 +26,6 @@ type Server struct {
 	httpd       *http.Server
 	httpdRunner sync.Once
 
-	hostsFiles  map[string]*dns.HostsFile
 	masterFiles map[string]*dns.MasterFile
 }
 
@@ -41,8 +40,9 @@ func New(fileConfig string) (srv *Server, err error) {
 	}
 
 	srv = &Server{
-		fileConfig: fileConfig,
-		env:        env,
+		fileConfig:  fileConfig,
+		env:         env,
+		masterFiles: make(map[string]*dns.MasterFile),
 	}
 
 	err = srv.httpdInit()
@@ -63,19 +63,21 @@ func (srv *Server) Start() (err error) {
 		return err
 	}
 
-	hostsFile, err := dns.ParseHostsFile(dns.GetSystemHosts())
+	dnsHostsFile, err := dns.ParseHostsFile(dns.GetSystemHosts())
 	if err != nil {
 		return err
 	}
-	srv.dns.PopulateCaches(hostsFile.Messages)
+	srv.dns.PopulateCaches(dnsHostsFile.Messages)
 
-	srv.hostsFiles, err = dns.LoadHostsDir(dirHosts)
+	dnsHostsFiles, err := dns.LoadHostsDir(dirHosts)
 	if err != nil {
 		return err
 	}
 
-	for _, hostsFile := range srv.hostsFiles {
-		srv.dns.PopulateCaches(hostsFile.Messages)
+	for _, dnsHostsFile := range dnsHostsFiles {
+		srv.dns.PopulateCaches(dnsHostsFile.Messages)
+		srv.env.HostsFiles = append(srv.env.HostsFiles,
+			convertHostsFile(dnsHostsFile))
 	}
 
 	srv.masterFiles, err = dns.LoadMasterDir(dirMaster)

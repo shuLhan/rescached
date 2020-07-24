@@ -4,9 +4,11 @@
 	import { apiEnvironment, environment, nanoSeconds } from './environment.js';
 	import Environment from './Environment.svelte';
 	import HostsBlock from './HostsBlock.svelte';
+	import HostsDir from './HostsDir.svelte';
 
 	const stateEnvironment = "environment"
 	const stateHostsBlock = "hosts_block"
+	const stateHostsDir = "hosts_d"
 
 	export let name;
 	let state;
@@ -18,8 +20,10 @@
 		got.PruneDelay = got.PruneDelay / nanoSeconds;
 		got.PruneThreshold = got.PruneThreshold / nanoSeconds;
 		env = Object.assign(env, got)
+        for (let x = 0; x < env.HostsFiles.length; x++) {
+            env.HostsFiles[x].hosts = [];
+        }
 		environment.set(env)
-		console.log("Environment:", environment)
 	});
 </script>
 
@@ -49,12 +53,18 @@
 	<a href="#{stateHostsBlock}" on:click={()=>state=stateHostsBlock}>
 		HostsBlock
 	</a>
+	/
+	<a href="#{stateHostsDir}" on:click={()=>state=stateHostsDir}>
+		hosts.d
+	</a>
 	</nav>
 
 	{#if state === stateEnvironment}
 		<Environment/>
 	{:else if state === stateHostsBlock}
 		<HostsBlock/>
+	{:else if state === stateHostsDir}
+		<HostsDir/>
 	{:else}
 		<p>
 			Welcome to rescached!
