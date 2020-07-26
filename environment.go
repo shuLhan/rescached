@@ -40,6 +40,7 @@ const (
 	keyLastUpdated         = "last_updated"
 	keyListen              = "listen"
 	keyParent              = "parent"
+	keyWUIListen           = "wui.listen"
 	keyTLSAllowInsecure    = "tls.allow_insecure"
 	keyTLSCertificate      = "tls.certificate"
 	keyTLSPort             = "tls.port"
@@ -54,7 +55,7 @@ const (
 //
 type environment struct {
 	dns.ServerOptions
-	WuiListen      string   `ini:"rescached::wui.listen"`
+	WUIListen      string   `ini:"rescached::wui.listen"`
 	FileResolvConf string   `ini:"rescached::file.resolvconf"`
 	Debug          int      `ini:"rescached::debug"`
 	HostsBlocksRaw []string `ini:"rescached::hosts_block" json:"-"`
@@ -104,8 +105,8 @@ func newEnvironment() *environment {
 // init check and initialize the environment instance with default values.
 //
 func (env *environment) init() {
-	if len(env.WuiListen) == 0 {
-		env.WuiListen = defWuiAddress
+	if len(env.WUIListen) == 0 {
+		env.WUIListen = defWuiAddress
 	}
 	if len(env.ListenAddress) == 0 {
 		env.ListenAddress = "127.0.0.1:53"
@@ -169,8 +170,10 @@ func (env *environment) write(file string) (err error) {
 
 	in.Set(sectionNameRescached, "", keyFileResolvConf, env.FileResolvConf)
 	in.Set(sectionNameRescached, "", keyDebug, strconv.Itoa(env.Debug))
+	in.Set(sectionNameRescached, "", keyWUIListen, strings.TrimSpace(env.WUIListen))
 
 	in.UnsetAll(sectionNameRescached, "", keyHostsBlock)
+
 	for _, hb := range env.HostsBlocks {
 		if hb.IsEnabled {
 			in.Add(sectionNameRescached, "", keyHostsBlock, hb.URL)

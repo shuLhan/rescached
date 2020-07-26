@@ -49,36 +49,19 @@ func (hb *hostsBlock) init(sources []string) {
 		}
 	}
 
-	// Set the LastUpdated from cache.
-	hb.file = filepath.Join(dirHosts, hb.Name)
-	fi, err := os.Stat(hb.file)
-	if err != nil {
-		return
-	}
-
-	hb.lastUpdated = fi.ModTime()
-	hb.LastUpdated = hb.lastUpdated.Format("2006-01-02 15:04:05 MST")
+	hb.initLastUpdated()
 }
 
-func (hb *hostsBlock) update(sources []*hostsBlock) bool {
-	for _, src := range sources {
-		if hb.Name == src.Name {
-			hb.IsEnabled = src.IsEnabled
-			break
-		}
-	}
+func (hb *hostsBlock) update() bool {
 	if !hb.IsEnabled {
-		hb.hide()
 		return false
 	}
-
-	hb.unhide()
 
 	if !hb.isOld() {
 		return false
 	}
 
-	fmt.Printf("hostsBlock: updating %q\n", hb.Name)
+	fmt.Printf("hostsBlock %s: updating ...\n", hb.Name)
 
 	res, err := http.Get(hb.URL)
 	if err != nil {
@@ -109,19 +92,17 @@ func (hb *hostsBlock) update(sources []*hostsBlock) bool {
 	return true
 }
 
-func (hb *hostsBlock) hide() {
-	if hb.lastUpdated.IsZero() {
-		return
-	}
-
+func (hb *hostsBlock) hide() (err error) {
+	oldFileName := filepath.Join(dirHosts, hb.Name)
 	newFileName := filepath.Join(dirHosts, "."+hb.Name)
-	err := os.Rename(hb.file, newFileName)
+	err = os.Rename(oldFileName, newFileName)
 	if err != nil {
-		log.Printf("hostsBlock.hide %q: %s", hb.file, err)
-		return
+		return err
 	}
 
 	hb.file = newFileName
+
+	return nil
 }
 
 func (hb *hostsBlock) isOld() bool {
@@ -131,17 +112,31 @@ func (hb *hostsBlock) isOld() bool {
 	return hb.lastUpdated.Before(lastWeek)
 }
 
-func (hb *hostsBlock) unhide() {
-	if hb.lastUpdated.IsZero() {
-		return
-	}
-
+//
+// unhide the hosts block file.
+//
+func (hb *hostsBlock) unhide() (err error) {
+	oldFileName := filepath.Join(dirHosts, "."+hb.Name)
 	newFileName := filepath.Join(dirHosts, hb.Name)
-	err := os.Rename(hb.file, newFileName)
+	err = os.Rename(oldFileName, newFileName)
 	if err != nil {
-		log.Printf("hostsBlock.unhide %q: %s", hb.file, err)
-		return
+		return err
 	}
 
 	hb.file = newFileName
+	hb.initLastUpdated()
+
+	return nil
+}
+
+func (hb *hostsBlock) initLastUpdated() {
+	hb.file = filepath.Join(dirHosts, hb.Name)
+	fi, err := os.Stat(hb.file)
+	if err != nil {
+		hb.IsEnabled = false
+		return
+	}
+
+	hb.lastUpdated = fi.ModTime()
+	hb.LastUpdated = hb.lastUpdated.Format("2006-01-02 15:04:05 MST")
 }

@@ -10,7 +10,9 @@ import (
 	"log"
 	stdhttp "net/http"
 	"os"
+	"path/filepath"
 
+	"github.com/shuLhan/share/lib/dns"
 	liberrors "github.com/shuLhan/share/lib/errors"
 	"github.com/shuLhan/share/lib/http"
 )
@@ -23,7 +25,7 @@ const (
 func (srv *Server) httpdInit() (err error) {
 	env := &http.ServerOptions{
 		Root:    defHTTPDRootDir,
-		Address: srv.env.WuiListen,
+		Address: srv.env.WUIListen,
 		Includes: []string{
 			`.*\.css`,
 			`.*\.html`,
@@ -144,7 +146,7 @@ func (srv *Server) httpdRun() {
 		}
 	}()
 
-	log.Printf("=== rescached: httpd listening at %s", srv.env.WuiListen)
+	log.Printf("=== rescached: httpd listening at %s", srv.env.WUIListen)
 
 	err := srv.httpd.Start()
 	if err != nil {
@@ -201,6 +203,15 @@ func (srv *Server) httpdAPIPostEnvironment(
 	return json.Marshal(res)
 }
 
+//
+// apiHostsBlockUpdate set the HostsBlock to be enabled or disabled.
+//
+// If its status changes to enabled, unhide it file, populate the hosts back
+// to caches, and add it to list of HostsFiles.
+//
+// If its status changes to disabled, remove the hosts from caches, hide it,
+// and remove it from list of HostsFiles.
+//
 func (srv *Server) apiHostsBlockUpdate(
 	httpRes stdhttp.ResponseWriter, req *stdhttp.Request, reqBody []byte,
 ) (
@@ -214,37 +225,94 @@ func (srv *Server) apiHostsBlockUpdate(
 	}
 
 	res := &liberrors.E{
-		Code:    stdhttp.StatusOK,
-		Message: "Restarting DNS server",
+		Code: stdhttp.StatusInternalServerError,
 	}
 
-	var mustRestart bool
-	for _, hb := range srv.env.HostsBlocks {
-		isUpdated := hb.update(hostsBlocks)
-		if isUpdated {
-			mustRestart = true
+	for _, hbx := range hostsBlocks {
+		for x := 0; x < len(srv.env.HostsBlocks); x++ {
+			hby := srv.env.HostsBlocks[x]
+			if hbx.Name != hby.Name {
+				continue
+			}
+			if hbx.IsEnabled == hby.IsEnabled {
+				break
+			}
+
+			if hbx.IsEnabled {
+				err = srv.hostsBlockEnable(hby)
+				if err != nil {
+					res.Message = err.Error()
+					return nil, res
+				}
+			} else {
+				err = srv.hostsBlockDisable(hby)
+				if err != nil {
+					res.Message = err.Error()
+					return nil, res
+				}
+				hby.IsEnabled = false
+			}
 		}
 	}
 
 	err = srv.env.write(srv.fileConfig)
 	if err != nil {
 		log.Println("apiHostsBlockUpdate:", err.Error())
-		res.Code = stdhttp.StatusInternalServerError
 		res.Message = err.Error()
-		return json.Marshal(res)
+		return nil, res
 	}
 
-	if mustRestart {
-		srv.Stop()
-		err = srv.Start()
-		if err != nil {
-			log.Println("apiHostsBlockUpdate:", err.Error())
-			res.Code = stdhttp.StatusInternalServerError
-			res.Message = err.Error()
+	return json.Marshal(srv.env)
+}
+
+func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
+	err = hb.unhide()
+	if err != nil {
+		return err
+	}
+
+	hfile, err := dns.ParseHostsFile(filepath.Join(dirHosts, hb.Name))
+	if err != nil {
+		return err
+	}
+
+	srv.dns.PopulateCaches(hfile.Messages)
+
+	hb.IsEnabled = true
+	hb.update()
+	srv.env.HostsFiles = append(srv.env.HostsFiles, convertHostsFile(hfile))
+
+	return nil
+}
+
+func (srv *Server) hostsBlockDisable(hb *hostsBlock) (err error) {
+	var (
+		x     int
+		hfile *hostsFile
+		found bool
+	)
+
+	for x, hfile = range srv.env.HostsFiles {
+		if hfile.Name == hb.Name {
+			found = true
+			break
 		}
 	}
+	if !found {
+		return fmt.Errorf("unknown hosts block: %q", hb.Name)
+	}
 
-	return json.Marshal(res)
+	srv.dns.RemoveCachesByNames(hfile.names())
+	err = hb.hide()
+	if err != nil {
+		return err
+	}
+
+	copy(srv.env.HostsFiles[x:], srv.env.HostsFiles[x+1:])
+	srv.env.HostsFiles[len(srv.env.HostsFiles)-1] = nil
+	srv.env.HostsFiles = srv.env.HostsFiles[:len(srv.env.HostsFiles)-1]
+
+	return nil
 }
 
 func (srv *Server) apiHostsFileCreate(

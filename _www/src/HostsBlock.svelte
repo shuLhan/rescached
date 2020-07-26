@@ -24,7 +24,14 @@
 			body: JSON.stringify(env.HostsBlocks),
 		});
 
-		const resJSON = await res.json()
+		let got = await res.json();
+		got.PruneDelay = got.PruneDelay / nanoSeconds;
+		got.PruneThreshold = got.PruneThreshold / nanoSeconds;
+		env = Object.assign(env, got)
+		for (let x = 0; x < env.HostsFiles.length; x++) {
+			env.HostsFiles[x].hosts = [];
+		}
+		environment.set(env)
 	}
 </script>
 
