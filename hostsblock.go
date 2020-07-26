@@ -52,21 +52,16 @@ func (hb *hostsBlock) init(sources []string) {
 	hb.initLastUpdated()
 }
 
-func (hb *hostsBlock) update() bool {
-	if !hb.IsEnabled {
-		return false
-	}
-
+func (hb *hostsBlock) update() (err error) {
 	if !hb.isOld() {
-		return false
+		return nil
 	}
 
 	fmt.Printf("hostsBlock %s: updating ...\n", hb.Name)
 
 	res, err := http.Get(hb.URL)
 	if err != nil {
-		log.Printf("hostsBlock.update %q: %s", hb.Name, err)
-		return false
+		return fmt.Errorf("hostsBlock.update %q: %w", hb.Name, err)
 	}
 	defer func() {
 		err := res.Body.Close()
@@ -77,19 +72,19 @@ func (hb *hostsBlock) update() bool {
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Printf("hostsBlock.update %q: %s", hb.Name, err)
-		return false
+		return fmt.Errorf("hostsBlock.update %q: %w", hb.Name, err)
 	}
 
 	body = bytes.ReplaceAll(body, []byte("\r\n"), []byte("\n"))
 
 	err = ioutil.WriteFile(hb.file, body, 0644)
 	if err != nil {
-		log.Printf("hostsBlock.update %q: %s", hb.Name, err)
-		return false
+		return fmt.Errorf("hostsBlock.update %q: %w", hb.Name, err)
 	}
 
-	return true
+	hb.initLastUpdated()
+
+	return nil
 }
 
 func (hb *hostsBlock) hide() (err error) {

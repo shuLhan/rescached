@@ -6,6 +6,7 @@ package rescached
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	stdhttp "net/http"
@@ -266,9 +267,18 @@ func (srv *Server) apiHostsBlockUpdate(
 }
 
 func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
+	hb.IsEnabled = true
+
 	err = hb.unhide()
 	if err != nil {
-		return err
+		if !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
+		// File not exist, fetch new from serfer.
+		err = hb.update()
+		if err != nil {
+			return err
+		}
 	}
 
 	hfile, err := dns.ParseHostsFile(filepath.Join(dirHosts, hb.Name))
@@ -278,8 +288,10 @@ func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
 
 	srv.dns.PopulateCaches(hfile.Messages)
 
-	hb.IsEnabled = true
-	hb.update()
+	err = hb.update()
+	if err != nil {
+		return err
+	}
 	srv.env.HostsFiles = append(srv.env.HostsFiles, convertHostsFile(hfile))
 
 	return nil
