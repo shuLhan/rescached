@@ -35,8 +35,9 @@ var hostsBlockSources = []*hostsBlock{{
 type hostsBlock struct {
 	Name        string // Derived from hostname in URL.
 	URL         string
-	LastUpdated time.Time
+	LastUpdated string
 	IsEnabled   bool
+	lastUpdated time.Time
 	file        string
 }
 
@@ -55,7 +56,8 @@ func (hb *hostsBlock) init(sources []string) {
 		return
 	}
 
-	hb.LastUpdated = fi.ModTime()
+	hb.lastUpdated = fi.ModTime()
+	hb.LastUpdated = hb.lastUpdated.Format("2006-01-02 15:04:05 MST")
 }
 
 func (hb *hostsBlock) update(sources []*hostsBlock) bool {
@@ -108,7 +110,7 @@ func (hb *hostsBlock) update(sources []*hostsBlock) bool {
 }
 
 func (hb *hostsBlock) hide() {
-	if hb.LastUpdated.IsZero() {
+	if hb.lastUpdated.IsZero() {
 		return
 	}
 
@@ -126,11 +128,11 @@ func (hb *hostsBlock) isOld() bool {
 	oneWeek := 7 * 24 * time.Hour
 	lastWeek := time.Now().Add(-1 * oneWeek)
 
-	return hb.LastUpdated.Before(lastWeek)
+	return hb.lastUpdated.Before(lastWeek)
 }
 
 func (hb *hostsBlock) unhide() {
-	if hb.LastUpdated.IsZero() {
+	if hb.lastUpdated.IsZero() {
 		return
 	}
 

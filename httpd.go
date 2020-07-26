@@ -79,15 +79,13 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	epAPIPostHostsBlock := &http.Endpoint{
+	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodPost,
 		Path:         "/api/hosts_block",
 		RequestType:  http.RequestTypeJSON,
 		ResponseType: http.ResponseTypeJSON,
-		Call:         srv.apiPostHostsBlock,
-	}
-
-	err = srv.httpd.RegisterEndpoint(epAPIPostHostsBlock)
+		Call:         srv.apiHostsBlockUpdate,
+	})
 	if err != nil {
 		return err
 	}
@@ -203,7 +201,7 @@ func (srv *Server) httpdAPIPostEnvironment(
 	return json.Marshal(res)
 }
 
-func (srv *Server) apiPostHostsBlock(
+func (srv *Server) apiHostsBlockUpdate(
 	httpRes stdhttp.ResponseWriter, req *stdhttp.Request, reqBody []byte,
 ) (
 	resBody []byte, err error,
@@ -220,10 +218,6 @@ func (srv *Server) apiPostHostsBlock(
 		Message: "Restarting DNS server",
 	}
 
-	for x, hb := range hostsBlocks {
-		fmt.Printf("apiPostHostsBlock[%d]: %+v\n", x, hb)
-	}
-
 	var mustRestart bool
 	for _, hb := range srv.env.HostsBlocks {
 		isUpdated := hb.update(hostsBlocks)
@@ -234,7 +228,7 @@ func (srv *Server) apiPostHostsBlock(
 
 	err = srv.env.write(srv.fileConfig)
 	if err != nil {
-		log.Println("apiPostHostsBlock:", err.Error())
+		log.Println("apiHostsBlockUpdate:", err.Error())
 		res.Code = stdhttp.StatusInternalServerError
 		res.Message = err.Error()
 		return json.Marshal(res)
@@ -244,7 +238,7 @@ func (srv *Server) apiPostHostsBlock(
 		srv.Stop()
 		err = srv.Start()
 		if err != nil {
-			log.Println("apiPostHostsBlock:", err.Error())
+			log.Println("apiHostsBlockUpdate:", err.Error())
 			res.Code = stdhttp.StatusInternalServerError
 			res.Message = err.Error()
 		}
