@@ -1258,11 +1258,11 @@ var app = (function () {
     			button = element("button");
     			button.textContent = "Delete";
     			attr_dev(input, "class", "svelte-1gci9yh");
-    			add_location(input, file$3, 123, 2, 2617);
+    			add_location(input, file$3, 123, 2, 2611);
     			attr_dev(button, "class", "svelte-1gci9yh");
-    			add_location(button, file$3, 124, 2, 2643);
+    			add_location(button, file$3, 124, 2, 2637);
     			attr_dev(div, "class", "input-deletable svelte-1gci9yh");
-    			add_location(div, file$3, 122, 1, 2585);
+    			add_location(div, file$3, 122, 1, 2579);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -1702,42 +1702,42 @@ var app = (function () {
     			div4 = element("div");
     			button1 = element("button");
     			button1.textContent = "Save";
-    			add_location(h2, file$3, 83, 0, 1571);
-    			add_location(p, file$3, 87, 0, 1598);
-    			add_location(h30, file$3, 92, 0, 1717);
+    			add_location(h2, file$3, 83, 0, 1565);
+    			add_location(p, file$3, 87, 0, 1592);
+    			add_location(h30, file$3, 92, 0, 1711);
     			attr_dev(input0, "name", "FileResolvConf");
     			attr_dev(input0, "class", "svelte-1gci9yh");
-    			add_location(input0, file$3, 102, 1, 2077);
-    			add_location(div0, file$3, 93, 0, 1736);
-    			add_location(h31, file$3, 114, 0, 2417);
-    			add_location(button0, file$3, 129, 1, 2724);
+    			add_location(input0, file$3, 102, 1, 2071);
+    			add_location(div0, file$3, 93, 0, 1730);
+    			add_location(h31, file$3, 114, 0, 2411);
+    			add_location(button0, file$3, 129, 1, 2718);
     			attr_dev(input1, "name", "TLSCertFile");
     			attr_dev(input1, "class", "svelte-1gci9yh");
-    			add_location(input1, file$3, 167, 1, 3680);
+    			add_location(input1, file$3, 167, 1, 3674);
     			attr_dev(input2, "name", "TLSPrivateKey");
     			attr_dev(input2, "class", "svelte-1gci9yh");
-    			add_location(input2, file$3, 175, 1, 3895);
+    			add_location(input2, file$3, 175, 1, 3889);
     			attr_dev(input3, "name", "TLSAllowInsecure");
     			attr_dev(input3, "type", "checkbox");
     			attr_dev(input3, "class", "svelte-1gci9yh");
-    			add_location(input3, file$3, 184, 2, 4148);
+    			add_location(input3, file$3, 184, 2, 4142);
     			attr_dev(span0, "class", "suffix svelte-1gci9yh");
-    			add_location(span0, file$3, 189, 2, 4244);
+    			add_location(span0, file$3, 189, 2, 4238);
     			attr_dev(div1, "class", "input-suffix svelte-1gci9yh");
-    			add_location(div1, file$3, 183, 1, 4119);
+    			add_location(div1, file$3, 183, 1, 4113);
     			attr_dev(input4, "name", "DoHBehindProxy");
     			attr_dev(input4, "type", "checkbox");
     			attr_dev(input4, "class", "svelte-1gci9yh");
-    			add_location(input4, file$3, 202, 2, 4554);
+    			add_location(input4, file$3, 202, 2, 4548);
     			attr_dev(span1, "class", "suffix svelte-1gci9yh");
-    			add_location(span1, file$3, 207, 2, 4646);
+    			add_location(span1, file$3, 207, 2, 4640);
     			attr_dev(div2, "class", "input-suffix svelte-1gci9yh");
-    			add_location(div2, file$3, 201, 1, 4525);
-    			add_location(div3, file$3, 115, 0, 2437);
-    			add_location(button1, file$3, 243, 1, 5438);
-    			add_location(div4, file$3, 242, 0, 5431);
+    			add_location(div2, file$3, 201, 1, 4519);
+    			add_location(div3, file$3, 115, 0, 2431);
+    			add_location(button1, file$3, 243, 1, 5432);
+    			add_location(div4, file$3, 242, 0, 5425);
     			attr_dev(div5, "class", "environment");
-    			add_location(div5, file$3, 82, 0, 1545);
+    			add_location(div5, file$3, 82, 0, 1539);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2208,7 +2208,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (82:5) {#each env.HostsBlocks as hostsBlock}
+    // (82:2) {#each env.HostsBlocks as hostsBlock}
     function create_each_block$1(ctx) {
     	let div;
     	let span0;
@@ -2252,21 +2252,21 @@ var app = (function () {
     			t4 = text(t4_value);
     			t5 = space();
     			attr_dev(input0, "type", "checkbox");
-    			attr_dev(input0, "class", "svelte-192o32u");
-    			add_location(input0, file$4, 84, 16, 1732);
-    			attr_dev(span0, "class", "svelte-192o32u");
-    			add_location(span0, file$4, 83, 12, 1709);
-    			attr_dev(span1, "class", "svelte-192o32u");
-    			add_location(span1, file$4, 89, 12, 1879);
+    			attr_dev(input0, "class", "svelte-ze2due");
+    			add_location(input0, file$4, 84, 4, 1513);
+    			attr_dev(span0, "class", "svelte-ze2due");
+    			add_location(span0, file$4, 83, 3, 1502);
+    			attr_dev(span1, "class", "svelte-ze2due");
+    			add_location(span1, file$4, 89, 3, 1600);
     			input1.disabled = true;
-    			attr_dev(input1, "class", "svelte-192o32u");
-    			add_location(input1, file$4, 93, 16, 1975);
-    			attr_dev(span2, "class", "svelte-192o32u");
-    			add_location(span2, file$4, 92, 12, 1952);
-    			attr_dev(span3, "class", "svelte-192o32u");
-    			add_location(span3, file$4, 98, 12, 2109);
-    			attr_dev(div, "class", "item svelte-192o32u");
-    			add_location(div, file$4, 82, 8, 1678);
+    			attr_dev(input1, "class", "svelte-ze2due");
+    			add_location(input1, file$4, 93, 4, 1654);
+    			attr_dev(span2, "class", "svelte-ze2due");
+    			add_location(span2, file$4, 92, 3, 1643);
+    			attr_dev(span3, "class", "svelte-ze2due");
+    			add_location(span3, file$4, 98, 3, 1728);
+    			attr_dev(div, "class", "item svelte-ze2due");
+    			add_location(div, file$4, 82, 2, 1480);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2320,7 +2320,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(82:5) {#each env.HostsBlocks as hostsBlock}",
+    		source: "(82:2) {#each env.HostsBlocks as hostsBlock}",
     		ctx
     	});
 
@@ -2388,24 +2388,24 @@ var app = (function () {
     			div2 = element("div");
     			button = element("button");
     			button.textContent = "Save";
-    			add_location(h2, file$4, 66, 1, 1327);
-    			add_location(p, file$4, 70, 1, 1356);
-    			attr_dev(span0, "class", "svelte-192o32u");
-    			add_location(span0, file$4, 76, 12, 1486);
-    			attr_dev(span1, "class", "svelte-192o32u");
-    			add_location(span1, file$4, 77, 12, 1521);
-    			attr_dev(span2, "class", "svelte-192o32u");
-    			add_location(span2, file$4, 78, 12, 1553);
-    			attr_dev(span3, "class", "svelte-192o32u");
-    			add_location(span3, file$4, 79, 12, 1584);
-    			attr_dev(div0, "class", "item header svelte-192o32u");
-    			add_location(div0, file$4, 75, 8, 1448);
-    			attr_dev(div1, "class", "block_source svelte-192o32u");
-    			add_location(div1, file$4, 74, 1, 1413);
-    			add_location(button, file$4, 106, 2, 2220);
-    			add_location(div2, file$4, 105, 1, 2212);
+    			add_location(h2, file$4, 66, 1, 1186);
+    			add_location(p, file$4, 70, 1, 1215);
+    			attr_dev(span0, "class", "svelte-ze2due");
+    			add_location(span0, file$4, 76, 3, 1330);
+    			attr_dev(span1, "class", "svelte-ze2due");
+    			add_location(span1, file$4, 77, 3, 1356);
+    			attr_dev(span2, "class", "svelte-ze2due");
+    			add_location(span2, file$4, 78, 3, 1379);
+    			attr_dev(span3, "class", "svelte-ze2due");
+    			add_location(span3, file$4, 79, 3, 1401);
+    			attr_dev(div0, "class", "item header svelte-ze2due");
+    			add_location(div0, file$4, 75, 2, 1301);
+    			attr_dev(div1, "class", "block_source svelte-ze2due");
+    			add_location(div1, file$4, 74, 1, 1272);
+    			add_location(button, file$4, 106, 2, 1812);
+    			add_location(div2, file$4, 105, 1, 1804);
     			attr_dev(div3, "class", "hosts-block");
-    			add_location(div3, file$4, 65, 0, 1300);
+    			add_location(div3, file$4, 65, 0, 1159);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2585,7 +2585,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (132:8) {#each env.HostsFiles as hf}
+    // (132:2) {#each env.HostsFiles as hf}
     function create_each_block_1(ctx) {
     	let div;
     	let a;
@@ -2600,9 +2600,9 @@ var app = (function () {
     			a = element("a");
     			t = text(t_value);
     			attr_dev(a, "href", "#");
-    			add_location(a, file$5, 133, 12, 3148);
-    			attr_dev(div, "class", "item svelte-1oufeoa");
-    			add_location(div, file$5, 132, 8, 3117);
+    			add_location(a, file$5, 133, 3, 2524);
+    			attr_dev(div, "class", "item svelte-1vh8vt2");
+    			add_location(div, file$5, 132, 2, 2502);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2639,14 +2639,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(132:8) {#each env.HostsFiles as hf}",
+    		source: "(132:2) {#each env.HostsFiles as hf}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (155:8) {:else}
+    // (155:2) {:else}
     function create_else_block(ctx) {
     	let p;
     	let t0_value = /*hostsFile*/ ctx[1].Name + "";
@@ -2683,7 +2683,7 @@ var app = (function () {
     			t0 = text(t0_value);
     			t1 = text(" (");
     			t2 = text(t2_value);
-    			t3 = text(" records)\n            ");
+    			t3 = text(" records)\n\t\t\t");
     			button0 = element("button");
     			button0.textContent = "Delete";
     			t5 = space();
@@ -2699,11 +2699,11 @@ var app = (function () {
     			t8 = space();
     			button2 = element("button");
     			button2.textContent = "Save";
-    			add_location(button0, file$5, 157, 12, 3751);
-    			add_location(p, file$5, 155, 8, 3671);
-    			add_location(button1, file$5, 162, 12, 3882);
-    			add_location(div, file$5, 161, 8, 3864);
-    			add_location(button2, file$5, 185, 8, 4471);
+    			add_location(button0, file$5, 157, 3, 2965);
+    			add_location(p, file$5, 155, 2, 2903);
+    			add_location(button1, file$5, 162, 3, 3054);
+    			add_location(div, file$5, 161, 2, 3045);
+    			add_location(button2, file$5, 185, 2, 3448);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -2776,14 +2776,14 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(155:8) {:else}",
+    		source: "(155:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (151:8) {#if hostsFile.Name === ""}
+    // (151:2) {#if hostsFile.Name === ""}
     function create_if_block$3(ctx) {
     	let p;
 
@@ -2791,7 +2791,7 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			p.textContent = "Select one of the hosts file to manage.";
-    			add_location(p, file$5, 151, 8, 3578);
+    			add_location(p, file$5, 151, 2, 2837);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -2806,14 +2806,14 @@ var app = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(151:8) {#if hostsFile.Name === \\\"\\\"}",
+    		source: "(151:2) {#if hostsFile.Name === \\\"\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (168:8) {#each hostsFile.hosts as host, idx (idx)}
+    // (168:2) {#each hostsFile.hosts as host, idx (idx)}
     function create_each_block$2(key_1, ctx) {
     	let div;
     	let input0;
@@ -2843,15 +2843,15 @@ var app = (function () {
     			t1 = space();
     			button = element("button");
     			button.textContent = "X";
-    			attr_dev(input0, "class", "host_name svelte-1oufeoa");
+    			attr_dev(input0, "class", "host_name svelte-1vh8vt2");
     			attr_dev(input0, "placeholder", "Domain name");
-    			add_location(input0, file$5, 169, 12, 4058);
-    			attr_dev(input1, "class", "host_value svelte-1oufeoa");
+    			add_location(input0, file$5, 169, 3, 3182);
+    			attr_dev(input1, "class", "host_value svelte-1vh8vt2");
     			attr_dev(input1, "placeholder", "IP address");
-    			add_location(input1, file$5, 174, 12, 4206);
-    			add_location(button, file$5, 179, 12, 4355);
-    			attr_dev(div, "class", "host svelte-1oufeoa");
-    			add_location(div, file$5, 168, 8, 4027);
+    			add_location(input1, file$5, 174, 3, 3276);
+    			add_location(button, file$5, 179, 3, 3371);
+    			attr_dev(div, "class", "host svelte-1vh8vt2");
+    			add_location(div, file$5, 168, 2, 3160);
     			this.first = div;
     		},
     		m: function mount(target, anchor) {
@@ -2905,7 +2905,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(168:8) {#each hostsFile.hosts as host, idx (idx)}",
+    		source: "(168:2) {#each hostsFile.hosts as host, idx (idx)}",
     		ctx
     	});
 
@@ -2976,19 +2976,19 @@ var app = (function () {
     			t9 = space();
     			div1 = element("div");
     			if_block.c();
-    			add_location(h2, file$5, 126, 4, 3011);
-    			add_location(br0, file$5, 138, 8, 3271);
-    			add_location(span, file$5, 140, 12, 3305);
-    			add_location(br1, file$5, 141, 12, 3346);
-    			add_location(input, file$5, 142, 12, 3364);
-    			add_location(label, file$5, 139, 8, 3285);
-    			add_location(button, file$5, 144, 8, 3423);
-    			attr_dev(div0, "class", "nav-left svelte-1oufeoa");
-    			add_location(div0, file$5, 130, 4, 3049);
-    			attr_dev(div1, "class", "content svelte-1oufeoa");
-    			add_location(div1, file$5, 149, 4, 3512);
+    			add_location(h2, file$5, 126, 1, 2420);
+    			add_location(br0, file$5, 138, 2, 2608);
+    			add_location(span, file$5, 140, 3, 2627);
+    			add_location(br1, file$5, 141, 3, 2659);
+    			add_location(input, file$5, 142, 3, 2668);
+    			add_location(label, file$5, 139, 2, 2616);
+    			add_location(button, file$5, 144, 2, 2715);
+    			attr_dev(div0, "class", "nav-left svelte-1vh8vt2");
+    			add_location(div0, file$5, 130, 1, 2446);
+    			attr_dev(div1, "class", "content svelte-1vh8vt2");
+    			add_location(div1, file$5, 149, 1, 2783);
     			attr_dev(div2, "class", "hosts_d");
-    			add_location(div2, file$5, 125, 0, 2985);
+    			add_location(div2, file$5, 125, 0, 2397);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3422,24 +3422,24 @@ var app = (function () {
     			nav = element("nav");
     			a0 = element("a");
     			t0 = text(/*name*/ ctx[0]);
-    			t1 = text("\n        /\n        ");
+    			t1 = text("\n\t\t/\n\t\t");
     			a1 = element("a");
     			t2 = text("Hosts blocks");
-    			t3 = text("\n        /\n        ");
+    			t3 = text("\n\t\t/\n\t\t");
     			a2 = element("a");
     			t4 = text("hosts.d");
     			t5 = space();
     			if_block.c();
     			attr_dev(a0, "href", "#");
-    			add_location(a0, file$6, 54, 8, 1175);
+    			add_location(a0, file$6, 54, 2, 1109);
     			attr_dev(a1, "href", a1_href_value = "#" + stateHostsBlock);
-    			add_location(a1, file$6, 58, 8, 1262);
+    			add_location(a1, file$6, 58, 2, 1169);
     			attr_dev(a2, "href", a2_href_value = "#" + stateHostsDir);
-    			add_location(a2, file$6, 62, 8, 1385);
-    			attr_dev(nav, "class", "menu svelte-7mwbvy");
-    			add_location(nav, file$6, 53, 1, 1148);
-    			attr_dev(div, "class", "main svelte-7mwbvy");
-    			add_location(div, file$6, 52, 0, 1128);
+    			add_location(a2, file$6, 62, 2, 1265);
+    			attr_dev(nav, "class", "menu svelte-1l2nq2w");
+    			add_location(nav, file$6, 53, 1, 1088);
+    			attr_dev(div, "class", "main svelte-1l2nq2w");
+    			add_location(div, file$6, 52, 0, 1068);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

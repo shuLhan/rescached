@@ -8,7 +8,7 @@
 
 	let env = {
 		NameServers: [],
-        HostsBlocks: [],
+		HostsBlocks: [],
 	};
 
 	const envUnsubscribe = environment.subscribe(value => {
