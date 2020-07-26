@@ -1,7 +1,7 @@
 <script>
 	import { onDestroy } from 'svelte';
 
-	import { apiEnvironment, environment, nanoSeconds } from './environment.js';
+	import { environment, nanoSeconds, setEnvironment } from './environment.js';
 
 	const apiHostsBlock = "/api/hosts_block"
 	let env = {
@@ -24,14 +24,12 @@
 			body: JSON.stringify(env.HostsBlocks),
 		});
 
-		let got = await res.json();
-		got.PruneDelay = got.PruneDelay / nanoSeconds;
-		got.PruneThreshold = got.PruneThreshold / nanoSeconds;
-		env = Object.assign(env, got)
-		for (let x = 0; x < env.HostsFiles.length; x++) {
-			env.HostsFiles[x].hosts = [];
+		if (res.status >= 400) {
+			console.log("updateHostsBlocks: ", res.status, res.statusText)
+			return;
 		}
-		environment.set(env)
+
+		setEnvironment(await res.json());
 	}
 </script>
 

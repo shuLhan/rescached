@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 
-	import { apiEnvironment, environment, nanoSeconds } from './environment.js';
+	import { apiEnvironment, environment, nanoSeconds, setEnvironment } from './environment.js';
 	import Environment from './Environment.svelte';
 	import HostsBlock from './HostsBlock.svelte';
 	import HostsDir from './HostsDir.svelte';
@@ -19,14 +19,12 @@
 
 	onMount(async () => {
 		const res = await fetch(apiEnvironment);
-		let got = await res.json();
-		got.PruneDelay = got.PruneDelay / nanoSeconds;
-		got.PruneThreshold = got.PruneThreshold / nanoSeconds;
-		env = Object.assign(env, got)
-		for (let x = 0; x < env.HostsFiles.length; x++) {
-			env.HostsFiles[x].hosts = [];
+		if (res.status >= 400) {
+			console.log("onMount: ", res.status, res.statusText);
+			return;
 		}
-		environment.set(env)
+
+		setEnvironment(await res.json());
 	});
 </script>
 
