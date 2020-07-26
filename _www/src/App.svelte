@@ -6,13 +6,16 @@
 	import HostsBlock from './HostsBlock.svelte';
 	import HostsDir from './HostsDir.svelte';
 
-	const stateEnvironment = "environment"
 	const stateHostsBlock = "hosts_block"
 	const stateHostsDir = "hosts_d"
 
 	export let name;
 	let state;
-	let env = {};
+	let env = {
+        NameServers: [],
+        HostsBlocks: [],
+        HostsFiles: [],
+    };
 
 	onMount(async () => {
 		const res = await fetch(apiEnvironment);
@@ -33,8 +36,14 @@
 		max-width: 800px;
 		margin: 0px auto;
 	}
+    nav.menu {
+	    color: #ff3e00;
+	    text-transform: uppercase;
+	    font-size: normal;
+	    font-weight: 100;
+    }
 
-	@media (width: 640px) {
+	@media (max-width: 640px) {
 		div.main {
 			max-width: none;
 		}
@@ -42,32 +51,25 @@
 </style>
 
 <div class="main">
-	<h1> {name} </h1>
 	<nav class="menu">
-	<a href="#home" on:click={()=>state=""}>Home</a>
-	/
-	<a href="#{stateEnvironment}" on:click={()=>state=stateEnvironment}>
-		Environment
-	</a>
-	/
-	<a href="#{stateHostsBlock}" on:click={()=>state=stateHostsBlock}>
-		HostsBlock
-	</a>
-	/
-	<a href="#{stateHostsDir}" on:click={()=>state=stateHostsDir}>
-		hosts.d
-	</a>
+        <a href="#" on:click={()=>state=""}>
+            {name}
+        </a>
+        /
+        <a href="#{stateHostsBlock}" on:click={()=>state=stateHostsBlock}>
+            Hosts blocks
+        </a>
+        /
+        <a href="#{stateHostsDir}" on:click={()=>state=stateHostsDir}>
+            hosts.d
+        </a>
 	</nav>
 
-	{#if state === stateEnvironment}
-		<Environment/>
-	{:else if state === stateHostsBlock}
+	{#if state === stateHostsBlock}
 		<HostsBlock/>
 	{:else if state === stateHostsDir}
 		<HostsDir/>
 	{:else}
-		<p>
-			Welcome to rescached!
-		</p>
+		<Environment/>
 	{/if}
 </div>

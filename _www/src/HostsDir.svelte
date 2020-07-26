@@ -3,7 +3,9 @@
 	import { apiEnvironment, environment, nanoSeconds } from './environment.js';
 
 	const apiHostsDir = "/api/hosts.d"
-	let env = {};
+	let env = {
+        HostsFiles: [],
+    };
     let hostsFile = {
         Name: "",
         hosts: [],
