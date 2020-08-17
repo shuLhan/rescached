@@ -27,7 +27,7 @@ func convertRRToHost(from *dns.ResourceRecord) (to *host) {
 		dns.QueryTypeMB, dns.QueryTypeMG, dns.QueryTypeMR,
 		dns.QueryTypeNULL, dns.QueryTypePTR, dns.QueryTypeTXT,
 		dns.QueryTypeAAAA:
-		to.Value = string(from.RData().([]byte))
+		to.Value = from.Value.(string)
 	}
 
 	return to

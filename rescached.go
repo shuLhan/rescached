@@ -25,8 +25,6 @@ type Server struct {
 
 	httpd       *http.Server
 	httpdRunner sync.Once
-
-	masterFiles map[string]*dns.MasterFile
 }
 
 //
@@ -40,9 +38,8 @@ func New(fileConfig string) (srv *Server, err error) {
 	}
 
 	srv = &Server{
-		fileConfig:  fileConfig,
-		env:         env,
-		masterFiles: make(map[string]*dns.MasterFile),
+		fileConfig: fileConfig,
+		env:        env,
 	}
 
 	err = srv.httpdInit()
@@ -80,12 +77,12 @@ func (srv *Server) Start() (err error) {
 			convertHostsFile(dnsHostsFile))
 	}
 
-	srv.masterFiles, err = dns.LoadMasterDir(dirMaster)
+	srv.env.MasterFiles, err = dns.LoadMasterDir(dirMaster)
 	if err != nil {
 		return err
 	}
-	for _, masterFile := range srv.masterFiles {
-		srv.dns.PopulateCaches(masterFile.Messages)
+	for _, masterFile := range srv.env.MasterFiles {
+		srv.dns.PopulateCaches(masterFile.Messages())
 	}
 
 	if len(srv.env.FileResolvConf) > 0 {

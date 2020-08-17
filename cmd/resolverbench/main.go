@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -45,10 +44,10 @@ func main() {
 			continue
 		}
 
-		exp := hostsFile.Messages[x].Answer[0].RData().([]byte)
-		got := res.Answer[0].RData().([]byte)
+		exp := hostsFile.Messages[x].Answer[0].Value.(string)
+		got := res.Answer[0].Value.(string)
 
-		if !bytes.Equal(exp, got) {
+		if exp != got {
 			nfail++
 			log.Printf(`! Answer not matched %s:
 expecting: %s

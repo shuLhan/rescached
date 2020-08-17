@@ -5,11 +5,12 @@
 	import Environment from './Environment.svelte';
 	import HostsBlock from './HostsBlock.svelte';
 	import HostsDir from './HostsDir.svelte';
+	import MasterDir from './MasterDir.svelte';
 
-	const stateHostsBlock = "hosts_block"
-	const stateHostsDir = "hosts_d"
+	const stateHostsBlock = "hosts_block";
+	const stateHostsDir = "hosts_d";
+	const stateMasterDir = "master_d";
 
-	export let name;
 	let state;
 	let env = {
 		NameServers: [],
@@ -25,14 +26,14 @@
 		}
 
 		setEnvironment(await res.json());
+ 		state = window.location.hash.slice(1);
+		console.log('state:', state);
 	});
 </script>
 
 <style>
 	div.main {
 		padding: 0px 1em;
-		max-width: 800px;
-		margin: 0px auto;
 	}
 	nav.menu {
 		color: #ff3e00;
@@ -50,8 +51,8 @@
 
 <div class="main">
 	<nav class="menu">
-		<a href="#" on:click={()=>state=""}>
-			{name}
+		<a href="#home" on:click={()=>state=""}>
+			rescached
 		</a>
 		/
 		<a href="#{stateHostsBlock}" on:click={()=>state=stateHostsBlock}>
@@ -61,12 +62,18 @@
 		<a href="#{stateHostsDir}" on:click={()=>state=stateHostsDir}>
 			hosts.d
 		</a>
+		/
+		<a href="#{stateMasterDir}" on:click={()=>state=stateMasterDir}>
+			master.d
+		</a>
 	</nav>
 
 	{#if state === stateHostsBlock}
 		<HostsBlock/>
 	{:else if state === stateHostsDir}
 		<HostsDir/>
+	{:else if state === stateMasterDir}
+		<MasterDir/>
 	{:else}
 		<Environment/>
 	{/if}

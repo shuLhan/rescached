@@ -152,23 +152,24 @@ func messagePrint(nameserver string, msg *dns.Message) string {
 	for x, rr := range msg.Answer {
 		fmt.Fprintf(&b, "\n> Answer #%d:", x+1)
 		fmt.Fprintf(&b, "\n>> Resource record: %s", rr.String())
-		fmt.Fprintf(&b, "\n>> RDATA: %s", rr.RData())
+		fmt.Fprintf(&b, "\n>> RDATA: %s", rr.Value)
 	}
 	for x, rr := range msg.Authority {
 		fmt.Fprintf(&b, "\n> Authority #%d:", x+1)
 		fmt.Fprintf(&b, "\n>> Resource record: %s", rr.String())
-		fmt.Fprintf(&b, "\n>> RDATA: %s", rr.RData())
+		fmt.Fprintf(&b, "\n>> RDATA: %s", rr.Value)
 	}
 	for x, rr := range msg.Additional {
 		fmt.Fprintf(&b, "\n> Additional #%d:", x+1)
 		fmt.Fprintf(&b, "\n>> Resource record: %s", rr.String())
-		fmt.Fprintf(&b, "\n>> RDATA: %s", rr.RData())
+		fmt.Fprintf(&b, "\n>> RDATA: %s", rr.Value)
 	}
 
 	return b.String()
 }
 
-func lookup(opts *options, cl dns.Client, timeout time.Duration, qname []byte) *dns.Message {
+func lookup(opts *options, cl dns.Client, timeout time.Duration, qname string,
+) *dns.Message {
 	var (
 		err error
 	)
@@ -250,7 +251,7 @@ func main() {
 		for x := 0; x < rc.Attempts; x++ {
 			fmt.Printf("> Lookup %s at %s\n", qname, cl.RemoteAddr())
 
-			res = lookup(opts, cl, timeout, []byte(qname))
+			res = lookup(opts, cl, timeout, qname)
 			if res != nil {
 				goto out
 			}

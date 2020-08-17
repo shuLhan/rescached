@@ -12,6 +12,7 @@ import (
 	stdhttp "net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/shuLhan/share/lib/dns"
 	liberrors "github.com/shuLhan/share/lib/errors"
@@ -21,6 +22,7 @@ import (
 const (
 	defHTTPDRootDir = "_public/"
 	paramNameName   = "name"
+	paramNameType   = "type"
 )
 
 func (srv *Server) httpdInit() (err error) {
@@ -131,6 +133,27 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		RequestType:  http.RequestTypeNone,
 		ResponseType: http.ResponseTypeJSON,
 		Call:         srv.apiHostsFileDelete,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
+		Method:       http.RequestMethodPost,
+		Path:         "/api/master.d/:name/rr/:type",
+		RequestType:  http.RequestTypeJSON,
+		ResponseType: http.ResponseTypeJSON,
+		Call:         srv.apiMasterFileCreateRR,
+	})
+	if err != nil {
+		return err
+	}
+	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
+		Method:       http.RequestMethodDelete,
+		Path:         "/api/master.d/:name/rr/:type",
+		RequestType:  http.RequestTypeJSON,
+		ResponseType: http.ResponseTypeJSON,
+		Call:         srv.apiMasterFileDeleteRR,
 	})
 	if err != nil {
 		return err
@@ -489,4 +512,143 @@ func (srv *Server) apiHostsFileDelete(
 	}
 	res.Message = "apiDeleteHostsFile: " + name + " not found"
 	return nil, res
+}
+
+//
+// apiMasterFileCreateRR create new RR for the master file.
+//
+func (srv *Server) apiMasterFileCreateRR(
+	_ stdhttp.ResponseWriter,
+	httpreq *stdhttp.Request,
+	reqbody []byte,
+) (
+	resbody []byte, err error,
+) {
+	res := &liberrors.E{
+		Code: stdhttp.StatusBadRequest,
+	}
+
+	masterFileName := httpreq.Form.Get(paramNameName)
+	if len(masterFileName) == 0 {
+		res.Message = "empty or invalid master file name"
+		return nil, res
+	}
+
+	mf := srv.env.MasterFiles[masterFileName]
+	if mf == nil {
+		res.Message = "unknown master file name " + masterFileName
+		return nil, res
+	}
+
+	v := httpreq.Form.Get(paramNameType)
+	rrType, err := strconv.Atoi(v)
+	if err != nil {
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	rr := dns.ResourceRecord{}
+	switch uint16(rrType) {
+	case dns.QueryTypeSOA:
+		rr.Value = &dns.RDataSOA{}
+	case dns.QueryTypeMX:
+		rr.Value = &dns.RDataMX{}
+	}
+	err = json.Unmarshal(reqbody, &rr)
+	if err != nil {
+		res.Message = "json.Unmarshal:" + err.Error()
+		return nil, res
+	}
+
+	if len(rr.Name) == 0 {
+		rr.Name = masterFileName
+	} else {
+		rr.Name += "." + masterFileName
+	}
+
+	err = srv.dns.UpsertCacheByRR(&rr)
+	if err != nil {
+		res.Message = "UpsertCacheByRR: " + err.Error()
+		return nil, res
+	}
+
+	// Update the Master file.
+	mf.AddRR(&rr)
+	err = mf.Save()
+	if err != nil {
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	return json.Marshal(&rr)
+}
+
+//
+// apiMasterFileDeleteRR delete RR from the master file.
+//
+func (srv *Server) apiMasterFileDeleteRR(
+	_ stdhttp.ResponseWriter,
+	httpreq *stdhttp.Request,
+	reqbody []byte,
+) (
+	resbody []byte, err error,
+) {
+	res := &liberrors.E{
+		Code: stdhttp.StatusBadRequest,
+	}
+
+	masterFileName := httpreq.Form.Get(paramNameName)
+	if len(masterFileName) == 0 {
+		res.Message = "empty or invalid master file name"
+		return nil, res
+	}
+
+	mf := srv.env.MasterFiles[masterFileName]
+	if mf == nil {
+		res.Message = "unknown master file name " + masterFileName
+		return nil, res
+	}
+
+	v := httpreq.Form.Get(paramNameType)
+	rrType, err := strconv.Atoi(v)
+	if err != nil {
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	rr := dns.ResourceRecord{}
+	switch uint16(rrType) {
+	case dns.QueryTypeSOA:
+		rr.Value = &dns.RDataSOA{}
+	case dns.QueryTypeMX:
+		rr.Value = &dns.RDataMX{}
+	}
+	err = json.Unmarshal(reqbody, &rr)
+	if err != nil {
+		res.Message = "json.Unmarshal:" + err.Error()
+		return nil, res
+	}
+
+	if len(rr.Name) == 0 {
+		res.Message = "invalid or empty ResourceRecord.Name"
+		return nil, err
+	}
+
+	// Remove the RR from caches.
+	err = srv.dns.RemoveCachesByRR(&rr)
+	if err != nil {
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	// Remove the RR from zone file.
+	err = mf.Remove(&rr)
+	if err != nil {
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	res.Code = stdhttp.StatusOK
+
+	return json.Marshal(res)
 }
