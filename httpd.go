@@ -17,6 +17,7 @@ import (
 	"github.com/shuLhan/share/lib/dns"
 	liberrors "github.com/shuLhan/share/lib/errors"
 	"github.com/shuLhan/share/lib/http"
+	libnet "github.com/shuLhan/share/lib/net"
 )
 
 const (
@@ -138,6 +139,26 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
+	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
+		Method:       http.RequestMethodPut,
+		Path:         "/api/master.d/:name",
+		RequestType:  http.RequestTypeNone,
+		ResponseType: http.ResponseTypeJSON,
+		Call:         srv.apiMasterFileCreate,
+	})
+	if err != nil {
+		return err
+	}
+	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
+		Method:       http.RequestMethodDelete,
+		Path:         "/api/master.d/:name",
+		RequestType:  http.RequestTypeNone,
+		ResponseType: http.ResponseTypeJSON,
+		Call:         srv.apiMasterFileDelete,
+	})
+	if err != nil {
+		return err
+	}
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodPost,
 		Path:         "/api/master.d/:name/rr/:type",
@@ -512,6 +533,91 @@ func (srv *Server) apiHostsFileDelete(
 	}
 	res.Message = "apiDeleteHostsFile: " + name + " not found"
 	return nil, res
+}
+
+func (srv *Server) apiMasterFileCreate(
+	_ stdhttp.ResponseWriter,
+	httpreq *stdhttp.Request,
+	reqbody []byte,
+) (
+	resbody []byte, err error,
+) {
+	res := &liberrors.E{
+		Code: stdhttp.StatusBadRequest,
+	}
+
+	zoneName := httpreq.Form.Get(paramNameName)
+	if len(zoneName) == 0 {
+		res.Message = "empty or invalid zone file name"
+		return nil, res
+	}
+
+	if !libnet.IsHostnameValid([]byte(zoneName), true) {
+		res.Message = "zone file name must be valid hostname"
+		return nil, res
+	}
+
+	mf, ok := srv.env.MasterFiles[zoneName]
+	if ok {
+		return json.Marshal(mf)
+	}
+
+	zoneFile := filepath.Join(dirMaster, zoneName)
+	mf = dns.NewMasterFile(zoneFile, zoneName)
+	err = mf.Save()
+	if err != nil {
+		res.Code = stdhttp.StatusInternalServerError
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	srv.env.MasterFiles[zoneName] = mf
+
+	return json.Marshal(mf)
+}
+
+func (srv *Server) apiMasterFileDelete(
+	_ stdhttp.ResponseWriter,
+	httpreq *stdhttp.Request,
+	reqbody []byte,
+) (
+	resbody []byte, err error,
+) {
+	res := &liberrors.E{
+		Code: stdhttp.StatusBadRequest,
+	}
+
+	zoneName := httpreq.Form.Get(paramNameName)
+	if len(zoneName) == 0 {
+		res.Message = "empty or invalid zone file name"
+		return nil, res
+	}
+
+	mf, ok := srv.env.MasterFiles[zoneName]
+	if !ok {
+		res.Message = "unknown zone file name " + zoneName
+		return nil, res
+	}
+
+	names := make([]string, 0, len(mf.Records))
+	for name := range mf.Records {
+		names = append(names, name)
+	}
+
+	srv.dns.RemoveCachesByNames(names)
+	delete(srv.env.MasterFiles, zoneName)
+
+	err = mf.Delete()
+	if err != nil {
+		res.Code = stdhttp.StatusInternalServerError
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	res.Code = stdhttp.StatusOK
+	res.Message = zoneName + " has been deleted"
+
+	return json.Marshal(res)
 }
 
 //

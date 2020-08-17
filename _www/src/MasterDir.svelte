@@ -35,10 +35,37 @@
 	});
 	onDestroy(envUnsubscribe);
 
-	function createMasterFile() {
+	async function handleMasterFileCreate() {
+		let api = apiMasterd + newMasterFile
+		const res = await fetch(api, {
+			method: "PUT",
+		})
+
+		if (res.status >= 400) {
+			console.log("handleCreateRR: ", res.status, res.statusText);
+			return;
+		}
+
+		activeMF = await res.json()
+		env.MasterFiles[activeMF.Name] = activeMF
 	}
 
-	function deleteMasterFile() {
+	async function handleMasterFileDelete() {
+		let api = apiMasterd + activeMF.Name
+		const res = await fetch(api, {
+			method: "DELETE",
+		})
+
+		if (res.status >= 400) {
+			console.log("handleCreateRR: ", res.status, res.statusText);
+			return;
+		}
+
+		delete env.MasterFiles[activeMF.Name]
+		activeMF = {
+			Name: "",
+		}
+		env.MasterFiles = env.MasterFiles
 	}
 
 	function onSelectRRType() {
@@ -228,7 +255,7 @@
 			<br/>
 			<input bind:value={newMasterFile}>
 		</label>
-		<button on:click={createMasterFile}>
+		<button on:click={handleMasterFileCreate}>
 			Create
 		</button>
 	</div>
@@ -241,7 +268,7 @@
 {:else}
 		<p>
 			{activeMF.Name}
-			<button on:click={deleteMasterFile}>
+			<button on:click={handleMasterFileDelete}>
 				Delete
 			</button>
 		</p>
