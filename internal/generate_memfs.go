@@ -17,6 +17,7 @@ func main() {
 		`.*\.html`,
 		`.*\.js`,
 		`.*\.css`,
+		`.*\.png`,
 	}
 
 	mfs, err := memfs.New("_www/public/", includes, nil, true)
