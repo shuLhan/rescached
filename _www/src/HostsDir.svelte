@@ -1,5 +1,6 @@
 <script>
 	import { onDestroy } from 'svelte';
+	import { WuiPushNotif } from 'wui.svelte';
 	import { apiEnvironment, environment, nanoSeconds } from './environment.js';
 
 	const apiHostsDir = "/api/hosts.d"
@@ -37,7 +38,8 @@
 		})
 
 		if (res.status >= 400) {
-			console.log("createHostsFile: ", res.status, res.statusText);
+			WuiPushNotif.Error("ERROR: createHostsFile: ", res.status,
+				res.statusText);
 			return;
 		}
 
@@ -57,7 +59,8 @@
 		})
 
 		if (res.status >= 400) {
-			console.log("updateHostsFile: ", res.status, res.statusText);
+			WuiPushNotif.Error("ERROR: updateHostsFile: ", res.status,
+				res.statusText);
 			return;
 		}
 
@@ -74,7 +77,6 @@
 	}
 
 	function deleteHost(idx) {
-		console.log('deleteHost at ', idx);
 		hostsFile.hosts.splice(idx, 1);
 		hostsFile.hosts = hostsFile.hosts;
 	}
@@ -84,7 +86,8 @@
 			method: "DELETE",
 		});
 		if (res.status >= 400) {
-			console.log("deleteHostsFile: ", res.status, res.statusText);
+			WuiPushNotif.Error("ERROR: deleteHostsFile: ", res.status,
+				res.statusText);
 			return;
 		}
 		for (let x = 0; x < env.HostsFiles.length; x++) {
@@ -124,10 +127,6 @@
 </style>
 
 <div class="hosts_d">
-	<h2>
-		/ hosts.d
-	</h2>
-
 	<div class="nav-left">
 		{#each env.HostsFiles as hf}
 		<div class="item">
@@ -136,7 +135,9 @@
 			</a>
 		</div>
 		{/each}
+
 		<br/>
+
 		<label>
 			<span>New hosts file:</span>
 			<br/>

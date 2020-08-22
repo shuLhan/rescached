@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+	import { WuiNotif, WuiPushNotif } from 'wui.svelte';
 
 	import { apiEnvironment, environment, nanoSeconds, setEnvironment } from './environment.js';
 	import Environment from './Environment.svelte';
@@ -21,49 +22,72 @@
 	onMount(async () => {
 		const res = await fetch(apiEnvironment);
 		if (res.status >= 400) {
-			console.log("onMount: ", res.status, res.statusText);
+			WuiPushNotif.Error("ERROR: {apiEnvironment}: ",
+				res.status, res.statusText);
 			return;
 		}
 
 		setEnvironment(await res.json());
  		state = window.location.hash.slice(1);
-		console.log('state:', state);
 	});
 </script>
 
 <style>
 	div.main {
+		margin: 0 auto;
+		width: 800px;
 		padding: 0px 1em;
 	}
 	nav.menu {
 		color: #ff3e00;
 		text-transform: uppercase;
-		font-size: normal;
 		font-weight: 100;
+		margin-bottom: 2em;
 	}
-
-	@media (max-width: 640px) {
+	.active {
+		padding-bottom: 4px;
+		border-bottom: 4px solid #ff3e00;
+	}
+	@media (max-width: 900px) {
 		div.main {
-			max-width: none;
+			width: calc(100% - 2em);
 		}
 	}
 </style>
 
+<WuiNotif />
+
 <div class="main">
 	<nav class="menu">
-		<a href="#home" on:click={()=>state=""}>
+		<a
+			href="#home"
+			on:click={()=>state=""}
+			class:active="{state===''||state==='home'}"
+		>
 			rescached
 		</a>
 		/
-		<a href="#{stateHostsBlock}" on:click={()=>state=stateHostsBlock}>
+		<a
+			href="#{stateHostsBlock}"
+			on:click={()=>state=stateHostsBlock}
+			class:active="{state===stateHostsBlock}"
+		>
 			Hosts blocks
 		</a>
 		/
-		<a href="#{stateHostsDir}" on:click={()=>state=stateHostsDir}>
+		<a
+			href="#{stateHostsDir}"
+			on:click={()=>state=stateHostsDir}
+			class:active="{state === stateHostsDir}"
+		>
 			hosts.d
 		</a>
 		/
-		<a href="#{stateMasterDir}" on:click={()=>state=stateMasterDir}>
+		<a
+			href="#{stateMasterDir}"
+			on:click={()=>state=stateMasterDir}
+			class:active="{state === stateMasterDir}"
+		>
 			master.d
 		</a>
 	</nav>

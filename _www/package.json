@@ -1,21 +1,22 @@
 {
-  "name": "svelte-app",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public"
-  },
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "11.0.2",
-    "@rollup/plugin-node-resolve": "^7.0.0",
-    "rollup": "^1.20.0",
-    "rollup-plugin-livereload": "^1.0.0",
-    "rollup-plugin-svelte": "^5.2.3",
-    "rollup-plugin-terser": "^5.1.2",
-    "svelte": "^3.24.1"
-  },
-  "dependencies": {
-    "sirv-cli": "^0.4.6"
-  }
+	"name": "rescached-wui",
+	"version": "1.0.0",
+	"scripts": {
+		"build": "rollup -c",
+		"dev": "rollup -c -w",
+		"start": "sirv public"
+	},
+	"devDependencies": {
+		"@rollup/plugin-commonjs": "11.0.2",
+		"@rollup/plugin-node-resolve": "^7.0.0",
+		"rollup": "^1.20.0",
+		"rollup-plugin-livereload": "^1.0.0",
+		"rollup-plugin-svelte": "^5.2.3",
+		"rollup-plugin-terser": "^5.1.2",
+		"svelte": "^3.24.1"
+	},
+	"dependencies": {
+		"sirv-cli": "^0.4.6",
+		"wui.svelte": "^0.2.0"
+	}
 }

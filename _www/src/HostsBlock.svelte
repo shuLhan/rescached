@@ -1,6 +1,6 @@
 <script>
 	import { onDestroy } from 'svelte';
-
+	import { WuiPushNotif } from 'wui.svelte';
 	import { environment, nanoSeconds, setEnvironment } from './environment.js';
 
 	const apiHostsBlock = "/api/hosts_block"
@@ -25,7 +25,7 @@
 		});
 
 		if (res.status >= 400) {
-			console.log("updateHostsBlocks: ", res.status, res.statusText)
+			WuiPushNotif.Error("ERROR: ", res.status, res.statusText)
 			return;
 		}
 
@@ -69,10 +69,6 @@
 </style>
 
 <div class="hosts-block">
-	<h2>
-	/ Hosts block
-	</h2>
-
 	<p>
 	Configure the source of blocked hosts file.
 	</p>

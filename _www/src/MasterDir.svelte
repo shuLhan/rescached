@@ -1,5 +1,6 @@
 <script>
 	import { onDestroy } from 'svelte';
+	import { WuiPushNotif } from 'wui.svelte';
 	import { environment, nanoSeconds, setEnvironment } from './environment.js';
 
 	const apiMasterd = "/api/master.d/"
@@ -42,7 +43,8 @@
 		})
 
 		if (res.status >= 400) {
-			console.log("handleCreateRR: ", res.status, res.statusText);
+			WuiPushNotif.Error("ERROR: handleCreateRR: ", res.status,
+				res.statusText);
 			return;
 		}
 
@@ -57,7 +59,8 @@
 		})
 
 		if (res.status >= 400) {
-			console.log("handleCreateRR: ", res.status, res.statusText);
+			WuiPushNotif.Error("ERROR: handleCreateRR: ", res.status,
+				res.statusText);
 			return;
 		}
 
@@ -99,7 +102,8 @@
 		})
 
 		if (res.status >= 400) {
-			console.log("handleCreateRR: ", res.status, res.statusText);
+			WuiPushNotif.Error("ERROR: handleCreateRR: ", res.status,
+				res.statusText);
 			return;
 		}
 
@@ -111,8 +115,6 @@
 		}
 		listRR.push(newRR);
 		activeMF.Records[newRR.Name] = listRR
-
-		console.log("handleCreateRR:", newRR);
 	}
 
 	async function handleDeleteRR(rr, idx) {
@@ -127,7 +129,8 @@
 		})
 
 		if (res.status >= 400) {
-			console.log("handleCreateRR: ", res.status, res.statusText)
+			WuiPushNotif.Error("ERROR: handleCreateRR: ", res.status,
+				res.statusText)
 			return
 		}
 
@@ -136,8 +139,6 @@
 		activeMF.Records[rr.Name] = listRR
 
 		let resbody = await res.json()
-
-		console.log("response body:", resbody)
 	}
 
 	function getTypeName(k) {
@@ -238,8 +239,6 @@
 </style>
 
 <div class="master_d">
-	<h2> / master.d </h2>
-
 	<div class="nav-left">
 {#each Object.entries(env.MasterFiles) as [name, mf]}
 		<div class="item">

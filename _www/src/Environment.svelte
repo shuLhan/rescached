@@ -2,9 +2,8 @@
 	import { onDestroy } from 'svelte';
 
 	import { apiEnvironment, environment, nanoSeconds } from './environment.js';
-	import LabelHint from "./LabelHint.svelte";
-	import InputNumber from "./InputNumber.svelte";
-	import InputAddress from "./InputAddress.svelte";
+	import { WuiPushNotif } from "wui.svelte";
+	import { WuiLabelHint, WuiInputNumber, WuiInputIPPort } from "wui.svelte";
 
 	let env = {
 		NameServers: [],
@@ -17,6 +16,8 @@
 	});
 
 	onDestroy(envUnsubscribe);
+
+	const defTitleWidth = "300px";
 
 	function addNameServer() {
 		env.NameServers = [...env.NameServers, '']
@@ -49,9 +50,13 @@
 			body: JSON.stringify(got),
 		});
 
-		const resJSON = await res.json()
+		if (res.status >= 400) {
+			const resbody = await res.json()
+			WuiPushNotif.Error("ERROR: ", resbody.message)
+			return;
+		}
 
-		console.log(resJSON);
+		WuiPushNotif.Info("The environment succesfully updated ...")
 	}
 </script>
 
@@ -63,29 +68,25 @@
 		width: 100%;
 	}
 	.input-deletable > input {
-		float: left;
-		max-width: calc(100% - 80px);
+		max-width: calc(100% - 100px);
 	}
 	.input-deletable > button {
-		float: left;
 		width: 80px;
 	}
-	.input-suffix input {
-		width: 70%;
+	.input-checkbox {
+		width: 100%;
 	}
-	.input-suffix input[type="checkbox"] {
+	.input-checkbox input[type="checkbox"] {
 		width: auto;
 	}
-	.input-suffix .suffix {
-		width: 30%;
+	.section-bottom {
+		margin: 2em 0px 0px 0px;
+		padding: 1em;
+		border-top: 1px solid black;
 	}
 </style>
 
 <div class="environment">
-<h2>
-	/ Environment
-</h2>
-
 <p>
 This page allow you to change the rescached environment.
 Upon save, the rescached service will be restarted.
@@ -93,33 +94,43 @@ Upon save, the rescached service will be restarted.
 
 <h3>rescached</h3>
 <div>
-	<LabelHint
-		target="FileResolvConf"
+	<WuiLabelHint
 		title="System resolv.conf"
+		title_width="{defTitleWidth}"
 		info="A path to dynamically generated resolv.conf(5) by
 resolvconf(8).  If set, the nameserver values in referenced file will
 replace 'parent' value and 'parent' will become a fallback in
 case the referenced file being deleted or can not be parsed."
-	></LabelHint>
-	<input name="FileResolvConf" bind:value={env.FileResolvConf}>
+	>
+		<input
+			bind:value={env.FileResolvConf}
+		/>
+	</WuiLabelHint>
 
-	<LabelHint
-		target="Debug"
+	<WuiLabelHint
 		title="Debug level"
+		title_width="{defTitleWidth}"
 		info="This option only used for debugging program or if user
 want to monitor what kind of traffic goes in and out of rescached."
-	></LabelHint>
-	<InputNumber min=0 max=3 bind:val={env.Debug} unit="">
-	</InputNumber>
+	>
+		<WuiInputNumber
+			min=0
+			max=3
+			bind:value={env.Debug}
+			unit=""
+		/>
+	</WuiLabelHint>
 </div>
 
 <h3>DNS server</h3>
 <div>
-	<LabelHint
-		target="NameServers"
-		title="Name servers"
+	<WuiLabelHint
+		title="Parent name servers"
+		title_width="{defTitleWidth}"
 		info="List of parent DNS servers."
-	></LabelHint>
+	>
+	</WuiLabelHint>
+
 	{#each env.NameServers as ns}
 	<div class="input-deletable">
 		<input bind:value={ns}>
@@ -128,122 +139,148 @@ want to monitor what kind of traffic goes in and out of rescached."
 		</button>
 	</div>
 	{/each}
-	<button on:click={addNameServer}>
+
+	<button
+		on:click={addNameServer}
+	>
 		Add
 	</button>
 
-	<LabelHint
-		target="ListenAddress"
+	<WuiLabelHint
 		title="Listen address"
+		title_width="{defTitleWidth}"
 		info="Address in local network where rescached will
 listening for query from client through UDP and TCP.
 <br/>
 If you want rescached to serve a query from another host in your local
 network, change this value to <tt>0.0.0.0:53</tt>."
-	></LabelHint>
-	<InputAddress
-		bind:value={env.ListenAddress}
-	></InputAddress>
+	>
+		<WuiInputIPPort
+			bind:value={env.ListenAddress}
+		/>
+	</WuiLabelHint>
 
-	<LabelHint
-		target="HTTPPort"
+	<WuiLabelHint
 		title="HTTP listen port"
+		title_width="{defTitleWidth}"
 		info="Port to serve DNS over HTTP"
-	></LabelHint>
-	<InputNumber min=0 max=65535 bind:val={env.HTTPPort} unit="">
-	</InputNumber>
+	>
+		<WuiInputNumber
+			min=0
+			max=65535
+			bind:value={env.HTTPPort}
+			unit=""
+		/>
+	</WuiLabelHint>
 
-	<LabelHint
-		target="TLSPort"
+	<WuiLabelHint
 		title="TLS listen port"
+		title_width="{defTitleWidth}"
 		info="Port to listen for DNS over TLS"
-	></LabelHint>
-	<InputNumber min=0 max=65535 bind:val={env.TLSPort} unit="">
-	</InputNumber>
+	>
+		<WuiInputNumber
+			min=0
+			max=65535
+			bind:value={env.TLSPort}
+			unit=""
+		/>
+	</WuiLabelHint>
 
-	<LabelHint
-		target="TLSCertFile"
+	<WuiLabelHint
 		title="TLS certificate"
+		title_width="{defTitleWidth}"
 		info="Path to certificate file to serve DNS over TLS and
-HTTPS"></LabelHint>
-	<input name="TLSCertFile" bind:value={env.TLSCertFile}>
+HTTPS">
+		<input
+			placeholder="/path/to/certificate"
+			bind:value={env.TLSCertFile}
+		/>
+	</WuiLabelHint>
 
-	<LabelHint
-		target="TLSPrivateKey"
+	<WuiLabelHint
 		title="TLS private key"
+		title_width="{defTitleWidth}"
 		info="Path to certificate private key file to serve DNS over TLS and
 HTTPS."
-	></LabelHint>
-	<input name="TLSPrivateKey" bind:value={env.TLSPrivateKey}>
+	>
+		<input
+			placeholder="/path/to/certificate/private.key"
+			bind:value={env.TLSPrivateKey}
+		/>
+	</WuiLabelHint>
 
-	<LabelHint
-		target="TLSAllowInsecure"
+	<WuiLabelHint
 		title="TLS allow insecure"
+		title_width="{defTitleWidth}"
 		info="If its true, allow serving DoH and DoT with self signed
 certificate."
-	></LabelHint>
-	<div class="input-suffix">
-		<input
-			name="TLSAllowInsecure"
-			type=checkbox
-			bind:checked={env.TLSAllowInsecure}
-		>
-		<span class="suffix">
-			Yes
-		</span>
-	</div>
+	>
+		<div class="input-checkbox">
+			<input
+				type=checkbox
+				bind:checked={env.TLSAllowInsecure}
+			>
+			<span class="suffix">
+				Yes
+			</span>
+		</div>
+	</WuiLabelHint>
 
-	<LabelHint
-		target="DoHBehindProxy"
+	<WuiLabelHint
 		title="DoH behind proxy"
+		title_width="{defTitleWidth}"
 		info="If its true, serve DNS over HTTP only, even if
 certificate files is defined.
 This allow serving DNS request forwarded by another proxy server."
-	></LabelHint>
-	<div class="input-suffix">
-		<input
-			name="DoHBehindProxy"
-			type=checkbox
-			bind:checked={env.DoHBehindProxy}
-		>
-		<span class="suffix">
-			Yes
-		</span>
-	</div>
+	>
+		<div class="input-checkbox">
+			<input
+				type=checkbox
+				bind:checked={env.DoHBehindProxy}
+			>
+			<span class="suffix">
+				Yes
+			</span>
+		</div>
+	</WuiLabelHint>
 
-	<LabelHint
-		target="PruneDelay"
+	<WuiLabelHint
 		title="Prune delay"
+		title_width="{defTitleWidth}"
 		info="Delay for pruning caches.
 Every N seconds, rescached will traverse all caches and remove response that
 has not been accessed less than cache.prune_threshold.
 Its value must be equal or greater than 1 hour (3600 seconds).
 "
-	></LabelHint>
-	<InputNumber
-		min=3600
-		max=36000
-		bind:val={env.PruneDelay}
-		unit="Seconds"
-	></InputNumber>
+	>
+		<WuiInputNumber
+			min=3600
+			max=36000
+			bind:value={env.PruneDelay}
+			unit="seconds"
+		/>
+	</WuiLabelHint>
 
-	<LabelHint
-		target="PruneThreshold"
+	<WuiLabelHint
 		title="Prune threshold"
+		title_width="{defTitleWidth}"
 		info="The duration when the cache will be considered expired.
 Its value must be negative and greater or equal than -1 hour (-3600 seconds)."
-	></LabelHint>
-	<InputNumber
-		min=-36000
-		max=-3600
-		bind:val={env.PruneThreshold}
-		unit="Seconds"
-	></InputNumber>
+	>
+		<WuiInputNumber
+			min=-36000
+			max=-3600
+			bind:value={env.PruneThreshold}
+			unit="seconds"
+		/>
+	</WuiLabelHint>
 </div>
 
-<div>
-	<button on:click={updateEnvironment}>
-		Save
-	</button>
-</div>
+	<div class="section-bottom">
+		<div>
+			<button on:click={updateEnvironment}>
+				Save
+			</button>
+		</div>
+	</div>
 </div>
