@@ -38,8 +38,8 @@
 		})
 
 		if (res.status >= 400) {
-			WuiPushNotif.Error("ERROR: createHostsFile: ", res.status,
-				res.statusText);
+			const resError = await res.json()
+			WuiPushNotif.Error("ERROR: createHostsFile: ", resError.message)
 			return;
 		}
 
@@ -50,6 +50,8 @@
 		}
 		env.HostsFiles.push(hf);
 		env.HostsFiles = env.HostsFiles;
+
+		WuiPushNotif.Info("The new host file '"+ newHostsFile +"' has been created")
 	}
 
 	async function updateHostsFile() {
@@ -59,12 +61,14 @@
 		})
 
 		if (res.status >= 400) {
-			WuiPushNotif.Error("ERROR: updateHostsFile: ", res.status,
-				res.statusText);
+			const resError = await res.json()
+			WuiPushNotif.Error("ERROR: updateHostsFile: ", resError.message)
 			return;
 		}
 
 		hostsFile.hosts = await res.json()
+
+		WuiPushNotif.Info("The host file '"+ hostsFile.Name +"' has been updated")
 	}
 
 	function addHost() {
@@ -86,8 +90,8 @@
 			method: "DELETE",
 		});
 		if (res.status >= 400) {
-			WuiPushNotif.Error("ERROR: deleteHostsFile: ", res.status,
-				res.statusText);
+			const resError = await res.json()
+			WuiPushNotif.Error("ERROR: deleteHostsFile: ", resError.message)
 			return;
 		}
 		for (let x = 0; x < env.HostsFiles.length; x++) {
@@ -95,6 +99,7 @@
 				hostsFile = {Name: "", Path:"", hosts: []};
 				env.HostsFiles.splice(x, 1);
 				env.HostsFiles = env.HostsFiles;
+				WuiPushNotif.Info("The host file '"+ hfile.Name +"' has been deleted")
 				return
 			}
 		}
@@ -150,9 +155,9 @@
 
 	<div class="content">
 		{#if hostsFile.Name === ""}
-		<p>
+		<div>
 			Select one of the hosts file to manage.
-		</p>
+		</div>
 		{:else}
 		<p>
 			{hostsFile.Name} ({hostsFile.hosts.length} records)

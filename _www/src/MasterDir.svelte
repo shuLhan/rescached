@@ -43,13 +43,16 @@
 		})
 
 		if (res.status >= 400) {
-			WuiPushNotif.Error("ERROR: handleCreateRR: ", res.status,
-				res.statusText);
+			const resError = await res.json()
+			WuiPushNotif.Error("ERROR: handleCreateRR: ", resError.message)
 			return;
 		}
 
 		activeMF = await res.json()
 		env.ZoneFiles[activeMF.Name] = activeMF
+
+		WuiPushNotif.Info("The new zone file '"+ newMasterFile +
+			"' has been created")
 	}
 
 	async function handleMasterFileDelete() {
@@ -59,16 +62,19 @@
 		})
 
 		if (res.status >= 400) {
-			WuiPushNotif.Error("ERROR: handleCreateRR: ", res.status,
-				res.statusText);
+			const resError = await res.json()
+			WuiPushNotif.Error("ERROR: handleCreateRR: ", resError.message)
 			return;
 		}
+
+		WuiPushNotif.Info("The zone file '"+ activeMF.Name + "' has beed deleted")
 
 		delete env.ZoneFiles[activeMF.Name]
 		activeMF = {
 			Name: "",
 		}
 		env.ZoneFiles = env.ZoneFiles
+
 	}
 
 	function onSelectRRType() {
@@ -102,8 +108,8 @@
 		})
 
 		if (res.status >= 400) {
-			WuiPushNotif.Error("ERROR: handleCreateRR: ", res.status,
-				res.statusText);
+			const resError = await res.json()
+			WuiPushNotif.Error("ERROR: handleCreateRR: ", resError.message)
 			return;
 		}
 
@@ -115,6 +121,8 @@
 		}
 		listRR.push(newRR);
 		activeMF.Records[newRR.Name] = listRR
+
+		WuiPushNotif.Info("The new record '"+ newRR.Name +"' has been created")
 	}
 
 	async function handleDeleteRR(rr, idx) {
@@ -129,10 +137,12 @@
 		})
 
 		if (res.status >= 400) {
-			WuiPushNotif.Error("ERROR: handleCreateRR: ", res.status,
-				res.statusText)
+			const resError = await res.json()
+			WuiPushNotif.Error("ERROR: handleCreateRR: ", resError.message)
 			return
 		}
+
+		WuiPushNotif.Info("The record '"+ rr.Name +"' has been deleted")
 
 		let listRR = activeMF.Records[rr.Name]
 		listRR.splice(idx, 1)
