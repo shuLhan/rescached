@@ -5,7 +5,7 @@ export const environment = writable({
 	NameServers: [],
 	HostsBlocks: [],
 	HostsFiles: [],
-	MasterFiles: [],
+	ZoneFiles: [],
 })
 export const nanoSeconds = 1000000000
 

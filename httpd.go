@@ -212,27 +212,32 @@ func (srv *Server) httpdAPIPostEnvironment(
 ) (
 	resBody []byte, err error,
 ) {
+	res := &liberrors.E{
+		Code:    stdhttp.StatusOK,
+		Message: "Restarting DNS server",
+	}
+
 	newOpts := new(environment)
 	err = json.Unmarshal(reqBody, newOpts)
 	if err != nil {
 		return nil, err
 	}
 
+	if len(newOpts.NameServers) == 0 {
+		res.Code = stdhttp.StatusBadRequest
+		res.Message = "at least one parent name servers must be defined"
+		return nil, res
+	}
+
 	newOpts.init()
 
 	fmt.Printf("new options: %+v\n", newOpts)
 
-	res := &liberrors.E{
-		Code:    stdhttp.StatusOK,
-		Message: "Restarting DNS server",
-	}
-
 	err = newOpts.write(srv.fileConfig)
 	if err != nil {
-		log.Println("httpdAPIPostEnvironment:", err.Error())
 		res.Code = stdhttp.StatusInternalServerError
 		res.Message = err.Error()
-		return json.Marshal(res)
+		return nil, res
 	}
 
 	srv.env = newOpts
@@ -240,9 +245,9 @@ func (srv *Server) httpdAPIPostEnvironment(
 	srv.Stop()
 	err = srv.Start()
 	if err != nil {
-		log.Println("httpdAPIPostEnvironment:", err.Error())
 		res.Code = stdhttp.StatusInternalServerError
 		res.Message = err.Error()
+		return nil, res
 	}
 
 	return json.Marshal(res)
@@ -557,13 +562,13 @@ func (srv *Server) apiMasterFileCreate(
 		return nil, res
 	}
 
-	mf, ok := srv.env.MasterFiles[zoneName]
+	mf, ok := srv.env.ZoneFiles[zoneName]
 	if ok {
 		return json.Marshal(mf)
 	}
 
 	zoneFile := filepath.Join(dirMaster, zoneName)
-	mf = dns.NewMasterFile(zoneFile, zoneName)
+	mf = dns.NewZoneFile(zoneFile, zoneName)
 	err = mf.Save()
 	if err != nil {
 		res.Code = stdhttp.StatusInternalServerError
@@ -571,7 +576,7 @@ func (srv *Server) apiMasterFileCreate(
 		return nil, res
 	}
 
-	srv.env.MasterFiles[zoneName] = mf
+	srv.env.ZoneFiles[zoneName] = mf
 
 	return json.Marshal(mf)
 }
@@ -593,7 +598,7 @@ func (srv *Server) apiMasterFileDelete(
 		return nil, res
 	}
 
-	mf, ok := srv.env.MasterFiles[zoneName]
+	mf, ok := srv.env.ZoneFiles[zoneName]
 	if !ok {
 		res.Message = "unknown zone file name " + zoneName
 		return nil, res
@@ -605,7 +610,7 @@ func (srv *Server) apiMasterFileDelete(
 	}
 
 	srv.dns.RemoveCachesByNames(names)
-	delete(srv.env.MasterFiles, zoneName)
+	delete(srv.env.ZoneFiles, zoneName)
 
 	err = mf.Delete()
 	if err != nil {
@@ -640,7 +645,7 @@ func (srv *Server) apiMasterFileCreateRR(
 		return nil, res
 	}
 
-	mf := srv.env.MasterFiles[masterFileName]
+	mf := srv.env.ZoneFiles[masterFileName]
 	if mf == nil {
 		res.Message = "unknown master file name " + masterFileName
 		return nil, res
@@ -672,14 +677,14 @@ func (srv *Server) apiMasterFileCreateRR(
 		rr.Name += "." + masterFileName
 	}
 
-	err = srv.dns.UpsertCacheByRR(&rr)
+	err = srv.dns.PopulateCachesByRR(&rr)
 	if err != nil {
 		res.Message = "UpsertCacheByRR: " + err.Error()
 		return nil, res
 	}
 
 	// Update the Master file.
-	mf.AddRR(&rr)
+	mf.Add(&rr)
 	err = mf.Save()
 	if err != nil {
 		res.Message = err.Error()
@@ -709,7 +714,7 @@ func (srv *Server) apiMasterFileDeleteRR(
 		return nil, res
 	}
 
-	mf := srv.env.MasterFiles[masterFileName]
+	mf := srv.env.ZoneFiles[masterFileName]
 	if mf == nil {
 		res.Message = "unknown master file name " + masterFileName
 		return nil, res

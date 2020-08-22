@@ -9,7 +9,7 @@
 		NameServers: [],
 		HostsBlocks: [],
 		HostsFiles: [],
-		MasterFiles: {},
+		ZoneFiles: {},
 	};
 	let newMasterFile = "";
 	let activeMF = {
@@ -49,7 +49,7 @@
 		}
 
 		activeMF = await res.json()
-		env.MasterFiles[activeMF.Name] = activeMF
+		env.ZoneFiles[activeMF.Name] = activeMF
 	}
 
 	async function handleMasterFileDelete() {
@@ -64,11 +64,11 @@
 			return;
 		}
 
-		delete env.MasterFiles[activeMF.Name]
+		delete env.ZoneFiles[activeMF.Name]
 		activeMF = {
 			Name: "",
 		}
-		env.MasterFiles = env.MasterFiles
+		env.ZoneFiles = env.ZoneFiles
 	}
 
 	function onSelectRRType() {
@@ -240,7 +240,7 @@
 
 <div class="master_d">
 	<div class="nav-left">
-{#each Object.entries(env.MasterFiles) as [name, mf]}
+{#each Object.entries(env.ZoneFiles) as [name, mf]}
 		<div class="item">
 			<span on:click={()=>activeMF = mf}>
 				{mf.Name}
@@ -250,7 +250,7 @@
 		<br/>
 
 		<label>
-			<span>New master file:</span>
+			<span>New zone file:</span>
 			<br/>
 			<input bind:value={newMasterFile}>
 		</label>
@@ -262,7 +262,7 @@
 	<div class="content">
 {#if activeMF.Name === ""}
 		<p>
-			Select one of the master file to manage.
+			Select one of the zone file to manage.
 		</p>
 {:else}
 		<p>
