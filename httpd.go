@@ -21,9 +21,14 @@ import (
 )
 
 const (
-	defHTTPDRootDir = "_public/"
-	paramNameName   = "name"
-	paramNameType   = "type"
+	defHTTPDRootDir     = "_public/"
+	paramNameName       = "name"
+	paramNameType       = "type"
+	apiEnvironment      = "/api/environment"
+	apiHostsBlock       = "/api/hosts_block"
+	apiHostsDir         = "/api/hosts.d/:name"
+	apiMasterFile       = "/api/master.d/:name"
+	apiMasterFileRRType = "/api/master.d/:name/rr/:type"
 )
 
 func (srv *Server) httpdInit() (err error) {
@@ -61,7 +66,7 @@ func (srv *Server) httpdInit() (err error) {
 func (srv *Server) httpdRegisterEndpoints() (err error) {
 	epAPIGetEnvironment := &http.Endpoint{
 		Method:       http.RequestMethodGet,
-		Path:         "/api/environment",
+		Path:         apiEnvironment,
 		RequestType:  http.RequestTypeJSON,
 		ResponseType: http.ResponseTypeJSON,
 		Call:         srv.httpdAPIGetEnvironment,
@@ -74,7 +79,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	epAPIPostEnvironment := &http.Endpoint{
 		Method:       http.RequestMethodPost,
-		Path:         "/api/environment",
+		Path:         apiEnvironment,
 		RequestType:  http.RequestTypeJSON,
 		ResponseType: http.ResponseTypeJSON,
 		Call:         srv.httpdAPIPostEnvironment,
@@ -87,7 +92,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodPost,
-		Path:         "/api/hosts_block",
+		Path:         apiHostsBlock,
 		RequestType:  http.RequestTypeJSON,
 		ResponseType: http.ResponseTypeJSON,
 		Call:         srv.apiHostsBlockUpdate,
@@ -98,7 +103,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodPut,
-		Path:         "/api/hosts.d/:name",
+		Path:         apiHostsDir,
 		RequestType:  http.RequestTypeNone,
 		ResponseType: http.ResponseTypeNone,
 		Call:         srv.apiHostsFileCreate,
@@ -109,7 +114,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodGet,
-		Path:         "/api/hosts.d/:name",
+		Path:         apiHostsDir,
 		RequestType:  http.RequestTypeNone,
 		ResponseType: http.ResponseTypeJSON,
 		Call:         srv.apiHostsFileGet,
@@ -120,7 +125,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodPost,
-		Path:         "/api/hosts.d/:name",
+		Path:         apiHostsDir,
 		RequestType:  http.RequestTypeJSON,
 		ResponseType: http.ResponseTypeJSON,
 		Call:         srv.apiHostsFileUpdate,
@@ -130,7 +135,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodDelete,
-		Path:         "/api/hosts.d/:name",
+		Path:         apiHostsDir,
 		RequestType:  http.RequestTypeNone,
 		ResponseType: http.ResponseTypeJSON,
 		Call:         srv.apiHostsFileDelete,
@@ -141,7 +146,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodPut,
-		Path:         "/api/master.d/:name",
+		Path:         apiMasterFile,
 		RequestType:  http.RequestTypeNone,
 		ResponseType: http.ResponseTypeJSON,
 		Call:         srv.apiMasterFileCreate,
@@ -151,7 +156,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodDelete,
-		Path:         "/api/master.d/:name",
+		Path:         apiMasterFile,
 		RequestType:  http.RequestTypeNone,
 		ResponseType: http.ResponseTypeJSON,
 		Call:         srv.apiMasterFileDelete,
@@ -161,7 +166,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodPost,
-		Path:         "/api/master.d/:name/rr/:type",
+		Path:         apiMasterFileRRType,
 		RequestType:  http.RequestTypeJSON,
 		ResponseType: http.ResponseTypeJSON,
 		Call:         srv.apiMasterFileCreateRR,
@@ -171,7 +176,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodDelete,
-		Path:         "/api/master.d/:name/rr/:type",
+		Path:         apiMasterFileRRType,
 		RequestType:  http.RequestTypeJSON,
 		ResponseType: http.ResponseTypeJSON,
 		Call:         srv.apiMasterFileDeleteRR,
