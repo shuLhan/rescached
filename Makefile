@@ -60,7 +60,7 @@ lint:
 $(RESCACHED_BIN): cmd/rescached/memfs.go $(SRC)
 	go build $(DEBUG) ./cmd/rescached
 
-cmd/rescached/memfs.go: internal/generate_memfs.go _www/public/*
+cmd/rescached/memfs.go: internal/generate_memfs.go _www/public/build/*
 	go run ./internal/generate_memfs.go
 
 $(RESOLVER_BIN): $(SRC)
