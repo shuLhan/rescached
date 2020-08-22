@@ -428,17 +428,15 @@ func (srv *Server) apiHostsFileGet(
 ) (
 	resbody []byte, err error,
 ) {
-	hosts := make([]*host, 0)
 	name := httpreq.Form.Get(paramNameName)
 
 	for _, hfile := range srv.env.HostsFiles {
 		if hfile.Name == name {
-			hosts = hfile.hosts
-			break
+			return json.Marshal(&hfile.hosts)
 		}
 	}
 
-	return json.Marshal(&hosts)
+	return []byte("[]"), nil
 }
 
 func (srv *Server) apiHostsFileUpdate(
@@ -447,7 +445,7 @@ func (srv *Server) apiHostsFileUpdate(
 	resbody []byte, err error,
 ) {
 	var (
-		hosts = make([]*host, 0)
+		hosts = make([]*dns.ResourceRecord, 0)
 		name  = httpreq.Form.Get(paramNameName)
 		found bool
 		hfile *hostsFile

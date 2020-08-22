@@ -15,7 +15,7 @@ import (
 type hostsFile struct {
 	Name  string
 	Path  string
-	hosts []*host
+	hosts []*dns.ResourceRecord
 	out   *os.File
 }
 
@@ -27,7 +27,7 @@ func convertHostsFile(from *dns.HostsFile) (to *hostsFile) {
 	to = &hostsFile{
 		Name:  from.Name,
 		Path:  from.Path,
-		hosts: make([]*host, 0, len(from.Messages)),
+		hosts: make([]*dns.ResourceRecord, 0, len(from.Messages)),
 	}
 
 	for _, msg := range from.Messages {
@@ -35,18 +35,15 @@ func convertHostsFile(from *dns.HostsFile) (to *hostsFile) {
 			continue
 		}
 
-		host := convertRRToHost(&msg.Answer[0])
-		if host != nil {
-			to.hosts = append(to.hosts, host)
-		}
+		to.hosts = append(to.hosts, &msg.Answer[0])
 	}
 
 	return to
 }
 
-func newHostsFile(name string, hosts []*host) (hfile *hostsFile, err error) {
+func newHostsFile(name string, hosts []*dns.ResourceRecord) (hfile *hostsFile, err error) {
 	if hosts == nil {
-		hosts = make([]*host, 0)
+		hosts = make([]*dns.ResourceRecord, 0)
 	}
 
 	hfile = &hostsFile{
@@ -80,7 +77,9 @@ func (hfile *hostsFile) names() (names []string) {
 	return names
 }
 
-func (hfile *hostsFile) update(hosts []*host) (msgs []*dns.Message, err error) {
+func (hfile *hostsFile) update(hosts []*dns.ResourceRecord) (
+	msgs []*dns.Message, err error,
+) {
 	if hfile.out == nil {
 		hfile.out, err = os.OpenFile(hfile.Path,
 			os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0600)
@@ -97,12 +96,16 @@ func (hfile *hostsFile) update(hosts []*host) (msgs []*dns.Message, err error) {
 	hfile.hosts = hfile.hosts[:0]
 
 	for _, host := range hosts {
-		if len(host.Name) == 0 || len(host.Value) == 0 {
+		if len(host.Name) == 0 || host.Value == nil {
+			continue
+		}
+		hostValue, ok := host.Value.(string)
+		if !ok {
 			continue
 		}
 		msg := dns.NewMessageAddress(
 			[]byte(host.Name),
-			[][]byte{[]byte(host.Value)},
+			[][]byte{[]byte(hostValue)},
 		)
 		if msg == nil {
 			continue
