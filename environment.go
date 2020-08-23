@@ -60,7 +60,7 @@ type environment struct {
 	Debug          int      `ini:"rescached::debug"`
 	HostsBlocksRaw []string `ini:"rescached::hosts_block" json:"-"`
 	HostsBlocks    []*hostsBlock
-	HostsFiles     []*hostsFile
+	HostsFiles     map[string]*dns.HostsFile
 	ZoneFiles      map[string]*dns.ZoneFile
 }
 

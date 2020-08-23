@@ -60,23 +60,25 @@ func (srv *Server) Start() (err error) {
 		return err
 	}
 
-	dnsHostsFile, err := dns.ParseHostsFile(dns.GetSystemHosts())
+	systemHostsFile, err := dns.ParseHostsFile(dns.GetSystemHosts())
 	if err != nil {
 		return err
 	}
-	srv.dns.PopulateCaches(dnsHostsFile.Messages)
-
-	dnsHostsFiles, err := dns.LoadHostsDir(dirHosts)
+	err = srv.dns.PopulateCachesByRR(systemHostsFile.Records)
 	if err != nil {
 		return err
 	}
 
-	srv.env.HostsFiles = make([]*hostsFile, 0, len(dnsHostsFiles))
+	srv.env.HostsFiles, err = dns.LoadHostsDir(dirHosts)
+	if err != nil {
+		return err
+	}
 
-	for _, dnsHostsFile := range dnsHostsFiles {
-		srv.dns.PopulateCaches(dnsHostsFile.Messages)
-		srv.env.HostsFiles = append(srv.env.HostsFiles,
-			convertHostsFile(dnsHostsFile))
+	for _, hf := range srv.env.HostsFiles {
+		err = srv.dns.PopulateCachesByRR(hf.Records)
+		if err != nil {
+			return err
+		}
 	}
 
 	srv.env.ZoneFiles, err = dns.LoadMasterDir(dirMaster)

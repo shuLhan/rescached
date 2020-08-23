@@ -1,15 +1,14 @@
-<script>
-	import { onDestroy } from 'svelte';
+<script> import { onDestroy } from 'svelte';
 	import { WuiPushNotif } from 'wui.svelte';
 	import { apiEnvironment, environment, nanoSeconds } from './environment.js';
 
 	const apiHostsDir = "/api/hosts.d"
 	let env = {
-		HostsFiles: [],
+		HostsFiles: {},
 	};
 	let hostsFile = {
 		Name: "",
-		hosts: [],
+		Records: [],
 	};
 	let newHostsFile = "";
 
@@ -19,12 +18,15 @@
 	onDestroy(envUnsubscribe);
 
 	async function getHostsFile(hf) {
-		if (hf.hosts.length > 0) {
+		if (hf.Records === null) {
+			hf.Records = []
+		}
+		if (hf.Records.length > 0) {
 			hostsFile = hf;
 			return;
 		}
 		const res = await fetch(apiHostsDir +"/"+ hf.Name);
-		hf.hosts = await res.json();
+		hf.Records = await res.json();
 		hostsFile = hf;
 	}
 
@@ -45,11 +47,10 @@
 
 		const hf = {
 			Name: newHostsFile,
-			Path: newHostsFile,
-			hosts: [],
+			Records: [],
 		}
-		env.HostsFiles.push(hf);
-		env.HostsFiles = env.HostsFiles;
+		env.HostsFiles[newHostsFile] = hf
+		env = env
 
 		WuiPushNotif.Info("The new host file '"+ newHostsFile +"' has been created")
 	}
@@ -57,7 +58,7 @@
 	async function updateHostsFile() {
 		const res = await fetch(apiHostsDir+"/"+ hostsFile.Name, {
 			method: "POST",
-			body: JSON.stringify(hostsFile.hosts),
+			body: JSON.stringify(hostsFile.Records),
 		})
 
 		if (res.status >= 400) {
@@ -66,7 +67,7 @@
 			return;
 		}
 
-		hostsFile.hosts = await res.json()
+		hostsFile.Records = await res.json()
 
 		WuiPushNotif.Info("The host file '"+ hostsFile.Name +"' has been updated")
 	}
@@ -76,13 +77,13 @@
 			Name: "",
 			Value: "",
 		}
-		hostsFile.hosts.unshift(newHost);
-		hostsFile.hosts = hostsFile.hosts;
+		hostsFile.Records.unshift(newHost);
+		hostsFile.Records = hostsFile.Records;
 	}
 
 	function deleteHost(idx) {
-		hostsFile.hosts.splice(idx, 1);
-		hostsFile.hosts = hostsFile.hosts;
+		hostsFile.Records.splice(idx, 1);
+		hostsFile.Records = hostsFile.Records;
 	}
 
 	async function deleteHostsFile(hfile) {
@@ -94,15 +95,13 @@
 			WuiPushNotif.Error("ERROR: deleteHostsFile: ", resError.message)
 			return;
 		}
-		for (let x = 0; x < env.HostsFiles.length; x++) {
-			if (env.HostsFiles[x].Name == hfile.Name) {
-				hostsFile = {Name: "", Path:"", hosts: []};
-				env.HostsFiles.splice(x, 1);
-				env.HostsFiles = env.HostsFiles;
-				WuiPushNotif.Info("The host file '"+ hfile.Name +"' has been deleted")
-				return
-			}
+		delete env.HostsFiles[hfile.Name]
+		env = env;
+		hostsFile = {
+			Name: "",
+			Records: [],
 		}
+		WuiPushNotif.Info("The host file '"+ hfile.Name +"' has been deleted")
 	}
 </script>
 
@@ -133,7 +132,7 @@
 
 <div class="hosts_d">
 	<div class="nav-left">
-		{#each env.HostsFiles as hf}
+		{#each Object.entries(env.HostsFiles) as [name,hf], name }
 		<div class="item">
 			<a href="#" on:click={getHostsFile(hf)}>
 				{hf.Name}
@@ -160,7 +159,7 @@
 		</div>
 		{:else}
 		<p>
-			{hostsFile.Name} ({hostsFile.hosts.length} records)
+			{hostsFile.Name} ({hostsFile.Records.length} records)
 			<button on:click={deleteHostsFile(hostsFile)}>
 				Delete
 			</button>
@@ -171,7 +170,7 @@
 			</button>
 		</div>
 
-		{#each hostsFile.hosts as host, idx (idx)}
+		{#each hostsFile.Records as host, idx (idx)}
 		<div class="host">
 			<input
 				class="host_name"

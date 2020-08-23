@@ -328,7 +328,7 @@ func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
 		if !errors.Is(err, os.ErrNotExist) {
 			return err
 		}
-		// File not exist, fetch new from serfer.
+		// File not exist, fetch new from server.
 		err = hb.update()
 		if err != nil {
 			return err
@@ -340,43 +340,34 @@ func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
 		return err
 	}
 
-	srv.dns.PopulateCaches(hfile.Messages)
+	err = srv.dns.PopulateCachesByRR(hfile.Records)
+	if err != nil {
+		return err
+	}
 
 	err = hb.update()
 	if err != nil {
 		return err
 	}
-	srv.env.HostsFiles = append(srv.env.HostsFiles, convertHostsFile(hfile))
+
+	srv.env.HostsFiles[hfile.Name] = hfile
 
 	return nil
 }
 
 func (srv *Server) hostsBlockDisable(hb *hostsBlock) (err error) {
-	var (
-		x     int
-		hfile *hostsFile
-		found bool
-	)
-
-	for x, hfile = range srv.env.HostsFiles {
-		if hfile.Name == hb.Name {
-			found = true
-			break
-		}
-	}
+	hfile, found := srv.env.HostsFiles[hb.Name]
 	if !found {
 		return fmt.Errorf("unknown hosts block: %q", hb.Name)
 	}
 
-	srv.dns.RemoveCachesByNames(hfile.names())
+	srv.dns.RemoveCachesByNames(hfile.Names())
+
 	err = hb.hide()
 	if err != nil {
 		return err
 	}
-
-	copy(srv.env.HostsFiles[x:], srv.env.HostsFiles[x+1:])
-	srv.env.HostsFiles[len(srv.env.HostsFiles)-1] = nil
-	srv.env.HostsFiles = srv.env.HostsFiles[:len(srv.env.HostsFiles)-1]
+	delete(srv.env.HostsFiles, hb.Name)
 
 	return nil
 }
@@ -394,29 +385,18 @@ func (srv *Server) apiHostsFileCreate(
 		}
 	}
 
-	for _, hf := range srv.env.HostsFiles {
-		if hf.Name == name {
-			return nil, nil
+	_, found := srv.env.HostsFiles[name]
+	if !found {
+		path := filepath.Join(dirHosts, name)
+		hfile, err := dns.NewHostsFile(path, nil)
+		if err != nil {
+			return nil, &liberrors.E{
+				Code:    stdhttp.StatusInternalServerError,
+				Message: err.Error(),
+			}
 		}
+		srv.env.HostsFiles[hfile.Name] = hfile
 	}
-
-	hfile, err := newHostsFile(name, nil)
-	if err != nil {
-		return nil, &liberrors.E{
-			Code:    stdhttp.StatusInternalServerError,
-			Message: err.Error(),
-		}
-	}
-
-	err = hfile.close()
-	if err != nil {
-		return nil, &liberrors.E{
-			Code:    stdhttp.StatusInternalServerError,
-			Message: err.Error(),
-		}
-	}
-
-	srv.env.HostsFiles = append(srv.env.HostsFiles, hfile)
 
 	httpres.WriteHeader(stdhttp.StatusCreated)
 
@@ -430,13 +410,12 @@ func (srv *Server) apiHostsFileGet(
 ) {
 	name := httpreq.Form.Get(paramNameName)
 
-	for _, hfile := range srv.env.HostsFiles {
-		if hfile.Name == name {
-			return json.Marshal(&hfile.hosts)
-		}
+	hfile, found := srv.env.HostsFiles[name]
+	if !found || hfile.Records == nil {
+		return []byte("[]"), nil
 	}
 
-	return []byte("[]"), nil
+	return json.Marshal(&hfile.Records)
 }
 
 func (srv *Server) apiHostsFileUpdate(
@@ -445,59 +424,55 @@ func (srv *Server) apiHostsFileUpdate(
 	resbody []byte, err error,
 ) {
 	var (
-		hosts = make([]*dns.ResourceRecord, 0)
-		name  = httpreq.Form.Get(paramNameName)
-		found bool
-		hfile *hostsFile
+		listRR = make([]*dns.ResourceRecord, 0)
+		name   = httpreq.Form.Get(paramNameName)
 	)
+	res := &liberrors.E{
+		Code:    stdhttp.StatusInternalServerError,
+		Message: "internal server error",
+	}
 
-	err = json.Unmarshal(reqbody, &hosts)
+	err = json.Unmarshal(reqbody, &listRR)
 	if err != nil {
-		return nil, &liberrors.E{
-			Code:    stdhttp.StatusInternalServerError,
-			Message: err.Error(),
-		}
+		res.Message = err.Error()
+		return nil, res
 	}
 
-	for _, hfile = range srv.env.HostsFiles {
-		if hfile.Name == name {
-			found = true
-			break
-		}
-	}
+	hfile, found := srv.env.HostsFiles[name]
 	if !found {
-		hfile, err = newHostsFile(name, hosts)
+		path := filepath.Join(dirHosts, name)
+		hfile, err = dns.NewHostsFile(path, listRR)
 		if err != nil {
-			return nil, &liberrors.E{
-				Code:    stdhttp.StatusInternalServerError,
-				Message: err.Error(),
-			}
+			res.Message = err.Error()
+			return nil, res
 		}
-		srv.env.HostsFiles = append(srv.env.HostsFiles, hfile)
-	}
+		srv.env.HostsFiles[name] = hfile
+	} else {
+		oldHostnames := hfile.Names()
 
-	oldHostnames := hfile.names()
+		// Remove the records associated with hosts file.
+		srv.dns.RemoveCachesByNames(oldHostnames)
 
-	msgs, err := hfile.update(hosts)
-	if err != nil {
-		return nil, &liberrors.E{
-			Code:    stdhttp.StatusInternalServerError,
-			Message: err.Error(),
+		// Save new records.
+		hfile.Records = listRR
+		err = hfile.Save()
+		if err != nil {
+			res.Message = err.Error()
+			return nil, res
 		}
 	}
-
-	// Remove the records associated with hosts file.
-	srv.dns.RemoveCachesByNames(oldHostnames)
 
 	// Populate new hosts to cache.
-	srv.dns.PopulateCaches(msgs)
-
-	resbody, err = json.Marshal(&hfile.hosts)
+	err = srv.dns.PopulateCachesByRR(hfile.Records)
 	if err != nil {
-		return nil, &liberrors.E{
-			Code:    stdhttp.StatusInternalServerError,
-			Message: err.Error(),
-		}
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	resbody, err = json.Marshal(&hfile.Records)
+	if err != nil {
+		res.Message = err.Error()
+		return nil, res
 	}
 
 	return resbody, nil
@@ -518,29 +493,25 @@ func (srv *Server) apiHostsFileDelete(
 		return nil, res
 	}
 
-	for x, hfile := range srv.env.HostsFiles {
-		if hfile.Name != name {
-			continue
-		}
-
-		// Remove the records associated with hosts file.
-		srv.dns.RemoveCachesByNames(hfile.names())
-
-		err = os.RemoveAll(hfile.Path)
-		if err != nil {
-			res.Message = err.Error()
-			return nil, res
-		}
-
-		copy(srv.env.HostsFiles[x:], srv.env.HostsFiles[x+1:])
-		srv.env.HostsFiles[len(srv.env.HostsFiles)-1] = nil
-		srv.env.HostsFiles = srv.env.HostsFiles[:len(srv.env.HostsFiles)-1]
-
-		res.Message = name + " has been deleted"
-		return json.Marshal(res)
+	hfile, found := srv.env.HostsFiles[name]
+	if !found {
+		res.Message = "apiDeleteHostsFile: " + name + " not found"
+		return nil, res
 	}
-	res.Message = "apiDeleteHostsFile: " + name + " not found"
-	return nil, res
+
+	// Remove the records associated with hosts file.
+	srv.dns.RemoveCachesByNames(hfile.Names())
+
+	err = hfile.Delete()
+	if err != nil {
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	delete(srv.env.HostsFiles, name)
+
+	res.Message = name + " has been deleted"
+	return json.Marshal(res)
 }
 
 func (srv *Server) apiMasterFileCreate(
@@ -680,7 +651,8 @@ func (srv *Server) apiMasterFileCreateRR(
 		rr.Name += "." + masterFileName
 	}
 
-	err = srv.dns.PopulateCachesByRR(&rr)
+	listRR := []*dns.ResourceRecord{&rr}
+	err = srv.dns.PopulateCachesByRR(listRR)
 	if err != nil {
 		res.Message = "UpsertCacheByRR: " + err.Error()
 		return nil, res

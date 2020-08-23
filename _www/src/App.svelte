@@ -16,7 +16,7 @@
 	let env = {
 		NameServers: [],
 		HostsBlocks: [],
-		HostsFiles: [],
+		HostsFiles: {},
 	};
 
 	onMount(async () => {
