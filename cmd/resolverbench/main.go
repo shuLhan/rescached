@@ -33,18 +33,18 @@ func main() {
 
 	var nfail int
 
-	fmt.Printf("= Benchmarking with %d messages\n", len(hostsFile.Messages))
+	fmt.Printf("= Benchmarking with %d messages\n", len(hostsFile.Records))
 
 	timeStart := time.Now()
-	for x := 0; x < len(hostsFile.Messages); x++ {
-		res, err := cl.Query(hostsFile.Messages[x])
+	for _, rr := range hostsFile.Records {
+		res, err := cl.Lookup(true, rr.Type, rr.Class, rr.Name)
 		if err != nil {
 			nfail++
 			log.Println("! Send error: ", err)
 			continue
 		}
 
-		exp := hostsFile.Messages[x].Answer[0].Value.(string)
+		exp := rr.Value.(string)
 		got := res.Answer[0].Value.(string)
 
 		if exp != got {
@@ -52,12 +52,12 @@ func main() {
 			log.Printf(`! Answer not matched %s:
 expecting: %s
 got: %s
-`, hostsFile.Messages[x].Question.String(), exp, got)
+`, rr.String(), exp, got)
 		}
 	}
 	timeEnd := time.Now()
 
-	fmt.Printf("= Total: %d\n", len(hostsFile.Messages))
+	fmt.Printf("= Total: %d\n", len(hostsFile.Records))
 	fmt.Printf("= Failed: %d\n", nfail)
 	fmt.Printf("= Elapsed time: %v\n", timeEnd.Sub(timeStart))
 }
