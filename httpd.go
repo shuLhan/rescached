@@ -340,7 +340,7 @@ func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
 		return err
 	}
 
-	err = srv.dns.PopulateCachesByRR(hfile.Records)
+	err = srv.dns.PopulateCachesByRR(hfile.Records, hfile.Path)
 	if err != nil {
 		return err
 	}
@@ -463,7 +463,7 @@ func (srv *Server) apiHostsFileUpdate(
 	}
 
 	// Populate new hosts to cache.
-	err = srv.dns.PopulateCachesByRR(hfile.Records)
+	err = srv.dns.PopulateCachesByRR(hfile.Records, hfile.Path)
 	if err != nil {
 		res.Message = err.Error()
 		return nil, res
@@ -652,7 +652,7 @@ func (srv *Server) apiMasterFileCreateRR(
 	}
 
 	listRR := []*dns.ResourceRecord{&rr}
-	err = srv.dns.PopulateCachesByRR(listRR)
+	err = srv.dns.PopulateCachesByRR(listRR, mf.Path)
 	if err != nil {
 		res.Message = "UpsertCacheByRR: " + err.Error()
 		return nil, res

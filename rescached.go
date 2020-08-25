@@ -64,7 +64,8 @@ func (srv *Server) Start() (err error) {
 	if err != nil {
 		return err
 	}
-	err = srv.dns.PopulateCachesByRR(systemHostsFile.Records)
+	err = srv.dns.PopulateCachesByRR(systemHostsFile.Records,
+		systemHostsFile.Path)
 	if err != nil {
 		return err
 	}
@@ -75,7 +76,7 @@ func (srv *Server) Start() (err error) {
 	}
 
 	for _, hf := range srv.env.HostsFiles {
-		err = srv.dns.PopulateCachesByRR(hf.Records)
+		err = srv.dns.PopulateCachesByRR(hf.Records, hf.Path)
 		if err != nil {
 			return err
 		}
@@ -86,7 +87,7 @@ func (srv *Server) Start() (err error) {
 		return err
 	}
 	for _, masterFile := range srv.env.ZoneFiles {
-		srv.dns.PopulateCaches(masterFile.Messages())
+		srv.dns.PopulateCaches(masterFile.Messages(), masterFile.Path)
 	}
 
 	if len(srv.env.FileResolvConf) > 0 {
