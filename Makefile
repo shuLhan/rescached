@@ -4,7 +4,7 @@
 
 .PHONY: build debug install install-common install-macos
 .PHONY: uninstall uninstall-macos
-.PHONY: test test.prof coverbrowse lint
+.PHONY: test test.prof lint
 .PHONY: doc
 .PHONY: clean distclean
 .PHONY: deploy
@@ -50,9 +50,6 @@ $(COVER_HTML): $(COVER_OUT)
 
 $(COVER_OUT): $(SRC) $(SRC_TEST)
 	go test $(DEBUG) -count=1 -coverprofile=$@ ./...
-
-coverbrowse: $(COVER_HTML)
-	xdg-open $<
 
 lint:
 	-golangci-lint run --enable-all ./...
@@ -115,7 +112,7 @@ install-common:
 
 
 install: build install-common
-	mkdir -p                     $(PREFIX)/usr/lib/systemd/system
+	mkdir -p                      $(PREFIX)/usr/lib/systemd/system
 	cp _scripts/rescached.service $(PREFIX)/usr/lib/systemd/system/
 
 
@@ -143,6 +140,9 @@ uninstall: uninstall-common
 	rm -f /usr/lib/systemd/system/rescached.service
 
 
+uninstall-macos: DIR_BIN=/usr/local/bin
+uninstall-macos: DIR_MAN=/usr/local/share/man
+uninstall-macos: DIR_RESCACHED=/usr/local/share/rescached
 uninstall-macos: uninstall-common
 	launchctl stop info.kilabit.rescached
 	launchctl unload info.kilabit.rescached
