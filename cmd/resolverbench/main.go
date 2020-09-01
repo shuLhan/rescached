@@ -45,9 +45,17 @@ func main() {
 		}
 
 		exp := rr.Value.(string)
-		got := res.Answer[0].Value.(string)
+		got := ""
+		found := false
+		for x := 0; x < len(res.Answer); x++ {
+			got = res.Answer[x].Value.(string)
+			if exp == got {
+				found = true
+				break
+			}
+		}
 
-		if exp != got {
+		if !found {
 			nfail++
 			log.Printf(`! Answer not matched %s:
 expecting: %s
