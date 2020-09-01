@@ -1,15 +1,12 @@
 /README.html
 /TODO
 /_doc/benchmark.html
-/_doc/rescached.cfg.5.gz
-/_doc/resolver.1.gz
 /_www/node_modules/
 /cmd/rescached/memfs.go
 /cover.html
 /cover.out
 /heap*
 /rescached
-/rescached.1.gz
 /resolver
 /resolverbench
 /testdata/rescached.pid

@@ -33,10 +33,10 @@ DIR_BIN=/usr/bin
 DIR_MAN=/usr/share/man
 DIR_RESCACHED=/usr/share/rescached
 
-build: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
+build: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
 
 debug: DEBUG=-race -v
-debug: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN) doc
+debug: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
 
 test: $(COVER_HTML)
 
@@ -89,7 +89,6 @@ distclean: clean
 clean:
 	rm -f testdata/rescached.pid
 	rm -f $(COVER_OUT) $(COVER_HTML)
-	rm -f $(RESCACHED_MAN) $(RESOLVER_MAN) $(RESCACHED_CFG_MAN)
 	rm -f $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
 
 
