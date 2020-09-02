@@ -338,7 +338,7 @@
 			</label>
 
 	{#if rr.Type === 1 || rr.Type === 2 || rr.Type === 5 ||
-		rr.Type === 12 || rr.Type === 16 || rr.Type === 28
+		rr.Type === 16 || rr.Type === 28
 	}
 			<label>
 				<span>
@@ -388,6 +388,17 @@
 					Minimum:
 				</span>
 				<input bind:value={rrSOA.Minimum} type=number>
+			</label>
+	{:else if rr.Type === 12}
+			<label>
+				<span>
+					Value:
+				</span>
+				<input bind:value={rr.Value}>
+				<p>
+					For PTR record, the name will become a value, and the
+					value will become a name.
+				</p>
 			</label>
 	{:else if rr.Type === 15}
 			<label>

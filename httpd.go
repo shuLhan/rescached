@@ -651,6 +651,13 @@ func (srv *Server) apiMasterFileCreateRR(
 		rr.Name += "." + masterFileName
 	}
 
+	// Reverse the value and name for PTR record.
+	if rr.Type == dns.QueryTypePTR {
+		tmp := rr.Name
+		rr.Name = rr.Value.(string)
+		rr.Value = tmp
+	}
+
 	listRR := []*dns.ResourceRecord{&rr}
 	err = srv.dns.PopulateCachesByRR(listRR, mf.Path)
 	if err != nil {

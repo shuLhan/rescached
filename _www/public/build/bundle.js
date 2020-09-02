@@ -3713,7 +3713,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (135:2) {#each Object.entries(env.HostsFiles) as [name,hf], name }
+    // (136:2) {#each Object.entries(env.HostsFiles) as [name,hf], name }
     function create_each_block_1(ctx) {
     	let div;
     	let a;
@@ -3728,9 +3728,9 @@ var app = (function () {
     			a = element("a");
     			t = text(t_value);
     			attr_dev(a, "href", "#");
-    			add_location(a, file$7, 136, 3, 2784);
-    			attr_dev(div, "class", "item svelte-1vh8vt2");
-    			add_location(div, file$7, 135, 2, 2762);
+    			add_location(a, file$7, 137, 3, 2813);
+    			attr_dev(div, "class", "item svelte-1fg406f");
+    			add_location(div, file$7, 136, 2, 2791);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -3767,14 +3767,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(135:2) {#each Object.entries(env.HostsFiles) as [name,hf], name }",
+    		source: "(136:2) {#each Object.entries(env.HostsFiles) as [name,hf], name }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (160:2) {:else}
+    // (161:2) {:else}
     function create_else_block(ctx) {
     	let p;
     	let t0_value = /*hostsFile*/ ctx[1].Name + "";
@@ -3827,11 +3827,11 @@ var app = (function () {
     			t8 = space();
     			button2 = element("button");
     			button2.textContent = "Save";
-    			add_location(button0, file$7, 162, 3, 3233);
-    			add_location(p, file$7, 160, 2, 3169);
-    			add_location(button1, file$7, 167, 3, 3322);
-    			add_location(div, file$7, 166, 2, 3313);
-    			add_location(button2, file$7, 190, 2, 3718);
+    			add_location(button0, file$7, 163, 3, 3262);
+    			add_location(p, file$7, 161, 2, 3198);
+    			add_location(button1, file$7, 168, 3, 3351);
+    			add_location(div, file$7, 167, 2, 3342);
+    			add_location(button2, file$7, 191, 2, 3747);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -3904,14 +3904,14 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(160:2) {:else}",
+    		source: "(161:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (156:2) {#if hostsFile.Name === ""}
+    // (157:2) {#if hostsFile.Name === ""}
     function create_if_block$3(ctx) {
     	let div;
 
@@ -3919,7 +3919,7 @@ var app = (function () {
     		c: function create() {
     			div = element("div");
     			div.textContent = "Select one of the hosts file to manage.";
-    			add_location(div, file$7, 156, 2, 3099);
+    			add_location(div, file$7, 157, 2, 3128);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -3934,14 +3934,14 @@ var app = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(156:2) {#if hostsFile.Name === \\\"\\\"}",
+    		source: "(157:2) {#if hostsFile.Name === \\\"\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (173:2) {#each hostsFile.Records as host, idx (idx)}
+    // (174:2) {#each hostsFile.Records as host, idx (idx)}
     function create_each_block$3(key_1, ctx) {
     	let div;
     	let input0;
@@ -3971,15 +3971,15 @@ var app = (function () {
     			t1 = space();
     			button = element("button");
     			button.textContent = "X";
-    			attr_dev(input0, "class", "host_name svelte-1vh8vt2");
+    			attr_dev(input0, "class", "host_name svelte-1fg406f");
     			attr_dev(input0, "placeholder", "Domain name");
-    			add_location(input0, file$7, 174, 3, 3452);
-    			attr_dev(input1, "class", "host_value svelte-1vh8vt2");
+    			add_location(input0, file$7, 175, 3, 3481);
+    			attr_dev(input1, "class", "host_value svelte-1fg406f");
     			attr_dev(input1, "placeholder", "IP address");
-    			add_location(input1, file$7, 179, 3, 3546);
-    			add_location(button, file$7, 184, 3, 3641);
-    			attr_dev(div, "class", "host svelte-1vh8vt2");
-    			add_location(div, file$7, 173, 2, 3430);
+    			add_location(input1, file$7, 180, 3, 3575);
+    			add_location(button, file$7, 185, 3, 3670);
+    			attr_dev(div, "class", "host svelte-1fg406f");
+    			add_location(div, file$7, 174, 2, 3459);
     			this.first = div;
     		},
     		m: function mount(target, anchor) {
@@ -4033,7 +4033,7 @@ var app = (function () {
     		block,
     		id: create_each_block$3.name,
     		type: "each",
-    		source: "(173:2) {#each hostsFile.Records as host, idx (idx)}",
+    		source: "(174:2) {#each hostsFile.Records as host, idx (idx)}",
     		ctx
     	});
 
@@ -4099,18 +4099,18 @@ var app = (function () {
     			t7 = space();
     			div1 = element("div");
     			if_block.c();
-    			add_location(br0, file$7, 142, 2, 2869);
-    			add_location(span, file$7, 145, 3, 2889);
-    			add_location(br1, file$7, 146, 3, 2921);
-    			add_location(input, file$7, 147, 3, 2930);
-    			add_location(label, file$7, 144, 2, 2878);
-    			add_location(button, file$7, 149, 2, 2977);
-    			attr_dev(div0, "class", "nav-left svelte-1vh8vt2");
-    			add_location(div0, file$7, 133, 1, 2676);
-    			attr_dev(div1, "class", "content svelte-1vh8vt2");
-    			add_location(div1, file$7, 154, 1, 3045);
+    			add_location(br0, file$7, 143, 2, 2898);
+    			add_location(span, file$7, 146, 3, 2918);
+    			add_location(br1, file$7, 147, 3, 2950);
+    			add_location(input, file$7, 148, 3, 2959);
+    			add_location(label, file$7, 145, 2, 2907);
+    			add_location(button, file$7, 150, 2, 3006);
+    			attr_dev(div0, "class", "nav-left svelte-1fg406f");
+    			add_location(div0, file$7, 134, 1, 2705);
+    			attr_dev(div1, "class", "content svelte-1fg406f");
+    			add_location(div1, file$7, 155, 1, 3074);
     			attr_dev(div2, "class", "hosts_d");
-    			add_location(div2, file$7, 132, 0, 2653);
+    			add_location(div2, file$7, 133, 0, 2682);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4390,43 +4390,43 @@ var app = (function () {
 
     function get_each_context$4(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[28] = list[i][0];
-    	child_ctx[29] = list[i][1];
+    	child_ctx[29] = list[i][0];
+    	child_ctx[30] = list[i][1];
     	return child_ctx;
     }
 
     function get_each_context_2(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[5] = list[i];
-    	child_ctx[37] = i;
+    	child_ctx[38] = i;
     	return child_ctx;
     }
 
     function get_each_context_1$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[32] = list[i][0];
-    	child_ctx[33] = list[i][1];
+    	child_ctx[33] = list[i][0];
+    	child_ctx[34] = list[i][1];
     	return child_ctx;
     }
 
     function get_each_context_3(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[38] = list[i][0];
-    	child_ctx[39] = list[i][1];
+    	child_ctx[39] = list[i][0];
+    	child_ctx[40] = list[i][1];
     	return child_ctx;
     }
 
-    // (253:0) {#each Object.entries(env.ZoneFiles) as [name, mf]}
+    // (254:0) {#each Object.entries(env.ZoneFiles) as [name, mf]}
     function create_each_block_3(ctx) {
     	let div;
     	let span;
-    	let t_value = /*mf*/ ctx[39].Name + "";
+    	let t_value = /*mf*/ ctx[40].Name + "";
     	let t;
     	let mounted;
     	let dispose;
 
     	function click_handler(...args) {
-    		return /*click_handler*/ ctx[13](/*mf*/ ctx[39], ...args);
+    		return /*click_handler*/ ctx[13](/*mf*/ ctx[40], ...args);
     	}
 
     	const block = {
@@ -4434,9 +4434,9 @@ var app = (function () {
     			div = element("div");
     			span = element("span");
     			t = text(t_value);
-    			add_location(span, file$8, 254, 3, 4482);
-    			attr_dev(div, "class", "item svelte-nv73ia");
-    			add_location(div, file$8, 253, 2, 4460);
+    			add_location(span, file$8, 255, 3, 4511);
+    			attr_dev(div, "class", "item svelte-pymca9");
+    			add_location(div, file$8, 254, 2, 4489);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -4450,7 +4450,7 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty[0] & /*env*/ 1 && t_value !== (t_value = /*mf*/ ctx[39].Name + "")) set_data_dev(t, t_value);
+    			if (dirty[0] & /*env*/ 1 && t_value !== (t_value = /*mf*/ ctx[40].Name + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
@@ -4463,14 +4463,14 @@ var app = (function () {
     		block,
     		id: create_each_block_3.name,
     		type: "each",
-    		source: "(253:0) {#each Object.entries(env.ZoneFiles) as [name, mf]}",
+    		source: "(254:0) {#each Object.entries(env.ZoneFiles) as [name, mf]}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (277:0) {:else}
+    // (278:0) {:else}
     function create_else_block$1(ctx) {
     	let p;
     	let t0_value = /*activeMF*/ ctx[2].Name + "";
@@ -4522,9 +4522,10 @@ var app = (function () {
     	}
 
     	function select_block_type_1(ctx, dirty) {
-    		if (/*rr*/ ctx[5].Type === 1 || /*rr*/ ctx[5].Type === 2 || /*rr*/ ctx[5].Type === 5 || /*rr*/ ctx[5].Type === 12 || /*rr*/ ctx[5].Type === 16 || /*rr*/ ctx[5].Type === 28) return create_if_block_1;
+    		if (/*rr*/ ctx[5].Type === 1 || /*rr*/ ctx[5].Type === 2 || /*rr*/ ctx[5].Type === 5 || /*rr*/ ctx[5].Type === 16 || /*rr*/ ctx[5].Type === 28) return create_if_block_1;
     		if (/*rr*/ ctx[5].Type === 6) return create_if_block_2;
-    		if (/*rr*/ ctx[5].Type === 15) return create_if_block_3;
+    		if (/*rr*/ ctx[5].Type === 12) return create_if_block_3;
+    		if (/*rr*/ ctx[5].Type === 15) return create_if_block_4;
     	}
 
     	let current_block_type = select_block_type_1(ctx);
@@ -4579,35 +4580,35 @@ var app = (function () {
     			div1 = element("div");
     			button1 = element("button");
     			button1.textContent = "Create";
-    			add_location(button0, file$8, 279, 3, 4885);
-    			add_location(p, file$8, 277, 2, 4859);
-    			attr_dev(span0, "class", "name svelte-nv73ia");
-    			add_location(span0, file$8, 285, 3, 4989);
-    			attr_dev(span1, "class", "type svelte-nv73ia");
-    			add_location(span1, file$8, 288, 3, 5032);
-    			attr_dev(span2, "class", "value svelte-nv73ia");
-    			add_location(span2, file$8, 291, 3, 5075);
-    			attr_dev(div0, "class", "rr header svelte-nv73ia");
-    			add_location(div0, file$8, 284, 2, 4962);
-    			attr_dev(span3, "class", "svelte-nv73ia");
-    			add_location(span3, file$8, 317, 4, 5555);
-    			attr_dev(input, "class", "name svelte-nv73ia");
-    			add_location(input, file$8, 320, 4, 5589);
-    			attr_dev(label0, "class", "svelte-nv73ia");
-    			add_location(label0, file$8, 316, 3, 5543);
-    			attr_dev(span4, "class", "svelte-nv73ia");
-    			add_location(span4, file$8, 324, 4, 5679);
+    			add_location(button0, file$8, 280, 3, 4914);
+    			add_location(p, file$8, 278, 2, 4888);
+    			attr_dev(span0, "class", "name svelte-pymca9");
+    			add_location(span0, file$8, 286, 3, 5018);
+    			attr_dev(span1, "class", "type svelte-pymca9");
+    			add_location(span1, file$8, 289, 3, 5061);
+    			attr_dev(span2, "class", "value svelte-pymca9");
+    			add_location(span2, file$8, 292, 3, 5104);
+    			attr_dev(div0, "class", "rr header svelte-pymca9");
+    			add_location(div0, file$8, 285, 2, 4991);
+    			attr_dev(span3, "class", "svelte-pymca9");
+    			add_location(span3, file$8, 318, 4, 5584);
+    			attr_dev(input, "class", "name svelte-pymca9");
+    			add_location(input, file$8, 321, 4, 5618);
+    			attr_dev(label0, "class", "svelte-pymca9");
+    			add_location(label0, file$8, 317, 3, 5572);
+    			attr_dev(span4, "class", "svelte-pymca9");
+    			add_location(span4, file$8, 325, 4, 5708);
     			if (/*rr*/ ctx[5].Type === void 0) add_render_callback(() => /*select_change_handler*/ ctx[16].call(select));
-    			add_location(select, file$8, 327, 4, 5713);
-    			attr_dev(label1, "class", "svelte-nv73ia");
-    			add_location(label1, file$8, 323, 3, 5667);
+    			add_location(select, file$8, 328, 4, 5742);
+    			attr_dev(label1, "class", "svelte-pymca9");
+    			add_location(label1, file$8, 324, 3, 5696);
     			attr_dev(button1, "class", "create");
     			attr_dev(button1, "type", "submit");
-    			add_location(button1, file$8, 406, 4, 7196);
-    			attr_dev(div1, "class", "actions svelte-nv73ia");
-    			add_location(div1, file$8, 405, 3, 7170);
-    			attr_dev(form, "class", "svelte-nv73ia");
-    			add_location(form, file$8, 315, 2, 5491);
+    			add_location(button1, file$8, 418, 4, 7433);
+    			attr_dev(div1, "class", "actions svelte-pymca9");
+    			add_location(div1, file$8, 417, 3, 7407);
+    			attr_dev(form, "class", "svelte-pymca9");
+    			add_location(form, file$8, 316, 2, 5520);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -4761,14 +4762,14 @@ var app = (function () {
     		block,
     		id: create_else_block$1.name,
     		type: "else",
-    		source: "(277:0) {:else}",
+    		source: "(278:0) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (273:0) {#if activeMF.Name === ""}
+    // (274:0) {#if activeMF.Name === ""}
     function create_if_block$4(ctx) {
     	let p;
 
@@ -4776,7 +4777,7 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			p.textContent = "Select one of the zone file to manage.";
-    			add_location(p, file$8, 273, 2, 4796);
+    			add_location(p, file$8, 274, 2, 4825);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -4791,14 +4792,14 @@ var app = (function () {
     		block,
     		id: create_if_block$4.name,
     		type: "if",
-    		source: "(273:0) {#if activeMF.Name === \\\"\\\"}",
+    		source: "(274:0) {#if activeMF.Name === \\\"\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (298:2) {#each listRR as rr, idx}
+    // (299:2) {#each listRR as rr, idx}
     function create_each_block_2(ctx) {
     	let div;
     	let span0;
@@ -4831,15 +4832,15 @@ var app = (function () {
     			t5 = space();
     			button = element("button");
     			button.textContent = "X";
-    			attr_dev(span0, "class", "name svelte-nv73ia");
-    			add_location(span0, file$8, 299, 3, 5238);
-    			attr_dev(span1, "class", "type svelte-nv73ia");
-    			add_location(span1, file$8, 302, 3, 5286);
-    			attr_dev(span2, "class", "value svelte-nv73ia");
-    			add_location(span2, file$8, 305, 3, 5347);
-    			add_location(button, file$8, 308, 3, 5397);
-    			attr_dev(div, "class", "rr svelte-nv73ia");
-    			add_location(div, file$8, 298, 2, 5218);
+    			attr_dev(span0, "class", "name svelte-pymca9");
+    			add_location(span0, file$8, 300, 3, 5267);
+    			attr_dev(span1, "class", "type svelte-pymca9");
+    			add_location(span1, file$8, 303, 3, 5315);
+    			attr_dev(span2, "class", "value svelte-pymca9");
+    			add_location(span2, file$8, 306, 3, 5376);
+    			add_location(button, file$8, 309, 3, 5426);
+    			attr_dev(div, "class", "rr svelte-pymca9");
+    			add_location(div, file$8, 299, 2, 5247);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -4859,7 +4860,7 @@ var app = (function () {
     					button,
     					"click",
     					function () {
-    						if (is_function(/*handleDeleteRR*/ ctx[11](/*rr*/ ctx[5], /*idx*/ ctx[37]))) /*handleDeleteRR*/ ctx[11](/*rr*/ ctx[5], /*idx*/ ctx[37]).apply(this, arguments);
+    						if (is_function(/*handleDeleteRR*/ ctx[11](/*rr*/ ctx[5], /*idx*/ ctx[38]))) /*handleDeleteRR*/ ctx[11](/*rr*/ ctx[5], /*idx*/ ctx[38]).apply(this, arguments);
     					},
     					false,
     					false,
@@ -4886,17 +4887,17 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(298:2) {#each listRR as rr, idx}",
+    		source: "(299:2) {#each listRR as rr, idx}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (297:1) {#each Object.entries(activeMF.Records) as [dname, listRR]}
+    // (298:1) {#each Object.entries(activeMF.Records) as [dname, listRR]}
     function create_each_block_1$1(ctx) {
     	let each_1_anchor;
-    	let each_value_2 = /*listRR*/ ctx[33];
+    	let each_value_2 = /*listRR*/ ctx[34];
     	validate_each_argument(each_value_2);
     	let each_blocks = [];
 
@@ -4921,7 +4922,7 @@ var app = (function () {
     		},
     		p: function update(ctx, dirty) {
     			if (dirty[0] & /*handleDeleteRR, activeMF, getTypeName*/ 6148) {
-    				each_value_2 = /*listRR*/ ctx[33];
+    				each_value_2 = /*listRR*/ ctx[34];
     				validate_each_argument(each_value_2);
     				let i;
 
@@ -4954,17 +4955,17 @@ var app = (function () {
     		block,
     		id: create_each_block_1$1.name,
     		type: "each",
-    		source: "(297:1) {#each Object.entries(activeMF.Records) as [dname, listRR]}",
+    		source: "(298:1) {#each Object.entries(activeMF.Records) as [dname, listRR]}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (332:1) {#each Object.entries(RRTypes) as [k, v]}
+    // (333:1) {#each Object.entries(RRTypes) as [k, v]}
     function create_each_block$4(ctx) {
     	let option;
-    	let t0_value = /*v*/ ctx[29] + "";
+    	let t0_value = /*v*/ ctx[30] + "";
     	let t0;
     	let t1;
     	let option_value_value;
@@ -4974,9 +4975,9 @@ var app = (function () {
     			option = element("option");
     			t0 = text(t0_value);
     			t1 = space();
-    			option.__value = option_value_value = parseInt(/*k*/ ctx[28]);
+    			option.__value = option_value_value = parseInt(/*k*/ ctx[29]);
     			option.value = option.__value;
-    			add_location(option, file$8, 332, 5, 5831);
+    			add_location(option, file$8, 333, 5, 5860);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -4993,15 +4994,15 @@ var app = (function () {
     		block,
     		id: create_each_block$4.name,
     		type: "each",
-    		source: "(332:1) {#each Object.entries(RRTypes) as [k, v]}",
+    		source: "(333:1) {#each Object.entries(RRTypes) as [k, v]}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (392:26) 
-    function create_if_block_3(ctx) {
+    // (404:26) 
+    function create_if_block_4(ctx) {
     	let label0;
     	let span0;
     	let t1;
@@ -5027,21 +5028,21 @@ var app = (function () {
     			span1.textContent = "Exchange:";
     			t4 = space();
     			input1 = element("input");
-    			attr_dev(span0, "class", "svelte-nv73ia");
-    			add_location(span0, file$8, 393, 4, 6943);
+    			attr_dev(span0, "class", "svelte-pymca9");
+    			add_location(span0, file$8, 405, 4, 7180);
     			attr_dev(input0, "type", "number");
     			attr_dev(input0, "min", "1");
     			attr_dev(input0, "max", "65535");
-    			attr_dev(input0, "class", "svelte-nv73ia");
-    			add_location(input0, file$8, 396, 4, 6983);
-    			attr_dev(label0, "class", "svelte-nv73ia");
-    			add_location(label0, file$8, 392, 3, 6931);
-    			attr_dev(span1, "class", "svelte-nv73ia");
-    			add_location(span1, file$8, 399, 4, 7075);
-    			attr_dev(input1, "class", "svelte-nv73ia");
-    			add_location(input1, file$8, 402, 4, 7113);
-    			attr_dev(label1, "class", "svelte-nv73ia");
-    			add_location(label1, file$8, 398, 3, 7063);
+    			attr_dev(input0, "class", "svelte-pymca9");
+    			add_location(input0, file$8, 408, 4, 7220);
+    			attr_dev(label0, "class", "svelte-pymca9");
+    			add_location(label0, file$8, 404, 3, 7168);
+    			attr_dev(span1, "class", "svelte-pymca9");
+    			add_location(span1, file$8, 411, 4, 7312);
+    			attr_dev(input1, "class", "svelte-pymca9");
+    			add_location(input1, file$8, 414, 4, 7350);
+    			attr_dev(label1, "class", "svelte-pymca9");
+    			add_location(label1, file$8, 410, 3, 7300);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, label0, anchor);
@@ -5058,8 +5059,8 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler_1*/ ctx[25]),
-    					listen_dev(input1, "input", /*input1_input_handler_1*/ ctx[26])
+    					listen_dev(input0, "input", /*input0_input_handler_1*/ ctx[26]),
+    					listen_dev(input1, "input", /*input1_input_handler_1*/ ctx[27])
     				];
 
     				mounted = true;
@@ -5085,16 +5086,82 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3.name,
+    		id: create_if_block_4.name,
     		type: "if",
-    		source: "(392:26) ",
+    		source: "(404:26) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (349:25) 
+    // (393:26) 
+    function create_if_block_3(ctx) {
+    	let label;
+    	let span;
+    	let t1;
+    	let input;
+    	let t2;
+    	let p;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			label = element("label");
+    			span = element("span");
+    			span.textContent = "Value:";
+    			t1 = space();
+    			input = element("input");
+    			t2 = space();
+    			p = element("p");
+    			p.textContent = "For PTR record, the name will become a value, and the\n\t\t\t\t\tvalue will become a name.";
+    			attr_dev(span, "class", "svelte-pymca9");
+    			add_location(span, file$8, 394, 4, 6954);
+    			attr_dev(input, "class", "svelte-pymca9");
+    			add_location(input, file$8, 397, 4, 6989);
+    			add_location(p, file$8, 398, 4, 7023);
+    			attr_dev(label, "class", "svelte-pymca9");
+    			add_location(label, file$8, 393, 3, 6942);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, label, anchor);
+    			append_dev(label, span);
+    			append_dev(label, t1);
+    			append_dev(label, input);
+    			set_input_value(input, /*rr*/ ctx[5].Value);
+    			append_dev(label, t2);
+    			append_dev(label, p);
+
+    			if (!mounted) {
+    				dispose = listen_dev(input, "input", /*input_input_handler_3*/ ctx[25]);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*rr, RRTypes*/ 96 && input.value !== /*rr*/ ctx[5].Value) {
+    				set_input_value(input, /*rr*/ ctx[5].Value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(label);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_3.name,
+    		type: "if",
+    		source: "(393:26) ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (350:25) 
     function create_if_block_2(ctx) {
     	let label0;
     	let span0;
@@ -5176,53 +5243,53 @@ var app = (function () {
     			span6.textContent = "Minimum:";
     			t19 = space();
     			input6 = element("input");
-    			attr_dev(span0, "class", "svelte-nv73ia");
-    			add_location(span0, file$8, 350, 4, 6167);
-    			attr_dev(input0, "class", "svelte-nv73ia");
-    			add_location(input0, file$8, 353, 4, 6208);
-    			attr_dev(label0, "class", "svelte-nv73ia");
-    			add_location(label0, file$8, 349, 3, 6155);
-    			attr_dev(span1, "class", "svelte-nv73ia");
-    			add_location(span1, file$8, 356, 4, 6268);
-    			attr_dev(input1, "class", "svelte-nv73ia");
-    			add_location(input1, file$8, 359, 4, 6309);
-    			attr_dev(label1, "class", "svelte-nv73ia");
-    			add_location(label1, file$8, 355, 3, 6256);
-    			attr_dev(span2, "class", "svelte-nv73ia");
-    			add_location(span2, file$8, 362, 4, 6369);
+    			attr_dev(span0, "class", "svelte-pymca9");
+    			add_location(span0, file$8, 351, 4, 6178);
+    			attr_dev(input0, "class", "svelte-pymca9");
+    			add_location(input0, file$8, 354, 4, 6219);
+    			attr_dev(label0, "class", "svelte-pymca9");
+    			add_location(label0, file$8, 350, 3, 6166);
+    			attr_dev(span1, "class", "svelte-pymca9");
+    			add_location(span1, file$8, 357, 4, 6279);
+    			attr_dev(input1, "class", "svelte-pymca9");
+    			add_location(input1, file$8, 360, 4, 6320);
+    			attr_dev(label1, "class", "svelte-pymca9");
+    			add_location(label1, file$8, 356, 3, 6267);
+    			attr_dev(span2, "class", "svelte-pymca9");
+    			add_location(span2, file$8, 363, 4, 6380);
     			attr_dev(input2, "type", "number");
-    			attr_dev(input2, "class", "svelte-nv73ia");
-    			add_location(input2, file$8, 365, 4, 6405);
-    			attr_dev(label2, "class", "svelte-nv73ia");
-    			add_location(label2, file$8, 361, 3, 6357);
-    			attr_dev(span3, "class", "svelte-nv73ia");
-    			add_location(span3, file$8, 368, 4, 6478);
+    			attr_dev(input2, "class", "svelte-pymca9");
+    			add_location(input2, file$8, 366, 4, 6416);
+    			attr_dev(label2, "class", "svelte-pymca9");
+    			add_location(label2, file$8, 362, 3, 6368);
+    			attr_dev(span3, "class", "svelte-pymca9");
+    			add_location(span3, file$8, 369, 4, 6489);
     			attr_dev(input3, "type", "number");
-    			attr_dev(input3, "class", "svelte-nv73ia");
-    			add_location(input3, file$8, 371, 4, 6515);
-    			attr_dev(label3, "class", "svelte-nv73ia");
-    			add_location(label3, file$8, 367, 3, 6466);
-    			attr_dev(span4, "class", "svelte-nv73ia");
-    			add_location(span4, file$8, 374, 4, 6589);
+    			attr_dev(input3, "class", "svelte-pymca9");
+    			add_location(input3, file$8, 372, 4, 6526);
+    			attr_dev(label3, "class", "svelte-pymca9");
+    			add_location(label3, file$8, 368, 3, 6477);
+    			attr_dev(span4, "class", "svelte-pymca9");
+    			add_location(span4, file$8, 375, 4, 6600);
     			attr_dev(input4, "type", "number");
-    			attr_dev(input4, "class", "svelte-nv73ia");
-    			add_location(input4, file$8, 377, 4, 6624);
-    			attr_dev(label4, "class", "svelte-nv73ia");
-    			add_location(label4, file$8, 373, 3, 6577);
-    			attr_dev(span5, "class", "svelte-nv73ia");
-    			add_location(span5, file$8, 380, 4, 6696);
+    			attr_dev(input4, "class", "svelte-pymca9");
+    			add_location(input4, file$8, 378, 4, 6635);
+    			attr_dev(label4, "class", "svelte-pymca9");
+    			add_location(label4, file$8, 374, 3, 6588);
+    			attr_dev(span5, "class", "svelte-pymca9");
+    			add_location(span5, file$8, 381, 4, 6707);
     			attr_dev(input5, "type", "number");
-    			attr_dev(input5, "class", "svelte-nv73ia");
-    			add_location(input5, file$8, 383, 4, 6732);
-    			attr_dev(label5, "class", "svelte-nv73ia");
-    			add_location(label5, file$8, 379, 3, 6684);
-    			attr_dev(span6, "class", "svelte-nv73ia");
-    			add_location(span6, file$8, 386, 4, 6805);
+    			attr_dev(input5, "class", "svelte-pymca9");
+    			add_location(input5, file$8, 384, 4, 6743);
+    			attr_dev(label5, "class", "svelte-pymca9");
+    			add_location(label5, file$8, 380, 3, 6695);
+    			attr_dev(span6, "class", "svelte-pymca9");
+    			add_location(span6, file$8, 387, 4, 6816);
     			attr_dev(input6, "type", "number");
-    			attr_dev(input6, "class", "svelte-nv73ia");
-    			add_location(input6, file$8, 389, 4, 6842);
-    			attr_dev(label6, "class", "svelte-nv73ia");
-    			add_location(label6, file$8, 385, 3, 6793);
+    			attr_dev(input6, "class", "svelte-pymca9");
+    			add_location(input6, file$8, 390, 4, 6853);
+    			attr_dev(label6, "class", "svelte-pymca9");
+    			add_location(label6, file$8, 386, 3, 6804);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, label0, anchor);
@@ -5333,14 +5400,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(349:25) ",
+    		source: "(350:25) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (340:1) {#if rr.Type === 1 || rr.Type === 2 || rr.Type === 5 ||   rr.Type === 12 || rr.Type === 16 || rr.Type === 28  }
+    // (341:1) {#if rr.Type === 1 || rr.Type === 2 || rr.Type === 5 ||   rr.Type === 16 || rr.Type === 28  }
     function create_if_block_1(ctx) {
     	let label;
     	let span;
@@ -5356,12 +5423,12 @@ var app = (function () {
     			span.textContent = "Value:";
     			t1 = space();
     			input = element("input");
-    			attr_dev(span, "class", "svelte-nv73ia");
-    			add_location(span, file$8, 343, 4, 6049);
-    			attr_dev(input, "class", "svelte-nv73ia");
-    			add_location(input, file$8, 346, 4, 6084);
-    			attr_dev(label, "class", "svelte-nv73ia");
-    			add_location(label, file$8, 342, 3, 6037);
+    			attr_dev(span, "class", "svelte-pymca9");
+    			add_location(span, file$8, 344, 4, 6060);
+    			attr_dev(input, "class", "svelte-pymca9");
+    			add_location(input, file$8, 347, 4, 6095);
+    			attr_dev(label, "class", "svelte-pymca9");
+    			add_location(label, file$8, 343, 3, 6048);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, label, anchor);
@@ -5391,7 +5458,7 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(340:1) {#if rr.Type === 1 || rr.Type === 2 || rr.Type === 5 ||   rr.Type === 12 || rr.Type === 16 || rr.Type === 28  }",
+    		source: "(341:1) {#if rr.Type === 1 || rr.Type === 2 || rr.Type === 5 ||   rr.Type === 16 || rr.Type === 28  }",
     		ctx
     	});
 
@@ -5457,18 +5524,18 @@ var app = (function () {
     			t7 = space();
     			div1 = element("div");
     			if_block.c();
-    			add_location(br0, file$8, 259, 2, 4562);
-    			add_location(span, file$8, 262, 3, 4582);
-    			add_location(br1, file$8, 263, 3, 4613);
-    			add_location(input, file$8, 264, 3, 4622);
-    			add_location(label, file$8, 261, 2, 4571);
-    			add_location(button, file$8, 266, 2, 4670);
-    			attr_dev(div0, "class", "nav-left svelte-nv73ia");
-    			add_location(div0, file$8, 251, 1, 4383);
-    			attr_dev(div1, "class", "content svelte-nv73ia");
-    			add_location(div1, file$8, 271, 1, 4745);
+    			add_location(br0, file$8, 260, 2, 4591);
+    			add_location(span, file$8, 263, 3, 4611);
+    			add_location(br1, file$8, 264, 3, 4642);
+    			add_location(input, file$8, 265, 3, 4651);
+    			add_location(label, file$8, 262, 2, 4600);
+    			add_location(button, file$8, 267, 2, 4699);
+    			attr_dev(div0, "class", "nav-left svelte-pymca9");
+    			add_location(div0, file$8, 252, 1, 4412);
+    			attr_dev(div1, "class", "content svelte-pymca9");
+    			add_location(div1, file$8, 272, 1, 4774);
     			attr_dev(div2, "class", "master_d");
-    			add_location(div2, file$8, 250, 0, 4359);
+    			add_location(div2, file$8, 251, 0, 4388);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5801,6 +5868,12 @@ var app = (function () {
     		$$invalidate(3, rrSOA);
     	}
 
+    	function input_input_handler_3() {
+    		rr.Value = this.value;
+    		$$invalidate(5, rr);
+    		$$invalidate(6, RRTypes);
+    	}
+
     	function input0_input_handler_1() {
     		rrMX.Preference = to_number(this.value);
     		$$invalidate(4, rrMX);
@@ -5877,6 +5950,7 @@ var app = (function () {
     		input4_input_handler,
     		input5_input_handler,
     		input6_input_handler,
+    		input_input_handler_3,
     		input0_input_handler_1,
     		input1_input_handler_1
     	];
