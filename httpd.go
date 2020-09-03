@@ -645,18 +645,26 @@ func (srv *Server) apiMasterFileCreateRR(
 		return nil, res
 	}
 
-	if len(rr.Name) == 0 {
-		rr.Name = masterFileName
+	if rr.Type == dns.QueryTypePTR {
+		if len(rr.Name) == 0 {
+			res.Message = "empty PTR name"
+			return nil, res
+		}
+		v := rr.Value.(string)
+		if len(v) == 0 {
+			rr.Value = masterFileName
+		} else {
+			rr.Value = v + "." + masterFileName
+		}
 	} else {
-		rr.Name += "." + masterFileName
+		if len(rr.Name) == 0 {
+			rr.Name = masterFileName
+		} else {
+			rr.Name += "." + masterFileName
+		}
 	}
 
-	// Reverse the value and name for PTR record.
-	if rr.Type == dns.QueryTypePTR {
-		tmp := rr.Name
-		rr.Name = rr.Value.(string)
-		rr.Value = tmp
-	}
+	fmt.Printf("RR: %+v\n", rr)
 
 	listRR := []*dns.ResourceRecord{&rr}
 	err = srv.dns.PopulateCachesByRR(listRR, mf.Path)

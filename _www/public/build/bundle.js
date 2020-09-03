@@ -4390,37 +4390,37 @@ var app = (function () {
 
     function get_each_context$4(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[30] = list[i][0];
-    	child_ctx[31] = list[i][1];
+    	child_ctx[32] = list[i][0];
+    	child_ctx[33] = list[i][1];
     	return child_ctx;
     }
 
     function get_each_context_2(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[4] = list[i];
-    	child_ctx[39] = i;
+    	child_ctx[41] = i;
     	return child_ctx;
     }
 
     function get_each_context_1$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[34] = list[i][0];
-    	child_ctx[35] = list[i][1];
+    	child_ctx[36] = list[i][0];
+    	child_ctx[37] = list[i][1];
     	return child_ctx;
     }
 
     function get_each_context_3(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[40] = list[i][0];
-    	child_ctx[41] = list[i][1];
+    	child_ctx[42] = list[i][0];
+    	child_ctx[43] = list[i][1];
     	return child_ctx;
     }
 
-    // (278:0) {#each Object.entries(env.ZoneFiles) as [name, mf]}
+    // (280:0) {#each Object.entries(env.ZoneFiles) as [name, mf]}
     function create_each_block_3(ctx) {
     	let div;
     	let span;
-    	let t_value = /*mf*/ ctx[41].Name + "";
+    	let t_value = /*mf*/ ctx[43].Name + "";
     	let t;
     	let mounted;
     	let dispose;
@@ -4430,9 +4430,9 @@ var app = (function () {
     			div = element("div");
     			span = element("span");
     			t = text(t_value);
-    			add_location(span, file$8, 279, 3, 5005);
+    			add_location(span, file$8, 281, 3, 5040);
     			attr_dev(div, "class", "item svelte-7ujef7");
-    			add_location(div, file$8, 278, 2, 4983);
+    			add_location(div, file$8, 280, 2, 5018);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -4444,7 +4444,7 @@ var app = (function () {
     					span,
     					"click",
     					function () {
-    						if (is_function(/*setActiveZone*/ ctx[6](/*mf*/ ctx[41]))) /*setActiveZone*/ ctx[6](/*mf*/ ctx[41]).apply(this, arguments);
+    						if (is_function(/*setActiveZone*/ ctx[6](/*mf*/ ctx[43]))) /*setActiveZone*/ ctx[6](/*mf*/ ctx[43]).apply(this, arguments);
     					},
     					false,
     					false,
@@ -4456,7 +4456,7 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty[0] & /*env*/ 1 && t_value !== (t_value = /*mf*/ ctx[41].Name + "")) set_data_dev(t, t_value);
+    			if (dirty[0] & /*env*/ 1 && t_value !== (t_value = /*mf*/ ctx[43].Name + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
@@ -4469,14 +4469,14 @@ var app = (function () {
     		block,
     		id: create_each_block_3.name,
     		type: "each",
-    		source: "(278:0) {#each Object.entries(env.ZoneFiles) as [name, mf]}",
+    		source: "(280:0) {#each Object.entries(env.ZoneFiles) as [name, mf]}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (302:0) {:else}
+    // (304:0) {:else}
     function create_else_block$1(ctx) {
     	let h3;
     	let t0_value = /*activeZone*/ ctx[2].Name + "";
@@ -4517,20 +4517,12 @@ var app = (function () {
     	let t23;
     	let t24;
     	let form;
-    	let label0;
+    	let label;
     	let span3;
     	let t26;
-    	let input;
-    	let t27;
-    	let t28_value = /*activeZone*/ ctx[2].Name + "";
-    	let t28;
-    	let t29;
-    	let label1;
-    	let span4;
-    	let t31;
     	let select;
-    	let t32;
-    	let t33;
+    	let t27;
+    	let t28;
     	let div3;
     	let button3;
     	let current;
@@ -4691,72 +4683,58 @@ var app = (function () {
 
     			t24 = space();
     			form = element("form");
-    			label0 = element("label");
+    			label = element("label");
     			span3 = element("span");
-    			span3.textContent = "Name:";
+    			span3.textContent = "Type:";
     			t26 = space();
-    			input = element("input");
-    			t27 = text("\n\t\t\t\t.");
-    			t28 = text(t28_value);
-    			t29 = space();
-    			label1 = element("label");
-    			span4 = element("span");
-    			span4.textContent = "Type:";
-    			t31 = space();
     			select = element("select");
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			t32 = space();
+    			t27 = space();
     			if (if_block) if_block.c();
-    			t33 = space();
+    			t28 = space();
     			div3 = element("div");
     			button3 = element("button");
     			button3.textContent = "Create";
     			attr_dev(button0, "class", "action-delete svelte-7ujef7");
-    			add_location(button0, file$8, 304, 3, 5413);
-    			add_location(h3, file$8, 302, 2, 5384);
+    			add_location(button0, file$8, 306, 3, 5448);
+    			add_location(h3, file$8, 304, 2, 5419);
     			attr_dev(button1, "class", "action-delete svelte-7ujef7");
-    			add_location(button1, file$8, 314, 3, 5547);
+    			add_location(button1, file$8, 316, 3, 5582);
     			attr_dev(h40, "class", "svelte-7ujef7");
-    			add_location(h40, file$8, 312, 2, 5525);
+    			add_location(h40, file$8, 314, 2, 5560);
     			attr_dev(button2, "class", "svelte-7ujef7");
-    			add_location(button2, file$8, 401, 4, 7778);
+    			add_location(button2, file$8, 403, 4, 7813);
     			attr_dev(div0, "class", "actions svelte-7ujef7");
-    			add_location(div0, file$8, 400, 3, 7752);
+    			add_location(div0, file$8, 402, 3, 7787);
     			attr_dev(div1, "class", "rr-soa");
-    			add_location(div1, file$8, 321, 2, 5651);
+    			add_location(div1, file$8, 323, 2, 5686);
     			attr_dev(h41, "class", "svelte-7ujef7");
-    			add_location(h41, file$8, 407, 2, 7858);
+    			add_location(h41, file$8, 409, 2, 7893);
     			attr_dev(span0, "class", "name svelte-7ujef7");
-    			add_location(span0, file$8, 409, 3, 7911);
+    			add_location(span0, file$8, 411, 3, 7946);
     			attr_dev(span1, "class", "type svelte-7ujef7");
-    			add_location(span1, file$8, 412, 3, 7954);
+    			add_location(span1, file$8, 414, 3, 7989);
     			attr_dev(span2, "class", "value svelte-7ujef7");
-    			add_location(span2, file$8, 415, 3, 7997);
+    			add_location(span2, file$8, 417, 3, 8032);
     			attr_dev(div2, "class", "rr header svelte-7ujef7");
-    			add_location(div2, file$8, 408, 2, 7884);
+    			add_location(div2, file$8, 410, 2, 7919);
     			attr_dev(span3, "class", "svelte-7ujef7");
-    			add_location(span3, file$8, 441, 4, 8479);
-    			attr_dev(input, "class", "name svelte-7ujef7");
-    			add_location(input, file$8, 444, 4, 8513);
-    			attr_dev(label0, "class", "svelte-7ujef7");
-    			add_location(label0, file$8, 440, 3, 8467);
-    			attr_dev(span4, "class", "svelte-7ujef7");
-    			add_location(span4, file$8, 448, 4, 8605);
-    			if (/*rr*/ ctx[4].Type === void 0) add_render_callback(() => /*select_change_handler*/ ctx[24].call(select));
-    			add_location(select, file$8, 451, 4, 8639);
-    			attr_dev(label1, "class", "svelte-7ujef7");
-    			add_location(label1, file$8, 447, 3, 8593);
+    			add_location(span3, file$8, 443, 4, 8514);
+    			if (/*rr*/ ctx[4].Type === void 0) add_render_callback(() => /*select_change_handler*/ ctx[23].call(select));
+    			add_location(select, file$8, 446, 4, 8548);
+    			attr_dev(label, "class", "svelte-7ujef7");
+    			add_location(label, file$8, 442, 3, 8502);
     			attr_dev(button3, "class", "create svelte-7ujef7");
     			attr_dev(button3, "type", "submit");
-    			add_location(button3, file$8, 498, 4, 9555);
+    			add_location(button3, file$8, 511, 4, 9761);
     			attr_dev(div3, "class", "actions svelte-7ujef7");
-    			add_location(div3, file$8, 497, 3, 9529);
+    			add_location(div3, file$8, 510, 3, 9735);
     			attr_dev(form, "class", "svelte-7ujef7");
-    			add_location(form, file$8, 439, 2, 8415);
+    			add_location(form, file$8, 441, 2, 8450);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, h3, anchor);
@@ -4802,27 +4780,19 @@ var app = (function () {
 
     			insert_dev(target, t24, anchor);
     			insert_dev(target, form, anchor);
-    			append_dev(form, label0);
-    			append_dev(label0, span3);
-    			append_dev(label0, t26);
-    			append_dev(label0, input);
-    			set_input_value(input, /*rr*/ ctx[4].Name);
-    			append_dev(label0, t27);
-    			append_dev(label0, t28);
-    			append_dev(form, t29);
-    			append_dev(form, label1);
-    			append_dev(label1, span4);
-    			append_dev(label1, t31);
-    			append_dev(label1, select);
+    			append_dev(form, label);
+    			append_dev(label, span3);
+    			append_dev(label, t26);
+    			append_dev(label, select);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].m(select, null);
     			}
 
     			select_option(select, /*rr*/ ctx[4].Type);
-    			append_dev(form, t32);
+    			append_dev(form, t27);
     			if (if_block) if_block.m(form, null);
-    			append_dev(form, t33);
+    			append_dev(form, t28);
     			append_dev(form, div3);
     			append_dev(div3, button3);
     			current = true;
@@ -4832,8 +4802,7 @@ var app = (function () {
     					listen_dev(button0, "click", /*handleMasterFileDelete*/ ctx[8], false, false, false),
     					listen_dev(button1, "click", /*handleSOADelete*/ ctx[10], false, false, false),
     					listen_dev(button2, "click", /*handleSOASave*/ ctx[11], false, false, false),
-    					listen_dev(input, "input", /*input_input_handler_8*/ ctx[23]),
-    					listen_dev(select, "change", /*select_change_handler*/ ctx[24]),
+    					listen_dev(select, "change", /*select_change_handler*/ ctx[23]),
     					listen_dev(select, "blur", /*onSelectRRType*/ ctx[9], false, false, false),
     					listen_dev(form, "submit", prevent_default(/*handleCreateRR*/ ctx[12]), false, true, false)
     				];
@@ -4845,49 +4814,49 @@ var app = (function () {
     			if ((!current || dirty[0] & /*activeZone*/ 4) && t0_value !== (t0_value = /*activeZone*/ ctx[2].Name + "")) set_data_dev(t0, t0_value);
     			const wuilabelhint0_changes = {};
 
-    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 8192) {
+    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 32768) {
     				wuilabelhint0_changes.$$scope = { dirty, ctx };
     			}
 
     			wuilabelhint0.$set(wuilabelhint0_changes);
     			const wuilabelhint1_changes = {};
 
-    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 8192) {
+    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 32768) {
     				wuilabelhint1_changes.$$scope = { dirty, ctx };
     			}
 
     			wuilabelhint1.$set(wuilabelhint1_changes);
     			const wuilabelhint2_changes = {};
 
-    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 8192) {
+    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 32768) {
     				wuilabelhint2_changes.$$scope = { dirty, ctx };
     			}
 
     			wuilabelhint2.$set(wuilabelhint2_changes);
     			const wuilabelhint3_changes = {};
 
-    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 8192) {
+    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 32768) {
     				wuilabelhint3_changes.$$scope = { dirty, ctx };
     			}
 
     			wuilabelhint3.$set(wuilabelhint3_changes);
     			const wuilabelhint4_changes = {};
 
-    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 8192) {
+    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 32768) {
     				wuilabelhint4_changes.$$scope = { dirty, ctx };
     			}
 
     			wuilabelhint4.$set(wuilabelhint4_changes);
     			const wuilabelhint5_changes = {};
 
-    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 8192) {
+    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 32768) {
     				wuilabelhint5_changes.$$scope = { dirty, ctx };
     			}
 
     			wuilabelhint5.$set(wuilabelhint5_changes);
     			const wuilabelhint6_changes = {};
 
-    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 8192) {
+    			if (dirty[0] & /*activeZone*/ 4 | dirty[1] & /*$$scope*/ 32768) {
     				wuilabelhint6_changes.$$scope = { dirty, ctx };
     			}
 
@@ -4916,12 +4885,6 @@ var app = (function () {
 
     				each_blocks_1.length = each_value_1.length;
     			}
-
-    			if (dirty[0] & /*rr, RRTypes*/ 48 && input.value !== /*rr*/ ctx[4].Name) {
-    				set_input_value(input, /*rr*/ ctx[4].Name);
-    			}
-
-    			if ((!current || dirty[0] & /*activeZone*/ 4) && t28_value !== (t28_value = /*activeZone*/ ctx[2].Name + "")) set_data_dev(t28, t28_value);
 
     			if (dirty[0] & /*RRTypes*/ 32) {
     				each_value = Object.entries(/*RRTypes*/ ctx[5]);
@@ -4959,7 +4922,7 @@ var app = (function () {
 
     				if (if_block) {
     					if_block.c();
-    					if_block.m(form, t33);
+    					if_block.m(form, t28);
     				}
     			}
     		},
@@ -5020,14 +4983,14 @@ var app = (function () {
     		block,
     		id: create_else_block$1.name,
     		type: "else",
-    		source: "(302:0) {:else}",
+    		source: "(304:0) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (298:0) {#if activeZone.Name === ""}
+    // (300:0) {#if activeZone.Name === ""}
     function create_if_block$4(ctx) {
     	let p;
 
@@ -5035,7 +4998,7 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			p.textContent = "Select one of the zone file to manage.";
-    			add_location(p, file$8, 298, 2, 5321);
+    			add_location(p, file$8, 300, 2, 5356);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -5052,14 +5015,14 @@ var app = (function () {
     		block,
     		id: create_if_block$4.name,
     		type: "if",
-    		source: "(298:0) {#if activeZone.Name === \\\"\\\"}",
+    		source: "(300:0) {#if activeZone.Name === \\\"\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (323:3) <WuiLabelHint     title="Name server"     title_width="150px"     info="The domain-name of the name server that was the                 original or primary source of data for this zone"    >
+    // (325:3) <WuiLabelHint     title="Name server"     title_width="150px"     info="The domain-name of the name server that was the                 original or primary source of data for this zone"    >
     function create_default_slot_6$1(ctx) {
     	let input;
     	let mounted;
@@ -5068,7 +5031,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			input = element("input");
-    			add_location(input, file$8, 328, 4, 5870);
+    			add_location(input, file$8, 330, 4, 5905);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -5095,14 +5058,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_6$1.name,
     		type: "slot",
-    		source: "(323:3) <WuiLabelHint     title=\\\"Name server\\\"     title_width=\\\"150px\\\"     info=\\\"The domain-name of the name server that was the                 original or primary source of data for this zone\\\"    >",
+    		source: "(325:3) <WuiLabelHint     title=\\\"Name server\\\"     title_width=\\\"150px\\\"     info=\\\"The domain-name of the name server that was the                 original or primary source of data for this zone\\\"    >",
     		ctx
     	});
 
     	return block;
     }
 
-    // (331:3) <WuiLabelHint     title="Admin email"     title_width="150px"     info="A domain-name which specifies the mailbox of the                 person responsible for this zone."    >
+    // (333:3) <WuiLabelHint     title="Admin email"     title_width="150px"     info="A domain-name which specifies the mailbox of the                 person responsible for this zone."    >
     function create_default_slot_5$1(ctx) {
     	let input;
     	let mounted;
@@ -5111,7 +5074,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			input = element("input");
-    			add_location(input, file$8, 336, 4, 6121);
+    			add_location(input, file$8, 338, 4, 6156);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -5138,14 +5101,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_5$1.name,
     		type: "slot",
-    		source: "(331:3) <WuiLabelHint     title=\\\"Admin email\\\"     title_width=\\\"150px\\\"     info=\\\"A domain-name which specifies the mailbox of the                 person responsible for this zone.\\\"    >",
+    		source: "(333:3) <WuiLabelHint     title=\\\"Admin email\\\"     title_width=\\\"150px\\\"     info=\\\"A domain-name which specifies the mailbox of the                 person responsible for this zone.\\\"    >",
     		ctx
     	});
 
     	return block;
     }
 
-    // (339:3) <WuiLabelHint     title="Serial"     title_width="150px"     info="The version number of the original copy                 of the zone.  Zone transfers preserve this value.  This                 value wraps and should be compared using sequence space                 arithmetic."    >
+    // (341:3) <WuiLabelHint     title="Serial"     title_width="150px"     info="The version number of the original copy                 of the zone.  Zone transfers preserve this value.  This                 value wraps and should be compared using sequence space                 arithmetic."    >
     function create_default_slot_4$1(ctx) {
     	let input;
     	let mounted;
@@ -5156,7 +5119,7 @@ var app = (function () {
     			input = element("input");
     			attr_dev(input, "type", "number");
     			attr_dev(input, "min", "0");
-    			add_location(input, file$8, 346, 4, 6480);
+    			add_location(input, file$8, 348, 4, 6515);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -5183,14 +5146,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_4$1.name,
     		type: "slot",
-    		source: "(339:3) <WuiLabelHint     title=\\\"Serial\\\"     title_width=\\\"150px\\\"     info=\\\"The version number of the original copy                 of the zone.  Zone transfers preserve this value.  This                 value wraps and should be compared using sequence space                 arithmetic.\\\"    >",
+    		source: "(341:3) <WuiLabelHint     title=\\\"Serial\\\"     title_width=\\\"150px\\\"     info=\\\"The version number of the original copy                 of the zone.  Zone transfers preserve this value.  This                 value wraps and should be compared using sequence space                 arithmetic.\\\"    >",
     		ctx
     	});
 
     	return block;
     }
 
-    // (353:3) <WuiLabelHint     title="Refresh"     title_width="150px"     info="A time interval before the zone should be refreshed."    >
+    // (355:3) <WuiLabelHint     title="Refresh"     title_width="150px"     info="A time interval before the zone should be refreshed."    >
     function create_default_slot_3$1(ctx) {
     	let input;
     	let mounted;
@@ -5201,7 +5164,7 @@ var app = (function () {
     			input = element("input");
     			attr_dev(input, "type", "number");
     			attr_dev(input, "min", "0");
-    			add_location(input, file$8, 357, 4, 6720);
+    			add_location(input, file$8, 359, 4, 6755);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -5228,14 +5191,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_3$1.name,
     		type: "slot",
-    		source: "(353:3) <WuiLabelHint     title=\\\"Refresh\\\"     title_width=\\\"150px\\\"     info=\\\"A time interval before the zone should be refreshed.\\\"    >",
+    		source: "(355:3) <WuiLabelHint     title=\\\"Refresh\\\"     title_width=\\\"150px\\\"     info=\\\"A time interval before the zone should be refreshed.\\\"    >",
     		ctx
     	});
 
     	return block;
     }
 
-    // (364:3) <WuiLabelHint     title="Retry"     title_width="150px"     info="A time interval that should elapse before a                 failed refresh should be retried."    >
+    // (366:3) <WuiLabelHint     title="Retry"     title_width="150px"     info="A time interval that should elapse before a                 failed refresh should be retried."    >
     function create_default_slot_2$1(ctx) {
     	let input;
     	let mounted;
@@ -5246,7 +5209,7 @@ var app = (function () {
     			input = element("input");
     			attr_dev(input, "type", "number");
     			attr_dev(input, "min", "0");
-    			add_location(input, file$8, 369, 4, 7000);
+    			add_location(input, file$8, 371, 4, 7035);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -5273,14 +5236,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2$1.name,
     		type: "slot",
-    		source: "(364:3) <WuiLabelHint     title=\\\"Retry\\\"     title_width=\\\"150px\\\"     info=\\\"A time interval that should elapse before a                 failed refresh should be retried.\\\"    >",
+    		source: "(366:3) <WuiLabelHint     title=\\\"Retry\\\"     title_width=\\\"150px\\\"     info=\\\"A time interval that should elapse before a                 failed refresh should be retried.\\\"    >",
     		ctx
     	});
 
     	return block;
     }
 
-    // (376:3) <WuiLabelHint     title="Expire"     title_width="150px"     info="A 32 bit time value that specifies the upper limit on                 the time interval that can elapse before the zone is no                 longer authoritative."    >
+    // (378:3) <WuiLabelHint     title="Expire"     title_width="150px"     info="A 32 bit time value that specifies the upper limit on                 the time interval that can elapse before the zone is no                 longer authoritative."    >
     function create_default_slot_1$1(ctx) {
     	let input;
     	let mounted;
@@ -5291,7 +5254,7 @@ var app = (function () {
     			input = element("input");
     			attr_dev(input, "type", "number");
     			attr_dev(input, "min", "0");
-    			add_location(input, file$8, 382, 4, 7349);
+    			add_location(input, file$8, 384, 4, 7384);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -5318,14 +5281,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_1$1.name,
     		type: "slot",
-    		source: "(376:3) <WuiLabelHint     title=\\\"Expire\\\"     title_width=\\\"150px\\\"     info=\\\"A 32 bit time value that specifies the upper limit on                 the time interval that can elapse before the zone is no                 longer authoritative.\\\"    >",
+    		source: "(378:3) <WuiLabelHint     title=\\\"Expire\\\"     title_width=\\\"150px\\\"     info=\\\"A 32 bit time value that specifies the upper limit on                 the time interval that can elapse before the zone is no                 longer authoritative.\\\"    >",
     		ctx
     	});
 
     	return block;
     }
 
-    // (389:3) <WuiLabelHint     title="Minimum"     title_width="150px"     info="The unsigned 32 bit minimum TTL field that should be                 exported with any RR from this zone."    >
+    // (391:3) <WuiLabelHint     title="Minimum"     title_width="150px"     info="The unsigned 32 bit minimum TTL field that should be                 exported with any RR from this zone."    >
     function create_default_slot$1(ctx) {
     	let input;
     	let mounted;
@@ -5336,7 +5299,7 @@ var app = (function () {
     			input = element("input");
     			attr_dev(input, "type", "number");
     			attr_dev(input, "min", "0");
-    			add_location(input, file$8, 394, 4, 7642);
+    			add_location(input, file$8, 396, 4, 7677);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -5363,14 +5326,14 @@ var app = (function () {
     		block,
     		id: create_default_slot$1.name,
     		type: "slot",
-    		source: "(389:3) <WuiLabelHint     title=\\\"Minimum\\\"     title_width=\\\"150px\\\"     info=\\\"The unsigned 32 bit minimum TTL field that should be                 exported with any RR from this zone.\\\"    >",
+    		source: "(391:3) <WuiLabelHint     title=\\\"Minimum\\\"     title_width=\\\"150px\\\"     info=\\\"The unsigned 32 bit minimum TTL field that should be                 exported with any RR from this zone.\\\"    >",
     		ctx
     	});
 
     	return block;
     }
 
-    // (422:2) {#each listRR as rr, idx}
+    // (424:2) {#each listRR as rr, idx}
     function create_each_block_2(ctx) {
     	let div;
     	let span0;
@@ -5404,14 +5367,14 @@ var app = (function () {
     			button = element("button");
     			button.textContent = "X";
     			attr_dev(span0, "class", "name svelte-7ujef7");
-    			add_location(span0, file$8, 423, 3, 8162);
+    			add_location(span0, file$8, 425, 3, 8197);
     			attr_dev(span1, "class", "type svelte-7ujef7");
-    			add_location(span1, file$8, 426, 3, 8210);
+    			add_location(span1, file$8, 428, 3, 8245);
     			attr_dev(span2, "class", "value svelte-7ujef7");
-    			add_location(span2, file$8, 429, 3, 8271);
-    			add_location(button, file$8, 432, 3, 8321);
+    			add_location(span2, file$8, 431, 3, 8306);
+    			add_location(button, file$8, 434, 3, 8356);
     			attr_dev(div, "class", "rr svelte-7ujef7");
-    			add_location(div, file$8, 422, 2, 8142);
+    			add_location(div, file$8, 424, 2, 8177);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -5431,7 +5394,7 @@ var app = (function () {
     					button,
     					"click",
     					function () {
-    						if (is_function(/*handleDeleteRR*/ ctx[13](/*rr*/ ctx[4], /*idx*/ ctx[39]))) /*handleDeleteRR*/ ctx[13](/*rr*/ ctx[4], /*idx*/ ctx[39]).apply(this, arguments);
+    						if (is_function(/*handleDeleteRR*/ ctx[13](/*rr*/ ctx[4], /*idx*/ ctx[41]))) /*handleDeleteRR*/ ctx[13](/*rr*/ ctx[4], /*idx*/ ctx[41]).apply(this, arguments);
     					},
     					false,
     					false,
@@ -5458,17 +5421,17 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(422:2) {#each listRR as rr, idx}",
+    		source: "(424:2) {#each listRR as rr, idx}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (421:1) {#each Object.entries(activeZone.Records) as [dname, listRR]}
+    // (423:1) {#each Object.entries(activeZone.Records) as [dname, listRR]}
     function create_each_block_1$1(ctx) {
     	let each_1_anchor;
-    	let each_value_2 = /*listRR*/ ctx[35];
+    	let each_value_2 = /*listRR*/ ctx[37];
     	validate_each_argument(each_value_2);
     	let each_blocks = [];
 
@@ -5493,7 +5456,7 @@ var app = (function () {
     		},
     		p: function update(ctx, dirty) {
     			if (dirty[0] & /*handleDeleteRR, activeZone, getTypeName*/ 24580) {
-    				each_value_2 = /*listRR*/ ctx[35];
+    				each_value_2 = /*listRR*/ ctx[37];
     				validate_each_argument(each_value_2);
     				let i;
 
@@ -5526,17 +5489,17 @@ var app = (function () {
     		block,
     		id: create_each_block_1$1.name,
     		type: "each",
-    		source: "(421:1) {#each Object.entries(activeZone.Records) as [dname, listRR]}",
+    		source: "(423:1) {#each Object.entries(activeZone.Records) as [dname, listRR]}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (456:1) {#each Object.entries(RRTypes) as [k, v]}
+    // (451:1) {#each Object.entries(RRTypes) as [k, v]}
     function create_each_block$4(ctx) {
     	let option;
-    	let t0_value = /*v*/ ctx[31] + "";
+    	let t0_value = /*v*/ ctx[33] + "";
     	let t0;
     	let t1;
     	let option_value_value;
@@ -5546,9 +5509,9 @@ var app = (function () {
     			option = element("option");
     			t0 = text(t0_value);
     			t1 = space();
-    			option.__value = option_value_value = parseInt(/*k*/ ctx[30]);
+    			option.__value = option_value_value = parseInt(/*k*/ ctx[32]);
     			option.value = option.__value;
-    			add_location(option, file$8, 456, 5, 8757);
+    			add_location(option, file$8, 451, 5, 8666);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -5565,15 +5528,148 @@ var app = (function () {
     		block,
     		id: create_each_block$4.name,
     		type: "each",
-    		source: "(456:1) {#each Object.entries(RRTypes) as [k, v]}",
+    		source: "(451:1) {#each Object.entries(RRTypes) as [k, v]}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (484:26) 
+    // (490:26) 
     function create_if_block_3(ctx) {
+    	let label0;
+    	let span0;
+    	let t1;
+    	let input0;
+    	let t2;
+    	let t3_value = /*activeZone*/ ctx[2].Name + "";
+    	let t3;
+    	let t4;
+    	let label1;
+    	let span1;
+    	let t6;
+    	let input1;
+    	let t7;
+    	let label2;
+    	let span2;
+    	let t9;
+    	let input2;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			label0 = element("label");
+    			span0 = element("span");
+    			span0.textContent = "Name:";
+    			t1 = space();
+    			input0 = element("input");
+    			t2 = text("\n\t\t\t\t.");
+    			t3 = text(t3_value);
+    			t4 = space();
+    			label1 = element("label");
+    			span1 = element("span");
+    			span1.textContent = "Preference:";
+    			t6 = space();
+    			input1 = element("input");
+    			t7 = space();
+    			label2 = element("label");
+    			span2 = element("span");
+    			span2.textContent = "Exchange:";
+    			t9 = space();
+    			input2 = element("input");
+    			attr_dev(span0, "class", "svelte-7ujef7");
+    			add_location(span0, file$8, 491, 4, 9382);
+    			attr_dev(input0, "class", "name svelte-7ujef7");
+    			add_location(input0, file$8, 494, 4, 9416);
+    			attr_dev(label0, "class", "svelte-7ujef7");
+    			add_location(label0, file$8, 490, 3, 9370);
+    			attr_dev(span1, "class", "svelte-7ujef7");
+    			add_location(span1, file$8, 498, 4, 9508);
+    			attr_dev(input1, "type", "number");
+    			attr_dev(input1, "min", "1");
+    			attr_dev(input1, "max", "65535");
+    			attr_dev(input1, "class", "svelte-7ujef7");
+    			add_location(input1, file$8, 501, 4, 9548);
+    			attr_dev(label1, "class", "svelte-7ujef7");
+    			add_location(label1, file$8, 497, 3, 9496);
+    			attr_dev(span2, "class", "svelte-7ujef7");
+    			add_location(span2, file$8, 504, 4, 9640);
+    			attr_dev(input2, "class", "svelte-7ujef7");
+    			add_location(input2, file$8, 507, 4, 9678);
+    			attr_dev(label2, "class", "svelte-7ujef7");
+    			add_location(label2, file$8, 503, 3, 9628);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, label0, anchor);
+    			append_dev(label0, span0);
+    			append_dev(label0, t1);
+    			append_dev(label0, input0);
+    			set_input_value(input0, /*rr*/ ctx[4].Name);
+    			append_dev(label0, t2);
+    			append_dev(label0, t3);
+    			insert_dev(target, t4, anchor);
+    			insert_dev(target, label1, anchor);
+    			append_dev(label1, span1);
+    			append_dev(label1, t6);
+    			append_dev(label1, input1);
+    			set_input_value(input1, /*rrMX*/ ctx[3].Preference);
+    			insert_dev(target, t7, anchor);
+    			insert_dev(target, label2, anchor);
+    			append_dev(label2, span2);
+    			append_dev(label2, t9);
+    			append_dev(label2, input2);
+    			set_input_value(input2, /*rrMX*/ ctx[3].Exchange);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(input0, "input", /*input0_input_handler_2*/ ctx[28]),
+    					listen_dev(input1, "input", /*input1_input_handler_2*/ ctx[29]),
+    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[30])
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*rr, RRTypes*/ 48 && input0.value !== /*rr*/ ctx[4].Name) {
+    				set_input_value(input0, /*rr*/ ctx[4].Name);
+    			}
+
+    			if (dirty[0] & /*activeZone*/ 4 && t3_value !== (t3_value = /*activeZone*/ ctx[2].Name + "")) set_data_dev(t3, t3_value);
+
+    			if (dirty[0] & /*rrMX*/ 8 && to_number(input1.value) !== /*rrMX*/ ctx[3].Preference) {
+    				set_input_value(input1, /*rrMX*/ ctx[3].Preference);
+    			}
+
+    			if (dirty[0] & /*rrMX*/ 8 && input2.value !== /*rrMX*/ ctx[3].Exchange) {
+    				set_input_value(input2, /*rrMX*/ ctx[3].Exchange);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(label0);
+    			if (detaching) detach_dev(t4);
+    			if (detaching) detach_dev(label1);
+    			if (detaching) detach_dev(t7);
+    			if (detaching) detach_dev(label2);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_3.name,
+    		type: "if",
+    		source: "(490:26) ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (476:26) 
+    function create_if_block_2(ctx) {
     	let label0;
     	let span0;
     	let t1;
@@ -5583,6 +5679,9 @@ var app = (function () {
     	let span1;
     	let t4;
     	let input1;
+    	let t5;
+    	let t6_value = /*activeZone*/ ctx[2].Name + "";
+    	let t6;
     	let mounted;
     	let dispose;
 
@@ -5590,61 +5689,64 @@ var app = (function () {
     		c: function create() {
     			label0 = element("label");
     			span0 = element("span");
-    			span0.textContent = "Preference:";
+    			span0.textContent = "Name:";
     			t1 = space();
     			input0 = element("input");
     			t2 = space();
     			label1 = element("label");
     			span1 = element("span");
-    			span1.textContent = "Exchange:";
+    			span1.textContent = "Value:";
     			t4 = space();
     			input1 = element("input");
+    			t5 = text("\n\t\t\t\t.");
+    			t6 = text(t6_value);
     			attr_dev(span0, "class", "svelte-7ujef7");
-    			add_location(span0, file$8, 485, 4, 9302);
-    			attr_dev(input0, "type", "number");
-    			attr_dev(input0, "min", "1");
-    			attr_dev(input0, "max", "65535");
+    			add_location(span0, file$8, 477, 4, 9125);
     			attr_dev(input0, "class", "svelte-7ujef7");
-    			add_location(input0, file$8, 488, 4, 9342);
+    			add_location(input0, file$8, 480, 4, 9159);
     			attr_dev(label0, "class", "svelte-7ujef7");
-    			add_location(label0, file$8, 484, 3, 9290);
+    			add_location(label0, file$8, 476, 3, 9113);
     			attr_dev(span1, "class", "svelte-7ujef7");
-    			add_location(span1, file$8, 491, 4, 9434);
-    			attr_dev(input1, "class", "svelte-7ujef7");
-    			add_location(input1, file$8, 494, 4, 9472);
+    			add_location(span1, file$8, 483, 4, 9215);
+    			attr_dev(input1, "class", "name svelte-7ujef7");
+    			add_location(input1, file$8, 486, 4, 9250);
     			attr_dev(label1, "class", "svelte-7ujef7");
-    			add_location(label1, file$8, 490, 3, 9422);
+    			add_location(label1, file$8, 482, 3, 9203);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, label0, anchor);
     			append_dev(label0, span0);
     			append_dev(label0, t1);
     			append_dev(label0, input0);
-    			set_input_value(input0, /*rrMX*/ ctx[3].Preference);
+    			set_input_value(input0, /*rr*/ ctx[4].Name);
     			insert_dev(target, t2, anchor);
     			insert_dev(target, label1, anchor);
     			append_dev(label1, span1);
     			append_dev(label1, t4);
     			append_dev(label1, input1);
-    			set_input_value(input1, /*rrMX*/ ctx[3].Exchange);
+    			set_input_value(input1, /*rr*/ ctx[4].Value);
+    			append_dev(label1, t5);
+    			append_dev(label1, t6);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[27]),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[28])
+    					listen_dev(input0, "input", /*input0_input_handler_1*/ ctx[26]),
+    					listen_dev(input1, "input", /*input1_input_handler_1*/ ctx[27])
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*rrMX*/ 8 && to_number(input0.value) !== /*rrMX*/ ctx[3].Preference) {
-    				set_input_value(input0, /*rrMX*/ ctx[3].Preference);
+    			if (dirty[0] & /*rr, RRTypes*/ 48 && input0.value !== /*rr*/ ctx[4].Name) {
+    				set_input_value(input0, /*rr*/ ctx[4].Name);
     			}
 
-    			if (dirty[0] & /*rrMX*/ 8 && input1.value !== /*rrMX*/ ctx[3].Exchange) {
-    				set_input_value(input1, /*rrMX*/ ctx[3].Exchange);
+    			if (dirty[0] & /*rr, RRTypes*/ 48 && input1.value !== /*rr*/ ctx[4].Value) {
+    				set_input_value(input1, /*rr*/ ctx[4].Value);
     			}
+
+    			if (dirty[0] & /*activeZone*/ 4 && t6_value !== (t6_value = /*activeZone*/ ctx[2].Name + "")) set_data_dev(t6, t6_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(label0);
@@ -5657,125 +5759,101 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3.name,
-    		type: "if",
-    		source: "(484:26) ",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (473:26) 
-    function create_if_block_2(ctx) {
-    	let label;
-    	let span;
-    	let t1;
-    	let input;
-    	let t2;
-    	let p;
-    	let mounted;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			label = element("label");
-    			span = element("span");
-    			span.textContent = "Value:";
-    			t1 = space();
-    			input = element("input");
-    			t2 = space();
-    			p = element("p");
-    			p.textContent = "For PTR record, the name will become a value, and the\n\t\t\t\t\tvalue will become a name.";
-    			attr_dev(span, "class", "svelte-7ujef7");
-    			add_location(span, file$8, 474, 4, 9076);
-    			attr_dev(input, "class", "svelte-7ujef7");
-    			add_location(input, file$8, 477, 4, 9111);
-    			add_location(p, file$8, 478, 4, 9145);
-    			attr_dev(label, "class", "svelte-7ujef7");
-    			add_location(label, file$8, 473, 3, 9064);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, label, anchor);
-    			append_dev(label, span);
-    			append_dev(label, t1);
-    			append_dev(label, input);
-    			set_input_value(input, /*rr*/ ctx[4].Value);
-    			append_dev(label, t2);
-    			append_dev(label, p);
-
-    			if (!mounted) {
-    				dispose = listen_dev(input, "input", /*input_input_handler_10*/ ctx[26]);
-    				mounted = true;
-    			}
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*rr, RRTypes*/ 48 && input.value !== /*rr*/ ctx[4].Value) {
-    				set_input_value(input, /*rr*/ ctx[4].Value);
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(label);
-    			mounted = false;
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(473:26) ",
+    		source: "(476:26) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (464:1) {#if rr.Type === 1 || rr.Type === 2 || rr.Type === 5 ||   rr.Type === 16 || rr.Type === 28  }
+    // (459:1) {#if rr.Type === 1 || rr.Type === 2 || rr.Type === 5 ||   rr.Type === 16 || rr.Type === 28  }
     function create_if_block_1(ctx) {
-    	let label;
-    	let span;
+    	let label0;
+    	let span0;
     	let t1;
-    	let input;
+    	let input0;
+    	let t2;
+    	let t3_value = /*activeZone*/ ctx[2].Name + "";
+    	let t3;
+    	let t4;
+    	let label1;
+    	let span1;
+    	let t6;
+    	let input1;
     	let mounted;
     	let dispose;
 
     	const block = {
     		c: function create() {
-    			label = element("label");
-    			span = element("span");
-    			span.textContent = "Value:";
+    			label0 = element("label");
+    			span0 = element("span");
+    			span0.textContent = "Name:";
     			t1 = space();
-    			input = element("input");
-    			attr_dev(span, "class", "svelte-7ujef7");
-    			add_location(span, file$8, 467, 4, 8957);
-    			attr_dev(input, "class", "svelte-7ujef7");
-    			add_location(input, file$8, 470, 4, 8992);
-    			attr_dev(label, "class", "svelte-7ujef7");
-    			add_location(label, file$8, 466, 3, 8945);
+    			input0 = element("input");
+    			t2 = text("\n\t\t\t\t.");
+    			t3 = text(t3_value);
+    			t4 = space();
+    			label1 = element("label");
+    			span1 = element("span");
+    			span1.textContent = "Value:";
+    			t6 = space();
+    			input1 = element("input");
+    			attr_dev(span0, "class", "svelte-7ujef7");
+    			add_location(span0, file$8, 462, 4, 8866);
+    			attr_dev(input0, "class", "name svelte-7ujef7");
+    			add_location(input0, file$8, 465, 4, 8900);
+    			attr_dev(label0, "class", "svelte-7ujef7");
+    			add_location(label0, file$8, 461, 3, 8854);
+    			attr_dev(span1, "class", "svelte-7ujef7");
+    			add_location(span1, file$8, 470, 4, 8993);
+    			attr_dev(input1, "class", "svelte-7ujef7");
+    			add_location(input1, file$8, 473, 4, 9028);
+    			attr_dev(label1, "class", "svelte-7ujef7");
+    			add_location(label1, file$8, 469, 3, 8981);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, label, anchor);
-    			append_dev(label, span);
-    			append_dev(label, t1);
-    			append_dev(label, input);
-    			set_input_value(input, /*rr*/ ctx[4].Value);
+    			insert_dev(target, label0, anchor);
+    			append_dev(label0, span0);
+    			append_dev(label0, t1);
+    			append_dev(label0, input0);
+    			set_input_value(input0, /*rr*/ ctx[4].Name);
+    			append_dev(label0, t2);
+    			append_dev(label0, t3);
+    			insert_dev(target, t4, anchor);
+    			insert_dev(target, label1, anchor);
+    			append_dev(label1, span1);
+    			append_dev(label1, t6);
+    			append_dev(label1, input1);
+    			set_input_value(input1, /*rr*/ ctx[4].Value);
 
     			if (!mounted) {
-    				dispose = listen_dev(input, "input", /*input_input_handler_9*/ ctx[25]);
+    				dispose = [
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[24]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[25])
+    				];
+
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*rr, RRTypes*/ 48 && input.value !== /*rr*/ ctx[4].Value) {
-    				set_input_value(input, /*rr*/ ctx[4].Value);
+    			if (dirty[0] & /*rr, RRTypes*/ 48 && input0.value !== /*rr*/ ctx[4].Name) {
+    				set_input_value(input0, /*rr*/ ctx[4].Name);
+    			}
+
+    			if (dirty[0] & /*activeZone*/ 4 && t3_value !== (t3_value = /*activeZone*/ ctx[2].Name + "")) set_data_dev(t3, t3_value);
+
+    			if (dirty[0] & /*rr, RRTypes*/ 48 && input1.value !== /*rr*/ ctx[4].Value) {
+    				set_input_value(input1, /*rr*/ ctx[4].Value);
     			}
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(label);
+    			if (detaching) detach_dev(label0);
+    			if (detaching) detach_dev(t4);
+    			if (detaching) detach_dev(label1);
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
     		}
     	};
 
@@ -5783,7 +5861,7 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(464:1) {#if rr.Type === 1 || rr.Type === 2 || rr.Type === 5 ||   rr.Type === 16 || rr.Type === 28  }",
+    		source: "(459:1) {#if rr.Type === 1 || rr.Type === 2 || rr.Type === 5 ||   rr.Type === 16 || rr.Type === 28  }",
     		ctx
     	});
 
@@ -5855,18 +5933,18 @@ var app = (function () {
     			t7 = space();
     			div1 = element("div");
     			if_block.c();
-    			add_location(br0, file$8, 284, 2, 5085);
-    			add_location(span, file$8, 287, 3, 5105);
-    			add_location(br1, file$8, 288, 3, 5136);
-    			add_location(input, file$8, 289, 3, 5145);
-    			add_location(label, file$8, 286, 2, 5094);
-    			add_location(button, file$8, 291, 2, 5193);
+    			add_location(br0, file$8, 286, 2, 5120);
+    			add_location(span, file$8, 289, 3, 5140);
+    			add_location(br1, file$8, 290, 3, 5171);
+    			add_location(input, file$8, 291, 3, 5180);
+    			add_location(label, file$8, 288, 2, 5129);
+    			add_location(button, file$8, 293, 2, 5228);
     			attr_dev(div0, "class", "nav-left svelte-7ujef7");
-    			add_location(div0, file$8, 276, 1, 4906);
+    			add_location(div0, file$8, 278, 1, 4941);
     			attr_dev(div1, "class", "content svelte-7ujef7");
-    			add_location(div1, file$8, 296, 1, 5268);
+    			add_location(div1, file$8, 298, 1, 5303);
     			attr_dev(div2, "class", "master_d");
-    			add_location(div2, file$8, 275, 0, 4882);
+    			add_location(div2, file$8, 277, 0, 4917);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -6057,7 +6135,7 @@ var app = (function () {
 
     		if (res.status >= 400) {
     			const resError = await res.json();
-    			WuiPushNotif.Error("ERROR: handleCreateRR: " + resError.message);
+    			WuiPushNotif.Error("ERROR: handleMasterFileCreate: " + resError.message);
     			return;
     		}
 
@@ -6072,7 +6150,7 @@ var app = (function () {
 
     		if (res.status >= 400) {
     			const resError = await res.json();
-    			WuiPushNotif.Error("ERROR: handleCreateRR: " + resError.message);
+    			WuiPushNotif.Error("ERROR: handleMasterFileDelete: " + resError.message);
     			return;
     		}
 
@@ -6100,8 +6178,10 @@ var app = (function () {
     	}
 
     	async function handleCreateRR() {
-    		if (rr.Type === 15) {
-    			$$invalidate(4, rr.Value = rrMX, rr);
+    		switch (rr.Type) {
+    			case 15:
+    				$$invalidate(4, rr.Value = rrMX, rr);
+    				break;
     		}
 
     		let api = apiMasterd + activeZone.Name + "/rr/" + rr.Type;
@@ -6224,36 +6304,48 @@ var app = (function () {
     		$$invalidate(2, activeZone);
     	}
 
-    	function input_input_handler_8() {
-    		rr.Name = this.value;
-    		$$invalidate(4, rr);
-    		$$invalidate(5, RRTypes);
-    	}
-
     	function select_change_handler() {
     		rr.Type = select_value(this);
     		$$invalidate(4, rr);
     		$$invalidate(5, RRTypes);
     	}
 
-    	function input_input_handler_9() {
-    		rr.Value = this.value;
-    		$$invalidate(4, rr);
-    		$$invalidate(5, RRTypes);
-    	}
-
-    	function input_input_handler_10() {
-    		rr.Value = this.value;
-    		$$invalidate(4, rr);
-    		$$invalidate(5, RRTypes);
-    	}
-
     	function input0_input_handler() {
+    		rr.Name = this.value;
+    		$$invalidate(4, rr);
+    		$$invalidate(5, RRTypes);
+    	}
+
+    	function input1_input_handler() {
+    		rr.Value = this.value;
+    		$$invalidate(4, rr);
+    		$$invalidate(5, RRTypes);
+    	}
+
+    	function input0_input_handler_1() {
+    		rr.Name = this.value;
+    		$$invalidate(4, rr);
+    		$$invalidate(5, RRTypes);
+    	}
+
+    	function input1_input_handler_1() {
+    		rr.Value = this.value;
+    		$$invalidate(4, rr);
+    		$$invalidate(5, RRTypes);
+    	}
+
+    	function input0_input_handler_2() {
+    		rr.Name = this.value;
+    		$$invalidate(4, rr);
+    		$$invalidate(5, RRTypes);
+    	}
+
+    	function input1_input_handler_2() {
     		rrMX.Preference = to_number(this.value);
     		$$invalidate(3, rrMX);
     	}
 
-    	function input1_input_handler() {
+    	function input2_input_handler() {
     		rrMX.Exchange = this.value;
     		$$invalidate(3, rrMX);
     	}
@@ -6324,12 +6416,14 @@ var app = (function () {
     		input_input_handler_5,
     		input_input_handler_6,
     		input_input_handler_7,
-    		input_input_handler_8,
     		select_change_handler,
-    		input_input_handler_9,
-    		input_input_handler_10,
     		input0_input_handler,
-    		input1_input_handler
+    		input1_input_handler,
+    		input0_input_handler_1,
+    		input1_input_handler_1,
+    		input0_input_handler_2,
+    		input1_input_handler_2,
+    		input2_input_handler
     	];
     }
 

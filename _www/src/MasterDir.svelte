@@ -49,7 +49,7 @@
 
 		if (res.status >= 400) {
 			const resError = await res.json()
-			WuiPushNotif.Error("ERROR: handleCreateRR: "+ resError.message)
+			WuiPushNotif.Error("ERROR: handleMasterFileCreate: "+ resError.message)
 			return;
 		}
 
@@ -67,7 +67,7 @@
 
 		if (res.status >= 400) {
 			const resError = await res.json()
-			WuiPushNotif.Error("ERROR: handleCreateRR: "+ resError.message)
+			WuiPushNotif.Error("ERROR: handleMasterFileDelete: "+ resError.message)
 			return;
 		}
 
@@ -99,11 +99,13 @@
 	}
 
 	async function handleCreateRR() {
-		if (rr.Type === 15) {
+		switch (rr.Type) {
+		case 15:
 			rr.Value = rrMX;
+			break;
 		}
 
-		let api = apiMasterd+ activeZone.Name +"/rr/"+ rr.Type;
+		let api = apiMasterd + activeZone.Name +"/rr/"+ rr.Type;
 		const res = await fetch(api, {
 			method: "POST",
 			headers: {
@@ -440,13 +442,6 @@
 		<form on:submit|preventDefault={handleCreateRR}>
 			<label>
 				<span>
-					Name:
-				</span>
-				<input class="name" bind:value={rr.Name}>
-				.{activeZone.Name}
-			</label>
-			<label>
-				<span>
 					Type:
 				</span>
 				<select
@@ -466,22 +461,40 @@
 	}
 			<label>
 				<span>
-					Value:
+					Name:
 				</span>
-				<input bind:value={rr.Value}>
+				<input class="name" bind:value={rr.Name}>
+				.{activeZone.Name}
 			</label>
-	{:else if rr.Type === 12}
+
 			<label>
 				<span>
 					Value:
 				</span>
 				<input bind:value={rr.Value}>
-				<p>
-					For PTR record, the name will become a value, and the
-					value will become a name.
-				</p>
 			</label>
-	{:else if rr.Type === 15}
+	{:else if rr.Type === 12} <!-- PTR -->
+			<label>
+				<span>
+					Name:
+				</span>
+				<input bind:value={rr.Name}>
+			</label>
+			<label>
+				<span>
+					Value:
+				</span>
+				<input class="name" bind:value={rr.Value}>
+				.{activeZone.Name}
+			</label>
+	{:else if rr.Type === 15} <!-- MX -->
+			<label>
+				<span>
+					Name:
+				</span>
+				<input class="name" bind:value={rr.Name}>
+				.{activeZone.Name}
+			</label>
 			<label>
 				<span>
 					Preference:
