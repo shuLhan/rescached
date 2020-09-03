@@ -724,7 +724,7 @@ func (srv *Server) apiMasterFileDeleteRR(
 
 	if len(rr.Name) == 0 {
 		res.Message = "invalid or empty ResourceRecord.Name"
-		return nil, err
+		return nil, res
 	}
 
 	// Remove the RR from caches.
