@@ -108,7 +108,7 @@
 <style>
 	.nav-left {
 		padding: 0px;
-		width: 300px;
+		width: 280px;
 		float: left;
 	}
 	.nav-left .item {
@@ -116,6 +116,7 @@
 	}
 	.content {
 		float: left;
+		width: calc(100% - 300px);
 	}
 	.host {
 		font-family: monospace;

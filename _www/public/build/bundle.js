@@ -3729,7 +3729,7 @@ var app = (function () {
     			t = text(t_value);
     			attr_dev(a, "href", "#");
     			add_location(a, file$7, 137, 3, 2813);
-    			attr_dev(div, "class", "item svelte-1fg406f");
+    			attr_dev(div, "class", "item svelte-10sock6");
     			add_location(div, file$7, 136, 2, 2791);
     		},
     		m: function mount(target, anchor) {
@@ -3971,14 +3971,14 @@ var app = (function () {
     			t1 = space();
     			button = element("button");
     			button.textContent = "X";
-    			attr_dev(input0, "class", "host_name svelte-1fg406f");
+    			attr_dev(input0, "class", "host_name svelte-10sock6");
     			attr_dev(input0, "placeholder", "Domain name");
     			add_location(input0, file$7, 175, 3, 3481);
-    			attr_dev(input1, "class", "host_value svelte-1fg406f");
+    			attr_dev(input1, "class", "host_value svelte-10sock6");
     			attr_dev(input1, "placeholder", "IP address");
     			add_location(input1, file$7, 180, 3, 3575);
     			add_location(button, file$7, 185, 3, 3670);
-    			attr_dev(div, "class", "host svelte-1fg406f");
+    			attr_dev(div, "class", "host svelte-10sock6");
     			add_location(div, file$7, 174, 2, 3459);
     			this.first = div;
     		},
@@ -4105,9 +4105,9 @@ var app = (function () {
     			add_location(input, file$7, 148, 3, 2959);
     			add_location(label, file$7, 145, 2, 2907);
     			add_location(button, file$7, 150, 2, 3006);
-    			attr_dev(div0, "class", "nav-left svelte-1fg406f");
+    			attr_dev(div0, "class", "nav-left svelte-10sock6");
     			add_location(div0, file$7, 134, 1, 2705);
-    			attr_dev(div1, "class", "content svelte-1fg406f");
+    			attr_dev(div1, "class", "content svelte-10sock6");
     			add_location(div1, file$7, 155, 1, 3074);
     			attr_dev(div2, "class", "hosts_d");
     			add_location(div2, file$7, 133, 0, 2682);
