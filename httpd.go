@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/shuLhan/share/lib/dns"
 	liberrors "github.com/shuLhan/share/lib/errors"
@@ -613,22 +614,23 @@ func (srv *Server) apiMasterFileCreateRR(
 		Code: stdhttp.StatusBadRequest,
 	}
 
-	masterFileName := httpreq.Form.Get(paramNameName)
-	if len(masterFileName) == 0 {
+	zoneFileName := httpreq.Form.Get(paramNameName)
+	if len(zoneFileName) == 0 {
 		res.Message = "empty or invalid master file name"
 		return nil, res
 	}
 
-	mf := srv.env.ZoneFiles[masterFileName]
-	if mf == nil {
-		res.Message = "unknown master file name " + masterFileName
+	zoneFile := srv.env.ZoneFiles[zoneFileName]
+	if zoneFile == nil {
+		res.Message = "unknown master file name " + zoneFileName
 		return nil, res
 	}
 
-	v := httpreq.Form.Get(paramNameType)
-	rrType, err := strconv.Atoi(v)
+	rrTypeValue := httpreq.Form.Get(paramNameType)
+	rrType, err := strconv.Atoi(rrTypeValue)
 	if err != nil {
-		res.Message = err.Error()
+		res.Message = fmt.Sprintf("invalid or empty RR type %q: %s",
+			rrTypeValue, err.Error())
 		return nil, res
 	}
 
@@ -645,6 +647,8 @@ func (srv *Server) apiMasterFileCreateRR(
 		return nil, res
 	}
 
+	rr.Name = strings.TrimRight(rr.Name, ".")
+
 	if rr.Type == dns.QueryTypePTR {
 		if len(rr.Name) == 0 {
 			res.Message = "empty PTR name"
@@ -652,30 +656,28 @@ func (srv *Server) apiMasterFileCreateRR(
 		}
 		v := rr.Value.(string)
 		if len(v) == 0 {
-			rr.Value = masterFileName
+			rr.Value = zoneFileName
 		} else {
-			rr.Value = v + "." + masterFileName
+			rr.Value = v + "." + zoneFileName
 		}
 	} else {
 		if len(rr.Name) == 0 {
-			rr.Name = masterFileName
+			rr.Name = zoneFileName
 		} else {
-			rr.Name += "." + masterFileName
+			rr.Name += "." + zoneFileName
 		}
 	}
 
-	fmt.Printf("RR: %+v\n", rr)
-
 	listRR := []*dns.ResourceRecord{&rr}
-	err = srv.dns.PopulateCachesByRR(listRR, mf.Path)
+	err = srv.dns.PopulateCachesByRR(listRR, zoneFile.Path)
 	if err != nil {
 		res.Message = "UpsertCacheByRR: " + err.Error()
 		return nil, res
 	}
 
 	// Update the Master file.
-	mf.Add(&rr)
-	err = mf.Save()
+	zoneFile.Add(&rr)
+	err = zoneFile.Save()
 	if err != nil {
 		res.Message = err.Error()
 		return nil, res
@@ -698,15 +700,15 @@ func (srv *Server) apiMasterFileDeleteRR(
 		Code: stdhttp.StatusBadRequest,
 	}
 
-	masterFileName := httpreq.Form.Get(paramNameName)
-	if len(masterFileName) == 0 {
-		res.Message = "empty or invalid master file name"
+	zoneFileName := httpreq.Form.Get(paramNameName)
+	if len(zoneFileName) == 0 {
+		res.Message = "empty zone file name"
 		return nil, res
 	}
 
-	mf := srv.env.ZoneFiles[masterFileName]
+	mf := srv.env.ZoneFiles[zoneFileName]
 	if mf == nil {
-		res.Message = "unknown master file name " + masterFileName
+		res.Message = "unknown master file name " + zoneFileName
 		return nil, res
 	}
 

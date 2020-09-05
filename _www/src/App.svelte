@@ -55,7 +55,7 @@
 	}
 </style>
 
-<WuiNotif />
+<WuiNotif timeout=3000 />
 
 <div class="main">
 	<nav class="menu">
