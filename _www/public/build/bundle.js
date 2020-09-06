@@ -1999,7 +1999,75 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (99:3) {#each msg.Answer as rr}
+    // (100:3) {#if msg.Answer !== null && msg.Answer.length > 0}
+    function create_if_block_2(ctx) {
+    	let each_1_anchor;
+    	let each_value_3 = /*msg*/ ctx[5].Answer;
+    	validate_each_argument(each_value_3);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value_3.length; i += 1) {
+    		each_blocks[i] = create_each_block_3(get_each_context_3(ctx, each_value_3, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			each_1_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(target, anchor);
+    			}
+
+    			insert_dev(target, each_1_anchor, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*listMsg, getRRTypeName*/ 2) {
+    				each_value_3 = /*msg*/ ctx[5].Answer;
+    				validate_each_argument(each_value_3);
+    				let i;
+
+    				for (i = 0; i < each_value_3.length; i += 1) {
+    					const child_ctx = get_each_context_3(ctx, each_value_3, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block_3(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value_3.length;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			destroy_each(each_blocks, detaching);
+    			if (detaching) detach_dev(each_1_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2.name,
+    		type: "if",
+    		source: "(100:3) {#if msg.Answer !== null && msg.Answer.length > 0}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (101:4) {#each msg.Answer as rr}
     function create_each_block_3(ctx) {
     	let div;
     	let span0;
@@ -2015,6 +2083,7 @@ var app = (function () {
     	let span3;
     	let t6_value = /*rr*/ ctx[8].Value + "";
     	let t6;
+    	let t7;
 
     	const block = {
     		c: function create() {
@@ -2030,16 +2099,17 @@ var app = (function () {
     			t5 = space();
     			span3 = element("span");
     			t6 = text(t6_value);
+    			t7 = space();
     			attr_dev(span0, "class", "kind svelte-1xo5wbm");
-    			add_location(span0, file$5, 100, 5, 1830);
+    			add_location(span0, file$5, 102, 6, 1888);
     			attr_dev(span1, "class", "type svelte-1xo5wbm");
-    			add_location(span1, file$5, 101, 5, 1870);
+    			add_location(span1, file$5, 103, 6, 1929);
     			attr_dev(span2, "class", "ttl svelte-1xo5wbm");
-    			add_location(span2, file$5, 102, 5, 1928);
+    			add_location(span2, file$5, 104, 6, 1988);
     			attr_dev(span3, "class", "value svelte-1xo5wbm");
-    			add_location(span3, file$5, 103, 5, 1969);
+    			add_location(span3, file$5, 105, 6, 2030);
     			attr_dev(div, "class", "rr svelte-1xo5wbm");
-    			add_location(div, file$5, 99, 4, 1808);
+    			add_location(div, file$5, 101, 5, 1865);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2053,6 +2123,7 @@ var app = (function () {
     			append_dev(div, t5);
     			append_dev(div, span3);
     			append_dev(span3, t6);
+    			append_dev(div, t7);
     		},
     		p: function update(ctx, dirty) {
     			if (dirty & /*listMsg*/ 2 && t2_value !== (t2_value = getRRTypeName(/*rr*/ ctx[8].Type) + "")) set_data_dev(t2, t2_value);
@@ -2068,14 +2139,14 @@ var app = (function () {
     		block,
     		id: create_each_block_3.name,
     		type: "each",
-    		source: "(99:3) {#each msg.Answer as rr}",
+    		source: "(101:4) {#each msg.Answer as rr}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (107:3) {#if msg.Authority !== null && msg.Authority.length > 0}
+    // (110:3) {#if msg.Authority !== null && msg.Authority.length > 0}
     function create_if_block_1(ctx) {
     	let each_1_anchor;
     	let each_value_2 = /*msg*/ ctx[5].Authority;
@@ -2136,14 +2207,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(107:3) {#if msg.Authority !== null && msg.Authority.length > 0}",
+    		source: "(110:3) {#if msg.Authority !== null && msg.Authority.length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (108:4) {#each msg.Authority as rr}
+    // (111:4) {#each msg.Authority as rr}
     function create_each_block_2(ctx) {
     	let div;
     	let span0;
@@ -2177,15 +2248,15 @@ var app = (function () {
     			t6 = text(t6_value);
     			t7 = space();
     			attr_dev(span0, "class", "kind svelte-1xo5wbm");
-    			add_location(span0, file$5, 109, 6, 2151);
+    			add_location(span0, file$5, 112, 6, 2223);
     			attr_dev(span1, "class", "type svelte-1xo5wbm");
-    			add_location(span1, file$5, 110, 6, 2195);
+    			add_location(span1, file$5, 113, 6, 2267);
     			attr_dev(span2, "class", "ttl svelte-1xo5wbm");
-    			add_location(span2, file$5, 111, 6, 2254);
+    			add_location(span2, file$5, 114, 6, 2326);
     			attr_dev(span3, "class", "value svelte-1xo5wbm");
-    			add_location(span3, file$5, 112, 6, 2296);
+    			add_location(span3, file$5, 115, 6, 2368);
     			attr_dev(div, "class", "rr svelte-1xo5wbm");
-    			add_location(div, file$5, 108, 5, 2128);
+    			add_location(div, file$5, 111, 5, 2200);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2215,14 +2286,14 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(108:4) {#each msg.Authority as rr}",
+    		source: "(111:4) {#each msg.Authority as rr}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (117:3) {#if msg.Additional !== null && msg.Additional.length > 0}
+    // (120:3) {#if msg.Additional !== null && msg.Additional.length > 0}
     function create_if_block$3(ctx) {
     	let each_1_anchor;
     	let each_value_1 = /*msg*/ ctx[5].Additional;
@@ -2283,14 +2354,14 @@ var app = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(117:3) {#if msg.Additional !== null && msg.Additional.length > 0}",
+    		source: "(120:3) {#if msg.Additional !== null && msg.Additional.length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (118:4) {#each msg.Additional as rr}
+    // (121:4) {#each msg.Additional as rr}
     function create_each_block_1(ctx) {
     	let div;
     	let span0;
@@ -2324,15 +2395,15 @@ var app = (function () {
     			t6 = text(t6_value);
     			t7 = space();
     			attr_dev(span0, "class", "kind svelte-1xo5wbm");
-    			add_location(span0, file$5, 119, 6, 2492);
+    			add_location(span0, file$5, 122, 6, 2564);
     			attr_dev(span1, "class", "type svelte-1xo5wbm");
-    			add_location(span1, file$5, 120, 6, 2537);
+    			add_location(span1, file$5, 123, 6, 2609);
     			attr_dev(span2, "class", "ttl svelte-1xo5wbm");
-    			add_location(span2, file$5, 121, 6, 2596);
+    			add_location(span2, file$5, 124, 6, 2668);
     			attr_dev(span3, "class", "value svelte-1xo5wbm");
-    			add_location(span3, file$5, 122, 6, 2638);
+    			add_location(span3, file$5, 125, 6, 2710);
     			attr_dev(div, "class", "rr svelte-1xo5wbm");
-    			add_location(div, file$5, 118, 5, 2469);
+    			add_location(div, file$5, 121, 5, 2541);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2362,7 +2433,7 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(118:4) {#each msg.Additional as rr}",
+    		source: "(121:4) {#each msg.Additional as rr}",
     		ctx
     	});
 
@@ -2392,16 +2463,9 @@ var app = (function () {
     	let t13;
     	let mounted;
     	let dispose;
-    	let each_value_3 = /*msg*/ ctx[5].Answer;
-    	validate_each_argument(each_value_3);
-    	let each_blocks = [];
-
-    	for (let i = 0; i < each_value_3.length; i += 1) {
-    		each_blocks[i] = create_each_block_3(get_each_context_3(ctx, each_value_3, i));
-    	}
-
-    	let if_block0 = /*msg*/ ctx[5].Authority !== null && /*msg*/ ctx[5].Authority.length > 0 && create_if_block_1(ctx);
-    	let if_block1 = /*msg*/ ctx[5].Additional !== null && /*msg*/ ctx[5].Additional.length > 0 && create_if_block$3(ctx);
+    	let if_block0 = /*msg*/ ctx[5].Answer !== null && /*msg*/ ctx[5].Answer.length > 0 && create_if_block_2(ctx);
+    	let if_block1 = /*msg*/ ctx[5].Authority !== null && /*msg*/ ctx[5].Authority.length > 0 && create_if_block_1(ctx);
+    	let if_block2 = /*msg*/ ctx[5].Additional !== null && /*msg*/ ctx[5].Additional.length > 0 && create_if_block$3(ctx);
 
     	const block = {
     		key: key_1,
@@ -2426,15 +2490,11 @@ var app = (function () {
     			span3 = element("span");
     			span3.textContent = "Value";
     			t10 = space();
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			t11 = space();
     			if (if_block0) if_block0.c();
-    			t12 = space();
+    			t11 = space();
     			if (if_block1) if_block1.c();
+    			t12 = space();
+    			if (if_block2) if_block2.c();
     			t13 = space();
     			attr_dev(button, "class", "b-remove");
     			add_location(button, file$5, 85, 4, 1454);
@@ -2470,15 +2530,11 @@ var app = (function () {
     			append_dev(div1, t8);
     			append_dev(div1, span3);
     			append_dev(div2, t10);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].m(div2, null);
-    			}
-
-    			append_dev(div2, t11);
     			if (if_block0) if_block0.m(div2, null);
-    			append_dev(div2, t12);
+    			append_dev(div2, t11);
     			if (if_block1) if_block1.m(div2, null);
+    			append_dev(div2, t12);
+    			if (if_block2) if_block2.m(div2, null);
     			append_dev(div2, t13);
 
     			if (!mounted) {
@@ -2500,61 +2556,50 @@ var app = (function () {
     			ctx = new_ctx;
     			if (dirty & /*listMsg*/ 2 && t0_value !== (t0_value = /*msg*/ ctx[5].Question.Name + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty & /*listMsg, getRRTypeName*/ 2) {
-    				each_value_3 = /*msg*/ ctx[5].Answer;
-    				validate_each_argument(each_value_3);
-    				let i;
-
-    				for (i = 0; i < each_value_3.length; i += 1) {
-    					const child_ctx = get_each_context_3(ctx, each_value_3, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
-    					} else {
-    						each_blocks[i] = create_each_block_3(child_ctx);
-    						each_blocks[i].c();
-    						each_blocks[i].m(div2, t11);
-    					}
-    				}
-
-    				for (; i < each_blocks.length; i += 1) {
-    					each_blocks[i].d(1);
-    				}
-
-    				each_blocks.length = each_value_3.length;
-    			}
-
-    			if (/*msg*/ ctx[5].Authority !== null && /*msg*/ ctx[5].Authority.length > 0) {
+    			if (/*msg*/ ctx[5].Answer !== null && /*msg*/ ctx[5].Answer.length > 0) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_1(ctx);
+    					if_block0 = create_if_block_2(ctx);
     					if_block0.c();
-    					if_block0.m(div2, t12);
+    					if_block0.m(div2, t11);
     				}
     			} else if (if_block0) {
     				if_block0.d(1);
     				if_block0 = null;
     			}
 
-    			if (/*msg*/ ctx[5].Additional !== null && /*msg*/ ctx[5].Additional.length > 0) {
+    			if (/*msg*/ ctx[5].Authority !== null && /*msg*/ ctx[5].Authority.length > 0) {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
-    					if_block1 = create_if_block$3(ctx);
+    					if_block1 = create_if_block_1(ctx);
     					if_block1.c();
-    					if_block1.m(div2, t13);
+    					if_block1.m(div2, t12);
     				}
     			} else if (if_block1) {
     				if_block1.d(1);
     				if_block1 = null;
     			}
+
+    			if (/*msg*/ ctx[5].Additional !== null && /*msg*/ ctx[5].Additional.length > 0) {
+    				if (if_block2) {
+    					if_block2.p(ctx, dirty);
+    				} else {
+    					if_block2 = create_if_block$3(ctx);
+    					if_block2.c();
+    					if_block2.m(div2, t13);
+    				}
+    			} else if (if_block2) {
+    				if_block2.d(1);
+    				if_block2 = null;
+    			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div2);
-    			destroy_each(each_blocks, detaching);
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
     			mounted = false;
     			dispose();
     		}
@@ -2690,7 +2735,7 @@ var app = (function () {
 
     		if (res.status >= 400) {
     			const resbody = await res.json();
-    			WuiPushNotif.Error("ERROR: ", resbody.message);
+    			WuiPushNotif.Error("ERROR: " + resbody.message);
     			return;
     		}
 
@@ -2702,7 +2747,7 @@ var app = (function () {
 
     		if (res.status >= 400) {
     			const resbody = await res.json();
-    			WuiPushNotif.Error("ERROR: ", resbody.message);
+    			WuiPushNotif.Error("ERROR: " + resbody.message);
     			return;
     		}
 
@@ -5614,7 +5659,7 @@ var app = (function () {
 
     	function select_block_type_1(ctx, dirty) {
     		if (/*_rr*/ ctx[3].Type === 1 || /*_rr*/ ctx[3].Type === 2 || /*_rr*/ ctx[3].Type === 5 || /*_rr*/ ctx[3].Type === 16 || /*_rr*/ ctx[3].Type === 28) return create_if_block_1$2;
-    		if (/*_rr*/ ctx[3].Type === 12) return create_if_block_2;
+    		if (/*_rr*/ ctx[3].Type === 12) return create_if_block_2$1;
     		if (/*_rr*/ ctx[3].Type === 15) return create_if_block_3;
     	}
 
@@ -6659,7 +6704,7 @@ var app = (function () {
     }
 
     // (488:30) 
-    function create_if_block_2(ctx) {
+    function create_if_block_2$1(ctx) {
     	let label0;
     	let span0;
     	let t1;
@@ -6749,7 +6794,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2.name,
+    		id: create_if_block_2$1.name,
     		type: "if",
     		source: "(488:30) ",
     		ctx
@@ -7513,7 +7558,7 @@ var app = (function () {
     }
 
     // (109:35) 
-    function create_if_block_2$1(ctx) {
+    function create_if_block_2$2(ctx) {
     	let hostsdir;
     	let current;
     	hostsdir = new HostsDir({ $$inline: true });
@@ -7542,7 +7587,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$1.name,
+    		id: create_if_block_2$2.name,
     		type: "if",
     		source: "(109:35) ",
     		ctx
@@ -7664,7 +7709,7 @@ var app = (function () {
     	const if_block_creators = [
     		create_if_block$6,
     		create_if_block_1$3,
-    		create_if_block_2$1,
+    		create_if_block_2$2,
     		create_if_block_3$1,
     		create_else_block$2
     	];

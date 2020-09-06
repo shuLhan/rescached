@@ -12,7 +12,7 @@
 
 		if (res.status >= 400) {
 			const resbody = await res.json()
-			WuiPushNotif.Error("ERROR: ", resbody.message)
+			WuiPushNotif.Error("ERROR: "+ resbody.message)
 			return;
 		}
 
@@ -26,7 +26,7 @@
 
 		if (res.status >= 400) {
 			const resbody = await res.json()
-			WuiPushNotif.Error("ERROR: ", resbody.message)
+			WuiPushNotif.Error("ERROR: "+ resbody.message)
 			return;
 		}
 
@@ -96,14 +96,17 @@
 				<span class="ttl"> TTL </span>
 				<span class="value"> Value </span>
 			</div>
-			{#each msg.Answer as rr}
-				<div class="rr">
-					<span class="kind"> Answer </span>
-					<span class="type"> {getRRTypeName(rr.Type)} </span>
-					<span class="ttl"> {rr.TTL} </span>
-					<span class="value"> {rr.Value} </span>
-				</div>
-			{/each}
+
+			{#if msg.Answer !== null && msg.Answer.length > 0}
+				{#each msg.Answer as rr}
+					<div class="rr">
+						<span class="kind"> Answer </span>
+						<span class="type"> {getRRTypeName(rr.Type)} </span>
+						<span class="ttl"> {rr.TTL} </span>
+						<span class="value"> {rr.Value} </span>
+					</div>
+				{/each}
+			{/if}
 			{#if msg.Authority !== null && msg.Authority.length > 0}
 				{#each msg.Authority as rr}
 					<div class="rr">
