@@ -3,11 +3,13 @@
 	import { WuiNotif, WuiPushNotif } from 'wui.svelte';
 
 	import { apiEnvironment, environment, nanoSeconds, setEnvironment } from './environment.js';
+	import Dashboard from './Dashboard.svelte';
 	import Environment from './Environment.svelte';
 	import HostsBlock from './HostsBlock.svelte';
 	import HostsDir from './HostsDir.svelte';
 	import MasterDir from './MasterDir.svelte';
 
+	const stateEnvironment = "environment";
 	const stateHostsBlock = "hosts_block";
 	const stateHostsDir = "hosts_d";
 	const stateMasterDir = "master_d";
@@ -68,6 +70,14 @@
 		</a>
 		/
 		<a
+			href="#environment"
+			on:click={()=>state=stateEnvironment}
+			class:active="{state===stateEnvironment}"
+		>
+			Environment
+		</a>
+		/
+		<a
 			href="#{stateHostsBlock}"
 			on:click={()=>state=stateHostsBlock}
 			class:active="{state===stateHostsBlock}"
@@ -92,13 +102,15 @@
 		</a>
 	</nav>
 
-	{#if state === stateHostsBlock}
+	{#if state === stateEnvironment}
+		<Environment/>
+	{:else if state === stateHostsBlock}
 		<HostsBlock/>
 	{:else if state === stateHostsDir}
 		<HostsDir/>
 	{:else if state === stateMasterDir}
 		<MasterDir/>
 	{:else}
-		<Environment/>
+		<Dashboard/>
 	{/if}
 </div>

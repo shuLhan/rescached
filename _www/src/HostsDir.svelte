@@ -3,6 +3,7 @@
 	import { apiEnvironment, environment, nanoSeconds } from './environment.js';
 
 	const apiHostsDir = "/api/hosts.d"
+
 	let env = {
 		HostsFiles: {},
 	};
@@ -10,6 +11,7 @@
 		Name: "",
 		Records: [],
 	};
+	let newRecord = null;
 	let newHostsFile = "";
 
 	const envUnsubscribe = environment.subscribe(value => {
@@ -72,18 +74,51 @@
 		WuiPushNotif.Info("The host file '"+ hostsFile.Name +"' has been updated")
 	}
 
-	function addHost() {
-		let newHost = {
+	function addRecord() {
+		if (newRecord !== null) {
+			return
+		}
+		newRecord = {
 			Name: "",
 			Value: "",
 		}
-		hostsFile.Records.unshift(newHost);
-		hostsFile.Records = hostsFile.Records;
 	}
 
-	function deleteHost(idx) {
+	async function handleHostsRecordCreate() {
+		const api = apiHostsDir +"/"+ hostsFile.Name +"/rr"
+			+"?domain="+ newRecord.Name
+			+"&value="+ newRecord.Value
+
+		const res = await fetch(api, {
+			method: "POST"
+		})
+		if (res.status >= 400) {
+			const resError = await res.json()
+			WuiPushNotif.Error("ERROR: "+ resError.message)
+			return;
+		}
+		const rr = await res.json()
+		hostsFile.Records.push(rr)
+		hostsFile.Records = hostsFile.Records
+		newRecord = null
+		WuiPushNotif.Info("Record '"+ rr.Name +"' has been created")
+	}
+
+	async function handleHostsRecordDelete(rr, idx) {
+		const api = apiHostsDir +"/"+ hostsFile.Name +"/rr"+
+			"?domain="+rr.Name
+
+		const res = await fetch(api, {
+			method: "DELETE"
+		})
+		if (res.status >= 400) {
+			const resError = await res.json()
+			WuiPushNotif.Error("ERROR: "+ resError.message)
+			return;
+		}
 		hostsFile.Records.splice(idx, 1);
 		hostsFile.Records = hostsFile.Records;
+		WuiPushNotif.Info("Record '"+ rr.Name +"' has been deleted")
 	}
 
 	async function deleteHostsFile(hfile) {
@@ -122,11 +157,18 @@
 		font-family: monospace;
 		width: 100%;
 	}
-	input.host_name {
-		min-width: 240px;
-		width: calc(100% - 180px);
+	.host.header {
+		margin: 1em 0px;
+		font-weight: bold;
+		border-bottom: 1px solid silver;
 	}
-	input.host_value {
+	.host_name {
+		display: inline-block;
+		width: 240px;
+		word-wrap: break-word;
+	}
+	.host_value {
+		display: inline-block;
 		width: 140px;
 	}
 </style>
@@ -155,43 +197,54 @@
 
 	<div class="content">
 		{#if hostsFile.Name === ""}
-		<div>
-			Select one of the hosts file to manage.
-		</div>
+			<div>
+				Select one of the hosts file to manage.
+			</div>
 		{:else}
-		<p>
-			{hostsFile.Name} ({hostsFile.Records.length} records)
-			<button on:click={deleteHostsFile(hostsFile)}>
-				Delete
-			</button>
-		</p>
-		<div>
-			<button on:click={addHost}>
-				Add
-			</button>
-		</div>
+			<p>
+				{hostsFile.Name} ({hostsFile.Records.length} records)
+				<button on:click={deleteHostsFile(hostsFile)}>
+					Delete
+				</button>
+			</p>
+			<div>
+				<button on:click={addRecord}>
+					Add
+				</button>
+			</div>
 
-		{#each hostsFile.Records as host, idx (idx)}
-		<div class="host">
-			<input
-				class="host_name"
-				placeholder="Domain name"
-				bind:value={host.Name}
-			>
-			<input
-				class="host_value"
-				placeholder="IP address"
-				bind:value={host.Value}
-			>
-			<button on:click={deleteHost(idx)}>
-				X
-			</button>
-		</div>
-		{/each}
+			{#if newRecord !== null}
+				<div class="host">
+					<input
+						class="host_name"
+						placeholder="Domain name"
+						bind:value={newRecord.Name}
+					>
+					<input
+						class="host_value"
+						placeholder="IP address"
+						bind:value={newRecord.Value}
+					>
+					<button on:click={handleHostsRecordCreate}>
+						Create
+					</button>
+				</div>
+			{/if}
 
-		<button on:click={updateHostsFile}>
-			Save
-		</button>
+			<div class="host header">
+				<span class="host_name"> Domain name </span>
+				<span class="host_value"> IP address </span>
+			</div>
+
+			{#each hostsFile.Records as rr, idx (idx)}
+				<div class="host">
+					<span class="host_name"> {rr.Name} </span>
+					<span class="host_value"> {rr.Value} </span>
+					<button on:click={handleHostsRecordDelete(rr, idx)}>
+						X
+					</button>
+				</div>
+			{/each}
 		{/if}
 	</div>
 </div>

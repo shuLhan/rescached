@@ -12,6 +12,7 @@ import (
 	stdhttp "net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -23,11 +24,16 @@ import (
 
 const (
 	defHTTPDRootDir     = "_public/"
+	paramNameDomain     = "domain"
 	paramNameName       = "name"
+	paramNameQuery      = "query"
 	paramNameType       = "type"
+	paramNameValue      = "value"
+	apiCaches           = "/api/caches"
 	apiEnvironment      = "/api/environment"
 	apiHostsBlock       = "/api/hosts_block"
 	apiHostsDir         = "/api/hosts.d/:name"
+	apiHostsDirRR       = "/api/hosts.d/:name/rr"
 	apiMasterFile       = "/api/master.d/:name"
 	apiMasterFileRRType = "/api/master.d/:name/rr/:type"
 )
@@ -65,6 +71,27 @@ func (srv *Server) httpdInit() (err error) {
 }
 
 func (srv *Server) httpdRegisterEndpoints() (err error) {
+	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
+		Method:       http.RequestMethodGet,
+		Path:         apiCaches,
+		RequestType:  http.RequestTypeQuery,
+		ResponseType: http.ResponseTypeJSON,
+		Call:         srv.httpdAPIGetCaches,
+	})
+	if err != nil {
+		return err
+	}
+	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
+		Method:       http.RequestMethodDelete,
+		Path:         apiCaches,
+		RequestType:  http.RequestTypeQuery,
+		ResponseType: http.ResponseTypeJSON,
+		Call:         srv.httpdAPIDeleteCaches,
+	})
+	if err != nil {
+		return err
+	}
+
 	epAPIGetEnvironment := &http.Endpoint{
 		Method:       http.RequestMethodGet,
 		Path:         apiEnvironment,
@@ -102,6 +129,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
+	// Register API to create new hosts file.
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodPut,
 		Path:         apiHostsDir,
@@ -112,7 +140,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	if err != nil {
 		return err
 	}
-
+	// Register API to get content of hosts file.
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodGet,
 		Path:         apiHostsDir,
@@ -123,23 +151,36 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	if err != nil {
 		return err
 	}
-
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodPost,
-		Path:         apiHostsDir,
-		RequestType:  http.RequestTypeJSON,
-		ResponseType: http.ResponseTypeJSON,
-		Call:         srv.apiHostsFileUpdate,
-	})
-	if err != nil {
-		return err
-	}
+	// Register API to delete hosts file.
 	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
 		Method:       http.RequestMethodDelete,
 		Path:         apiHostsDir,
 		RequestType:  http.RequestTypeNone,
 		ResponseType: http.ResponseTypeJSON,
 		Call:         srv.apiHostsFileDelete,
+	})
+	if err != nil {
+		return err
+	}
+
+	// Register API to create one record in hosts file.
+	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
+		Method:       http.RequestMethodPost,
+		Path:         apiHostsDirRR,
+		RequestType:  http.RequestTypeQuery,
+		ResponseType: http.ResponseTypeJSON,
+		Call:         srv.apiHostsFileRRCreate,
+	})
+	if err != nil {
+		return err
+	}
+	// Register API to delete a record from hosts file.
+	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
+		Method:       http.RequestMethodDelete,
+		Path:         apiHostsDirRR,
+		RequestType:  http.RequestTypeQuery,
+		ResponseType: http.ResponseTypeJSON,
+		Call:         srv.apiHostsFileRRDelete,
 	})
 	if err != nil {
 		return err
@@ -203,6 +244,54 @@ func (srv *Server) httpdRun() {
 	if err != nil {
 		log.Printf("httpServer.run: %s", err)
 	}
+}
+
+func (srv *Server) httpdAPIGetCaches(
+	_ stdhttp.ResponseWriter, req *stdhttp.Request, _ []byte,
+) (
+	resBody []byte, err error,
+) {
+	res := &liberrors.E{
+		Code: stdhttp.StatusInternalServerError,
+	}
+
+	q := req.Form.Get(paramNameQuery)
+
+	re, err := regexp.Compile(q)
+	if err != nil {
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	listMsg := srv.dns.SearchCaches(re)
+	if listMsg == nil {
+		listMsg = make([]*dns.Message, 0)
+	}
+
+	return json.Marshal(listMsg)
+}
+
+func (srv *Server) httpdAPIDeleteCaches(
+	_ stdhttp.ResponseWriter, req *stdhttp.Request, _ []byte,
+) (
+	resBody []byte, err error,
+) {
+	res := &liberrors.E{
+		Code: stdhttp.StatusInternalServerError,
+	}
+
+	q := req.Form.Get(paramNameName)
+	if len(q) == 0 {
+		res.Message = "empty query 'name' parameter"
+		return nil, res
+	}
+
+	srv.dns.RemoveCachesByNames([]string{q})
+
+	res.Code = stdhttp.StatusOK
+	res.Message = fmt.Sprintf("%q has been removed from caches", q)
+
+	return json.Marshal(res)
 }
 
 func (srv *Server) httpdAPIGetEnvironment(
@@ -362,7 +451,7 @@ func (srv *Server) hostsBlockDisable(hb *hostsBlock) (err error) {
 		return fmt.Errorf("unknown hosts block: %q", hb.Name)
 	}
 
-	srv.dns.RemoveCachesByNames(hfile.Names())
+	srv.dns.RemoveLocalCachesByNames(hfile.Names())
 
 	err = hb.hide()
 	if err != nil {
@@ -419,66 +508,6 @@ func (srv *Server) apiHostsFileGet(
 	return json.Marshal(&hfile.Records)
 }
 
-func (srv *Server) apiHostsFileUpdate(
-	_ stdhttp.ResponseWriter, httpreq *stdhttp.Request, reqbody []byte,
-) (
-	resbody []byte, err error,
-) {
-	var (
-		listRR = make([]*dns.ResourceRecord, 0)
-		name   = httpreq.Form.Get(paramNameName)
-	)
-	res := &liberrors.E{
-		Code:    stdhttp.StatusInternalServerError,
-		Message: "internal server error",
-	}
-
-	err = json.Unmarshal(reqbody, &listRR)
-	if err != nil {
-		res.Message = err.Error()
-		return nil, res
-	}
-
-	hfile, found := srv.env.HostsFiles[name]
-	if !found {
-		path := filepath.Join(dirHosts, name)
-		hfile, err = dns.NewHostsFile(path, listRR)
-		if err != nil {
-			res.Message = err.Error()
-			return nil, res
-		}
-		srv.env.HostsFiles[name] = hfile
-	} else {
-		oldHostnames := hfile.Names()
-
-		// Remove the records associated with hosts file.
-		srv.dns.RemoveCachesByNames(oldHostnames)
-
-		// Save new records.
-		hfile.Records = listRR
-		err = hfile.Save()
-		if err != nil {
-			res.Message = err.Error()
-			return nil, res
-		}
-	}
-
-	// Populate new hosts to cache.
-	err = srv.dns.PopulateCachesByRR(hfile.Records, hfile.Path)
-	if err != nil {
-		res.Message = err.Error()
-		return nil, res
-	}
-
-	resbody, err = json.Marshal(&hfile.Records)
-	if err != nil {
-		res.Message = err.Error()
-		return nil, res
-	}
-
-	return resbody, nil
-}
-
 func (srv *Server) apiHostsFileDelete(
 	_ stdhttp.ResponseWriter, httpreq *stdhttp.Request, reqbody []byte,
 ) (
@@ -501,7 +530,7 @@ func (srv *Server) apiHostsFileDelete(
 	}
 
 	// Remove the records associated with hosts file.
-	srv.dns.RemoveCachesByNames(hfile.Names())
+	srv.dns.RemoveLocalCachesByNames(hfile.Names())
 
 	err = hfile.Delete()
 	if err != nil {
@@ -512,6 +541,115 @@ func (srv *Server) apiHostsFileDelete(
 	delete(srv.env.HostsFiles, name)
 
 	res.Message = name + " has been deleted"
+	return json.Marshal(res)
+}
+
+//
+// apiHostsFileRRCreate create new record and save it to the hosts file.
+//
+func (srv *Server) apiHostsFileRRCreate(
+	_ stdhttp.ResponseWriter, httpreq *stdhttp.Request, _ []byte,
+) (
+	resbody []byte, err error,
+) {
+	res := &liberrors.E{
+		Code: stdhttp.StatusBadRequest,
+	}
+
+	hostsFileName := httpreq.Form.Get(paramNameName)
+	if len(hostsFileName) == 0 {
+		res.Message = "empty hosts file name in request path"
+		return nil, res
+	}
+
+	hfile, found := srv.env.HostsFiles[hostsFileName]
+	if !found {
+		res.Message = "unknown hosts file name: " + hostsFileName
+		return nil, res
+	}
+
+	rr := &dns.ResourceRecord{
+		Class: dns.QueryClassIN,
+	}
+
+	rr.Name = httpreq.Form.Get(paramNameDomain)
+	if len(rr.Name) == 0 {
+		res.Message = "empty 'domain' query parameter"
+		return nil, res
+	}
+	v := httpreq.Form.Get(paramNameValue)
+	if len(v) == 0 {
+		res.Message = "empty 'value' query parameter"
+		return nil, res
+	}
+	rr.Type = dns.GetQueryTypeFromAddress([]byte(v))
+	if rr.Type == 0 {
+		res.Message = "invalid address value: " + v
+		return nil, res
+	}
+	rr.Value = v
+
+	err = hfile.AppendAndSaveRecord(rr)
+	if err != nil {
+		res.Code = stdhttp.StatusInternalServerError
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	err = srv.dns.PopulateCachesByRR([]*dns.ResourceRecord{rr}, hostsFileName)
+	if err != nil {
+		res.Code = stdhttp.StatusInternalServerError
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	return json.Marshal(rr)
+}
+
+func (srv *Server) apiHostsFileRRDelete(
+	_ stdhttp.ResponseWriter, httpreq *stdhttp.Request, reqbody []byte,
+) (
+	resbody []byte, err error,
+) {
+	res := &liberrors.E{
+		Code: stdhttp.StatusBadRequest,
+	}
+
+	hostsFileName := httpreq.Form.Get(paramNameName)
+	if len(hostsFileName) == 0 {
+		res.Message = "empty hosts file name in request path"
+		return nil, res
+	}
+
+	hfile, found := srv.env.HostsFiles[hostsFileName]
+	if !found {
+		res.Message = "unknown hosts file name: " + hostsFileName
+		return nil, res
+	}
+
+	domainName := httpreq.Form.Get(paramNameDomain)
+	if len(domainName) == 0 {
+		res.Message = "empty 'domain' query parameter"
+		return nil, res
+	}
+
+	found = hfile.RemoveRecord(domainName)
+	if !found {
+		res.Message = "unknown domain name: " + domainName
+		return nil, res
+	}
+	err = hfile.Save()
+	if err != nil {
+		res.Code = stdhttp.StatusInternalServerError
+		res.Message = err.Error()
+		return nil, res
+	}
+
+	srv.dns.RemoveLocalCachesByNames([]string{domainName})
+
+	res.Code = stdhttp.StatusOK
+	res.Message = "domain name '" + domainName + "' has been removed from hosts file"
+
 	return json.Marshal(res)
 }
 
@@ -584,7 +722,7 @@ func (srv *Server) apiMasterFileDelete(
 		names = append(names, name)
 	}
 
-	srv.dns.RemoveCachesByNames(names)
+	srv.dns.RemoveLocalCachesByNames(names)
 	delete(srv.env.ZoneFiles, zoneName)
 
 	err = mf.Delete()
