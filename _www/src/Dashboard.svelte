@@ -68,6 +68,10 @@
 	.ttl {
 		width: 6em;
 	}
+	.value {
+		word-wrap: anywhere;
+		width: calc(100% - 24em);
+	}
 </style>
 
 <div class="dashboard">
@@ -103,7 +107,7 @@
 						<span class="kind"> Answer </span>
 						<span class="type"> {getRRTypeName(rr.Type)} </span>
 						<span class="ttl"> {rr.TTL} </span>
-						<span class="value"> {rr.Value} </span>
+						<span class="value"> {JSON.stringify(rr.Value, null, 2)} </span>
 					</div>
 				{/each}
 			{/if}
@@ -113,7 +117,7 @@
 						<span class="kind"> Authority </span>
 						<span class="type"> {getRRTypeName(rr.Type)} </span>
 						<span class="ttl"> {rr.TTL} </span>
-						<span class="value"> {rr.Value} </span>
+						<span class="value"> {JSON.stringify(rr.Value, null, 2)} </span>
 					</div>
 				{/each}
 			{/if}
@@ -123,7 +127,7 @@
 						<span class="kind"> Additional </span>
 						<span class="type"> {getRRTypeName(rr.Type)} </span>
 						<span class="ttl"> {rr.TTL} </span>
-						<span class="value"> {rr.Value} </span>
+						<span class="value"> {JSON.stringify(rr.Value, null, 2)} </span>
 					</div>
 				{/each}
 			{/if}

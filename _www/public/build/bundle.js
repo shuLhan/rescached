@@ -1957,11 +1957,23 @@ var app = (function () {
     const RRTypes = {
     	1: "A",
     	2: "NS",
+    	3: "MD",
+    	4: "MF",
     	5: "CNAME",
+    	6: "SOA",
+    	7: "MB",
+    	8: "MG",
+    	9: "MR",
+    	10: "NULL",
+    	11: "WKS",
     	12: "PTR",
+    	13: "HINFO",
+    	14: "MINFO",
     	15: "MX",
     	16: "TXT",
     	28: "AAAA",
+    	33: "SRV",
+    	41: "OPT",
     };
 
     function getRRTypeName(k) {
@@ -1999,7 +2011,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (100:3) {#if msg.Answer !== null && msg.Answer.length > 0}
+    // (104:3) {#if msg.Answer !== null && msg.Answer.length > 0}
     function create_if_block_2(ctx) {
     	let each_1_anchor;
     	let each_value_3 = /*msg*/ ctx[5].Answer;
@@ -2026,7 +2038,7 @@ var app = (function () {
     			insert_dev(target, each_1_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*listMsg, getRRTypeName*/ 2) {
+    			if (dirty & /*JSON, listMsg, getRRTypeName*/ 2) {
     				each_value_3 = /*msg*/ ctx[5].Answer;
     				validate_each_argument(each_value_3);
     				let i;
@@ -2060,14 +2072,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(100:3) {#if msg.Answer !== null && msg.Answer.length > 0}",
+    		source: "(104:3) {#if msg.Answer !== null && msg.Answer.length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (101:4) {#each msg.Answer as rr}
+    // (105:4) {#each msg.Answer as rr}
     function create_each_block_3(ctx) {
     	let div;
     	let span0;
@@ -2081,7 +2093,7 @@ var app = (function () {
     	let t4;
     	let t5;
     	let span3;
-    	let t6_value = /*rr*/ ctx[8].Value + "";
+    	let t6_value = JSON.stringify(/*rr*/ ctx[8].Value, null, 2) + "";
     	let t6;
     	let t7;
 
@@ -2100,16 +2112,16 @@ var app = (function () {
     			span3 = element("span");
     			t6 = text(t6_value);
     			t7 = space();
-    			attr_dev(span0, "class", "kind svelte-1xo5wbm");
-    			add_location(span0, file$5, 102, 6, 1888);
-    			attr_dev(span1, "class", "type svelte-1xo5wbm");
-    			add_location(span1, file$5, 103, 6, 1929);
-    			attr_dev(span2, "class", "ttl svelte-1xo5wbm");
-    			add_location(span2, file$5, 104, 6, 1988);
-    			attr_dev(span3, "class", "value svelte-1xo5wbm");
-    			add_location(span3, file$5, 105, 6, 2030);
-    			attr_dev(div, "class", "rr svelte-1xo5wbm");
-    			add_location(div, file$5, 101, 5, 1865);
+    			attr_dev(span0, "class", "kind svelte-1d4jf0i");
+    			add_location(span0, file$5, 106, 6, 1952);
+    			attr_dev(span1, "class", "type svelte-1d4jf0i");
+    			add_location(span1, file$5, 107, 6, 1993);
+    			attr_dev(span2, "class", "ttl svelte-1d4jf0i");
+    			add_location(span2, file$5, 108, 6, 2052);
+    			attr_dev(span3, "class", "value svelte-1d4jf0i");
+    			add_location(span3, file$5, 109, 6, 2094);
+    			attr_dev(div, "class", "rr svelte-1d4jf0i");
+    			add_location(div, file$5, 105, 5, 1929);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2128,7 +2140,7 @@ var app = (function () {
     		p: function update(ctx, dirty) {
     			if (dirty & /*listMsg*/ 2 && t2_value !== (t2_value = getRRTypeName(/*rr*/ ctx[8].Type) + "")) set_data_dev(t2, t2_value);
     			if (dirty & /*listMsg*/ 2 && t4_value !== (t4_value = /*rr*/ ctx[8].TTL + "")) set_data_dev(t4, t4_value);
-    			if (dirty & /*listMsg*/ 2 && t6_value !== (t6_value = /*rr*/ ctx[8].Value + "")) set_data_dev(t6, t6_value);
+    			if (dirty & /*listMsg*/ 2 && t6_value !== (t6_value = JSON.stringify(/*rr*/ ctx[8].Value, null, 2) + "")) set_data_dev(t6, t6_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
@@ -2139,14 +2151,14 @@ var app = (function () {
     		block,
     		id: create_each_block_3.name,
     		type: "each",
-    		source: "(101:4) {#each msg.Answer as rr}",
+    		source: "(105:4) {#each msg.Answer as rr}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (110:3) {#if msg.Authority !== null && msg.Authority.length > 0}
+    // (114:3) {#if msg.Authority !== null && msg.Authority.length > 0}
     function create_if_block_1(ctx) {
     	let each_1_anchor;
     	let each_value_2 = /*msg*/ ctx[5].Authority;
@@ -2173,7 +2185,7 @@ var app = (function () {
     			insert_dev(target, each_1_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*listMsg, getRRTypeName*/ 2) {
+    			if (dirty & /*JSON, listMsg, getRRTypeName*/ 2) {
     				each_value_2 = /*msg*/ ctx[5].Authority;
     				validate_each_argument(each_value_2);
     				let i;
@@ -2207,14 +2219,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(110:3) {#if msg.Authority !== null && msg.Authority.length > 0}",
+    		source: "(114:3) {#if msg.Authority !== null && msg.Authority.length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (111:4) {#each msg.Authority as rr}
+    // (115:4) {#each msg.Authority as rr}
     function create_each_block_2(ctx) {
     	let div;
     	let span0;
@@ -2228,7 +2240,7 @@ var app = (function () {
     	let t4;
     	let t5;
     	let span3;
-    	let t6_value = /*rr*/ ctx[8].Value + "";
+    	let t6_value = JSON.stringify(/*rr*/ ctx[8].Value, null, 2) + "";
     	let t6;
     	let t7;
 
@@ -2247,16 +2259,16 @@ var app = (function () {
     			span3 = element("span");
     			t6 = text(t6_value);
     			t7 = space();
-    			attr_dev(span0, "class", "kind svelte-1xo5wbm");
-    			add_location(span0, file$5, 112, 6, 2223);
-    			attr_dev(span1, "class", "type svelte-1xo5wbm");
-    			add_location(span1, file$5, 113, 6, 2267);
-    			attr_dev(span2, "class", "ttl svelte-1xo5wbm");
-    			add_location(span2, file$5, 114, 6, 2326);
-    			attr_dev(span3, "class", "value svelte-1xo5wbm");
-    			add_location(span3, file$5, 115, 6, 2368);
-    			attr_dev(div, "class", "rr svelte-1xo5wbm");
-    			add_location(div, file$5, 111, 5, 2200);
+    			attr_dev(span0, "class", "kind svelte-1d4jf0i");
+    			add_location(span0, file$5, 116, 6, 2312);
+    			attr_dev(span1, "class", "type svelte-1d4jf0i");
+    			add_location(span1, file$5, 117, 6, 2356);
+    			attr_dev(span2, "class", "ttl svelte-1d4jf0i");
+    			add_location(span2, file$5, 118, 6, 2415);
+    			attr_dev(span3, "class", "value svelte-1d4jf0i");
+    			add_location(span3, file$5, 119, 6, 2457);
+    			attr_dev(div, "class", "rr svelte-1d4jf0i");
+    			add_location(div, file$5, 115, 5, 2289);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2275,7 +2287,7 @@ var app = (function () {
     		p: function update(ctx, dirty) {
     			if (dirty & /*listMsg*/ 2 && t2_value !== (t2_value = getRRTypeName(/*rr*/ ctx[8].Type) + "")) set_data_dev(t2, t2_value);
     			if (dirty & /*listMsg*/ 2 && t4_value !== (t4_value = /*rr*/ ctx[8].TTL + "")) set_data_dev(t4, t4_value);
-    			if (dirty & /*listMsg*/ 2 && t6_value !== (t6_value = /*rr*/ ctx[8].Value + "")) set_data_dev(t6, t6_value);
+    			if (dirty & /*listMsg*/ 2 && t6_value !== (t6_value = JSON.stringify(/*rr*/ ctx[8].Value, null, 2) + "")) set_data_dev(t6, t6_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
@@ -2286,14 +2298,14 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(111:4) {#each msg.Authority as rr}",
+    		source: "(115:4) {#each msg.Authority as rr}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (120:3) {#if msg.Additional !== null && msg.Additional.length > 0}
+    // (124:3) {#if msg.Additional !== null && msg.Additional.length > 0}
     function create_if_block$3(ctx) {
     	let each_1_anchor;
     	let each_value_1 = /*msg*/ ctx[5].Additional;
@@ -2320,7 +2332,7 @@ var app = (function () {
     			insert_dev(target, each_1_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*listMsg, getRRTypeName*/ 2) {
+    			if (dirty & /*JSON, listMsg, getRRTypeName*/ 2) {
     				each_value_1 = /*msg*/ ctx[5].Additional;
     				validate_each_argument(each_value_1);
     				let i;
@@ -2354,14 +2366,14 @@ var app = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(120:3) {#if msg.Additional !== null && msg.Additional.length > 0}",
+    		source: "(124:3) {#if msg.Additional !== null && msg.Additional.length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (121:4) {#each msg.Additional as rr}
+    // (125:4) {#each msg.Additional as rr}
     function create_each_block_1(ctx) {
     	let div;
     	let span0;
@@ -2375,7 +2387,7 @@ var app = (function () {
     	let t4;
     	let t5;
     	let span3;
-    	let t6_value = /*rr*/ ctx[8].Value + "";
+    	let t6_value = JSON.stringify(/*rr*/ ctx[8].Value, null, 2) + "";
     	let t6;
     	let t7;
 
@@ -2394,16 +2406,16 @@ var app = (function () {
     			span3 = element("span");
     			t6 = text(t6_value);
     			t7 = space();
-    			attr_dev(span0, "class", "kind svelte-1xo5wbm");
-    			add_location(span0, file$5, 122, 6, 2564);
-    			attr_dev(span1, "class", "type svelte-1xo5wbm");
-    			add_location(span1, file$5, 123, 6, 2609);
-    			attr_dev(span2, "class", "ttl svelte-1xo5wbm");
-    			add_location(span2, file$5, 124, 6, 2668);
-    			attr_dev(span3, "class", "value svelte-1xo5wbm");
-    			add_location(span3, file$5, 125, 6, 2710);
-    			attr_dev(div, "class", "rr svelte-1xo5wbm");
-    			add_location(div, file$5, 121, 5, 2541);
+    			attr_dev(span0, "class", "kind svelte-1d4jf0i");
+    			add_location(span0, file$5, 126, 6, 2678);
+    			attr_dev(span1, "class", "type svelte-1d4jf0i");
+    			add_location(span1, file$5, 127, 6, 2723);
+    			attr_dev(span2, "class", "ttl svelte-1d4jf0i");
+    			add_location(span2, file$5, 128, 6, 2782);
+    			attr_dev(span3, "class", "value svelte-1d4jf0i");
+    			add_location(span3, file$5, 129, 6, 2824);
+    			attr_dev(div, "class", "rr svelte-1d4jf0i");
+    			add_location(div, file$5, 125, 5, 2655);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2422,7 +2434,7 @@ var app = (function () {
     		p: function update(ctx, dirty) {
     			if (dirty & /*listMsg*/ 2 && t2_value !== (t2_value = getRRTypeName(/*rr*/ ctx[8].Type) + "")) set_data_dev(t2, t2_value);
     			if (dirty & /*listMsg*/ 2 && t4_value !== (t4_value = /*rr*/ ctx[8].TTL + "")) set_data_dev(t4, t4_value);
-    			if (dirty & /*listMsg*/ 2 && t6_value !== (t6_value = /*rr*/ ctx[8].Value + "")) set_data_dev(t6, t6_value);
+    			if (dirty & /*listMsg*/ 2 && t6_value !== (t6_value = JSON.stringify(/*rr*/ ctx[8].Value, null, 2) + "")) set_data_dev(t6, t6_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
@@ -2433,14 +2445,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(121:4) {#each msg.Additional as rr}",
+    		source: "(125:4) {#each msg.Additional as rr}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (81:1) {#each listMsg as msg (msg)}
+    // (85:1) {#each listMsg as msg (msg)}
     function create_each_block$1(key_1, ctx) {
     	let div2;
     	let div0;
@@ -2497,21 +2509,21 @@ var app = (function () {
     			if (if_block2) if_block2.c();
     			t13 = space();
     			attr_dev(button, "class", "b-remove");
-    			add_location(button, file$5, 85, 4, 1454);
+    			add_location(button, file$5, 89, 4, 1518);
     			attr_dev(div0, "class", "qname");
-    			add_location(div0, file$5, 82, 3, 1405);
-    			attr_dev(span0, "class", "kind svelte-1xo5wbm");
-    			add_location(span0, file$5, 93, 4, 1627);
-    			attr_dev(span1, "class", "type svelte-1xo5wbm");
-    			add_location(span1, file$5, 94, 4, 1659);
-    			attr_dev(span2, "class", "ttl svelte-1xo5wbm");
-    			add_location(span2, file$5, 95, 4, 1696);
-    			attr_dev(span3, "class", "value svelte-1xo5wbm");
-    			add_location(span3, file$5, 96, 4, 1731);
-    			attr_dev(div1, "class", "rr header svelte-1xo5wbm");
-    			add_location(div1, file$5, 92, 3, 1599);
-    			attr_dev(div2, "class", "message svelte-1xo5wbm");
-    			add_location(div2, file$5, 81, 2, 1380);
+    			add_location(div0, file$5, 86, 3, 1469);
+    			attr_dev(span0, "class", "kind svelte-1d4jf0i");
+    			add_location(span0, file$5, 97, 4, 1691);
+    			attr_dev(span1, "class", "type svelte-1d4jf0i");
+    			add_location(span1, file$5, 98, 4, 1723);
+    			attr_dev(span2, "class", "ttl svelte-1d4jf0i");
+    			add_location(span2, file$5, 99, 4, 1760);
+    			attr_dev(span3, "class", "value svelte-1d4jf0i");
+    			add_location(span3, file$5, 100, 4, 1795);
+    			attr_dev(div1, "class", "rr header svelte-1d4jf0i");
+    			add_location(div1, file$5, 96, 3, 1663);
+    			attr_dev(div2, "class", "message svelte-1d4jf0i");
+    			add_location(div2, file$5, 85, 2, 1444);
     			this.first = div2;
     		},
     		m: function mount(target, anchor) {
@@ -2609,7 +2621,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(81:1) {#each listMsg as msg (msg)}",
+    		source: "(85:1) {#each listMsg as msg (msg)}",
     		ctx
     	});
 
@@ -2654,12 +2666,12 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			add_location(input, file$5, 75, 2, 1256);
-    			add_location(button, file$5, 76, 2, 1285);
+    			add_location(input, file$5, 79, 2, 1320);
+    			add_location(button, file$5, 80, 2, 1349);
     			attr_dev(div0, "class", "search");
-    			add_location(div0, file$5, 73, 1, 1223);
+    			add_location(div0, file$5, 77, 1, 1287);
     			attr_dev(div1, "class", "dashboard");
-    			add_location(div1, file$5, 72, 0, 1198);
+    			add_location(div1, file$5, 76, 0, 1262);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2692,7 +2704,7 @@ var app = (function () {
     				set_input_value(input, /*query*/ ctx[0]);
     			}
 
-    			if (dirty & /*listMsg, getRRTypeName, handleRemoveFromCaches*/ 10) {
+    			if (dirty & /*listMsg, JSON, getRRTypeName, handleRemoveFromCaches*/ 10) {
     				const each_value = /*listMsg*/ ctx[1];
     				validate_each_argument(each_value);
     				validate_each_keys(ctx, each_value, get_each_context$1, get_key);
