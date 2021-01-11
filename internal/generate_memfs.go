@@ -13,19 +13,20 @@ import (
 )
 
 func main() {
-	includes := []string{
-		`.*\.html`,
-		`.*\.js`,
-		`.*\.css`,
-		`.*\.png`,
+	opts := memfs.Options{
+		Root: "_www/public/",
+		Includes: []string{
+			`.*\.html`,
+			`.*\.js`,
+			`.*\.css`,
+			`.*\.png`,
+		},
 	}
-
-	mfs, err := memfs.New("_www/public/", includes, nil, true)
+	mfs, err := memfs.New(&opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	err = mfs.GoGenerate("main", "cmd/rescached/memfs.go", memfs.EncodingGzip)
+	err = mfs.GoGenerate("rescached", "memFS", "memfs_generate.go", memfs.EncodingGzip)
 	if err != nil {
 		log.Fatal(err)
 	}

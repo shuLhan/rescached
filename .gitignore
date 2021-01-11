@@ -6,6 +6,7 @@
 /cover.html
 /cover.out
 /heap*
+/memfs_generate.go
 /rescached
 /resolver
 /resolverbench

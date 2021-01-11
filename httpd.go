@@ -19,11 +19,14 @@ import (
 	"github.com/shuLhan/share/lib/dns"
 	liberrors "github.com/shuLhan/share/lib/errors"
 	"github.com/shuLhan/share/lib/http"
+	"github.com/shuLhan/share/lib/memfs"
 	libnet "github.com/shuLhan/share/lib/net"
 )
 
+var memFS *memfs.MemFS
+
 const (
-	defHTTPDRootDir     = "_public/"
+	defHTTPDRootDir     = "_www/public/"
 	paramNameDomain     = "domain"
 	paramNameName       = "name"
 	paramNameQuery      = "query"
@@ -40,21 +43,24 @@ const (
 
 func (srv *Server) httpdInit() (err error) {
 	env := &http.ServerOptions{
-		Root:    defHTTPDRootDir,
-		Address: srv.env.WUIListen,
-		Includes: []string{
-			`.*\.css`,
-			`.*\.html`,
-			`.*\.js`,
-			`.*\.png`,
+		Options: memfs.Options{
+			Root: defHTTPDRootDir,
+			Includes: []string{
+				`.*\.css`,
+				`.*\.html`,
+				`.*\.js`,
+				`.*\.png`,
+			},
+			Development: srv.env.Debug >= 3,
 		},
+		Memfs:   memFS,
+		Address: srv.env.WUIListen,
 		CORSAllowOrigins: []string{
 			"http://127.0.0.1:5000",
 		},
 		CORSAllowHeaders: []string{
 			http.HeaderContentType,
 		},
-		Development: srv.env.Debug >= 3,
 	}
 
 	srv.httpd, err = http.NewServer(env)

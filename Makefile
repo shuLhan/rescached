@@ -54,10 +54,10 @@ $(COVER_OUT): $(SRC) $(SRC_TEST)
 lint:
 	-golangci-lint run --enable-all ./...
 
-$(RESCACHED_BIN): cmd/rescached/memfs.go $(SRC)
+$(RESCACHED_BIN): memfs_generate.go $(SRC)
 	go build $(DEBUG) ./cmd/rescached
 
-cmd/rescached/memfs.go: internal/generate_memfs.go _www/public/build/*
+memfs_generate.go: internal/generate_memfs.go _www/public/build/*
 	go run ./internal/generate_memfs.go
 
 $(RESOLVER_BIN): $(SRC)
