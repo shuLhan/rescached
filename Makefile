@@ -2,15 +2,17 @@
 ## Use of this source code is governed by a BSD-style
 ## license that can be found in the LICENSE file.
 
-.PHONY: build debug install install-common install-macos
-.PHONY: uninstall uninstall-macos
-.PHONY: test test.prof lint
-.PHONY: doc
+.PHONY: test test.prof lint build debug doc
+.PHONY: install-common uninstall-common
+.PHONY: install uninstall
+.PHONY: install-macos uninstall-macos
 .PHONY: clean distclean
 .PHONY: deploy
+.FORCE:
 
-SRC:=$(shell go list -f '{{$$d:=.Dir}} {{ range .GoFiles }}{{$$d}}/{{.}} {{end}}' ./...)
-SRC_TEST:=$(shell go list -f '{{$$d:=.Dir}} {{ range .TestGoFiles }}{{$$d}}/{{.}} {{end}}' ./...)
+CGO_ENABLED:=$(shell go env CGO_ENABLED)
+GOOS:=$(shell go env GOOS)
+GOARCH:=$(shell go env GOARCH)
 
 COVER_OUT:=cover.out
 COVER_HTML:=cover.html
@@ -18,53 +20,43 @@ CPU_PROF:=cpu.prof
 MEM_PROF:=mem.prof
 DEBUG=
 
-RESCACHED_BIN:=rescached
+RESCACHED_BIN=_bin/$(GOOS)_$(GOARCH)/rescached
 RESCACHED_MAN:=rescached.1.gz
-
 RESCACHED_CFG:=cmd/rescached/rescached.cfg
 RESCACHED_CFG_MAN:=_doc/rescached.cfg.5.gz
 
-RESOLVER_BIN:=resolver
-RESOLVER_MAN:=_doc/resolver.1.gz
+RESOLVER_BIN=_bin/$(GOOS)_$(GOARCH)/resolver
+RESOLVER_MAN=_doc/resolver.1.gz
 
-RESOLVERBENCH_BIN:=resolverbench
+RESOLVERBENCH_BIN=_bin/$(GOOS)_$(GOARCH)/resolverbench
 
 DIR_BIN=/usr/bin
 DIR_MAN=/usr/share/man
 DIR_RESCACHED=/usr/share/rescached
 
-build: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
+build: test memfs_generate.go
+	mkdir -p _bin/$(GOOS)_$(GOARCH)
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) \
+		go build $(DEBUG) -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/...
 
+debug: CGO_ENABLED=1
 debug: DEBUG=-race -v
-debug: test $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
+debug: test build
 
-test: $(COVER_HTML)
+test:
+	go test $(DEBUG) -count=1 -coverprofile=$(COVER_OUT) ./...
+	go tool cover -html=$(COVER_OUT) -o $(COVER_HTML)
 
 test.prof:
 	go test $(DEBUG) -count=1 \
 		-cpuprofile $(CPU_PROF) \
 		-memprofile $(MEM_PROF) ./...
 
-$(COVER_HTML): $(COVER_OUT)
-	go tool cover -html=$< -o $@
-
-$(COVER_OUT): $(SRC) $(SRC_TEST)
-	go test $(DEBUG) -count=1 -coverprofile=$@ ./...
-
 lint:
 	-golangci-lint run --enable-all ./...
 
-$(RESCACHED_BIN): memfs_generate.go $(SRC)
-	go build $(DEBUG) ./cmd/rescached
-
-memfs_generate.go: internal/generate_memfs.go _www/public/build/*
+memfs_generate.go: internal/generate_memfs.go $(wildcard _www/**/*)
 	go run ./internal/generate_memfs.go
-
-$(RESOLVER_BIN): $(SRC)
-	go build $(DEBUG) ./cmd/resolver
-
-$(RESOLVERBENCH_BIN): $(SRC)
-	go build $(DEBUG) ./cmd/resolverbench
 
 doc: $(RESCACHED_MAN) $(RESCACHED_CFG_MAN) $(RESOLVER_MAN)
 
@@ -88,6 +80,9 @@ clean:
 	rm -f $(COVER_OUT) $(COVER_HTML)
 	rm -f $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
 
+##
+## Common tasks for installing and uninstalling program.
+##
 
 install-common:
 	mkdir -p $(PREFIX)/etc/rescached
@@ -111,18 +106,6 @@ install-common:
 	cp LICENSE $(PREFIX)$(DIR_RESCACHED)
 
 
-install: build install-common
-	mkdir -p                      $(PREFIX)/usr/lib/systemd/system
-	cp _scripts/rescached.service $(PREFIX)/usr/lib/systemd/system/
-
-
-install-macos: DIR_BIN=/usr/local/bin
-install-macos: DIR_MAN=/usr/local/share/man
-install-macos: DIR_RESCACHED=/usr/local/share/rescached
-install-macos: build install-common
-	cp _scripts/info.kilabit.rescached.plist /Library/LaunchDaemons/
-
-
 uninstall-common:
 	rm -f $(PREFIX)$(DIR_RESCACHED)/LICENSE
 
@@ -133,12 +116,28 @@ uninstall-common:
 	rm -f $(PREFIX)$(DIR_BIN)/$(RESOLVER_BIN)
 	rm -f $(PREFIX)$(DIR_BIN)/$(RESCACHED_BIN)
 
+##
+## Tasks for installing and uninstalling on GNU/Linux with systemd.
+##
+
+install: build install-common
+	mkdir -p                      $(PREFIX)/usr/lib/systemd/system
+	cp _scripts/rescached.service $(PREFIX)/usr/lib/systemd/system/
 
 uninstall: uninstall-common
 	systemctl stop rescached
 	systemctl disable rescached
 	rm -f /usr/lib/systemd/system/rescached.service
 
+##
+## Tasks for installing and uninstalling service on macOS
+##
+
+install-macos: DIR_BIN=/usr/local/bin
+install-macos: DIR_MAN=/usr/local/share/man
+install-macos: DIR_RESCACHED=/usr/local/share/rescached
+install-macos: build install-common
+	cp _scripts/info.kilabit.rescached.plist /Library/LaunchDaemons/
 
 uninstall-macos: DIR_BIN=/usr/local/bin
 uninstall-macos: DIR_MAN=/usr/local/share/man
@@ -148,6 +147,14 @@ uninstall-macos: uninstall-common
 	launchctl unload info.kilabit.rescached
 	rm -f /Library/LaunchDaemons/info.kilabit.rescached.plist
 
-deploy:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./cmd/rescached
-	rsync --progress ./rescached dns-server:~/bin/rescached
+##
+## Tasks for deploying to public DNS server.
+##
+
+build-linux-amd64: CGO_ENABLED=0
+build-linux-amd64: GOOS=linux
+build-linux-amd64: GOARCH=amd64
+build-linux-amd64: build
+
+deploy: build-linux-amd64
+	rsync --progress _bin/linux_amd64/rescached dns-server:~/bin/rescached

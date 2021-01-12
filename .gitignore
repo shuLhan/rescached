@@ -1,5 +1,6 @@
 /README.html
 /TODO
+/_bin
 /_doc/benchmark.html
 /_www/node_modules/
 /cmd/rescached/memfs.go
