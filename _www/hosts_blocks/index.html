@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+		<link rel="icon" type="image/png" href="/favicon.png" />
+		<link rel="stylesheet" href="/index.css" />
+		<title>rescached | hosts blocks</title>
+
+		<style>
+			.block_source {
+				width: calc(100% - 2em);
+				overflow: auto;
+			}
+			.block_source input:disabled {
+				color: black;
+			}
+			.item {
+				width: 100%;
+				margin-bottom: 1em;
+			}
+			.item.header {
+				font-weight: bold;
+				margin-bottom: 1em;
+				border-bottom: 1px solid silver;
+			}
+			.item .is-enabled {
+				display: inline-block;
+				width: 4em;
+				vertical-align: top;
+			}
+			.item .info {
+				display: inline-block;
+				width: calc(100% - 6em);
+			}
+			.item .info input {
+				width: calc(100% - 4em);
+			}
+		</style>
+	</head>
+	<body onload="onLoad()">
+		<nav class="menu">
+			<a href="/"> rescached </a>
+			/
+			<a href="/environment/"> Environment </a>
+			/
+			<a href="/hosts_blocks/" class="active"> Hosts blocks </a>
+			/
+			<a href="/hosts.d/"> hosts.d </a>
+			/
+			<a href="/zone.d/"> zone.d </a>
+		</nav>
+
+		<div id="notif"></div>
+
+		<p>Configure the source of blocked hosts file.</p>
+
+		<div class="block_source">
+			<div class="item header">
+				<span class="is-enabled"> Enabled </span>
+				<span class="info"> Name </span>
+			</div>
+		</div>
+		<div id="HostsBlocks" class="block_source"></div>
+
+		<div>
+			<button onclick="updateHostsBlocks()">Save</button>
+		</div>
+
+		<script src="/index.js"></script>
+		<script src="/rescached.js"></script>
+		<script>
+			let resc = null
+
+			function onLoad() {
+				resc = new Rescached("")
+				getEnvironment()
+			}
+
+			async function getEnvironment() {
+				const res = await resc.getEnvironment()
+				if (res.code != 200) {
+					notifError(res.message)
+					return
+				}
+
+				let env = res.data
+				renderHostsBlocks(env.HostsBlocks)
+			}
+
+			function onCheckHostblock(idx, val) {
+				resc.env.HostsBlocks[idx].IsEnabled = val
+			}
+
+			async function updateHostsBlocks() {
+				const res = await resc.updateHostsBlocks(resc.env.HostsBlocks)
+				if (res.code != 200) {
+					notifError("updateHostsBlocks: ", res.message)
+					return
+				}
+
+				renderHostsBlocks(res.data)
+				notifInfo("The hosts blocks has been updated.")
+			}
+
+			function renderHostsBlocks(hostsBlocks) {
+				let parent = document.getElementById("HostsBlocks")
+				parent.innerHTML = ""
+
+				for (let x = 0; x < hostsBlocks.length; x++) {
+					let hostsBlock = hostsBlocks[x]
+					let item = document.createElement("div")
+					item.classList.add("item")
+					item.innerHTML = `
+						<span class="is-enabled">
+							<input
+								type="checkbox"
+								${hostsBlock.IsEnabled ? "checked" : ""}
+								oninput="onCheckHostblock('${x}', this.checked)"
+							/>
+						</span>
+						<span class="info">
+							<div>${hostsBlock.Name}</div>
+							<div> URL: <input value="${hostsBlock.URL}" disabled /> </div>
+							<div> Last updated at ${hostsBlock.LastUpdated} </div>
+						</span>`
+
+					parent.appendChild(item)
+				}
+			}
+		</script>
+	</body>
+</html>

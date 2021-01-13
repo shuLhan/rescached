@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+		<link rel="icon" type="image/png" href="/favicon.png" />
+		<link rel="stylesheet" href="/index.css" />
+		<title>rescached</title>
+
+		<style>
+			.message {
+				padding: 1em 0px;
+				border-bottom: 1px solid silver;
+			}
+			.rr {
+				margin-left: 1em;
+				width: 100%;
+			}
+			.rr.header {
+				font-weight: bold;
+			}
+			.rr span {
+				display: inline-block;
+			}
+			.kind {
+				width: 9em;
+			}
+			.type {
+				width: 5em;
+			}
+			.ttl {
+				width: 6em;
+			}
+			.value {
+				word-wrap: anywhere;
+				width: calc(100% - 24em);
+			}
+		</style>
+	</head>
+	<body>
+		<nav class="menu">
+			<a href="/" class="active"> rescached </a>
+			/
+			<a href="/environment/"> Environment </a>
+			/
+			<a href="/hosts_blocks/"> Hosts blocks </a>
+			/
+			<a href="/hosts.d/"> hosts.d </a>
+			/
+			<a href="/zone.d/"> zone.d </a>
+		</nav>
+		<div class="search">
+			Caches:
+			<input name="query" />
+			<button onclick="doSearch()">Search</button>
+		</div>
+		<div id="result"></div>
+		<div id="notif"></div>
+
+		<script src="/index.js"></script>
+		<script src="/rescached.js"></script>
+		<script>
+			const resc = new Rescached("")
+
+			async function doSearch() {
+				const query = document.getElementsByName("query")[0].value
+				console.log("doSearch: ", query)
+				const res = await resc.Search(query)
+				if (res.code != 200) {
+					notifError(`doSearch ${query}: ${res.message}`)
+					return
+				}
+				onSearchResult(res.data)
+			}
+
+			function onSearchResult(dnsRecords) {
+				const elResult = document.getElementById("result")
+				elResult.innerHTML = ""
+
+				for (let x = 0; x < dnsRecords.length; x++) {
+					const record = dnsRecords[x]
+					const divRecord = document.createElement("div")
+					divRecord.classList.add("message")
+					innerHTML = `
+						<div class="qname">
+							${record.Question.Name}
+							<button class="b-remove"
+								onclick="doRemove('${record.Question.Name}')"
+							>Remove from cache</button>
+						</div>
+						<div class="rr header">
+							<span class="kind"></span>
+							<span class="type"> Type </span>
+							<span class="ttl"> TTL </span>
+							<span class="value"> Value </span>
+						</div>
+					`
+					if (record.Answer !== null && record.Answer.length > 0) {
+						innerHTML += renderRR(record.Answer, "Answer")
+					}
+					if (record.Authority !== null && record.Authority.length > 0) {
+						innerHTML += renderRR(record.Authority, "Authority")
+					}
+					if (record.Additional !== null && record.Additional.length > 0) {
+						innerHTML += renderRR(record.Additional, "Additional")
+					}
+
+					divRecord.innerHTML = innerHTML
+					elResult.appendChild(divRecord)
+				}
+			}
+
+			function renderRR(listRR, title) {
+				let innerHTML = ""
+
+				for (let x = 0; x < listRR.length; x++) {
+					const rr = listRR[x]
+					innerHTML += `
+						<div class="rr">
+							<span class="kind"> ${title} </span>
+							<span class="type"> ${getRRTypeName(rr.Type)} </span>
+							<span class="ttl"> ${rr.TTL} </span>
+							<span class="value"> ${JSON.stringify(rr.Value, null, 2)} </span>
+						</div>
+					`
+				}
+				return innerHTML
+			}
+		</script>
+	</body>
+</html>

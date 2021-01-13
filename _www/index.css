@@ -1,0 +1,139 @@
+html,
+body {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+body {
+	background-color: floralwhite;
+	color: #333;
+	margin: 0;
+	padding: 8px;
+	box-sizing: border-box;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+a {
+	color: rgb(0, 100, 200);
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:visited {
+	color: rgb(0, 80, 160);
+}
+
+input,
+button,
+select,
+textarea {
+	font-family: inherit;
+	font-size: inherit;
+	padding: 0.4em;
+	margin: 0.5em 0;
+	box-sizing: border-box;
+	border: 1px solid #ccc;
+	border-radius: 2px;
+}
+
+input:disabled {
+	color: #ccc;
+}
+
+input[type="range"] {
+	height: 0;
+}
+
+button {
+	color: #333;
+	background-color: lavender;
+	outline: none;
+}
+
+button:disabled {
+	color: #999;
+}
+
+button:not(:disabled):active {
+	background-color: #ddd;
+}
+
+button:focus {
+	border-color: #666;
+}
+
+h1,
+h2 {
+	color: #ff3e00;
+	text-transform: uppercase;
+	font-weight: 100;
+}
+
+body {
+	margin: 0 auto;
+	width: 800px;
+	padding: 1em;
+}
+
+#notif {
+	position: fixed;
+	top: 1em;
+	width: 70%;
+}
+#notif > .error {
+	background-color: salmon;
+	padding: 1em;
+}
+#notif > .info {
+	background-color: lightblue;
+	padding: 1em;
+}
+
+nav.menu {
+	color: #ff3e00;
+	text-transform: uppercase;
+	font-weight: 100;
+	margin-bottom: 2em;
+}
+.active {
+	padding-bottom: 4px;
+	border-bottom: 4px solid #ff3e00;
+}
+
+.input > label {
+	width: 8em;
+	display: inline-block;
+}
+.input > input,
+.input > select {
+	width: calc(100% - 11em);
+	display: inline-block;
+}
+.input > .input-info-toggler {
+	border-radius: 50%;
+	border: 1px solid grey;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 12px;
+	height: 14px;
+	line-height: 14px;
+	padding: 2px;
+	text-align: center;
+	width: 14px;
+}
+.input > .input-info {
+	background-color: #eee;
+	margin: 8px 0px;
+	padding: 1em;
+}
+
+@media (max-width: 900px) {
+	body {
+		width: calc(100% - 2em);
+	}
+}

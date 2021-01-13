@@ -1,7 +1,7 @@
 RESCACHED(1)
 ============
-M. Shulhan
-2018.09.29
+M. Shulhan <ms@kilabit.info>
+20 January 2021
 :doctype: manpage
 :mansource: rescached
 :manmanual: rescached
@@ -41,14 +41,15 @@ List of current features,
 
 - Enable to handle request from UDP and TCP connections
 - Enable to forward request using UDP or TCP
-- Load and serve addresses and hostnames in +/etc/hosts+
+- Load and serve addresses and host names in +/etc/hosts+
 - Load and serve hosts formatted files inside directory
   +/etc/rescached/hosts.d/+
 - Blocking ads and/or malicious websites through host list in
   +/etc/rescached/hosts.d/+
-- Support loading and serving master (zone) file format from
-  +/etc/rescached/master.d+
+- Support loading and serving zone file format from
+  +/etc/rescached/zone.d+
 - Integration with openresolv
+- Support DNS over TLS (DoH) (RFC 7858)
 - Support DNS over HTTPS (DoH) (RFC 8484)
 
 
@@ -56,7 +57,7 @@ List of current features,
 
 When you open a website, let say 'kilabit.info', in a browser, the first thing
 that browser do is to translate name address 'kilabit.info' into an internet
-address (for example to 35.240.172.103) so browser can make a connection to
+address (for example to 18.136.35.199) so browser can make a connection to
 'kilabit.info' server.
 
 How browser do that?
@@ -245,16 +246,16 @@ invoking,
 All rescached configuration located in file +/etc/rescached/rescached.cfg+.
 See manual page of *rescached.cfg*(5) for more information.
 
-=== MASTER FILE
+=== ZONE FILE
 
-Rescached support loading master file format.
+Rescached support loading zone file format.
 Unlike hosts file format, where each domain name is only mapped to type A
-(IPv4 address), in master file, one can define other type that known to
+(IPv4 address), in zone file, one can define other type that known to
 rescached.
-All files defined +dir.master+ configuration are considered as master file and
+All files defined +zone.d+ configuration are considered as zone file and
 will be loaded by rescached only if the configuration is not empty.
 
-Example of master file,
+Example of zone file,
 
 ----
 $ORIGIN my-site.vm.
@@ -294,7 +295,7 @@ The third RR define a mapping for another relative subdomain
 The last RR define a mapping for absolute domain "my-site.com." to IP
 address "10.8.0.1".
 
-For more information about format of master file see RFC 1035 section 5.
+For more information about format of zone file see RFC 1035 section 5.
 
 
 === INTEGRATION WITH OPENRESOLV

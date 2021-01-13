@@ -200,16 +200,16 @@ Its value must be negative and greater or equal than -1 hour (-3600 seconds).
 
 == FILES
 
-[[dir.hosts]]
+[[hosts.d]]
 === /etc/rescached/hosts.d
 
 Path to hosts directory where rescached will load all hosts formatted files.
 
 
-[[dir.master]]
-=== /etc/rescached/master.d
+[[zone.d]]
+=== /etc/rescached/zone.d
 
-Path to master directory where rescached will load all master files.
+Path to zone directory where rescached will load all zone files.
 
 
 == EXAMPLE

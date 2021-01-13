@@ -46,8 +46,8 @@ const (
 	keyTLSPort             = "tls.port"
 	keyTLSPrivateKey       = "tls.private_key"
 
-	dirHosts  = "/etc/rescached/hosts.d"
-	dirMaster = "/etc/rescached/master.d"
+	dirHosts = "/etc/rescached/hosts.d"
+	dirZone  = "/etc/rescached/zone.d"
 )
 
 //

@@ -14,7 +14,7 @@ import (
 
 func main() {
 	opts := memfs.Options{
-		Root: "_www/public/",
+		Root: "_www",
 		Includes: []string{
 			`.*\.html`,
 			`.*\.js`,

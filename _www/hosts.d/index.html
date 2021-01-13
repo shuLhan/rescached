@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+		<link rel="icon" type="image/png" href="/favicon.png" />
+		<link rel="stylesheet" href="/index.css" />
+		<title>rescached | hosts.d</title>
+
+		<style>
+			.nav-left {
+				padding: 0px;
+				width: 280px;
+				float: left;
+			}
+			.nav-left .item {
+				margin: 4px 0px;
+			}
+			#activeHostsFile {
+				float: left;
+				width: calc(100% - 300px);
+			}
+			.host {
+				font-family: monospace;
+				width: 100%;
+			}
+			.host.header {
+				margin: 1em 0px;
+				font-weight: bold;
+				border-bottom: 1px solid silver;
+			}
+			.host_name {
+				display: inline-block;
+				width: 240px;
+				word-wrap: break-word;
+			}
+			.host_value {
+				display: inline-block;
+				width: 140px;
+			}
+		</style>
+	</head>
+	<body onload="onLoad()">
+		<nav class="menu">
+			<a href="/"> rescached </a>
+			/
+			<a href="/environment/"> Environment </a>
+			/
+			<a href="/hosts_blocks/"> Hosts blocks </a>
+			/
+			<a href="/hosts.d/" class="active"> hosts.d </a>
+			/
+			<a href="/zone.d/"> zone.d </a>
+		</nav>
+
+		<div id="notif"></div>
+
+		<div class="hosts_d">
+			<div class="nav-left">
+				<h3>Hosts files</h3>
+				<div id="HostsFiles"></div>
+
+				<br />
+
+				<label>
+					<span>New hosts file:</span>
+					<br />
+					<input id="newHostsFile" oninput="onInputNewHostsFile(this.value)" />
+				</label>
+				<button onclick="onCreateHostsFile()">Create</button>
+			</div>
+
+			<div id="activeHostsFile">
+				<p>Select one of the hosts file to manage.</p>
+			</div>
+		</div>
+
+		<script src="/index.js"></script>
+		<script src="/rescached.js"></script>
+		<script>
+			let resc = null
+			let activeHostsFile = null
+			let newHostsFile = ""
+			let newRecord = {
+				Name: "",
+				Value: "",
+			}
+
+			async function getHostsFile(name) {
+				activeHostsFile = resc.env.HostsFiles[name]
+				if (typeof activeHostsFile.Records === "undefined") {
+					activeHostsFile.Records = []
+				}
+				if (activeHostsFile.Records === null) {
+					activeHostsFile.Records = []
+				}
+				if (activeHostsFile.Records.length === 0) {
+					const res = await resc.HostsFileGet(name)
+					activeHostsFile.Records = res.data
+				}
+				renderHostsFile(activeHostsFile)
+				newRecord.Name = ""
+				newRecord.Value = ""
+			}
+
+			async function onCreateHostsFile() {
+				if (newHostsFile === "") {
+					notifError("Please fill the hosts file name first")
+					return
+				}
+
+				let res = await resc.HostsFileCreate(newHostsFile)
+
+				if (res.code >= 400) {
+					notifError("ERROR: HostsFileCreate: " + res.message)
+					return
+				}
+				renderHostsFiles(resc.env.HostsFiles)
+				notifInfo(res.message)
+				resetInputs()
+			}
+
+			async function onDeleteActiveHostsFile() {
+				const res = await resc.HostsFileDelete(activeHostsFile.Name)
+				if (res.code != 200) {
+					notifError(res.message)
+					return
+				}
+				renderHostsFiles(resc.env.HostsFiles)
+				document.getElementById(
+					"activeHostsFile",
+				).innerHTML = `<p>Select one of the hosts file to manage.</p>`
+				notifInfo(`Hosts file "${activeHostsFile.Name}" has been deleted`)
+				activeHostsFile = null
+			}
+
+			async function onCreateRecord(hostsFile) {
+				if (hostsFile === "") {
+					notifError("invalid or empty hosts file name: " + hostsFile)
+					return
+				}
+				if (newRecord.Name === "") {
+					notifError("invalid or empty domain name")
+					return
+				}
+				if (newRecord.Value === "") {
+					notifError("invalid or empty IP address")
+					return
+				}
+				let res = await resc.HostsFileRecordAdd(hostsFile, newRecord.Name, newRecord.Value)
+				if (res.code >= 400) {
+					notifError("failed to add record for " + hostsFile + ": " + res.message)
+					return
+				}
+				renderNewRecord(res.data)
+			}
+
+			async function onDeleteRecord(domain) {
+				let res = await resc.HostsFileRecordDelete(activeHostsFile.Name, domain)
+				if (res.code !== 200) {
+					notifError("Failed to delete record " + domain)
+					return
+				}
+				activeHostsFile = resc.env.HostsFiles[activeHostsFile.Name]
+				renderHostsFile(activeHostsFile)
+			}
+
+			function onInputNewHostsFile(v) {
+				newHostsFile = v
+			}
+
+			function onInputNewRecord(k, v) {
+				newRecord[k] = v
+			}
+
+			async function onLoad() {
+				resc = new Rescached("")
+
+				let res = await resc.getEnvironment()
+				if (res.code != 200) {
+					notifError(res.message)
+					return
+				}
+
+				renderHostsFiles(res.data.HostsFiles)
+				resetInputs()
+			}
+
+			function renderHostsFile(hf) {
+				let content = document.getElementById("activeHostsFile")
+				let innerHTML = `
+					<p>
+						${hf.Name} (${hf.Records.length} records)
+						<button onclick="onDeleteActiveHostsFile()">Delete</button>
+					</p>
+					<div class="host">
+						<input class="host_name" placeholder="Domain name" value=""
+							oninput="onInputNewRecord('Name', this.value)"
+						/>
+						<input class="host_value" placeholder="IP address" value=""
+							oninput="onInputNewRecord('Value', this.value)"
+						/>
+						<button onclick="onCreateRecord('${hf.Name}')">Create</button>
+					</div>
+					<div class="host header">
+						<span class="host_name"> Domain name </span>
+						<span class="host_value"> IP address </span>
+					</div>
+					<div id="records">
+				`
+				for (let x = 0; x < hf.Records.length; x++) {
+					let rr = hf.Records[x]
+					innerHTML += `
+						<div class="host">
+							<span class="host_name"> ${rr.Name} </span>
+							<span class="host_value"> ${rr.Value} </span>
+							<button onclick="onDeleteRecord('${rr.Name}')">X</button>
+						</div>`
+				}
+				innerHTML += "</div>"
+				content.innerHTML = innerHTML
+			}
+
+			function renderHostsFiles(hostsFiles) {
+				let parent = document.getElementById("HostsFiles")
+				parent.innerHTML = ""
+
+				for (let k in hostsFiles) {
+					if (!hostsFiles.hasOwnProperty(k)) {
+						continue
+					}
+					let hf = hostsFiles[k]
+					let item = document.createElement("div")
+					item.classList.add("item")
+					item.innerHTML = `<a href="#" onclick="getHostsFile('${k}')"> ${hf.Name} </a>`
+					parent.appendChild(item)
+				}
+			}
+
+			// renderNewRecord prepend the new record on top of the list.
+			function renderNewRecord(rr) {
+				let div = document.getElementById("records")
+				innerHTML = `
+					<div class="host">
+						<span class="host_name"> ${rr.Name} </span>
+						<span class="host_value"> ${rr.Value} </span>
+						<button onclick="onDeleteRecord('${rr.Name}')">X</button>
+					</div>`
+				div.innerHTML = innerHTML + div.innerHTML
+			}
+
+			function resetInputs() {
+				document.getElementById("newHostsFile").value = ""
+				newHostsFile = ""
+			}
+		</script>
+	</body>
+</html>

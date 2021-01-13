@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	stdhttp "net/http"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -18,7 +18,7 @@ import (
 
 	"github.com/shuLhan/share/lib/dns"
 	liberrors "github.com/shuLhan/share/lib/errors"
-	"github.com/shuLhan/share/lib/http"
+	libhttp "github.com/shuLhan/share/lib/http"
 	"github.com/shuLhan/share/lib/memfs"
 	libnet "github.com/shuLhan/share/lib/net"
 )
@@ -26,23 +26,32 @@ import (
 var memFS *memfs.MemFS
 
 const (
-	defHTTPDRootDir     = "_www/public/"
-	paramNameDomain     = "domain"
-	paramNameName       = "name"
-	paramNameQuery      = "query"
-	paramNameType       = "type"
-	paramNameValue      = "value"
-	apiCaches           = "/api/caches"
-	apiEnvironment      = "/api/environment"
-	apiHostsBlock       = "/api/hosts_block"
-	apiHostsDir         = "/api/hosts.d/:name"
-	apiHostsDirRR       = "/api/hosts.d/:name/rr"
-	apiMasterFile       = "/api/master.d/:name"
-	apiMasterFileRRType = "/api/master.d/:name/rr/:type"
+	defHTTPDRootDir   = "_www"
+	paramNameDomain   = "domain"
+	paramNameName     = "name"
+	paramNameQuery    = "query"
+	paramNameType     = "type"
+	paramNameValue    = "value"
+	apiCaches         = "/api/caches"
+	apiEnvironment    = "/api/environment"
+	apiHostsBlock     = "/api/hosts_block"
+	apiHostsDir       = "/api/hosts.d/:name"
+	apiHostsDirRR     = "/api/hosts.d/:name/rr"
+	apiZoneFile       = "/api/zone.d/:name"
+	apiZoneFileRRType = "/api/zone.d/:name/rr/:type"
 )
 
+type response struct {
+	liberrors.E
+	Data interface{} `json:"data"`
+}
+
+func (r *response) Unwrap() error {
+	return &r.E
+}
+
 func (srv *Server) httpdInit() (err error) {
-	env := &http.ServerOptions{
+	env := &libhttp.ServerOptions{
 		Options: memfs.Options{
 			Root: defHTTPDRootDir,
 			Includes: []string{
@@ -59,11 +68,11 @@ func (srv *Server) httpdInit() (err error) {
 			"http://127.0.0.1:5000",
 		},
 		CORSAllowHeaders: []string{
-			http.HeaderContentType,
+			libhttp.HeaderContentType,
 		},
 	}
 
-	srv.httpd, err = http.NewServer(env)
+	srv.httpd, err = libhttp.NewServer(env)
 	if err != nil {
 		return fmt.Errorf("newHTTPServer: %w", err)
 	}
@@ -77,32 +86,32 @@ func (srv *Server) httpdInit() (err error) {
 }
 
 func (srv *Server) httpdRegisterEndpoints() (err error) {
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodGet,
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodGet,
 		Path:         apiCaches,
-		RequestType:  http.RequestTypeQuery,
-		ResponseType: http.ResponseTypeJSON,
+		RequestType:  libhttp.RequestTypeQuery,
+		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.httpdAPIGetCaches,
 	})
 	if err != nil {
 		return err
 	}
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodDelete,
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodDelete,
 		Path:         apiCaches,
-		RequestType:  http.RequestTypeQuery,
-		ResponseType: http.ResponseTypeJSON,
+		RequestType:  libhttp.RequestTypeQuery,
+		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.httpdAPIDeleteCaches,
 	})
 	if err != nil {
 		return err
 	}
 
-	epAPIGetEnvironment := &http.Endpoint{
-		Method:       http.RequestMethodGet,
+	epAPIGetEnvironment := &libhttp.Endpoint{
+		Method:       libhttp.RequestMethodGet,
 		Path:         apiEnvironment,
-		RequestType:  http.RequestTypeJSON,
-		ResponseType: http.ResponseTypeJSON,
+		RequestType:  libhttp.RequestTypeJSON,
+		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.httpdAPIGetEnvironment,
 	}
 
@@ -111,11 +120,11 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	epAPIPostEnvironment := &http.Endpoint{
-		Method:       http.RequestMethodPost,
+	epAPIPostEnvironment := &libhttp.Endpoint{
+		Method:       libhttp.RequestMethodPost,
 		Path:         apiEnvironment,
-		RequestType:  http.RequestTypeJSON,
-		ResponseType: http.ResponseTypeJSON,
+		RequestType:  libhttp.RequestTypeJSON,
+		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.httpdAPIPostEnvironment,
 	}
 
@@ -124,11 +133,11 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodPost,
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodPost,
 		Path:         apiHostsBlock,
-		RequestType:  http.RequestTypeJSON,
-		ResponseType: http.ResponseTypeJSON,
+		RequestType:  libhttp.RequestTypeJSON,
+		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiHostsBlockUpdate,
 	})
 	if err != nil {
@@ -136,33 +145,33 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 
 	// Register API to create new hosts file.
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodPut,
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodPut,
 		Path:         apiHostsDir,
-		RequestType:  http.RequestTypeNone,
-		ResponseType: http.ResponseTypeNone,
+		RequestType:  libhttp.RequestTypeNone,
+		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiHostsFileCreate,
 	})
 	if err != nil {
 		return err
 	}
 	// Register API to get content of hosts file.
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodGet,
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodGet,
 		Path:         apiHostsDir,
-		RequestType:  http.RequestTypeNone,
-		ResponseType: http.ResponseTypeJSON,
+		RequestType:  libhttp.RequestTypeNone,
+		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiHostsFileGet,
 	})
 	if err != nil {
 		return err
 	}
 	// Register API to delete hosts file.
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodDelete,
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodDelete,
 		Path:         apiHostsDir,
-		RequestType:  http.RequestTypeNone,
-		ResponseType: http.ResponseTypeJSON,
+		RequestType:  libhttp.RequestTypeNone,
+		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiHostsFileDelete,
 	})
 	if err != nil {
@@ -170,64 +179,65 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 
 	// Register API to create one record in hosts file.
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodPost,
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodPost,
 		Path:         apiHostsDirRR,
-		RequestType:  http.RequestTypeQuery,
-		ResponseType: http.ResponseTypeJSON,
+		RequestType:  libhttp.RequestTypeQuery,
+		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiHostsFileRRCreate,
 	})
 	if err != nil {
 		return err
 	}
+
 	// Register API to delete a record from hosts file.
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodDelete,
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodDelete,
 		Path:         apiHostsDirRR,
-		RequestType:  http.RequestTypeQuery,
-		ResponseType: http.ResponseTypeJSON,
+		RequestType:  libhttp.RequestTypeQuery,
+		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiHostsFileRRDelete,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodPut,
-		Path:         apiMasterFile,
-		RequestType:  http.RequestTypeNone,
-		ResponseType: http.ResponseTypeJSON,
-		Call:         srv.apiMasterFileCreate,
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodPut,
+		Path:         apiZoneFile,
+		RequestType:  libhttp.RequestTypeNone,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.apiZoneFileCreate,
 	})
 	if err != nil {
 		return err
 	}
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodDelete,
-		Path:         apiMasterFile,
-		RequestType:  http.RequestTypeNone,
-		ResponseType: http.ResponseTypeJSON,
-		Call:         srv.apiMasterFileDelete,
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodDelete,
+		Path:         apiZoneFile,
+		RequestType:  libhttp.RequestTypeNone,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.apiZoneFileDelete,
 	})
 	if err != nil {
 		return err
 	}
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodPost,
-		Path:         apiMasterFileRRType,
-		RequestType:  http.RequestTypeJSON,
-		ResponseType: http.ResponseTypeJSON,
-		Call:         srv.apiMasterFileCreateRR,
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodPost,
+		Path:         apiZoneFileRRType,
+		RequestType:  libhttp.RequestTypeJSON,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.apiZoneFileRRCreate,
 	})
 	if err != nil {
 		return err
 	}
-	err = srv.httpd.RegisterEndpoint(&http.Endpoint{
-		Method:       http.RequestMethodDelete,
-		Path:         apiMasterFileRRType,
-		RequestType:  http.RequestTypeJSON,
-		ResponseType: http.ResponseTypeJSON,
-		Call:         srv.apiMasterFileDeleteRR,
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodDelete,
+		Path:         apiZoneFileRRType,
+		RequestType:  libhttp.RequestTypeJSON,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.apiZoneFileRRDelete,
 	})
 	if err != nil {
 		return err
@@ -253,12 +263,14 @@ func (srv *Server) httpdRun() {
 }
 
 func (srv *Server) httpdAPIGetCaches(
-	_ stdhttp.ResponseWriter, req *stdhttp.Request, _ []byte,
+	_ http.ResponseWriter, req *http.Request, _ []byte,
 ) (
 	resBody []byte, err error,
 ) {
-	res := &liberrors.E{
-		Code: stdhttp.StatusInternalServerError,
+	res := response{
+		E: liberrors.E{
+			Code: http.StatusInternalServerError,
+		},
 	}
 
 	q := req.Form.Get(paramNameQuery)
@@ -266,7 +278,7 @@ func (srv *Server) httpdAPIGetCaches(
 	re, err := regexp.Compile(q)
 	if err != nil {
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	listMsg := srv.dns.SearchCaches(re)
@@ -274,16 +286,19 @@ func (srv *Server) httpdAPIGetCaches(
 		listMsg = make([]*dns.Message, 0)
 	}
 
-	return json.Marshal(listMsg)
+	res.Code = http.StatusOK
+	res.Data = listMsg
+
+	return json.Marshal(res)
 }
 
 func (srv *Server) httpdAPIDeleteCaches(
-	_ stdhttp.ResponseWriter, req *stdhttp.Request, _ []byte,
+	_ http.ResponseWriter, req *http.Request, _ []byte,
 ) (
 	resBody []byte, err error,
 ) {
 	res := &liberrors.E{
-		Code: stdhttp.StatusInternalServerError,
+		Code: http.StatusInternalServerError,
 	}
 
 	q := req.Form.Get(paramNameName)
@@ -294,28 +309,34 @@ func (srv *Server) httpdAPIDeleteCaches(
 
 	srv.dns.RemoveCachesByNames([]string{q})
 
-	res.Code = stdhttp.StatusOK
+	res.Code = http.StatusOK
 	res.Message = fmt.Sprintf("%q has been removed from caches", q)
 
 	return json.Marshal(res)
 }
 
 func (srv *Server) httpdAPIGetEnvironment(
-	httpRes stdhttp.ResponseWriter, req *stdhttp.Request, reqBody []byte,
+	httpRes http.ResponseWriter, req *http.Request, reqBody []byte,
 ) (
 	resBody []byte, err error,
 ) {
-	return json.Marshal(srv.env)
+	res := &response{}
+	res.Code = http.StatusOK
+	res.Data = srv.env
+
+	return json.Marshal(res)
 }
 
 func (srv *Server) httpdAPIPostEnvironment(
-	httpRes stdhttp.ResponseWriter, req *stdhttp.Request, reqBody []byte,
+	httpRes http.ResponseWriter, req *http.Request, reqBody []byte,
 ) (
 	resBody []byte, err error,
 ) {
-	res := &liberrors.E{
-		Code:    stdhttp.StatusOK,
-		Message: "Restarting DNS server",
+	res := &response{
+		E: liberrors.E{
+			Code:    http.StatusOK,
+			Message: "Restarting DNS server",
+		},
 	}
 
 	newOpts := new(environment)
@@ -325,7 +346,7 @@ func (srv *Server) httpdAPIPostEnvironment(
 	}
 
 	if len(newOpts.NameServers) == 0 {
-		res.Code = stdhttp.StatusBadRequest
+		res.Code = http.StatusBadRequest
 		res.Message = "at least one parent name servers must be defined"
 		return nil, res
 	}
@@ -336,7 +357,7 @@ func (srv *Server) httpdAPIPostEnvironment(
 
 	err = newOpts.write(srv.fileConfig)
 	if err != nil {
-		res.Code = stdhttp.StatusInternalServerError
+		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		return nil, res
 	}
@@ -346,7 +367,7 @@ func (srv *Server) httpdAPIPostEnvironment(
 	srv.Stop()
 	err = srv.Start()
 	if err != nil {
-		res.Code = stdhttp.StatusInternalServerError
+		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		return nil, res
 	}
@@ -357,14 +378,14 @@ func (srv *Server) httpdAPIPostEnvironment(
 //
 // apiHostsBlockUpdate set the HostsBlock to be enabled or disabled.
 //
-// If its status changes to enabled, unhide it file, populate the hosts back
-// to caches, and add it to list of HostsFiles.
+// If its status changes to enabled, unhide the hosts block file, populate the
+// hosts back to caches, and add it to list of HostsFiles.
 //
 // If its status changes to disabled, remove the hosts from caches, hide it,
 // and remove it from list of HostsFiles.
 //
 func (srv *Server) apiHostsBlockUpdate(
-	httpRes stdhttp.ResponseWriter, req *stdhttp.Request, reqBody []byte,
+	httpRes http.ResponseWriter, req *http.Request, reqBody []byte,
 ) (
 	resBody []byte, err error,
 ) {
@@ -375,8 +396,10 @@ func (srv *Server) apiHostsBlockUpdate(
 		return nil, err
 	}
 
-	res := &liberrors.E{
-		Code: stdhttp.StatusInternalServerError,
+	res := &response{
+		E: liberrors.E{
+			Code: http.StatusInternalServerError,
+		},
 	}
 
 	for _, hbx := range hostsBlocks {
@@ -413,7 +436,10 @@ func (srv *Server) apiHostsBlockUpdate(
 		return nil, res
 	}
 
-	return json.Marshal(srv.env)
+	res.Code = http.StatusOK
+	res.Data = hostsBlocks
+
+	return json.Marshal(res)
 }
 
 func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
@@ -469,16 +495,17 @@ func (srv *Server) hostsBlockDisable(hb *hostsBlock) (err error) {
 }
 
 func (srv *Server) apiHostsFileCreate(
-	httpres stdhttp.ResponseWriter, httpreq *stdhttp.Request, _ []byte,
+	httpres http.ResponseWriter, httpreq *http.Request, _ []byte,
 ) (
 	resbody []byte, err error,
 ) {
+	res := &response{}
+
 	name := httpreq.Form.Get(paramNameName)
 	if len(name) == 0 {
-		return nil, &liberrors.E{
-			Code:    stdhttp.StatusBadRequest,
-			Message: "hosts file name is invalid or empty",
-		}
+		res.Code = http.StatusBadRequest
+		res.Message = "hosts file name is invalid or empty"
+		return nil, res
 	}
 
 	_, found := srv.env.HostsFiles[name]
@@ -486,51 +513,61 @@ func (srv *Server) apiHostsFileCreate(
 		path := filepath.Join(dirHosts, name)
 		hfile, err := dns.NewHostsFile(path, nil)
 		if err != nil {
-			return nil, &liberrors.E{
-				Code:    stdhttp.StatusInternalServerError,
-				Message: err.Error(),
-			}
+			res.Code = http.StatusInternalServerError
+			res.Message = err.Error()
+			return nil, res
 		}
 		srv.env.HostsFiles[hfile.Name] = hfile
 	}
 
-	httpres.WriteHeader(stdhttp.StatusCreated)
+	res.Code = http.StatusOK
+	res.Message = fmt.Sprintf("Hosts file %q has been created", name)
 
-	return nil, nil
+	return json.Marshal(res)
 }
 
 func (srv *Server) apiHostsFileGet(
-	_ stdhttp.ResponseWriter, httpreq *stdhttp.Request, _ []byte,
+	_ http.ResponseWriter, httpreq *http.Request, _ []byte,
 ) (
 	resbody []byte, err error,
 ) {
+	res := &response{}
+
 	name := httpreq.Form.Get(paramNameName)
 
-	hfile, found := srv.env.HostsFiles[name]
-	if !found || hfile.Records == nil {
-		return []byte("[]"), nil
+	hf, found := srv.env.HostsFiles[name]
+	if !found {
+		res.Code = http.StatusNotFound
+		res.Message = "invalid or empty hosts file " + name
+		return nil, res
+	}
+	if hf.Records == nil || cap(hf.Records) == 0 {
+		hf.Records = make([]*dns.ResourceRecord, 0, 1)
 	}
 
-	return json.Marshal(&hfile.Records)
+	res.Code = http.StatusOK
+	res.Data = hf.Records
+
+	return json.Marshal(res)
 }
 
 func (srv *Server) apiHostsFileDelete(
-	_ stdhttp.ResponseWriter, httpreq *stdhttp.Request, reqbody []byte,
+	_ http.ResponseWriter, httpreq *http.Request, reqbody []byte,
 ) (
 	resbody []byte, err error,
 ) {
-	res := &liberrors.E{
-		Code: stdhttp.StatusOK,
-	}
+	res := &response{}
 
 	name := httpreq.Form.Get(paramNameName)
 	if len(name) == 0 {
+		res.Code = http.StatusBadRequest
 		res.Message = "empty or invalid host file name"
 		return nil, res
 	}
 
 	hfile, found := srv.env.HostsFiles[name]
 	if !found {
+		res.Code = http.StatusBadRequest
 		res.Message = "apiDeleteHostsFile: " + name + " not found"
 		return nil, res
 	}
@@ -540,12 +577,14 @@ func (srv *Server) apiHostsFileDelete(
 
 	err = hfile.Delete()
 	if err != nil {
+		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		return nil, res
 	}
 
 	delete(srv.env.HostsFiles, name)
 
+	res.Code = http.StatusOK
 	res.Message = name + " has been deleted"
 	return json.Marshal(res)
 }
@@ -554,13 +593,12 @@ func (srv *Server) apiHostsFileDelete(
 // apiHostsFileRRCreate create new record and save it to the hosts file.
 //
 func (srv *Server) apiHostsFileRRCreate(
-	_ stdhttp.ResponseWriter, httpreq *stdhttp.Request, _ []byte,
+	_ http.ResponseWriter, httpreq *http.Request, _ []byte,
 ) (
 	resbody []byte, err error,
 ) {
-	res := &liberrors.E{
-		Code: stdhttp.StatusBadRequest,
-	}
+	res := &response{}
+	res.Code = http.StatusBadRequest
 
 	hostsFileName := httpreq.Form.Get(paramNameName)
 	if len(hostsFileName) == 0 {
@@ -597,28 +635,31 @@ func (srv *Server) apiHostsFileRRCreate(
 
 	err = hfile.AppendAndSaveRecord(rr)
 	if err != nil {
-		res.Code = stdhttp.StatusInternalServerError
+		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		return nil, res
 	}
 
 	err = srv.dns.PopulateCachesByRR([]*dns.ResourceRecord{rr}, hostsFileName)
 	if err != nil {
-		res.Code = stdhttp.StatusInternalServerError
+		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		return nil, res
 	}
 
-	return json.Marshal(rr)
+	res.Code = http.StatusOK
+	res.Data = rr
+
+	return json.Marshal(res)
 }
 
 func (srv *Server) apiHostsFileRRDelete(
-	_ stdhttp.ResponseWriter, httpreq *stdhttp.Request, reqbody []byte,
+	_ http.ResponseWriter, httpreq *http.Request, reqbody []byte,
 ) (
 	resbody []byte, err error,
 ) {
 	res := &liberrors.E{
-		Code: stdhttp.StatusBadRequest,
+		Code: http.StatusBadRequest,
 	}
 
 	hostsFileName := httpreq.Form.Get(paramNameName)
@@ -646,29 +687,28 @@ func (srv *Server) apiHostsFileRRDelete(
 	}
 	err = hfile.Save()
 	if err != nil {
-		res.Code = stdhttp.StatusInternalServerError
+		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		return nil, res
 	}
 
 	srv.dns.RemoveLocalCachesByNames([]string{domainName})
 
-	res.Code = stdhttp.StatusOK
+	res.Code = http.StatusOK
 	res.Message = "domain name '" + domainName + "' has been removed from hosts file"
 
 	return json.Marshal(res)
 }
 
-func (srv *Server) apiMasterFileCreate(
-	_ stdhttp.ResponseWriter,
-	httpreq *stdhttp.Request,
+func (srv *Server) apiZoneFileCreate(
+	_ http.ResponseWriter,
+	httpreq *http.Request,
 	reqbody []byte,
 ) (
 	resbody []byte, err error,
 ) {
-	res := &liberrors.E{
-		Code: stdhttp.StatusBadRequest,
-	}
+	res := &response{}
+	res.Code = http.StatusBadRequest
 
 	zoneName := httpreq.Form.Get(paramNameName)
 	if len(zoneName) == 0 {
@@ -683,33 +723,37 @@ func (srv *Server) apiMasterFileCreate(
 
 	mf, ok := srv.env.ZoneFiles[zoneName]
 	if ok {
-		return json.Marshal(mf)
+		res.Code = http.StatusOK
+		res.Data = mf
+		return json.Marshal(res)
 	}
 
-	zoneFile := filepath.Join(dirMaster, zoneName)
+	zoneFile := filepath.Join(dirZone, zoneName)
 	mf = dns.NewZoneFile(zoneFile, zoneName)
 	err = mf.Save()
 	if err != nil {
-		res.Code = stdhttp.StatusInternalServerError
+		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		return nil, res
 	}
 
 	srv.env.ZoneFiles[zoneName] = mf
 
-	return json.Marshal(mf)
+	res.Code = http.StatusOK
+	res.Data = mf
+
+	return json.Marshal(res)
 }
 
-func (srv *Server) apiMasterFileDelete(
-	_ stdhttp.ResponseWriter,
-	httpreq *stdhttp.Request,
+func (srv *Server) apiZoneFileDelete(
+	_ http.ResponseWriter,
+	httpreq *http.Request,
 	reqbody []byte,
 ) (
 	resbody []byte, err error,
 ) {
-	res := &liberrors.E{
-		Code: stdhttp.StatusBadRequest,
-	}
+	res := &response{}
+	res.Code = http.StatusBadRequest
 
 	zoneName := httpreq.Form.Get(paramNameName)
 	if len(zoneName) == 0 {
@@ -733,40 +777,39 @@ func (srv *Server) apiMasterFileDelete(
 
 	err = mf.Delete()
 	if err != nil {
-		res.Code = stdhttp.StatusInternalServerError
+		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		return nil, res
 	}
 
-	res.Code = stdhttp.StatusOK
+	res.Code = http.StatusOK
 	res.Message = zoneName + " has been deleted"
 
 	return json.Marshal(res)
 }
 
 //
-// apiMasterFileCreateRR create new RR for the master file.
+// apiZoneFileRRCreate create new RR for the zone file.
 //
-func (srv *Server) apiMasterFileCreateRR(
-	_ stdhttp.ResponseWriter,
-	httpreq *stdhttp.Request,
+func (srv *Server) apiZoneFileRRCreate(
+	_ http.ResponseWriter,
+	httpreq *http.Request,
 	reqbody []byte,
 ) (
 	resbody []byte, err error,
 ) {
-	res := &liberrors.E{
-		Code: stdhttp.StatusBadRequest,
-	}
+	res := &response{}
+	res.Code = http.StatusBadRequest
 
 	zoneFileName := httpreq.Form.Get(paramNameName)
 	if len(zoneFileName) == 0 {
-		res.Message = "empty or invalid master file name"
+		res.Message = "empty or invalid zone file name"
 		return nil, res
 	}
 
 	zoneFile := srv.env.ZoneFiles[zoneFileName]
 	if zoneFile == nil {
-		res.Message = "unknown master file name " + zoneFileName
+		res.Message = "unknown zone file name " + zoneFileName
 		return nil, res
 	}
 
@@ -778,14 +821,14 @@ func (srv *Server) apiMasterFileCreateRR(
 		return nil, res
 	}
 
-	rr := dns.ResourceRecord{}
+	rr := &dns.ResourceRecord{}
 	switch uint16(rrType) {
 	case dns.QueryTypeSOA:
 		rr.Value = &dns.RDataSOA{}
 	case dns.QueryTypeMX:
 		rr.Value = &dns.RDataMX{}
 	}
-	err = json.Unmarshal(reqbody, &rr)
+	err = json.Unmarshal(reqbody, rr)
 	if err != nil {
 		res.Message = "json.Unmarshal:" + err.Error()
 		return nil, res
@@ -812,37 +855,45 @@ func (srv *Server) apiMasterFileCreateRR(
 		}
 	}
 
-	listRR := []*dns.ResourceRecord{&rr}
+	listRR := []*dns.ResourceRecord{rr}
 	err = srv.dns.PopulateCachesByRR(listRR, zoneFile.Path)
 	if err != nil {
-		res.Message = "UpsertCacheByRR: " + err.Error()
+		res.Code = http.StatusBadRequest
+		res.Message = "PopulateCacheByRR: " + err.Error()
 		return nil, res
 	}
 
-	// Update the Master file.
-	zoneFile.Add(&rr)
+	// Update the Zone file.
+	zoneFile.Add(rr)
 	err = zoneFile.Save()
 	if err != nil {
 		res.Message = err.Error()
 		return nil, res
 	}
 
-	return json.Marshal(&rr)
+	res.Code = http.StatusOK
+	res.Message = fmt.Sprintf("%s record has been saved", dns.QueryTypeNames[rr.Type])
+	if rr.Type == dns.QueryTypeSOA {
+		res.Data = rr
+	} else {
+		res.Data = zoneFile.Records
+	}
+
+	return json.Marshal(res)
 }
 
 //
-// apiMasterFileDeleteRR delete RR from the master file.
+// apiZoneFileRRDelete delete RR from the zone file.
 //
-func (srv *Server) apiMasterFileDeleteRR(
-	_ stdhttp.ResponseWriter,
-	httpreq *stdhttp.Request,
+func (srv *Server) apiZoneFileRRDelete(
+	_ http.ResponseWriter,
+	httpreq *http.Request,
 	reqbody []byte,
 ) (
 	resbody []byte, err error,
 ) {
-	res := &liberrors.E{
-		Code: stdhttp.StatusBadRequest,
-	}
+	res := &response{}
+	res.Code = http.StatusBadRequest
 
 	zoneFileName := httpreq.Form.Get(paramNameName)
 	if len(zoneFileName) == 0 {
@@ -852,14 +903,15 @@ func (srv *Server) apiMasterFileDeleteRR(
 
 	mf := srv.env.ZoneFiles[zoneFileName]
 	if mf == nil {
-		res.Message = "unknown master file name " + zoneFileName
+		res.Message = "unknown zone file name " + zoneFileName
 		return nil, res
 	}
 
 	v := httpreq.Form.Get(paramNameType)
 	rrType, err := strconv.Atoi(v)
 	if err != nil {
-		res.Message = err.Error()
+		res.Message = fmt.Sprintf("invalid or empty param type %s: %s",
+			paramNameType, err)
 		return nil, res
 	}
 
@@ -895,7 +947,10 @@ func (srv *Server) apiMasterFileDeleteRR(
 		return nil, res
 	}
 
-	res.Code = stdhttp.StatusOK
+	res.Code = http.StatusOK
+	res.Message = fmt.Sprintf("The RR type %d and name %s has been deleted",
+		rr.Type, rr.Name)
+	res.Data = mf.Records
 
 	return json.Marshal(res)
 }

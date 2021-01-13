@@ -6,8 +6,10 @@
 package rescached
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"os"
 	"sync"
 
 	"github.com/shuLhan/share/lib/debug"
@@ -82,12 +84,19 @@ func (srv *Server) Start() (err error) {
 		}
 	}
 
-	srv.env.ZoneFiles, err = dns.LoadMasterDir(dirMaster)
+	srv.env.ZoneFiles, err = dns.LoadZoneDir(dirZone)
 	if err != nil {
-		return err
+		if !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
+		err = os.MkdirAll(dirZone, 0700)
+		if err != nil {
+			return err
+		}
+		err = nil
 	}
-	for _, masterFile := range srv.env.ZoneFiles {
-		srv.dns.PopulateCaches(masterFile.Messages(), masterFile.Path)
+	for _, zoneFile := range srv.env.ZoneFiles {
+		srv.dns.PopulateCaches(zoneFile.Messages(), zoneFile.Path)
 	}
 
 	if len(srv.env.FileResolvConf) > 0 {
