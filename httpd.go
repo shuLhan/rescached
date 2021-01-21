@@ -33,6 +33,7 @@ const (
 	paramNameType     = "type"
 	paramNameValue    = "value"
 	apiCaches         = "/api/caches"
+	apiCachesSearch   = "/api/caches/search"
 	apiEnvironment    = "/api/environment"
 	apiHostsBlock     = "/api/hosts_block"
 	apiHostsDir       = "/api/hosts.d/:name"
@@ -60,7 +61,7 @@ func (srv *Server) httpdInit() (err error) {
 				`.*\.js`,
 				`.*\.png`,
 			},
-			Development: srv.env.Debug >= 3,
+			Development: srv.env.Debug >= 2,
 		},
 		Memfs:   memFS,
 		Address: srv.env.WUIListen,
@@ -91,11 +92,23 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		Path:         apiCaches,
 		RequestType:  libhttp.RequestTypeQuery,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpdAPIGetCaches,
+		Call:         srv.apiCaches,
 	})
 	if err != nil {
 		return err
 	}
+
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodGet,
+		Path:         apiCachesSearch,
+		RequestType:  libhttp.RequestTypeQuery,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.apiCachesSearch,
+	})
+	if err != nil {
+		return err
+	}
+
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
 		Path:         apiCaches,
@@ -262,7 +275,23 @@ func (srv *Server) httpdRun() {
 	}
 }
 
-func (srv *Server) httpdAPIGetCaches(
+func (srv *Server) apiCaches(
+	_ http.ResponseWriter, req *http.Request, _ []byte,
+) (
+	resBody []byte, err error,
+) {
+	res := response{}
+	res.Code = http.StatusOK
+	answers := srv.dns.CachesLRU()
+	if len(answers) == 0 {
+		res.Data = make([]struct{}, 0, 1)
+	} else {
+		res.Data = answers
+	}
+	return json.Marshal(res)
+}
+
+func (srv *Server) apiCachesSearch(
 	_ http.ResponseWriter, req *http.Request, _ []byte,
 ) (
 	resBody []byte, err error,
@@ -274,6 +303,12 @@ func (srv *Server) httpdAPIGetCaches(
 	}
 
 	q := req.Form.Get(paramNameQuery)
+
+	if len(q) == 0 {
+		res.Code = http.StatusOK
+		res.Data = make([]struct{}, 0, 1)
+		return json.Marshal(res)
+	}
 
 	re, err := regexp.Compile(q)
 	if err != nil {

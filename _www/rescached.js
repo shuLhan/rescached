@@ -30,12 +30,34 @@ function getRRTypeName(k) {
 
 class Rescached {
 	static nanoSeconds = 1000000000
+	static apiCaches = "/api/caches"
+	static apiCachesSearch = "/api/caches/search"
 	static apiHostsd = "/api/hosts.d/"
 	static apiZoned = "/api/zone.d/"
 
 	constructor(server) {
 		this.server = server
 		this.env = {}
+	}
+
+	async Caches() {
+		const res = await fetch(this.server + Rescached.apiCaches, {
+			headers: {
+				Connection: "keep-alive",
+			},
+		})
+		return await res.json()
+	}
+
+	async Search(query) {
+		console.log("Search: ", query)
+		const res = await fetch(
+			this.server +
+				Rescached.apiCachesSearch +
+				"?query=" +
+				query,
+		)
+		return await res.json()
 	}
 
 	async HostsFileCreate(name) {
@@ -53,14 +75,6 @@ class Rescached {
 			}
 		}
 		return res
-	}
-
-	async Search(query) {
-		console.log("Search: ", query)
-		const res = await fetch(
-			this.server + "/api/caches" + "?query=" + query,
-		)
-		return await res.json()
 	}
 
 	async getEnvironment() {

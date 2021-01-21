@@ -12,6 +12,18 @@
 				padding: 1em 0px;
 				border-bottom: 1px solid silver;
 			}
+			#summary {
+				margin: 1em 0;
+			}
+			#caches {
+				height: 20em;
+				overflow: auto;
+				font-family: monospace;
+			}
+			.QType {
+				width: 3em;
+				display: inline-block;
+			}
 			.rr {
 				margin-left: 1em;
 				width: 100%;
@@ -37,7 +49,7 @@
 			}
 		</style>
 	</head>
-	<body>
+	<body onload="main()">
 		<nav class="menu">
 			<a href="/" class="active"> rescached </a>
 			/
@@ -57,10 +69,42 @@
 		<div id="result"></div>
 		<div id="notif"></div>
 
+		<div id="summary"></div>
+		<div id="caches"></div>
+
 		<script src="/index.js"></script>
 		<script src="/rescached.js"></script>
 		<script>
-			const resc = new Rescached("")
+			let resc = null
+			let cachePoller = null
+			let dateFmt = new Intl.DateTimeFormat(undefined, {
+				year: "numeric",
+				month: "numeric",
+				day: "numeric",
+				hour: "numeric",
+				minute: "numeric",
+				second: "numeric",
+			})
+
+			async function main() {
+				resc = new Rescached("")
+				const res = await resc.Caches()
+				if (res.code != 200) {
+					notifError(`doSearch ${query}: ${res.message}`)
+					return
+				}
+				renderCaches(res.data)
+				cachePoller = setInterval(pollCaches, 10000)
+			}
+
+			async function pollCaches() {
+				const res = await resc.Caches()
+				if (res.code != 200) {
+					notifError(`doSearch ${query}: ${res.message}`)
+					return
+				}
+				renderCaches(res.data)
+			}
 
 			async function doSearch() {
 				const query = document.getElementsByName("query")[0].value
@@ -108,6 +152,25 @@
 					divRecord.innerHTML = innerHTML
 					elResult.appendChild(divRecord)
 				}
+			}
+
+			function renderCaches(answers) {
+				document.getElementById("summary").innerHTML = `
+						Total caches: ${answers.length}
+				`
+				let w = document.getElementById("caches")
+				let out = `
+				`
+				for (let x = answers.length - 1; x >= 0; x--) {
+					let answer = answers[x]
+					out += `
+						<div class="cache">
+							<span class="AccessedAt">${dateFmt.format(new Date(answer.AccessedAt * 1000))}</span>
+							<span class="QType">${resc.GetRRTypeName(answer.QType)}</span>
+							<span class="QName">${answer.QName}</span>
+						</div>`
+				}
+				w.innerHTML = out
 			}
 
 			function renderRR(listRR, title) {
