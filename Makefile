@@ -139,6 +139,12 @@ install-macos: DIR_RESCACHED=/usr/local/share/rescached
 install-macos: build install-common
 	cp _scripts/info.kilabit.rescached.plist /Library/LaunchDaemons/
 
+deploy-macos: DIR_BIN=/usr/local/bin
+deploy-macos: build
+	sudo cp _bin/$(GOOS)_$(GOARCH)/rescached $(DIR_BIN)/
+	sudo cp _bin/$(GOOS)_$(GOARCH)/resolver  $(DIR_BIN)/
+	sudo launchctl stop info.kilabit.rescached
+
 uninstall-macos: DIR_BIN=/usr/local/bin
 uninstall-macos: DIR_MAN=/usr/local/share/man
 uninstall-macos: DIR_RESCACHED=/usr/local/share/rescached
