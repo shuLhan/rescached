@@ -65,6 +65,7 @@
 			Caches:
 			<input name="query" />
 			<button onclick="doSearch()">Search</button>
+			<button onclick="doClearResult()">Clear result</button>
 		</div>
 		<div id="result"></div>
 		<div id="notif"></div>
@@ -115,6 +116,10 @@
 					return
 				}
 				onSearchResult(res.data)
+			}
+
+			async function doClearResult() {
+				document.getElementById("result").innerHTML = ""
 			}
 
 			function onSearchResult(dnsRecords) {
