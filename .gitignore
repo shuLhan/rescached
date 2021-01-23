@@ -2,15 +2,11 @@
 /TODO
 /_bin
 /_doc/benchmark.html
-/_www/node_modules/
-/cmd/rescached/memfs.go
 /cover.html
 /cover.out
 /heap*
-/memfs_generate.go
 /rescached
 /resolver
 /resolverbench
 /testdata/rescached.pid
 /testdata/test.pid
-docbook-xsl.css
