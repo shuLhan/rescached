@@ -55,7 +55,7 @@ test.prof:
 lint:
 	-golangci-lint run --enable-all ./...
 
-memfs_generate.go: internal/generate_memfs.go $(wildcard _www/**/*)
+memfs_generate.go: .FORCE
 	go run ./internal/generate_memfs.go
 
 doc: $(RESCACHED_MAN) $(RESCACHED_CFG_MAN) $(RESOLVER_MAN)
