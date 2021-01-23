@@ -61,12 +61,14 @@
 			/
 			<a href="/zone.d/"> zone.d </a>
 		</nav>
-		<div class="search">
-			Caches:
-			<input name="query" />
-			<button onclick="doSearch()">Search</button>
-			<button onclick="doClearResult()">Clear result</button>
-		</div>
+		<form id="form_search">
+			<div class="search">
+				Caches:
+				<input name="query" />
+				<button onclick="doSearch()">Search</button>
+				<button onclick="doClearResult()">Clear result</button>
+			</div>
+		</form>
 		<div id="result"></div>
 		<div id="notif"></div>
 
@@ -96,6 +98,11 @@
 				}
 				renderCaches(res.data)
 				cachePoller = setInterval(pollCaches, 10000)
+
+				// Catch the enter key on input text search.
+				document.getElementById("form_search").addEventListener("submit", e => {
+					e.preventDefault();
+				})
 			}
 
 			async function pollCaches() {
@@ -125,6 +132,11 @@
 			function onSearchResult(dnsRecords) {
 				const elResult = document.getElementById("result")
 				elResult.innerHTML = ""
+
+				if (dnsRecords.length === 0) {
+					elResult.innerHTML = "<div>No matches record found.</div>"
+					return
+				}
 
 				for (let x = 0; x < dnsRecords.length; x++) {
 					const record = dnsRecords[x]
