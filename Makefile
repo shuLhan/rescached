@@ -76,6 +76,7 @@ distclean: clean
 	go clean -i ./...
 
 clean:
+	rm -f cmd/rescached/memfs.go
 	rm -f testdata/rescached.pid
 	rm -f $(COVER_OUT) $(COVER_HTML)
 	rm -f $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
@@ -113,8 +114,8 @@ uninstall-common:
 	rm -f $(PREFIX)$(DIR_MAN)/man1/$(RESOLVER_MAN)
 	rm -f $(PREFIX)$(DIR_MAN)/man1/$(RESCACHED_MAN)
 
-	rm -f $(PREFIX)$(DIR_BIN)/$(RESOLVER_BIN)
-	rm -f $(PREFIX)$(DIR_BIN)/$(RESCACHED_BIN)
+	rm -f $(PREFIX)$(DIR_BIN)/resolver
+	rm -f $(PREFIX)$(DIR_BIN)/rescached
 
 ##
 ## Tasks for installing and uninstalling on GNU/Linux with systemd.
