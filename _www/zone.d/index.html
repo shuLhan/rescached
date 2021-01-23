@@ -31,10 +31,10 @@
 			.action-delete {
 				margin-left: 1em;
 			}
-			.actions {
+			div.actions {
 				padding: 1em;
 			}
-			.actions button {
+			div.actions button {
 				width: 100%;
 			}
 
@@ -50,6 +50,9 @@
 			.rr {
 				font-family: monospace;
 				width: 100%;
+			}
+			.rr > * {
+				vertical-align: middle;
 			}
 			.rr.header {
 				font-weight: bold;
@@ -69,7 +72,11 @@
 			}
 			.rr > .value {
 				display: inline-block;
+				width: 20em;
 				word-wrap: break-word;
+			}
+			.rr > .actions {
+				display: inline-block;
 			}
 		</style>
 	</head>
@@ -182,7 +189,7 @@
 						oninput="updateSOA('Expire', parseInt(this.value))"
 					/>
 					<span class="input-info-toggler" onclick="toggleInfo('soa_expire_info')">?</span>
-					<div class="soa_expire_info" class="input-info" style="display: none">
+					<div id="soa_expire_info" class="input-info" style="display: none">
 						Number of seconds after which secondary name servers should stop answering
 						request for this zone if the zone does not respond. This value must be
 						bigger than the sum of Refresh and Retry. Recommendation for small and
@@ -198,7 +205,7 @@
 						min="0"
 						oninput="updateSOA('Minimum', parseInt(this.value))"
 					/>
-					<span class="input-info-toggler" onclick="toggleInfo('soa_expire_info')">?</span>
+					<span class="input-info-toggler" onclick="toggleInfo('soa_minimum_info')">?</span>
 					<div id="soa_minimum_info" class="input-info" style="display: none">
 						Time to live for purposes of negative caching. Recommendation for small and
 						stable zones is 1800 seconds (30 min).
@@ -337,7 +344,9 @@
 					case 15: // MX
 						newRR.Name = document.getElementById("rr_mx_name").value
 						newRR.Value = {
-							Preference: parseInt(document.getElementById("rr_mx_preference").value),
+							Preference: parseInt(
+								document.getElementById("rr_mx_preference").value,
+							),
 							Exchange: document.getElementById("rr_mx_exchange").value,
 						}
 						break
@@ -463,16 +472,32 @@
 									${resc.GetRRTypeName(rr.Type)}
 								</span>
 								<span class="value">
-									${JSON.stringify(rr.Value)}
+									${renderRRValue(rr.Value)}
 								</span>
-								<button onclick="deleteRR('${rr.Name}', ${idx})">
-									X
-								</button>
+								<span class="actions">
+									<button onclick="deleteRR('${rr.Name}', ${idx})">
+										X
+									</button>
+								</span>
 							</div>
 					`
 					})
 				}
 				w.innerHTML = out
+			}
+
+			function renderRRValue(value) {
+				if (typeof value === "object") {
+					let w = ""
+					for (const [k, v] of Object.entries(value)) {
+						if (w.length > 0) {
+							w += ","
+						}
+						w += k + "=" + v
+					}
+					return w
+				}
+				return value
 			}
 
 			function renderActiveZoneForm() {
