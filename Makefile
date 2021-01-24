@@ -5,7 +5,7 @@
 .PHONY: test test.prof lint build debug doc
 .PHONY: install-common uninstall-common
 .PHONY: install uninstall
-.PHONY: install-macos uninstall-macos
+.PHONY: install-macos deploy-macos uninstall-macos
 .PHONY: clean distclean
 .PHONY: deploy
 .FORCE:
