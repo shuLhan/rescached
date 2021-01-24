@@ -5,6 +5,7 @@ M. Shulhan <ms@kilabit.info>
 :doctype: manpage
 :mansource: rescached
 :manmanual: rescached
+:toc:
 
 
 == NAME
@@ -361,6 +362,42 @@ At the terminal you will see output from rescached which looks like these,
 
 If you see number "4" in request line, "< request: 4", thats indicated that
 request is from HTTPS connection and its working.
+
+
+== WEB USER INTERFACE
+
+The rescached service provide a web user interface that can be accessed at
+http://127.0.0.1:5380.
+
+.Screenshot of front page
+image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_frontpage.png[width=75%].
+
+The front page allow user to monitor active caches, query the caches, and
+removing the caches.
+
+.Screenshot of Environment page
+image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_environment.png[width=75%].
+
+The Environment page allow user to modify the rescached configuration on the
+fly.
+
+.Screenshot of Hosts Blocks page
+image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_hosts_blocks.png[width=75%].
+
+The Hosts Blocks page allow user to enable or disable the external sources of
+hosts blocks list.
+
+.Screenshot of Hosts.d page
+image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_hosts_d.png[width=75%].
+
+The Hosts.d page allow user to manage hosts file, creating new hosts file,
+create new record, or delete a record.
+
+.Screenshot of Zone.d page
+image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_zone_d.png[width=75%].
+
+The Zone.d page allow user manage zone file, creating new zone file, adding or
+deleting new resource record in the zone file.
 
 
 == EXIT STATUS
