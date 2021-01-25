@@ -15,7 +15,7 @@ import (
 
 	"github.com/shuLhan/share/lib/debug"
 
-	rescached "github.com/shuLhan/rescached-go/v3"
+	"github.com/shuLhan/rescached-go/v4"
 )
 
 func main() {

@@ -164,4 +164,4 @@ build-linux-amd64: GOARCH=amd64
 build-linux-amd64: build
 
 deploy: build-linux-amd64
-	rsync --progress _bin/linux_amd64/rescached dns-server:~/bin/rescached
+	rsync --progress _bin/linux_amd64/rescached personal-server:~/bin/rescached
