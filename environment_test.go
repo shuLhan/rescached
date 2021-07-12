@@ -48,10 +48,10 @@ parent = https://kilabit.info/dns-query
 
 		err := ini.Unmarshal([]byte(c.content), got)
 		if err != nil {
-			test.Assert(t, "error", c.expError, err.Error(), true)
+			test.Assert(t, "error", c.expError, err.Error())
 			continue
 		}
 
-		test.Assert(t, "environment", c.exp, got, true)
+		test.Assert(t, "environment", c.exp, got)
 	}
 }

@@ -65,11 +65,13 @@ func (srv *Server) httpdInit() (err error) {
 		},
 		Memfs:   memFS,
 		Address: srv.env.WUIListen,
-		CORSAllowOrigins: []string{
-			"http://127.0.0.1:5000",
-		},
-		CORSAllowHeaders: []string{
-			libhttp.HeaderContentType,
+		CORS: libhttp.CORSOptions{
+			AllowOrigins: []string{
+				"http://127.0.0.1:5000",
+			},
+			AllowHeaders: []string{
+				libhttp.HeaderContentType,
+			},
 		},
 	}
 
@@ -275,11 +277,7 @@ func (srv *Server) httpdRun() {
 	}
 }
 
-func (srv *Server) apiCaches(
-	_ http.ResponseWriter, req *http.Request, _ []byte,
-) (
-	resBody []byte, err error,
-) {
+func (srv *Server) apiCaches(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	res := response{}
 	res.Code = http.StatusOK
 	answers := srv.dns.CachesLRU()
@@ -291,18 +289,14 @@ func (srv *Server) apiCaches(
 	return json.Marshal(res)
 }
 
-func (srv *Server) apiCachesSearch(
-	_ http.ResponseWriter, req *http.Request, _ []byte,
-) (
-	resBody []byte, err error,
-) {
+func (srv *Server) apiCachesSearch(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	res := response{
 		E: liberrors.E{
 			Code: http.StatusInternalServerError,
 		},
 	}
 
-	q := req.Form.Get(paramNameQuery)
+	q := epr.HttpRequest.Form.Get(paramNameQuery)
 
 	if len(q) == 0 {
 		res.Code = http.StatusOK
@@ -327,16 +321,12 @@ func (srv *Server) apiCachesSearch(
 	return json.Marshal(res)
 }
 
-func (srv *Server) httpdAPIDeleteCaches(
-	_ http.ResponseWriter, req *http.Request, _ []byte,
-) (
-	resBody []byte, err error,
-) {
+func (srv *Server) httpdAPIDeleteCaches(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	res := &liberrors.E{
 		Code: http.StatusInternalServerError,
 	}
 
-	q := req.Form.Get(paramNameName)
+	q := epr.HttpRequest.Form.Get(paramNameName)
 	if len(q) == 0 {
 		res.Message = "empty query 'name' parameter"
 		return nil, res
@@ -350,11 +340,7 @@ func (srv *Server) httpdAPIDeleteCaches(
 	return json.Marshal(res)
 }
 
-func (srv *Server) httpdAPIGetEnvironment(
-	httpRes http.ResponseWriter, req *http.Request, reqBody []byte,
-) (
-	resBody []byte, err error,
-) {
+func (srv *Server) httpdAPIGetEnvironment(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	res := &response{}
 	res.Code = http.StatusOK
 	res.Data = srv.env
@@ -362,11 +348,7 @@ func (srv *Server) httpdAPIGetEnvironment(
 	return json.Marshal(res)
 }
 
-func (srv *Server) httpdAPIPostEnvironment(
-	httpRes http.ResponseWriter, req *http.Request, reqBody []byte,
-) (
-	resBody []byte, err error,
-) {
+func (srv *Server) httpdAPIPostEnvironment(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	res := &response{
 		E: liberrors.E{
 			Code:    http.StatusOK,
@@ -375,7 +357,7 @@ func (srv *Server) httpdAPIPostEnvironment(
 	}
 
 	newOpts := new(environment)
-	err = json.Unmarshal(reqBody, newOpts)
+	err = json.Unmarshal(epr.RequestBody, newOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -419,14 +401,10 @@ func (srv *Server) httpdAPIPostEnvironment(
 // If its status changes to disabled, remove the hosts from caches, hide it,
 // and remove it from list of HostsFiles.
 //
-func (srv *Server) apiHostsBlockUpdate(
-	httpRes http.ResponseWriter, req *http.Request, reqBody []byte,
-) (
-	resBody []byte, err error,
-) {
+func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	hostsBlocks := make([]*hostsBlock, 0)
 
-	err = json.Unmarshal(reqBody, &hostsBlocks)
+	err = json.Unmarshal(epr.RequestBody, &hostsBlocks)
 	if err != nil {
 		return nil, err
 	}
@@ -529,14 +507,10 @@ func (srv *Server) hostsBlockDisable(hb *hostsBlock) (err error) {
 	return nil
 }
 
-func (srv *Server) apiHostsFileCreate(
-	httpres http.ResponseWriter, httpreq *http.Request, _ []byte,
-) (
-	resbody []byte, err error,
-) {
+func (srv *Server) apiHostsFileCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &response{}
 
-	name := httpreq.Form.Get(paramNameName)
+	name := epr.HttpRequest.Form.Get(paramNameName)
 	if len(name) == 0 {
 		res.Code = http.StatusBadRequest
 		res.Message = "hosts file name is invalid or empty"
@@ -561,14 +535,10 @@ func (srv *Server) apiHostsFileCreate(
 	return json.Marshal(res)
 }
 
-func (srv *Server) apiHostsFileGet(
-	_ http.ResponseWriter, httpreq *http.Request, _ []byte,
-) (
-	resbody []byte, err error,
-) {
+func (srv *Server) apiHostsFileGet(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &response{}
 
-	name := httpreq.Form.Get(paramNameName)
+	name := epr.HttpRequest.Form.Get(paramNameName)
 
 	hf, found := srv.env.HostsFiles[name]
 	if !found {
@@ -586,14 +556,10 @@ func (srv *Server) apiHostsFileGet(
 	return json.Marshal(res)
 }
 
-func (srv *Server) apiHostsFileDelete(
-	_ http.ResponseWriter, httpreq *http.Request, reqbody []byte,
-) (
-	resbody []byte, err error,
-) {
+func (srv *Server) apiHostsFileDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &response{}
 
-	name := httpreq.Form.Get(paramNameName)
+	name := epr.HttpRequest.Form.Get(paramNameName)
 	if len(name) == 0 {
 		res.Code = http.StatusBadRequest
 		res.Message = "empty or invalid host file name"
@@ -627,15 +593,11 @@ func (srv *Server) apiHostsFileDelete(
 //
 // apiHostsFileRRCreate create new record and save it to the hosts file.
 //
-func (srv *Server) apiHostsFileRRCreate(
-	_ http.ResponseWriter, httpreq *http.Request, _ []byte,
-) (
-	resbody []byte, err error,
-) {
+func (srv *Server) apiHostsFileRRCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &response{}
 	res.Code = http.StatusBadRequest
 
-	hostsFileName := httpreq.Form.Get(paramNameName)
+	hostsFileName := epr.HttpRequest.Form.Get(paramNameName)
 	if len(hostsFileName) == 0 {
 		res.Message = "empty hosts file name in request path"
 		return nil, res
@@ -651,12 +613,12 @@ func (srv *Server) apiHostsFileRRCreate(
 		Class: dns.QueryClassIN,
 	}
 
-	rr.Name = httpreq.Form.Get(paramNameDomain)
+	rr.Name = epr.HttpRequest.Form.Get(paramNameDomain)
 	if len(rr.Name) == 0 {
 		res.Message = "empty 'domain' query parameter"
 		return nil, res
 	}
-	v := httpreq.Form.Get(paramNameValue)
+	v := epr.HttpRequest.Form.Get(paramNameValue)
 	if len(v) == 0 {
 		res.Message = "empty 'value' query parameter"
 		return nil, res
@@ -688,16 +650,12 @@ func (srv *Server) apiHostsFileRRCreate(
 	return json.Marshal(res)
 }
 
-func (srv *Server) apiHostsFileRRDelete(
-	_ http.ResponseWriter, httpreq *http.Request, reqbody []byte,
-) (
-	resbody []byte, err error,
-) {
+func (srv *Server) apiHostsFileRRDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &liberrors.E{
 		Code: http.StatusBadRequest,
 	}
 
-	hostsFileName := httpreq.Form.Get(paramNameName)
+	hostsFileName := epr.HttpRequest.Form.Get(paramNameName)
 	if len(hostsFileName) == 0 {
 		res.Message = "empty hosts file name in request path"
 		return nil, res
@@ -709,7 +667,7 @@ func (srv *Server) apiHostsFileRRDelete(
 		return nil, res
 	}
 
-	domainName := httpreq.Form.Get(paramNameDomain)
+	domainName := epr.HttpRequest.Form.Get(paramNameDomain)
 	if len(domainName) == 0 {
 		res.Message = "empty 'domain' query parameter"
 		return nil, res
@@ -735,17 +693,11 @@ func (srv *Server) apiHostsFileRRDelete(
 	return json.Marshal(res)
 }
 
-func (srv *Server) apiZoneFileCreate(
-	_ http.ResponseWriter,
-	httpreq *http.Request,
-	reqbody []byte,
-) (
-	resbody []byte, err error,
-) {
+func (srv *Server) apiZoneFileCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &response{}
 	res.Code = http.StatusBadRequest
 
-	zoneName := httpreq.Form.Get(paramNameName)
+	zoneName := epr.HttpRequest.Form.Get(paramNameName)
 	if len(zoneName) == 0 {
 		res.Message = "empty or invalid zone file name"
 		return nil, res
@@ -780,17 +732,11 @@ func (srv *Server) apiZoneFileCreate(
 	return json.Marshal(res)
 }
 
-func (srv *Server) apiZoneFileDelete(
-	_ http.ResponseWriter,
-	httpreq *http.Request,
-	reqbody []byte,
-) (
-	resbody []byte, err error,
-) {
+func (srv *Server) apiZoneFileDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &response{}
 	res.Code = http.StatusBadRequest
 
-	zoneName := httpreq.Form.Get(paramNameName)
+	zoneName := epr.HttpRequest.Form.Get(paramNameName)
 	if len(zoneName) == 0 {
 		res.Message = "empty or invalid zone file name"
 		return nil, res
@@ -826,17 +772,11 @@ func (srv *Server) apiZoneFileDelete(
 //
 // apiZoneFileRRCreate create new RR for the zone file.
 //
-func (srv *Server) apiZoneFileRRCreate(
-	_ http.ResponseWriter,
-	httpreq *http.Request,
-	reqbody []byte,
-) (
-	resbody []byte, err error,
-) {
+func (srv *Server) apiZoneFileRRCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &response{}
 	res.Code = http.StatusBadRequest
 
-	zoneFileName := httpreq.Form.Get(paramNameName)
+	zoneFileName := epr.HttpRequest.Form.Get(paramNameName)
 	if len(zoneFileName) == 0 {
 		res.Message = "empty or invalid zone file name"
 		return nil, res
@@ -848,7 +788,7 @@ func (srv *Server) apiZoneFileRRCreate(
 		return nil, res
 	}
 
-	rrTypeValue := httpreq.Form.Get(paramNameType)
+	rrTypeValue := epr.HttpRequest.Form.Get(paramNameType)
 	rrType, err := strconv.Atoi(rrTypeValue)
 	if err != nil {
 		res.Message = fmt.Sprintf("invalid or empty RR type %q: %s",
@@ -863,7 +803,7 @@ func (srv *Server) apiZoneFileRRCreate(
 	case dns.QueryTypeMX:
 		rr.Value = &dns.RDataMX{}
 	}
-	err = json.Unmarshal(reqbody, rr)
+	err = json.Unmarshal(epr.RequestBody, rr)
 	if err != nil {
 		res.Message = "json.Unmarshal:" + err.Error()
 		return nil, res
@@ -920,17 +860,11 @@ func (srv *Server) apiZoneFileRRCreate(
 //
 // apiZoneFileRRDelete delete RR from the zone file.
 //
-func (srv *Server) apiZoneFileRRDelete(
-	_ http.ResponseWriter,
-	httpreq *http.Request,
-	reqbody []byte,
-) (
-	resbody []byte, err error,
-) {
+func (srv *Server) apiZoneFileRRDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &response{}
 	res.Code = http.StatusBadRequest
 
-	zoneFileName := httpreq.Form.Get(paramNameName)
+	zoneFileName := epr.HttpRequest.Form.Get(paramNameName)
 	if len(zoneFileName) == 0 {
 		res.Message = "empty zone file name"
 		return nil, res
@@ -942,7 +876,7 @@ func (srv *Server) apiZoneFileRRDelete(
 		return nil, res
 	}
 
-	v := httpreq.Form.Get(paramNameType)
+	v := epr.HttpRequest.Form.Get(paramNameType)
 	rrType, err := strconv.Atoi(v)
 	if err != nil {
 		res.Message = fmt.Sprintf("invalid or empty param type %s: %s",
@@ -957,7 +891,7 @@ func (srv *Server) apiZoneFileRRDelete(
 	case dns.QueryTypeMX:
 		rr.Value = &dns.RDataMX{}
 	}
-	err = json.Unmarshal(reqbody, &rr)
+	err = json.Unmarshal(epr.RequestBody, &rr)
 	if err != nil {
 		res.Message = "json.Unmarshal:" + err.Error()
 		return nil, res
