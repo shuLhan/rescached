@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build ignore
 // +build ignore
 
 package main
@@ -21,12 +22,18 @@ func main() {
 			`.*\.css`,
 			`.*\.png`,
 		},
+		Embed: memfs.EmbedOptions{
+			PackageName:     "rescached",
+			VarName:         "memFS",
+			GoFileName:      "memfs_generate.go",
+			ContentEncoding: memfs.EncodingGzip,
+		},
 	}
 	mfs, err := memfs.New(&opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = mfs.GoGenerate("rescached", "memFS", "memfs_generate.go", memfs.EncodingGzip)
+	err = mfs.GoEmbed()
 	if err != nil {
 		log.Fatal(err)
 	}
