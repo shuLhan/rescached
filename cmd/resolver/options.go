@@ -90,8 +90,7 @@ name server 35.240.172.103,
 Query the IPv4 records of domain name "kilabit.info" using DNS over HTTPS on
 name server kilabit.info,
 
-	$ resolver -ns https://kilabit.info/dns-query kilabit.info
-`)
+	$ resolver -ns https://kilabit.info/dns-query kilabit.info`)
 }
 
 func newOptions() (*options, error) {
