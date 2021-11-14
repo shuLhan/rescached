@@ -50,8 +50,8 @@ Format:: /any/path/to/file
 Default:: /etc/rescached/resolv.conf
 Description:: A path to dynamically generated *resolv.conf*(5) by
 *resolvconf*(8).  If set, the nameserver values in referenced file will
-replace "parent" value and "parent" will become a fallback in
-case the referenced file being deleted or can't be parsed.
+be used as "parent" name server if no "parent" is defined in configuration
+file.
 
 To use this config, you must set either "dnsmasq_resolv", "pdnsd_resolv", or
 "unbound_conf" in "/etc/resolvconf.conf" to point to
@@ -90,22 +90,31 @@ Format::
 
 ----
 parent  = "parent = " [ scheme "://"] ( ip-address / domain-name ) [ ":" port ]
-scheme  = ( "tcp" / "udp" / "https")
+scheme  = ( "udp" / "https")
 ----
 
 Default::
-* Address: udp://35.240.172.103
+* Address: udp://1.1.1.1
 * Port: 53
 Description:: List of parent DNS servers.
 +
-When +rescached+ receive a query from client and when it does
-not have a cached address of query, it will forward the query to those parent
-servers.
+When +rescached+ receive a query from client (for example, your browser) and
+when it does not have a cached answer for that query, it will forward the
+query to one of the parent name servers.
++
+Using UDP as parent scheme, will automatically assume that the server also
+capable of handling query in TCP.
+This is required when client (for example, your browser) re-send the query
+after receiving truncated UDP answer.
+Any query received by +rescached+ through TCP will forwarded to the parent
+name server as TCP too, using the same address and port defined in one of UDP
+parent.
 +
 Please, do not use OpenDNS server.
 If certain host-name not found (i.e. typo in host-name), OpenDNS will reply
 with its own address, instead of replying with empty answer.
-This will make +rescached+ caching a false data.
+This will make +rescached+ caching a false data and it may make your
+application open or consume unintended resources.
 +
 To check if your parent server reply the unknown host-name with no answer, use
 *resolver*(1) tool.
@@ -113,10 +122,10 @@ To check if your parent server reply the unknown host-name with no answer, use
 Example::
 ----
   ## Using UDP connection to forward request to parent name server.
-  parent = udp://35.240.172.103
+  parent = udp://1.1.1.1
 
-  ## Using TCP connection to forward request to parent name server.
-  parent = tcp://35.240.172.103
+  ## Using DNS over TLS to forward request to parent name server.
+  parent = https://1.1.1.1
 
   ## Using DNS over HTTPS to forward request to parent name server.
   parent = https://kilabit.info/dns-query
