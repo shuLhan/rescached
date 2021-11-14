@@ -153,8 +153,6 @@ func (env *environment) loadResolvConf() (ok bool, err error) {
 
 	if len(env.NameServers) == 0 {
 		env.NameServers = rc.NameServers
-	} else {
-		env.FallbackNS = rc.NameServers
 	}
 
 	return true, nil

@@ -1,3 +1,50 @@
+=  Rescached v4.1.0 (2021-11-xx)
+
+==  New features
+
+*  Add support to save and load caches to/from storage upon restart
+
+   rescached now able to save and load caches to local storage upon restart.
+
+   On POSIX, the caches is stored in /var/cache/rescached/rescached.gob,
+   encoded using gob.
+
+   Update #9
+
+==  Bug fixes
+
+*  make the TCP forwarders as complementary of UDP
+
+   The TCP forwarders only active when client send the DNS request as TCP.
+   When the server receive that request it should also forward the request
+   as TCP not as UDP to prevent the truncated response.
+
+   Another use case for TCP is when the response is truncated, the client
+   will send the query back through TCP connection.  The server should
+   forward this request using TCP instead of UDP.
+
+==  Enhancements
+
+*  remove the fallback name servers (NS) from server options
+
+   The original idea of fallback NS is to send the query to the one
+   define in resolv.conf, instead of using the one defined by user in
+   ServerOptions NameServers, when an error occured.
+
+   But, most of error usually caused by network (disconnected, time out),
+   so re-sending query to fallback NS does not have any effect if the
+   network it self is not working.
+
+   This changes remove the unnecessary and complex fallback NS from
+   server.
+
+*  Do not cache truncated answer
+
+   Previously only answer with non-zero response code is ignored.
+
+   This changes ignore also answer where response header is truncated.
+
+
 =  Rescached v4.0.0 (2021-01-25)
 
 ==  New features

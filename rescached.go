@@ -10,12 +10,18 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
 	"github.com/shuLhan/share/lib/http"
 	libio "github.com/shuLhan/share/lib/io"
+)
+
+const (
+	cachesDir  = "/var/cache/rescached/"
+	cachesFile = "rescached.gob"
 )
 
 // Server implement caching DNS server.
@@ -57,9 +63,29 @@ func New(fileConfig string) (srv *Server, err error) {
 // it.
 //
 func (srv *Server) Start() (err error) {
+	logp := "Start"
+
 	srv.dns, err = dns.NewServer(&srv.env.ServerOptions)
 	if err != nil {
 		return err
+	}
+
+	cachesPath := filepath.Join(cachesDir, cachesFile)
+
+	fcaches, err := os.Open(cachesPath)
+	if err == nil {
+		// Load stored caches from file.
+		answers, err := srv.dns.CachesLoad(fcaches)
+		if err != nil {
+			log.Printf("%s: %s", logp, err)
+		} else {
+			fmt.Printf("%s: %d caches loaded from %s\n", logp, len(answers), cachesPath)
+		}
+
+		err = fcaches.Close()
+		if err != nil {
+			log.Printf("%s: %s", logp, err)
+		}
 	}
 
 	systemHostsFile, err := dns.ParseHostsFile(dns.GetSystemHosts())
@@ -134,10 +160,36 @@ func (srv *Server) run() {
 // Stop the server.
 //
 func (srv *Server) Stop() {
+	logp := "Stop"
+
 	if srv.rcWatcher != nil {
 		srv.rcWatcher.Stop()
 	}
 	srv.dns.Stop()
+
+	cachesPath := filepath.Join(cachesDir, cachesFile)
+
+	// Stores caches to file for next start.
+	err := os.MkdirAll(cachesDir, 0700)
+	if err != nil {
+		log.Printf("%s: %s", logp, err)
+		return
+	}
+	fcaches, err := os.Create(cachesPath)
+	if err != nil {
+		log.Printf("%s: %s", logp, err)
+		return
+	}
+	n, err := srv.dns.CachesSave(fcaches)
+	if err != nil {
+		log.Printf("%s: %s", logp, err)
+		// fall-through for Close.
+	}
+	err = fcaches.Close()
+	if err != nil {
+		log.Printf("%s: %s", logp, err)
+	}
+	fmt.Printf("%s: %d caches stored to %s\n", logp, n, cachesPath)
 }
 
 func (srv *Server) watchResolvConf(ns *libio.NodeState) {
@@ -155,6 +207,6 @@ func (srv *Server) watchResolvConf(ns *libio.NodeState) {
 			break
 		}
 
-		srv.dns.RestartForwarders(srv.env.NameServers, srv.env.FallbackNS)
+		srv.dns.RestartForwarders(srv.env.NameServers)
 	}
 }
