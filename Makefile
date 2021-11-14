@@ -4,10 +4,10 @@
 
 .PHONY: test test.prof lint build debug doc
 .PHONY: install-common uninstall-common
-.PHONY: install uninstall
+.PHONY: install deploy uninstall
 .PHONY: install-macos deploy-macos uninstall-macos
 .PHONY: clean distclean
-.PHONY: deploy
+.PHONY: deploy-personal-server
 .FORCE:
 
 CGO_ENABLED:=$(shell go env CGO_ENABLED)
@@ -130,6 +130,11 @@ uninstall: uninstall-common
 	systemctl disable rescached
 	rm -f /usr/lib/systemd/system/rescached.service
 
+deploy: build
+	sudo rsync _bin/$(GOOS)_$(GOARCH)/rescached $(DIR_BIN)/
+	sudo rsync _bin/$(GOOS)_$(GOARCH)/resolver  $(DIR_BIN)/
+	sudo systemctl restart rescached
+
 ##
 ## Tasks for installing and uninstalling service on macOS
 ##
@@ -163,5 +168,6 @@ build-linux-amd64: GOOS=linux
 build-linux-amd64: GOARCH=amd64
 build-linux-amd64: build
 
-deploy: build-linux-amd64
+deploy-personal-server: build-linux-amd64
 	rsync --progress _bin/linux_amd64/rescached personal-server:~/bin/rescached
+	ssh personal-server "sudo rsync ~/bin/rescached /usr/bin/rescached; sudo systemctl restart rescached.service"
