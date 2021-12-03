@@ -61,7 +61,7 @@ type environment struct {
 	HostsBlocksRaw []string `ini:"rescached::hosts_block" json:"-"`
 	HostsBlocks    []*hostsBlock
 	HostsFiles     map[string]*dns.HostsFile
-	ZoneFiles      map[string]*dns.ZoneFile
+	Zones          map[string]*dns.Zone
 }
 
 func loadEnvironment(file string) (env *environment) {

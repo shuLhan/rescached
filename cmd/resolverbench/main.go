@@ -36,8 +36,12 @@ func main() {
 	fmt.Printf("= Benchmarking with %d messages\n", len(hostsFile.Records))
 
 	timeStart := time.Now()
+	q := dns.MessageQuestion{}
 	for _, rr := range hostsFile.Records {
-		res, err := cl.Lookup(true, rr.Type, rr.Class, rr.Name)
+		q.Name = rr.Name
+		q.Type = rr.Type
+		q.Class = rr.Class
+		res, err := cl.Lookup(q, true)
 		if err != nil {
 			nfail++
 			log.Println("! Send error: ", err)

@@ -26,20 +26,20 @@ import (
 var memFS *memfs.MemFS
 
 const (
-	defHTTPDRootDir   = "_www"
-	paramNameDomain   = "domain"
-	paramNameName     = "name"
-	paramNameQuery    = "query"
-	paramNameType     = "type"
-	paramNameValue    = "value"
-	apiCaches         = "/api/caches"
-	apiCachesSearch   = "/api/caches/search"
-	apiEnvironment    = "/api/environment"
-	apiHostsBlock     = "/api/hosts_block"
-	apiHostsDir       = "/api/hosts.d/:name"
-	apiHostsDirRR     = "/api/hosts.d/:name/rr"
-	apiZoneFile       = "/api/zone.d/:name"
-	apiZoneFileRRType = "/api/zone.d/:name/rr/:type"
+	defHTTPDRootDir = "_www"
+	paramNameDomain = "domain"
+	paramNameName   = "name"
+	paramNameQuery  = "query"
+	paramNameType   = "type"
+	paramNameValue  = "value"
+	apiCaches       = "/api/caches"
+	apiCachesSearch = "/api/caches/search"
+	apiEnvironment  = "/api/environment"
+	apiHostsBlock   = "/api/hosts_block"
+	apiHostsDir     = "/api/hosts.d/:name"
+	apiHostsDirRR   = "/api/hosts.d/:name/rr"
+	apiZone         = "/api/zone.d/:name"
+	apiZoneRRType   = "/api/zone.d/:name/rr/:type"
 )
 
 type response struct {
@@ -219,40 +219,40 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPut,
-		Path:         apiZoneFile,
+		Path:         apiZone,
 		RequestType:  libhttp.RequestTypeNone,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiZoneFileCreate,
+		Call:         srv.apiZoneCreate,
 	})
 	if err != nil {
 		return err
 	}
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
-		Path:         apiZoneFile,
+		Path:         apiZone,
 		RequestType:  libhttp.RequestTypeNone,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiZoneFileDelete,
+		Call:         srv.apiZoneDelete,
 	})
 	if err != nil {
 		return err
 	}
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         apiZoneFileRRType,
+		Path:         apiZoneRRType,
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiZoneFileRRCreate,
+		Call:         srv.apiZoneRRCreate,
 	})
 	if err != nil {
 		return err
 	}
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
-		Path:         apiZoneFileRRType,
+		Path:         apiZoneRRType,
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiZoneFileRRDelete,
+		Call:         srv.apiZoneRRDelete,
 	})
 	if err != nil {
 		return err
@@ -610,7 +610,7 @@ func (srv *Server) apiHostsFileRRCreate(epr *libhttp.EndpointRequest) (resbody [
 	}
 
 	rr := &dns.ResourceRecord{
-		Class: dns.QueryClassIN,
+		Class: dns.RecordClassIN,
 	}
 
 	rr.Name = epr.HttpRequest.Form.Get(paramNameDomain)
@@ -623,7 +623,7 @@ func (srv *Server) apiHostsFileRRCreate(epr *libhttp.EndpointRequest) (resbody [
 		res.Message = "empty 'value' query parameter"
 		return nil, res
 	}
-	rr.Type = dns.GetQueryTypeFromAddress([]byte(v))
+	rr.Type = dns.RecordTypeFromAddress([]byte(v))
 	if rr.Type == 0 {
 		res.Message = "invalid address value: " + v
 		return nil, res
@@ -693,7 +693,7 @@ func (srv *Server) apiHostsFileRRDelete(epr *libhttp.EndpointRequest) (resbody [
 	return json.Marshal(res)
 }
 
-func (srv *Server) apiZoneFileCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+func (srv *Server) apiZoneCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &response{}
 	res.Code = http.StatusBadRequest
 
@@ -708,7 +708,7 @@ func (srv *Server) apiZoneFileCreate(epr *libhttp.EndpointRequest) (resbody []by
 		return nil, res
 	}
 
-	mf, ok := srv.env.ZoneFiles[zoneName]
+	mf, ok := srv.env.Zones[zoneName]
 	if ok {
 		res.Code = http.StatusOK
 		res.Data = mf
@@ -716,7 +716,7 @@ func (srv *Server) apiZoneFileCreate(epr *libhttp.EndpointRequest) (resbody []by
 	}
 
 	zoneFile := filepath.Join(dirZone, zoneName)
-	mf = dns.NewZoneFile(zoneFile, zoneName)
+	mf = dns.NewZone(zoneFile, zoneName)
 	err = mf.Save()
 	if err != nil {
 		res.Code = http.StatusInternalServerError
@@ -724,7 +724,7 @@ func (srv *Server) apiZoneFileCreate(epr *libhttp.EndpointRequest) (resbody []by
 		return nil, res
 	}
 
-	srv.env.ZoneFiles[zoneName] = mf
+	srv.env.Zones[zoneName] = mf
 
 	res.Code = http.StatusOK
 	res.Data = mf
@@ -732,7 +732,7 @@ func (srv *Server) apiZoneFileCreate(epr *libhttp.EndpointRequest) (resbody []by
 	return json.Marshal(res)
 }
 
-func (srv *Server) apiZoneFileDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+func (srv *Server) apiZoneDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &response{}
 	res.Code = http.StatusBadRequest
 
@@ -742,7 +742,7 @@ func (srv *Server) apiZoneFileDelete(epr *libhttp.EndpointRequest) (resbody []by
 		return nil, res
 	}
 
-	mf, ok := srv.env.ZoneFiles[zoneName]
+	mf, ok := srv.env.Zones[zoneName]
 	if !ok {
 		res.Message = "unknown zone file name " + zoneName
 		return nil, res
@@ -754,7 +754,7 @@ func (srv *Server) apiZoneFileDelete(epr *libhttp.EndpointRequest) (resbody []by
 	}
 
 	srv.dns.RemoveLocalCachesByNames(names)
-	delete(srv.env.ZoneFiles, zoneName)
+	delete(srv.env.Zones, zoneName)
 
 	err = mf.Delete()
 	if err != nil {
@@ -770,9 +770,9 @@ func (srv *Server) apiZoneFileDelete(epr *libhttp.EndpointRequest) (resbody []by
 }
 
 //
-// apiZoneFileRRCreate create new RR for the zone file.
+// apiZoneRRCreate create new RR for the zone file.
 //
-func (srv *Server) apiZoneFileRRCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+func (srv *Server) apiZoneRRCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &response{}
 	res.Code = http.StatusBadRequest
 
@@ -782,7 +782,7 @@ func (srv *Server) apiZoneFileRRCreate(epr *libhttp.EndpointRequest) (resbody []
 		return nil, res
 	}
 
-	zoneFile := srv.env.ZoneFiles[zoneFileName]
+	zoneFile := srv.env.Zones[zoneFileName]
 	if zoneFile == nil {
 		res.Message = "unknown zone file name " + zoneFileName
 		return nil, res
@@ -797,10 +797,10 @@ func (srv *Server) apiZoneFileRRCreate(epr *libhttp.EndpointRequest) (resbody []
 	}
 
 	rr := &dns.ResourceRecord{}
-	switch uint16(rrType) {
-	case dns.QueryTypeSOA:
+	switch dns.RecordType(rrType) {
+	case dns.RecordTypeSOA:
 		rr.Value = &dns.RDataSOA{}
-	case dns.QueryTypeMX:
+	case dns.RecordTypeMX:
 		rr.Value = &dns.RDataMX{}
 	}
 	err = json.Unmarshal(epr.RequestBody, rr)
@@ -811,7 +811,7 @@ func (srv *Server) apiZoneFileRRCreate(epr *libhttp.EndpointRequest) (resbody []
 
 	rr.Name = strings.TrimRight(rr.Name, ".")
 
-	if rr.Type == dns.QueryTypePTR {
+	if rr.Type == dns.RecordTypePTR {
 		if len(rr.Name) == 0 {
 			res.Message = "empty PTR name"
 			return nil, res
@@ -847,8 +847,8 @@ func (srv *Server) apiZoneFileRRCreate(epr *libhttp.EndpointRequest) (resbody []
 	}
 
 	res.Code = http.StatusOK
-	res.Message = fmt.Sprintf("%s record has been saved", dns.QueryTypeNames[rr.Type])
-	if rr.Type == dns.QueryTypeSOA {
+	res.Message = fmt.Sprintf("%s record has been saved", dns.RecordTypeNames[rr.Type])
+	if rr.Type == dns.RecordTypeSOA {
 		res.Data = rr
 	} else {
 		res.Data = zoneFile.Records
@@ -858,9 +858,9 @@ func (srv *Server) apiZoneFileRRCreate(epr *libhttp.EndpointRequest) (resbody []
 }
 
 //
-// apiZoneFileRRDelete delete RR from the zone file.
+// apiZoneRRDelete delete RR from the zone file.
 //
-func (srv *Server) apiZoneFileRRDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+func (srv *Server) apiZoneRRDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	res := &response{}
 	res.Code = http.StatusBadRequest
 
@@ -870,7 +870,7 @@ func (srv *Server) apiZoneFileRRDelete(epr *libhttp.EndpointRequest) (resbody []
 		return nil, res
 	}
 
-	mf := srv.env.ZoneFiles[zoneFileName]
+	mf := srv.env.Zones[zoneFileName]
 	if mf == nil {
 		res.Message = "unknown zone file name " + zoneFileName
 		return nil, res
@@ -885,10 +885,10 @@ func (srv *Server) apiZoneFileRRDelete(epr *libhttp.EndpointRequest) (resbody []
 	}
 
 	rr := dns.ResourceRecord{}
-	switch uint16(rrType) {
-	case dns.QueryTypeSOA:
+	switch dns.RecordType(rrType) {
+	case dns.RecordTypeSOA:
 		rr.Value = &dns.RDataSOA{}
-	case dns.QueryTypeMX:
+	case dns.RecordTypeMX:
 		rr.Value = &dns.RDataMX{}
 	}
 	err = json.Unmarshal(epr.RequestBody, &rr)

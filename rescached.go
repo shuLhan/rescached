@@ -110,7 +110,7 @@ func (srv *Server) Start() (err error) {
 		}
 	}
 
-	srv.env.ZoneFiles, err = dns.LoadZoneDir(dirZone)
+	srv.env.Zones, err = dns.LoadZoneDir(dirZone)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
 			return err
@@ -121,7 +121,7 @@ func (srv *Server) Start() (err error) {
 		}
 		err = nil
 	}
-	for _, zoneFile := range srv.env.ZoneFiles {
+	for _, zoneFile := range srv.env.Zones {
 		srv.dns.PopulateCaches(zoneFile.Messages(), zoneFile.Path)
 	}
 

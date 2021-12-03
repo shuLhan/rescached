@@ -16,9 +16,9 @@ import (
 
 // List of error messages.
 var (
-	errQueryName  = errors.New("invalid or empty query name")
-	errQueryType  = errors.New("unknown query type")
-	errQueryClass = errors.New("unknown query class")
+	errQueryName   = errors.New("invalid or empty query name")
+	errRecordType  = errors.New("unknown query type")
+	errRecordClass = errors.New("unknown query class")
 )
 
 // List of command line usages.
@@ -46,8 +46,8 @@ type options struct {
 	nameserver string
 	insecure   bool
 	qname      string
-	qtype      uint16
-	qclass     uint16
+	qtype      dns.RecordType
+	qclass     dns.RecordClass
 }
 
 func help() {
@@ -140,9 +140,9 @@ func (opts *options) parseQType() error {
 
 	opts.sqtype = strings.ToUpper(opts.sqtype)
 
-	opts.qtype, ok = dns.QueryTypes[opts.sqtype]
+	opts.qtype, ok = dns.RecordTypes[opts.sqtype]
 	if !ok {
-		return errQueryType
+		return errRecordType
 	}
 
 	return nil
@@ -153,9 +153,9 @@ func (opts *options) parseQClass() error {
 
 	opts.sqclass = strings.ToUpper(opts.sqclass)
 
-	opts.qclass, ok = dns.QueryClasses[opts.sqclass]
+	opts.qclass, ok = dns.RecordClasses[opts.sqclass]
 	if !ok {
-		return errQueryClass
+		return errRecordClass
 	}
 
 	return nil
