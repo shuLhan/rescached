@@ -1,4 +1,25 @@
-=  Rescached v4.1.0 (2021-11-xx)
+=  Rescached v4.1.0 (2021-12-03)
+
+==  Breaking changes
+
+*  all: remove using tcp scheme in config and documentation
+
+   Using TCP for parent name server is discouraged, because most of server
+   disallow keeping the connection alive.
+
+   The valid use case for TCP connection is when server received truncated
+   UDP answer.
+
+   Using UDP as parent scheme, will automatically assume that the server
+   also capable of handling query in TCP.
+   This is required when client (for example, your browser) re-send the query
+   after receiving truncated UDP answer.
+   Any query received by rescached through TCP will forwarded to the parent
+   name server as TCP too, using the same address and port defined in one of
+   UDP parent.
+
+   While at it, use Cloudflare DNS server as default in configuration
+   and as example in documentation.
 
 ==  New features
 
