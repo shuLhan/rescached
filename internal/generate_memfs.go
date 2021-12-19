@@ -23,10 +23,9 @@ func main() {
 			`.*\.png`,
 		},
 		Embed: memfs.EmbedOptions{
-			PackageName:     "rescached",
-			VarName:         "memFS",
-			GoFileName:      "memfs_generate.go",
-			ContentEncoding: memfs.EncodingGzip,
+			PackageName: "rescached",
+			VarName:     "memFS",
+			GoFileName:  "memfs_generate.go",
 		},
 	}
 	mfs, err := memfs.New(&opts)
