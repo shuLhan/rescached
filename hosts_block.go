@@ -33,12 +33,14 @@ var hostsBlockSources = []*hostsBlock{{
 }}
 
 type hostsBlock struct {
+	lastUpdated time.Time
+
 	Name        string // Derived from hostname in URL.
 	URL         string
 	LastUpdated string
-	IsEnabled   bool
-	lastUpdated time.Time
 	file        string
+
+	IsEnabled bool
 }
 
 func (hb *hostsBlock) init(sources []string) {

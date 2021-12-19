@@ -53,16 +53,19 @@ const (
 // Environment for running rescached.
 //
 type Environment struct {
-	dns.ServerOptions
-	WUIListen      string `ini:"rescached::wui.listen"`
-	FileResolvConf string `ini:"rescached::file.resolvconf"`
-	fileConfig     string
+	HostsFiles map[string]*dns.HostsFile
+	Zones      map[string]*dns.Zone
 
-	Debug          int      `ini:"rescached::debug"`
+	fileConfig     string
+	FileResolvConf string `ini:"rescached::file.resolvconf"`
+	WUIListen      string `ini:"rescached::wui.listen"`
+
 	HostsBlocksRaw []string `ini:"rescached::hosts_block" json:"-"`
 	HostsBlocks    []*hostsBlock
-	HostsFiles     map[string]*dns.HostsFile
-	Zones          map[string]*dns.Zone
+
+	dns.ServerOptions
+
+	Debug int `ini:"rescached::debug"`
 }
 
 //
