@@ -26,10 +26,9 @@ const (
 
 // Server implement caching DNS server.
 type Server struct {
-	fileConfig string
-	dns        *dns.Server
-	env        *environment
-	rcWatcher  *libio.Watcher
+	dns       *dns.Server
+	env       *Environment
+	rcWatcher *libio.Watcher
 
 	httpd       *http.Server
 	httpdRunner sync.Once
@@ -38,16 +37,13 @@ type Server struct {
 //
 // New create and initialize new rescached server.
 //
-func New(fileConfig string) (srv *Server, err error) {
-	env := loadEnvironment(fileConfig)
-
+func New(env *Environment) (srv *Server, err error) {
 	if debug.Value >= 1 {
 		fmt.Printf("--- rescached: config: %+v\n", env)
 	}
 
 	srv = &Server{
-		fileConfig: fileConfig,
-		env:        env,
+		env: env,
 	}
 
 	err = srv.httpdInit()

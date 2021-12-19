@@ -29,7 +29,12 @@ func main() {
 	flag.StringVar(&fileConfig, "config", "", "path to configuration")
 	flag.Parse()
 
-	rcd, err := rescached.New(fileConfig)
+	env, err := rescached.LoadEnvironment(fileConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rcd, err := rescached.New(env)
 	if err != nil {
 		log.Fatal(err)
 	}

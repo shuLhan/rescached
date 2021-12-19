@@ -6,7 +6,6 @@ package rescached
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -51,12 +50,14 @@ const (
 )
 
 //
-// environment for running rescached.
+// Environment for running rescached.
 //
-type environment struct {
+type Environment struct {
 	dns.ServerOptions
-	WUIListen      string   `ini:"rescached::wui.listen"`
-	FileResolvConf string   `ini:"rescached::file.resolvconf"`
+	WUIListen      string `ini:"rescached::wui.listen"`
+	FileResolvConf string `ini:"rescached::file.resolvconf"`
+	fileConfig     string
+
 	Debug          int      `ini:"rescached::debug"`
 	HostsBlocksRaw []string `ini:"rescached::hosts_block" json:"-"`
 	HostsBlocks    []*hostsBlock
@@ -64,48 +65,55 @@ type environment struct {
 	Zones          map[string]*dns.Zone
 }
 
-func loadEnvironment(file string) (env *environment) {
-	env = newEnvironment()
+//
+// LoadEnvironment initialize environment from configuration file.
+//
+func LoadEnvironment(fileConfig string) (env *Environment, err error) {
+	var (
+		logp = "LoadEnvironment"
+		cfg  *ini.Ini
+	)
 
-	if len(file) == 0 {
+	env = newEnvironment(fileConfig)
+
+	if len(fileConfig) == 0 {
 		env.init()
-		return env
+		return env, nil
 	}
 
-	cfg, err := ini.Open(file)
+	cfg, err = ini.Open(fileConfig)
 	if err != nil {
-		log.Printf("loadEnvironment %q: %s", file, err)
-		return env
+		return nil, fmt.Errorf("%s: %q: %s", logp, fileConfig, err)
 	}
 
 	err = cfg.Unmarshal(env)
 	if err != nil {
-		log.Printf("loadEnvironment %q: %s", file, err)
-		return env
+		return nil, fmt.Errorf("%s: %q: %s", logp, fileConfig, err)
 	}
 
 	env.init()
 	env.initHostsBlock(cfg)
 	debug.Value = env.Debug
 
-	return env
+	return env, nil
 }
 
 //
 // newEnvironment create and initialize options with default values.
 //
-func newEnvironment() *environment {
-	return &environment{
+func newEnvironment(fileConfig string) *Environment {
+	return &Environment{
 		ServerOptions: dns.ServerOptions{
 			ListenAddress: "127.0.0.1:53",
 		},
+		fileConfig: fileConfig,
 	}
 }
 
 //
 // init check and initialize the environment instance with default values.
 //
-func (env *environment) init() {
+func (env *Environment) init() {
 	if len(env.WUIListen) == 0 {
 		env.WUIListen = defWuiAddress
 	}
@@ -117,7 +125,7 @@ func (env *environment) init() {
 	}
 }
 
-func (env *environment) initHostsBlock(cfg *ini.Ini) {
+func (env *Environment) initHostsBlock(cfg *ini.Ini) {
 	env.HostsBlocks = hostsBlockSources
 
 	for x, v := range env.HostsBlocksRaw {
@@ -129,7 +137,7 @@ func (env *environment) initHostsBlock(cfg *ini.Ini) {
 	}
 }
 
-func (env *environment) loadResolvConf() (ok bool, err error) {
+func (env *Environment) loadResolvConf() (ok bool, err error) {
 	rc, err := libnet.NewResolvConf(env.FileResolvConf)
 	if err != nil {
 		return false, err
@@ -161,7 +169,7 @@ func (env *environment) loadResolvConf() (ok bool, err error) {
 //
 // write the options values back to file.
 //
-func (env *environment) write(file string) (err error) {
+func (env *Environment) write(file string) (err error) {
 	in, err := ini.Open(file)
 	if err != nil {
 		return fmt.Errorf("write: %w", err)

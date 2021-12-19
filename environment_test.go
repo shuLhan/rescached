@@ -16,11 +16,11 @@ func TestEnvironment(t *testing.T) {
 	cases := []struct {
 		desc     string
 		content  string
-		exp      *environment
+		exp      *Environment
 		expError string
 	}{{
 		desc: "With empty content",
-		exp:  &environment{},
+		exp:  &Environment{},
 	}, {
 		desc: "With multiple parents",
 		content: `[dns "server"]
@@ -28,7 +28,7 @@ listen = 127.0.0.1:53
 parent = udp://35.240.172.103
 parent = https://kilabit.info/dns-query
 `,
-		exp: &environment{
+		exp: &Environment{
 			ServerOptions: dns.ServerOptions{
 				ListenAddress: "127.0.0.1:53",
 				NameServers: []string{
@@ -42,7 +42,7 @@ parent = https://kilabit.info/dns-query
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		got := &environment{
+		got := &Environment{
 			ServerOptions: dns.ServerOptions{},
 		}
 

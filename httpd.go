@@ -356,7 +356,7 @@ func (srv *Server) httpdAPIPostEnvironment(epr *libhttp.EndpointRequest) (resBod
 		},
 	}
 
-	newOpts := new(environment)
+	newOpts := new(Environment)
 	err = json.Unmarshal(epr.RequestBody, newOpts)
 	if err != nil {
 		return nil, err
@@ -372,7 +372,7 @@ func (srv *Server) httpdAPIPostEnvironment(epr *libhttp.EndpointRequest) (resBod
 
 	fmt.Printf("new options: %+v\n", newOpts)
 
-	err = newOpts.write(srv.fileConfig)
+	err = newOpts.write(srv.env.fileConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -442,7 +442,7 @@ func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []
 		}
 	}
 
-	err = srv.env.write(srv.fileConfig)
+	err = srv.env.write(srv.env.fileConfig)
 	if err != nil {
 		log.Println("apiHostsBlockUpdate:", err.Error())
 		res.Message = err.Error()
