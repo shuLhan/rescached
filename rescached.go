@@ -42,6 +42,13 @@ func New(env *Environment) (srv *Server, err error) {
 		fmt.Printf("--- rescached: config: %+v\n", env)
 	}
 
+	err = env.init()
+	if err != nil {
+		return nil, fmt.Errorf("rescached: New: %w", err)
+	}
+
+	env.initHostsBlock()
+
 	srv = &Server{
 		env: env,
 	}

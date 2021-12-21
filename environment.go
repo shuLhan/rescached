@@ -11,7 +11,9 @@ import (
 
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
+	libhttp "github.com/shuLhan/share/lib/http"
 	"github.com/shuLhan/share/lib/ini"
+	"github.com/shuLhan/share/lib/memfs"
 	libnet "github.com/shuLhan/share/lib/net"
 	libstrings "github.com/shuLhan/share/lib/strings"
 )
@@ -49,6 +51,10 @@ const (
 	dirZone  = "/etc/rescached/zone.d"
 )
 
+var (
+	mfsWww *memfs.MemFS
+)
+
 //
 // Environment for running rescached.
 //
@@ -62,6 +68,9 @@ type Environment struct {
 
 	HostsBlocksRaw []string `ini:"rescached::hosts_block" json:"-"`
 	HostsBlocks    []*hostsBlock
+
+	// The options for WUI HTTP server.
+	HttpdOptions *libhttp.ServerOptions `json:"-"`
 
 	dns.ServerOptions
 
@@ -77,7 +86,8 @@ func LoadEnvironment(fileConfig string) (env *Environment, err error) {
 		cfg  *ini.Ini
 	)
 
-	env = newEnvironment(fileConfig)
+	env = newEnvironment()
+	env.fileConfig = fileConfig
 
 	if len(fileConfig) == 0 {
 		env.init()
@@ -94,29 +104,28 @@ func LoadEnvironment(fileConfig string) (env *Environment, err error) {
 		return nil, fmt.Errorf("%s: %q: %s", logp, fileConfig, err)
 	}
 
-	env.init()
-	env.initHostsBlock(cfg)
-	debug.Value = env.Debug
-
 	return env, nil
 }
 
 //
 // newEnvironment create and initialize options with default values.
 //
-func newEnvironment(fileConfig string) *Environment {
+func newEnvironment() *Environment {
 	return &Environment{
+		HttpdOptions: &libhttp.ServerOptions{
+			Memfs:   mfsWww,
+			Address: defWuiAddress,
+		},
 		ServerOptions: dns.ServerOptions{
 			ListenAddress: "127.0.0.1:53",
 		},
-		fileConfig: fileConfig,
 	}
 }
 
 //
 // init check and initialize the environment instance with default values.
 //
-func (env *Environment) init() {
+func (env *Environment) init() (err error) {
 	if len(env.WUIListen) == 0 {
 		env.WUIListen = defWuiAddress
 	}
@@ -126,9 +135,43 @@ func (env *Environment) init() {
 	if len(env.FileResolvConf) > 0 {
 		_, _ = env.loadResolvConf()
 	}
+
+	debug.Value = env.Debug
+
+	if env.HttpdOptions == nil {
+		env.HttpdOptions = &libhttp.ServerOptions{
+			Memfs:   mfsWww,
+			Address: env.WUIListen,
+		}
+	} else {
+		env.HttpdOptions.Address = env.WUIListen
+	}
+
+	if env.HttpdOptions.Memfs == nil {
+		memfsWwwOpts := &memfs.Options{
+			Root: defHTTPDRootDir,
+			Includes: []string{
+				`.*\.css$`,
+				`.*\.html$`,
+				`.*\.js$`,
+				`.*\.png$`,
+			},
+			Embed: memfs.EmbedOptions{
+				PackageName: "rescached",
+				VarName:     "mfsWww",
+				GoFileName:  "memfs_generate.go",
+			},
+		}
+		env.HttpdOptions.Memfs, err = memfs.New(memfsWwwOpts)
+		if err != nil {
+			return fmt.Errorf("Environment.init: %w", err)
+		}
+	}
+
+	return nil
 }
 
-func (env *Environment) initHostsBlock(cfg *ini.Ini) {
+func (env *Environment) initHostsBlock() {
 	env.HostsBlocks = hostsBlockSources
 
 	for x, v := range env.HostsBlocksRaw {

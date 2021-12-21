@@ -19,11 +19,8 @@ import (
 	"github.com/shuLhan/share/lib/dns"
 	liberrors "github.com/shuLhan/share/lib/errors"
 	libhttp "github.com/shuLhan/share/lib/http"
-	"github.com/shuLhan/share/lib/memfs"
 	libnet "github.com/shuLhan/share/lib/net"
 )
-
-var memFS *memfs.MemFS
 
 const (
 	defHTTPDRootDir = "_www"
@@ -52,30 +49,7 @@ func (r *response) Unwrap() error {
 }
 
 func (srv *Server) httpdInit() (err error) {
-	env := &libhttp.ServerOptions{
-		Options: memfs.Options{
-			Root: defHTTPDRootDir,
-			Includes: []string{
-				`.*\.css`,
-				`.*\.html`,
-				`.*\.js`,
-				`.*\.png`,
-			},
-			Development: srv.env.Debug >= 2,
-		},
-		Memfs:   memFS,
-		Address: srv.env.WUIListen,
-		CORS: libhttp.CORSOptions{
-			AllowOrigins: []string{
-				"http://127.0.0.1:5000",
-			},
-			AllowHeaders: []string{
-				libhttp.HeaderContentType,
-			},
-		},
-	}
-
-	srv.httpd, err = libhttp.NewServer(env)
+	srv.httpd, err = libhttp.NewServer(srv.env.HttpdOptions)
 	if err != nil {
 		return fmt.Errorf("newHTTPServer: %w", err)
 	}
