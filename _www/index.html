@@ -20,7 +20,7 @@
 				overflow: auto;
 				font-family: monospace;
 			}
-			.QType {
+			.RType {
 				width: 3em;
 				display: inline-block;
 			}
@@ -183,7 +183,7 @@
 					out += `
 						<div class="cache">
 							<span class="AccessedAt">${dateFmt.format(new Date(answer.AccessedAt * 1000))}</span>
-							<span class="QType">${resc.GetRRTypeName(answer.QType)}</span>
+							<span class="RType">${resc.GetRRTypeName(answer.RType)}</span>
 							<span class="QName">${answer.QName}</span>
 						</div>`
 				}
