@@ -25,6 +25,7 @@
 				display: inline-block;
 			}
 			.rr {
+				border-bottom: 1px dashed silver;
 				margin-left: 1em;
 				width: 100%;
 			}
@@ -88,6 +89,7 @@
 				minute: "numeric",
 				second: "numeric",
 			})
+			let searchResults = []
 
 			async function main() {
 				resc = new Rescached("")
@@ -100,8 +102,8 @@
 				cachePoller = setInterval(pollCaches, 10000)
 
 				// Catch the enter key on input text search.
-				document.getElementById("form_search").addEventListener("submit", e => {
-					e.preventDefault();
+				document.getElementById("form_search").addEventListener("submit", (e) => {
+					e.preventDefault()
 				})
 			}
 
@@ -114,6 +116,20 @@
 				renderCaches(res.data)
 			}
 
+			async function doCacheRemove(idx, qname) {
+				const res = await resc.CacheRemove(qname)
+				if (res.code != 200) {
+					notifError(`doCacheRemove ${qname}: ${res.message}`)
+					return
+				}
+
+				notifInfo(`Record ${qname} has been removed from cache`)
+
+				// Remove the record from search result and re-render it.
+				searchResults.splice(idx, 1)
+				onSearchResult(searchResults)
+			}
+
 			async function doSearch() {
 				const query = document.getElementsByName("query")[0].value
 				console.log("doSearch: ", query)
@@ -122,10 +138,12 @@
 					notifError(`doSearch ${query}: ${res.message}`)
 					return
 				}
+				searchResults = res.data
 				onSearchResult(res.data)
 			}
 
 			async function doClearResult() {
+				searchResults = []
 				document.getElementById("result").innerHTML = ""
 			}
 
@@ -146,7 +164,7 @@
 						<div class="qname">
 							${record.Question.Name}
 							<button class="b-remove"
-								onclick="doRemove('${record.Question.Name}')"
+								onclick="doCacheRemove(${x}, '${record.Question.Name}')"
 							>Remove from cache</button>
 						</div>
 						<div class="rr header">

@@ -49,6 +49,16 @@ class Rescached {
 		return await res.json()
 	}
 
+	async CacheRemove(qname) {
+		const res = await fetch(
+			this.server + Rescached.apiCaches + "?name=" + qname,
+			{
+				method: "DELETE",
+			},
+		)
+		return await res.json()
+	}
+
 	async Search(query) {
 		console.log("Search: ", query)
 		const res = await fetch(
