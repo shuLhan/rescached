@@ -56,7 +56,7 @@ lint:
 	-golangci-lint run --enable-all ./...
 
 memfs_generate.go: .FORCE
-	go run ./internal/generate_memfs.go
+	go run ./cmd/rescached embed
 
 doc: $(RESCACHED_MAN) $(RESCACHED_CFG_MAN) $(RESOLVER_MAN)
 
@@ -80,6 +80,17 @@ clean:
 	rm -f testdata/rescached.pid
 	rm -f $(COVER_OUT) $(COVER_HTML)
 	rm -f $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
+
+##
+## Development tasks
+##
+
+.PHONY: dev
+
+dev:
+	-sudo ./_bin/nft_dnstest_chain.sh; \
+		go run ./cmd/rescached -config=cmd/rescached/rescached.cfg.test dev; \
+		sudo ./_bin/nft_dnstest_chain.sh flush
 
 ##
 ## Common tasks for installing and uninstalling program.

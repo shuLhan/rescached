@@ -1,6 +1,7 @@
 /README.html
 /TODO
-/_bin
+/_bin/darwin_amd64
+/_bin/linux_amd64
 /_doc/benchmark.html
 /cover.html
 /cover.out

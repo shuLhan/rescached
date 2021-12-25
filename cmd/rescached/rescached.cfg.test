@@ -6,7 +6,7 @@
 
 [rescached]
 file.resolvconf=
-debug=3
+debug=2
 wui.listen = 127.0.0.1:5381
 
 hosts_block = http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext
@@ -15,10 +15,10 @@ hosts_block = http://winhelp2002.mvps.org/hosts.txt
 hosts_block = http://someonewhocares.org/hosts/hosts
 
 [dns "server"]
-#parent=udp://18.136.35.199
-#parent=tcp://18.136.35.199
+#parent=udp://62.171.181.13
+#parent=tcp://62.171.181.13
 ## DNS over TLS
-parent=https://18.136.35.199
+parent=https://62.171.181.13
 ## DNS over HTTPS
 #parent=https://kilabit.info/dns-query
 
