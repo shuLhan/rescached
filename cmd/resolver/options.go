@@ -44,10 +44,11 @@ type options struct {
 	sqclass string
 
 	nameserver string
-	insecure   bool
 	qname      string
 	qtype      dns.RecordType
 	qclass     dns.RecordClass
+
+	insecure bool
 }
 
 func help() {
