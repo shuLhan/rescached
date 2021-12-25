@@ -309,6 +309,11 @@
 				let listNS = document.getElementById("nameservers")
 				listNS.innerHTML = ""
 
+				if (resc.env.NameServers === null) {
+					resc.env.NameServers = []
+					return
+				}
+
 				for (let x = 0; x < resc.env.NameServers.length; x++) {
 					let ns = resc.env.NameServers[x]
 
