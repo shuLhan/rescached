@@ -1,5 +1,4 @@
-RESOLVER(1)
-===========
+= RESOLVER(1)
 :doctype: manpage
 :man source: resolver
 :man version: 2018.08.26
@@ -42,7 +41,8 @@ Value::		DNS record type
 Format::	String
 Default::	A
 Description::	List of supported DNS record type,
-
++
+----
 TYPE (ID) - Description
 
 * A       (1) - a host Address
@@ -61,6 +61,7 @@ TYPE (ID) - Description
 * TXT    (16) - TeXT strings
 * AAAA   (28) - a host address in IPv6
 * SRV    (33) -  a SerViCe record
+----
 
 [[hostname]]
 === +hostname+
@@ -78,18 +79,18 @@ Upon exit and success +resolver+ will return 0, or 1 otherwise.
 
 == EXAMPLE
 
-* Resolve the IPv4 address for kilabit.info using one of nameserver in
-  +/etc/resolv.conf+,
-+
+Resolve the IPv4 address for kilabit.info using one of nameserver in
+`/etc/resolv.conf`,
+
 	$ resolver kilabit.info
 
-* Resolve the IPv4 address for kilabit.info using 127.0.0.1 at port 54 as
-  name server,
-+
+Resolve the IPv4 address for kilabit.info using 127.0.0.1 at port 54 as
+name server,
+
 	$ resolver -ns 127.0.0.1:54 kilabit.info
 
-* Resolve the mail exchange (MX) for kilabit.info,
-+
+Resolve the mail exchange (MX) for kilabit.info,
+
 	$ resolver -t MX kilabit.info
 
 

@@ -1,7 +1,6 @@
-RESCACHED(1)
-============
+= RESCACHED(1)
 M. Shulhan <ms@kilabit.info>
-20 January 2021
+8 February 2022
 :doctype: manpage
 :mansource: rescached
 :manmanual: rescached
@@ -15,23 +14,23 @@ rescached - DNS resolver cache daemon.
 
 == SYNOPSIS
 
-+rescached+ [-config 'rescached.cfg']
+rescached [-config 'rescached.cfg']
 
 
 == OPTIONS
 
-'rescached.cfg' is rescached configuration, usually it reside in
+`rescached.cfg` is rescached configuration, usually it reside in
 /etc/rescached/rescached.cfg.
 
 
 == DESCRIPTION
 
-+rescached+ is a daemon that caching internet name and address on local memory
+`rescached` is a daemon that caching internet name and address on local memory
 for speeding up DNS resolution.
 
-+rescached+ is not a reimplementation of DNS server like BIND.
+`rescached` is not a reimplementation of DNS server like BIND.
 
-+rescached+ primary goal is only to caching DNS queries and answers, used by
+`rescached` primary goal is only to caching DNS queries and answers, used by
 personal or small group of users, to minimize unneeded traffic to outside
 network.
 
@@ -40,18 +39,18 @@ network.
 
 List of current features,
 
-- Enable to handle request from UDP and TCP connections
-- Enable to forward request using UDP or TCP
-- Load and serve addresses and host names in +/etc/hosts+
-- Load and serve hosts formatted files inside directory
-  +/etc/rescached/hosts.d/+
-- Blocking ads and/or malicious websites through host list in
-  +/etc/rescached/hosts.d/+
-- Support loading and serving zone file format from
-  +/etc/rescached/zone.d+
-- Integration with openresolv
-- Support DNS over TLS (DoH) (RFC 7858)
-- Support DNS over HTTPS (DoH) (RFC 8484)
+* Enable to handle request from UDP and TCP connections
+* Enable to forward request using UDP or TCP
+* Load and serve addresses and host names in `/etc/hosts`
+* Load and serve hosts formatted files inside directory
+  `/etc/rescached/hosts.d/`
+* Blocking ads and/or malicious websites through host list in
+  `/etc/rescached/hosts.d/`
+* Support loading and serving zone file format from
+  `/etc/rescached/zone.d`
+* Integration with openresolv
+* Support DNS over TLS (DoH) (RFC 7858)
+* Support DNS over HTTPS (DoH) (RFC 8484)
 
 
 === BEHIND THE DNS
@@ -64,7 +63,7 @@ address (for example to 18.136.35.199) so browser can make a connection to
 How browser do that?
 
 First, it will send query to one of DNS server listed in your system
-configuration (in example, +/etc/resolv.conf+ in Linux).
+configuration (for example, `/etc/resolv.conf` in Linux).
 Then, if your DNS server also "caching" the name that you requested, it will
 reply the answer (internet address) directly, if it is not then it will ask
 their parent DNS server.
@@ -80,11 +79,11 @@ opening another page on the same website, etc; this procedures will always
 repeated every times, not including all external links like ads, social media
 button, or JavaScript from an other server.
 
-To make this repetitive procedures less occurred, you can run +rescached+ in
+To make this repetitive procedures less occurred, you can run `rescached` in
 your personal computer.
-The first time the answer is received in your local computer, +rescached+ will
+The first time the answer is received in your local computer, `rescached` will
 saved it in computer memory and any subsequent request of the same address
-will be answered directly by +rescached+.
+will be answered directly by `rescached`.
 
 ----
 +----+      +----------------+      +------------------+
@@ -99,7 +98,7 @@ will be answered directly by +rescached+.
 ----
 
 The only request that will be send to your DNS server is the one that does not
-already exist in +rescached+ cache.
+already exist in `rescached` cache.
 
 
 === HOW CACHE WORKS
@@ -127,15 +126,15 @@ The following table illustrate list of caches in memory,
 +---------------------+------------------+
 ----
 
-Every +cache.prune_delay+ (let say every 5 minutes), rescached will try to
+Every `cache.prune_delay` (let say every 5 minutes), rescached will try to
 pruning old records from cache.
 If the accessed-at value of record in cache is less than,
 
 ----
-	current-time + cache.threshold
+current-time + cache.threshold
 ----
 
-(remember that "+cache.threshold+" value must be negative) it will remove the
+(remember that "cache.threshold" value must be negative) it will remove the
 record from cache.
 
 
@@ -153,12 +152,12 @@ record from cache.
 Steps to compile from source,
 
 ----
-	$ go get -u github.com/shuLhan/rescached-go
-	$ cd ${GOPATH}/src/github.com/shuLhan/rescached-go
-	$ go build ./cmd/rescached
+$ go get -u github.com/shuLhan/rescached-go
+$ cd ${GOPATH}/src/github.com/shuLhan/rescached-go
+$ go build ./cmd/rescached
 ----
 
-The last command will build binary named +rescached+ in current directory.
+The last command will build binary named `rescached` in current directory.
 
 === INSTALLATION
 
@@ -167,25 +166,25 @@ system binary directory.
 
 ==== MANUAL INSTALLATION
 
-* Copy rescached configuration to system directory.
+Copy rescached configuration to system directory.
 We use directory "/etc/rescached" as configuration directory.
-+
+
 	$ sudo mkdir -p /etc/rescached
 	$ sudo cp cmd/rescached/rescached.cfg /etc/rescached/
 
-* Copy rescached program to your system path.
-+
+Copy rescached program to your system path.
+
 	$ sudo cp -f rescached /usr/bin/
 
-* Create system startup script.
-+
+Create system startup script.
+
 If you want your program running each time the system is starting up you can
 create a system startup script (or system service).
-For OS using systemd, you can see an example for +systemd+ service in
-+scripts/rescached.service+.
+For OS using systemd, you can see an example for `systemd` service in
+`scripts/rescached.service`.
 For system using launchd (macOS), you can see an example in
-+scripts/info.kilabit.rescached.plist+.
-+
+`scripts/info.kilabit.rescached.plist`.
+
 This step could be different between systems, consult your distribution
 wiki, forum, or mailing-list on how to create system startup script.
 
@@ -217,26 +216,28 @@ You can then load the rescached service using launchd,
 
 * Set your parent DNS server.
 +
-Edit rescached configuration, +/etc/rescached/rescached.cfg+, change the value
-of +parent+ based on your preferred DNS server.
+Edit rescached configuration, `/etc/rescached/rescached.cfg`, change the value
+of `parent` based on your preferred DNS server.
 
 * Set the cache prune delay and threshold
 +
-Edit rescached configuration, +/etc/rescached/rescached.cfg+, change the value
-of +cache.prune_delay+ and/or +cache.threshold+ to match your needs.
+Edit rescached configuration, `/etc/rescached/rescached.cfg`, change the value
+of `cache.prune_delay` and/or `cache.threshold` to match your needs.
 
 * Set your system DNS server to point to rescached.
 +
+--
 In UNIX system,
-+
+
 	$ sudo mv /etc/resolv.conf /etc/resolv.conf.org
 	$ sudo echo "nameserver 127.0.0.1" > /etc/resolv.conf
+--
 
-* If you use +systemd+, run +rescached+ service by invoking,
+* If you use `systemd`, run `rescached` service by invoking,
 +
 	$ sudo systemctl start rescached.service
 +
-and if you want +rescached+ service to run when system startup, enable it by
+and if you want `rescached` service to run when system startup, enable it by
 invoking,
 +
 	$ sudo systemctl enable rescached.service
@@ -244,7 +245,7 @@ invoking,
 
 == CONFIGURATION
 
-All rescached configuration located in file +/etc/rescached/rescached.cfg+.
+All rescached configuration located in file `/etc/rescached/rescached.cfg`.
 See manual page of *rescached.cfg*(5) for more information.
 
 === ZONE FILE
@@ -253,7 +254,7 @@ Rescached support loading zone file format.
 Unlike hosts file format, where each domain name is only mapped to type A
 (IPv4 address), in zone file, one can define other type that known to
 rescached.
-All files defined +zone.d+ configuration are considered as zone file and
+All files defined `zone.d` configuration are considered as zone file and
 will be loaded by rescached only if the configuration is not empty.
 
 Example of zone file,
@@ -319,34 +320,34 @@ To enable this feature rescached provided TLS certificate and private key.
 Example configuration in *rescached.cfg*,
 
 ----
-	[dns "server"]
-	parent = https://kilabit.info/dns-query
-	tls.certificate = /etc/rescached/localhost.cert.pem
-	tls.private_key = /etc/rescached/localhost.key.pem
-	tls.allow_insecure = false
+[dns "server"]
+parent = https://kilabit.info/dns-query
+tls.certificate = /etc/rescached/localhost.cert.pem
+tls.private_key = /etc/rescached/localhost.key.pem
+tls.allow_insecure = false
 ----
 
 If the parent nameserver is using self-signed certificate, you can set
 "tls.allow_insecure" to true.
 
 Using the above configuration, rescached will serve DoH queries on
-*https://localhost/dns-query* on port 443 and UDP queries on port 53.
+https://localhost/dns-query on port 443 and UDP queries on port 53.
 All queries to both locations will be forwarded to parent nameserver.
 
 This feature can be tested using Firefox Nightly by updating the configuration
 in "about:config" into,
 
 ----
-	network.trr.bootstrapAddress;127.0.0.1
-	network.trr.mode;3
-	network.trr.uri;https://localhost/dns-query
+network.trr.bootstrapAddress;127.0.0.1
+network.trr.mode;3
+network.trr.uri;https://localhost/dns-query
 ----
 
 Since we are using `mode=3`, the `network.trr.bootstrapAddress` is required so
 Firefox Nightly can resolve "localhost" to "127.0.0.1".
 If you use the provided self-signed certificate, you must import and/or enable
 an exception for it manually in Firefox Nightly (for example. by opening
-`https://localhost/dns-query` in new tab and accept security risk).
+https://localhost/dns-query in new tab and accept security risk).
 
 To check if DoH works, first, set the `debug` option to `1`, and
 restart the rescached.
@@ -370,31 +371,35 @@ The rescached service provide a web user interface that can be accessed at
 http://127.0.0.1:5380.
 
 .Screenshot of front page
-image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_frontpage.png[width=75%].
+image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_frontpage.png[Screenshot
+of rescached front page,320]
 
 The front page allow user to monitor active caches, query the caches, and
 removing the caches.
 
 .Screenshot of Environment page
-image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_environment.png[width=75%].
+image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_environment.png[rescached environment page,320]
 
 The Environment page allow user to modify the rescached configuration on the
 fly.
 
 .Screenshot of Hosts Blocks page
-image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_hosts_blocks.png[width=75%].
+image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_hosts_blocks.png[rescached
+Hosts Blocks page,320]
 
 The Hosts Blocks page allow user to enable or disable the external sources of
 hosts blocks list.
 
 .Screenshot of Hosts.d page
-image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_hosts_d.png[width=75%].
+image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_hosts_d.png[rescached
+Hosts.d page,320]
 
 The Hosts.d page allow user to manage hosts file, creating new hosts file,
 create new record, or delete a record.
 
 .Screenshot of Zone.d page
-image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_zone_d.png[width=75%].
+image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_doc/images/Screenshot_wui_zone_d.png[rescached
+Zone.d page,320]
 
 The Zone.d page allow user manage zone file, creating new zone file, adding or
 deleting new resource record in the zone file.
@@ -402,38 +407,34 @@ deleting new resource record in the zone file.
 
 == EXIT STATUS
 
-Upon success, +rescached+ will return 0, or 1 otherwise.
+Upon success, `rescached` will return 0, or 1 otherwise.
 
 
 == FILES
 
-'/etc/rescached/rescached.cfg'::
-
-The +rescached+ main configuration.
+`/etc/rescached/rescached.cfg`:: The `rescached` main configuration.
 This configuration will be read when program started.
 
-'/usr/share/rescached/LICENSE'::
+`/usr/share/rescached/LICENSE`:: License file for this software.
 
-License file for this software.
-
-'/var/run/rescached.pid'::
-
-File where process ID of rescached will be saved when running.
+`/var/run/rescached.pid`:: File where process ID of rescached will be saved
+when running.
 
 
 == NOTES
 
 This program developed with references to,
 
-'RFC1034':: Domain Names - Concepts and Facilities.
-'RFC1035':: Domain Names - Implementation and Specification.
-'RFC1886':: DNS Extensions to support IP version 6.
-'RFC2782':: A DNS RR for specifying the location of services (DNS SRV)
-'RFC8484':: DNS Queries over HTTPS (DoH)
+RFC1034:: Domain Names - Concepts and Facilities.
+RFC1035:: Domain Names - Implementation and Specification.
+RFC1886:: DNS Extensions to support IP version 6.
+RFC2782:: A DNS RR for specifying the location of services (DNS SRV)
+RFC8484:: DNS Queries over HTTPS (DoH)
 
 == BUGS
 
-+rescached+ only know specific DNS record type,
+`rescached` only know specific DNS record type,
+
 [horizontal]
 A:: A host address in IPv4
 NS:: An authoritative name server
@@ -452,7 +453,7 @@ AAAA:: A host address in IPv6
 SRV:: Service locator
 OPT:: This is a "pseudo DNS record type" needed to support EDNS
 
-+rescached+ only run and tested in Linux and macOS system.
+`rescached` only run and tested in Linux and macOS system.
 Technically, if it can compiled, it will run in any operating system.
 
 For request of features and/or bugs report please submitted through web at
@@ -461,7 +462,7 @@ https://github.com/shuLhan/rescached-go/issues.
 
 == AUTHOR
 
-+rescached+ is developed by Shulhan (ms@kilabit.info).
+`rescached` is developed by Shulhan (ms@kilabit.info).
 
 
 == LICENSE
@@ -475,9 +476,9 @@ in the LICENSE file.
 
 == LINKS
 
-- Source code repository: https://github.com/shuLhan/rescached-go
-- RFC 1035: https://tools.ietf.org/html/rfc1035
-- Improving DNS Privacy in Firefox: https://blog.nightly.mozilla.org/2018/06/01/improving-dns-privacy-in-firefox/
+* Source code repository: https://github.com/shuLhan/rescached-go
+* RFC 1035: https://tools.ietf.org/html/rfc1035
+* Improving DNS Privacy in Firefox: https://blog.nightly.mozilla.org/2018/06/01/improving-dns-privacy-in-firefox/
 
 
 == SEE ALSO
