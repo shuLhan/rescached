@@ -4,6 +4,56 @@ Shulhan <ms@kilabit.info>
 :sectanchors:
 :sectlinks:
 
+==  rescached v4.2.0 (2022-02-09)
+
+===  New features
+
+*  www: implement functionality to remove cache by record name
++
+In the web user interface (WUI), we have a button "Remove from cache"
+that displayed per record, but somehow this feature is not implemented,
+probably missing from commits due to rebase or I completely forgot about
+it.
++
+Anyway, this commit implement the feature to remove record from cache
+by clicking the button.  On success, it will remove the removed record
+from search result.
++
+Fix #10
+
+===  Bug fixes
+
+*  www: check for possible null on NameServers environment
+
+*  www: fix caches record type showing "undefined"
++
+Due to refactoring on DNS library, we forgot to rename the field QType
+to RType on the frontend.  This cause the record type on caches showed
+on the page as "undefined".
+
+===  Chores
+
+*  all: fix format of all asciidoc files
++
+This is to make the adoc files parsed and rendered correctly by
+asciidocgo and asciidoc tools.
+
+*  cmd/rescached: add command "embed" and to run in development mode
++
+This two commands is used internally for development.
++
+The "embed" command embed all files inside "_www" directory into
+Go file "memfs_generate.go".
+This command replace "internal/generate_memfs.go".
++
+The "dev" command run the rescached server in development mode using
+"cmd/rescached/rescached.cfg.test" as the configuration.
++
+The "dev" command listen on DNS port 5350, so to prevent conflict with
+live rescached server, we run script _bin/nft_dnstest_chain.sh to redirect
+UDP and TCP requests from port 53 to port 5350.
+
+
 ==  rescached v4.1.0 (2021-12-03)
 
 ===  Breaking changes
