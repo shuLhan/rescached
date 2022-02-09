@@ -1,0 +1,12 @@
+= rescached documentation index
+Shulhan <ms@kilabit.info>
+
+link:/CHANGELOG.html[CHANGELOG]:: Log for each release.
+
+link:/README.html[README]:: Manual for rescached program.
+
+link:/benchmark.html[benchmark]:: The latest benchmark of rescached server.
+
+link:/rescached.cfg.html[rescached.cfg]:: Manual for rescached configuration.
+
+link:/resolver.html[resolver]:: Manual for resolver command line interface.

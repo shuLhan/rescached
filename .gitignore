@@ -2,7 +2,7 @@
 /TODO
 /_bin/darwin_amd64
 /_bin/linux_amd64
-/_doc/benchmark.html
+/_doc/*.html
 /cover.html
 /cover.out
 /heap*
