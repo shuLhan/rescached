@@ -1,74 +1,80 @@
-=  Rescached v4.1.0 (2021-12-03)
+= Changelog for rescached
+Shulhan <ms@kilabit.info>
+:toc:
+:sectanchors:
+:sectlinks:
 
-==  Breaking changes
+==  rescached v4.1.0 (2021-12-03)
+
+===  Breaking changes
 
 *  all: remove using tcp scheme in config and documentation
++
+Using TCP for parent name server is discouraged, because most of server
+disallow keeping the connection alive.
++
+The valid use case for TCP connection is when server received truncated
+UDP answer.
++
+Using UDP as parent scheme, will automatically assume that the server
+also capable of handling query in TCP.
+This is required when client (for example, your browser) re-send the query
+after receiving truncated UDP answer.
+Any query received by rescached through TCP will forwarded to the parent
+name server as TCP too, using the same address and port defined in one of
+UDP parent.
++
+While at it, use Cloudflare DNS server as default in configuration
+and as example in documentation.
 
-   Using TCP for parent name server is discouraged, because most of server
-   disallow keeping the connection alive.
-
-   The valid use case for TCP connection is when server received truncated
-   UDP answer.
-
-   Using UDP as parent scheme, will automatically assume that the server
-   also capable of handling query in TCP.
-   This is required when client (for example, your browser) re-send the query
-   after receiving truncated UDP answer.
-   Any query received by rescached through TCP will forwarded to the parent
-   name server as TCP too, using the same address and port defined in one of
-   UDP parent.
-
-   While at it, use Cloudflare DNS server as default in configuration
-   and as example in documentation.
-
-==  New features
+===  New features
 
 *  Add support to save and load caches to/from storage upon restart
++
+rescached now able to save and load caches to local storage upon restart.
++
+On POSIX, the caches is stored in /var/cache/rescached/rescached.gob,
+encoded using gob.
++
+Update #9
 
-   rescached now able to save and load caches to local storage upon restart.
-
-   On POSIX, the caches is stored in /var/cache/rescached/rescached.gob,
-   encoded using gob.
-
-   Update #9
-
-==  Bug fixes
+===  Bug fixes
 
 *  make the TCP forwarders as complementary of UDP
++
+The TCP forwarders only active when client send the DNS request as TCP.
+When the server receive that request it should also forward the request
+as TCP not as UDP to prevent the truncated response.
++
+Another use case for TCP is when the response is truncated, the client
+will send the query back through TCP connection.  The server should
+forward this request using TCP instead of UDP.
 
-   The TCP forwarders only active when client send the DNS request as TCP.
-   When the server receive that request it should also forward the request
-   as TCP not as UDP to prevent the truncated response.
+===  Enhancements
 
-   Another use case for TCP is when the response is truncated, the client
-   will send the query back through TCP connection.  The server should
-   forward this request using TCP instead of UDP.
-
-==  Enhancements
-
-*  remove the fallback name servers (NS) from server options
-
-   The original idea of fallback NS is to send the query to the one
-   define in resolv.conf, instead of using the one defined by user in
-   ServerOptions NameServers, when an error occured.
-
-   But, most of error usually caused by network (disconnected, time out),
-   so re-sending query to fallback NS does not have any effect if the
-   network it self is not working.
-
-   This changes remove the unnecessary and complex fallback NS from
-   server.
+*  Remove the fallback name servers (NS) from server options
++
+The original idea of fallback NS is to send the query to the one
+define in resolv.conf, instead of using the one defined by user in
+ServerOptions NameServers, when an error occured.
++
+But, most of error usually caused by network (disconnected, time out),
+so re-sending query to fallback NS does not have any effect if the
+network it self is not working.
++
+This changes remove the unnecessary and complex fallback NS from
+server.
 
 *  Do not cache truncated answer
++
+Previously only answer with non-zero response code is ignored.
++
+This changes ignore also answer where response header is truncated.
 
-   Previously only answer with non-zero response code is ignored.
 
-   This changes ignore also answer where response header is truncated.
+==  rescached v4.0.0 (2021-01-25)
 
-
-=  Rescached v4.0.0 (2021-01-25)
-
-==  New features
+===  New features
 
 Rescached now have a web user interface (wui) that can be accessed at
 http://127.0.0.1:5380.
@@ -76,70 +82,71 @@ http://127.0.0.1:5380.
 The interface can be used to monitoring caches, managing caches, environment,
 blocked hosts, internal hosts files, and zone files.
 
-==  Breaking changes
+===  Breaking changes
 
 *  The `rescached::dir.hosts` now default to "/etc/rescached/hosts.d"
 
 *  The `rescached::dir.master` now default to "/etc/rescached/zone.d"
 
 
-=  Rescached v3.0.2 (2020-05-08)
+==  rescached v3.0.2 (2020-05-08)
 
 *  go.mod: comment replace directive
    This cause package is un-buildable using normal go get or git clone.
-
++
    Sorry :/
 
 
-=  Rescached v3.0.1 (2020-05-07)
+==  rescached v3.0.1 (2020-05-07)
 
-==  Enhancements
+===  Enhancements
 
 *  dns: change the mark of input/output in log output
++
    Previously, the character '<' is used to indicate incoming request
    from client and '>' to indicate outgoing response.
    This change reverse it because '<' make more sense for output and '>'
    is for input (looks like cin and cout on C++ world)
 
-==  Bug fixes
+===  Bug fixes
 
 *  dns: fix index out of range when unpacking OPT RR
 *  dns: forward the request to fallback queue if there is no forwarders
 
-==  Chores
+===  Chores
 
 *  Add prefix "_" to all non-Go source directories.
    This is to ignore the directory being scanned by Go tools.
 
 
-=  Rescached v3.0.0 (2020-01-15)
+==  rescached v3.0.0 (2020-01-15)
 
-==  Enhancements
+===  Enhancements
 
 * Makefile: remove unused option "CGO_ENABLED=0"
 
-==  Bug Fixes
+===  Bug Fixes
 
 * Makefile: remove invalid task "install-service-systemd"
 
 * cmd: fix formatting arguments
 
 
-=  Rescached v3.0.0-alpha (2019-12-26)
+==  rescached v3.0.0-alpha (2019-12-26)
 
 All the server core functionalities (caches and forwarding) now
 implemented inside "dns.Server".  The main function of this package are
 for reading options from configuration file (or from command line options)
 and watching changes from system resolv.conf.
 
-==  New Features
+===  New Features
 
 *  Support serving and forwarding DNS over TLS
 
 *  Add launchd script for macOS and make tasks to install and uninstall on
    macOS
 
-==  Breaking Changes
+===  Breaking Changes
 
 There are also some major changes on configuration file.
 All configuration now break into two section '[rescached]' and
@@ -166,60 +173,60 @@ If the program already started, the second program will fail because
 the port is already used.
 
 
-=  Rescached v2.1.2 (2019-03-22)
+==  rescached v2.1.2 (2019-03-22)
 
-==  Bug Fix
+===  Bug Fix
 
 Use single Go routine to handle request.  This fix mismatched ID in
 response due to single response is being use by multiple routines.
 
 
-=  Rescached v2.1.1 (2019-03-02)
+==  rescached v2.1.1 (2019-03-02)
 
-==  Enhancements
+===  Enhancements
 
 *  Run multiple (4) go routines to handle request
 *  Make the debug output to be more human readable
 
-==  Bug Fixes
+===  Bug Fixes
 
 *  cmd/resolver: fix query with zero ID
 
 
-=  Rescached v2.1.0 (2019-02-01)
+==  rescached v2.1.0 (2019-02-01)
 
-==  New Features
+===  New Features
 
--  Change default parent nameservers to Cloudflare DNS.
+*  Change default parent nameservers to Cloudflare DNS
++
 We believe in Cloudflare!
-Please read Cloudflare DNS policy for more information,
+Please read Cloudflare DNS policy for more information:
+https://developers.cloudflare.com/1.1.1.1/commitment-to-privacy/privacy-policy/privacy-policy/
 
-	https://developers.cloudflare.com/1.1.1.1/commitment-to-privacy/privacy-policy/privacy-policy/
+===  Enhancements
 
-==  Enhancements
-
--  Improve response performance.  Previously we can serve around 93k request
+*  Improve response performance.  Previously we can serve around 93k request
 per second (RPS).  The new enhancement increase the RPS to around 115k.
 
-==  Bug Fixes
+===  Bug Fixes
 
--  Fix the example certificate and key for DNS over HTTPS
--  Fix the hosts.block destination file in script to update blocked host file
--  Fix response with different query type that may not get pruned
+*  Fix the example certificate and key for DNS over HTTPS
+*  Fix the hosts.block destination file in script to update blocked host file
+*  Fix response with different query type that may not get pruned
 
 
-=  Rescached v2.0.0 (2019-01-16)
+==  rescached v2.0.0 (2019-01-16)
 
-==  Features
+===  Features
 
--  Enable to handle request from UDP and TCP connections
--  Enable to forward request using UDP or TCP connection
--  Load and serve addresses and hostnames in `/etc/hosts`
--  Load and serve hosts formated files inside directory
+*  Enable to handle request from UDP and TCP connections
+*  Enable to forward request using UDP or TCP connection
+*  Load and serve addresses and hostnames in `/etc/hosts`
+*  Load and serve hosts formated files inside directory
    `/etc/rescached/hosts.d/`
--  Blocking ads and/or malicious websites through host list in
+*  Blocking ads and/or malicious websites through host list in
    `/etc/rescached/hosts.d/hosts.block`
--  Support loading and serving master (zone) file format from
+*  Support loading and serving master (zone) file format from
    `/etc/rescached/master.d`
--  Integration with openresolv
--  Support DNS over HTTPS (DoH) (draft 14)
+*  Integration with openresolv
+*  Support DNS over HTTPS (DoH) (draft 14)
