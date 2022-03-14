@@ -251,6 +251,7 @@ func init() {
 			Excludes: []string{
 			},
 			Embed: memfs.EmbedOptions{
+				CommentHeader:  ``,
 				PackageName:    "rescached",
 				VarName:        "mfsWww",
 				GoFileName:     "memfs_generate.go",
