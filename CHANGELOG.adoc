@@ -6,6 +6,14 @@ Shulhan <ms@kilabit.info>
 :sectanchors:
 :sectlinks:
 
+[#v4.3.0]
+==  rescached v4.3.0 (2022-03-15)
+
+This release re-licensing the rescached under GPL 3.0 or later.
+
+See https://kilabit.info/journal/2022/gpl/ for more information.
+
+
 ==  rescached v4.2.0 (2022-02-09)
 
 ===  New features
