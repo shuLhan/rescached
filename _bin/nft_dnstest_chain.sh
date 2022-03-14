@@ -1,4 +1,7 @@
 #!/bin/sh
+## SPDX-FileCopyrightText: 2021 M. Shulhan <ms@kilabit.info>
+## SPDX-License-Identifier: GPL-3.0-or-later
+
 
 if [[ "$1" == "flush" ]]; then
 	echo "nft: delete chain dnstest";

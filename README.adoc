@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2018 M. Shulhan <ms@kilabit.info>
+// SPDX-License-Identifier: GPL-3.0-or-later
 = RESCACHED(1)
 M. Shulhan <ms@kilabit.info>
 8 February 2022
@@ -415,7 +417,7 @@ Upon success, `rescached` will return 0, or 1 otherwise.
 `/etc/rescached/rescached.cfg`:: The `rescached` main configuration.
 This configuration will be read when program started.
 
-`/usr/share/rescached/LICENSE`:: License file for this software.
+`/usr/share/rescached/COPYING`:: License file for this software.
 
 `/var/run/rescached.pid`:: File where process ID of rescached will be saved
 when running.
@@ -470,8 +472,8 @@ https://github.com/shuLhan/rescached-go/issues.
 Copyright 2018, M. Shulhan (ms@kilabit.info).
 All rights reserved.
 
-Use of this source code is governed by a BSD-style license that can be found
-in the LICENSE file.
+Use of this source code is governed by a GPL 3.0 license that can be found
+in the COPYING file.
 
 
 == LINKS

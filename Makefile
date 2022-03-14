@@ -1,6 +1,5 @@
-## Copyright 2018, Shulhan <ms@kilabit.info>. All rights reserved.
-## Use of this source code is governed by a BSD-style
-## license that can be found in the LICENSE file.
+## SPDX-FileCopyrightText: 2018 M. Shulhan <ms@kilabit.info>
+## SPDX-License-Identifier: GPL-3.0-or-later
 
 .PHONY: test test.prof lint build debug doc
 .PHONY: install-common uninstall-common
@@ -115,11 +114,11 @@ install-common:
 	cp $(RESCACHED_CFG_MAN) $(PREFIX)$(DIR_MAN)/man5/
 
 	mkdir -p   $(PREFIX)$(DIR_RESCACHED)
-	cp LICENSE $(PREFIX)$(DIR_RESCACHED)
+	cp COPYING $(PREFIX)$(DIR_RESCACHED)
 
 
 uninstall-common:
-	rm -f $(PREFIX)$(DIR_RESCACHED)/LICENSE
+	rm -f $(PREFIX)$(DIR_RESCACHED)/COPYING
 
 	rm -f $(PREFIX)$(DIR_MAN)/man5/$(RESCACHED_CFG_MAN)
 	rm -f $(PREFIX)$(DIR_MAN)/man1/$(RESOLVER_MAN)

@@ -1,6 +1,5 @@
-// Copyright 2019, Shulhan <m.shulhan@gmail.com>. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// SPDX-FileCopyrightText: 2019 M. Shulhan <ms@kilabit.info>
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 package rescached
 

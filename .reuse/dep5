@@ -1,0 +1,44 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: rescached-go
+Upstream-Contact: Shulhan <ms@kilabit.info>
+Source: https://github.com/shuLhan/rescached-go
+
+Files: _doc/images/*
+Copyright: 2021 Shulhan <ms@kilabit.info>
+License: GPL-3.0-or-later
+
+Files: _doc/rescached.cfg.5.gz
+Copyright: 2020 Shulhan <ms@kilabit.info>
+License: GPL-3.0-or-later
+
+Files: _doc/resolver.1.gz
+Copyright: 2020 Shulhan <ms@kilabit.info>
+License: GPL-3.0-or-later
+
+Files: .gitignore
+Copyright: 2018 Shulhan <ms@kilabit.info>
+License: GPL-3.0-or-later
+
+Files: .gitmodules
+Copyright: 2018 Shulhan <ms@kilabit.info>
+License: GPL-3.0-or-later
+
+Files: .ignore
+Copyright: 2018 Shulhan <ms@kilabit.info>
+License: GPL-3.0-or-later
+
+Files: go.sum
+Copyright: 2018 Shulhan <ms@kilabit.info>
+License: GPL-3.0-or-later
+
+Files: rescached.1.gz
+Copyright: 2021 Shulhan <ms@kilabit.info>
+License: GPL-3.0-or-later
+
+Files: testdata/*
+Copyright: 2021 Shulhan <ms@kilabit.info>
+License: GPL-3.0-or-later
+
+Files: _www/favicon.png
+Copyright: 2021 Shulhan <ms@kilabit.info>
+License: GPL-3.0-or-later

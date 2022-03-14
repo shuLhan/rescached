@@ -1,6 +1,5 @@
-// Copyright 2018, Shulhan <ms@kilabit.info>. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// SPDX-FileCopyrightText: 2018 M. Shulhan <ms@kilabit.info>
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 package rescached
 
@@ -157,6 +156,9 @@ func (env *Environment) init() (err error) {
 				`.*\.png$`,
 			},
 			Embed: memfs.EmbedOptions{
+				CommentHeader: `// SPDX-FileCopyrightText: 2021 M. Shulhan <ms@kilabit.info>
+// SPDX-License-Identifier: GPL-3.0-or-later
+`,
 				PackageName: "rescached",
 				VarName:     "mfsWww",
 				GoFileName:  "memfs_generate.go",
