@@ -16,7 +16,6 @@ import (
 	"strings"
 
 	"github.com/shuLhan/share/lib/dns"
-	liberrors "github.com/shuLhan/share/lib/errors"
 	libhttp "github.com/shuLhan/share/lib/http"
 	libnet "github.com/shuLhan/share/lib/net"
 )
@@ -37,15 +36,6 @@ const (
 	apiZone         = "/api/zone.d/:name"
 	apiZoneRRType   = "/api/zone.d/:name/rr/:type"
 )
-
-type response struct {
-	liberrors.E
-	Data interface{} `json:"data"`
-}
-
-func (r *response) Unwrap() error {
-	return &r.E
-}
 
 func (srv *Server) httpdInit() (err error) {
 	srv.httpd, err = libhttp.NewServer(srv.env.HttpdOptions)
@@ -251,39 +241,42 @@ func (srv *Server) httpdRun() {
 }
 
 func (srv *Server) apiCaches(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
-	res := response{}
+	var (
+		res     = libhttp.EndpointResponse{}
+		answers = srv.dns.CachesLRU()
+	)
 	res.Code = http.StatusOK
-	answers := srv.dns.CachesLRU()
 	if len(answers) == 0 {
 		res.Data = make([]struct{}, 0, 1)
 	} else {
 		res.Data = answers
 	}
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 func (srv *Server) apiCachesSearch(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
-	res := response{
-		E: liberrors.E{
-			Code: http.StatusInternalServerError,
-		},
-	}
+	var (
+		res = libhttp.EndpointResponse{}
+		q   = epr.HttpRequest.Form.Get(paramNameQuery)
 
-	q := epr.HttpRequest.Form.Get(paramNameQuery)
+		re      *regexp.Regexp
+		listMsg []*dns.Message
+	)
 
 	if len(q) == 0 {
 		res.Code = http.StatusOK
 		res.Data = make([]struct{}, 0, 1)
-		return json.Marshal(res)
+		return json.Marshal(&res)
 	}
 
-	re, err := regexp.Compile(q)
+	re, err = regexp.Compile(q)
 	if err != nil {
+		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		return nil, &res
 	}
 
-	listMsg := srv.dns.SearchCaches(re)
+	listMsg = srv.dns.SearchCaches(re)
 	if listMsg == nil {
 		listMsg = make([]*dns.Message, 0)
 	}
@@ -291,18 +284,19 @@ func (srv *Server) apiCachesSearch(epr *libhttp.EndpointRequest) (resBody []byte
 	res.Code = http.StatusOK
 	res.Data = listMsg
 
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 func (srv *Server) httpdAPIDeleteCaches(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
-	res := &liberrors.E{
-		Code: http.StatusInternalServerError,
-	}
+	var (
+		res = libhttp.EndpointResponse{}
+		q   = epr.HttpRequest.Form.Get(paramNameName)
+	)
 
-	q := epr.HttpRequest.Form.Get(paramNameName)
 	if len(q) == 0 {
+		res.Code = http.StatusInternalServerError
 		res.Message = "empty query 'name' parameter"
-		return nil, res
+		return nil, &res
 	}
 
 	srv.dns.RemoveCachesByNames([]string{q})
@@ -310,35 +304,37 @@ func (srv *Server) httpdAPIDeleteCaches(epr *libhttp.EndpointRequest) (resBody [
 	res.Code = http.StatusOK
 	res.Message = fmt.Sprintf("%q has been removed from caches", q)
 
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 func (srv *Server) httpdAPIGetEnvironment(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
-	res := &response{}
+	var (
+		res = libhttp.EndpointResponse{}
+	)
+
 	res.Code = http.StatusOK
 	res.Data = srv.env
 
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 func (srv *Server) httpdAPIPostEnvironment(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
-	res := &response{
-		E: liberrors.E{
-			Code:    http.StatusOK,
-			Message: "Restarting DNS server",
-		},
-	}
+	var (
+		res     = libhttp.EndpointResponse{}
+		newOpts = new(Environment)
+	)
 
-	newOpts := new(Environment)
 	err = json.Unmarshal(epr.RequestBody, newOpts)
 	if err != nil {
-		return nil, err
+		res.Code = http.StatusBadRequest
+		res.Message = err.Error()
+		return nil, &res
 	}
 
 	if len(newOpts.NameServers) == 0 {
 		res.Code = http.StatusBadRequest
 		res.Message = "at least one parent name servers must be defined"
-		return nil, res
+		return nil, &res
 	}
 
 	newOpts.init()
@@ -349,7 +345,7 @@ func (srv *Server) httpdAPIPostEnvironment(epr *libhttp.EndpointRequest) (resBod
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	srv.env = newOpts
@@ -359,10 +355,12 @@ func (srv *Server) httpdAPIPostEnvironment(epr *libhttp.EndpointRequest) (resBod
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
-	return json.Marshal(res)
+	res.Code = http.StatusOK
+	res.Message = "Restarting DNS server"
+	return json.Marshal(&res)
 }
 
 //
@@ -375,22 +373,25 @@ func (srv *Server) httpdAPIPostEnvironment(epr *libhttp.EndpointRequest) (resBod
 // and remove it from list of HostsFiles.
 //
 func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
-	hostsBlocks := make([]*hostsBlock, 0)
+	var (
+		res         = libhttp.EndpointResponse{}
+		hostsBlocks = make([]*hostsBlock, 0)
+
+		hbx *hostsBlock
+		hby *hostsBlock
+	)
 
 	err = json.Unmarshal(epr.RequestBody, &hostsBlocks)
 	if err != nil {
-		return nil, err
+		res.Code = http.StatusBadRequest
+		res.Message = err.Error()
+		return nil, &res
 	}
 
-	res := &response{
-		E: liberrors.E{
-			Code: http.StatusInternalServerError,
-		},
-	}
+	res.Code = http.StatusInternalServerError
 
-	for _, hbx := range hostsBlocks {
-		for x := 0; x < len(srv.env.HostsBlocks); x++ {
-			hby := srv.env.HostsBlocks[x]
+	for _, hbx = range hostsBlocks {
+		for _, hby = range srv.env.HostsBlocks {
 			if hbx.Name != hby.Name {
 				continue
 			}
@@ -402,13 +403,13 @@ func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []
 				err = srv.hostsBlockEnable(hby)
 				if err != nil {
 					res.Message = err.Error()
-					return nil, res
+					return nil, &res
 				}
 			} else {
 				err = srv.hostsBlockDisable(hby)
 				if err != nil {
 					res.Message = err.Error()
-					return nil, res
+					return nil, &res
 				}
 				hby.IsEnabled = false
 			}
@@ -419,16 +420,20 @@ func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []
 	if err != nil {
 		log.Println("apiHostsBlockUpdate:", err.Error())
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	res.Code = http.StatusOK
 	res.Data = hostsBlocks
 
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
+	var (
+		hfile *dns.HostsFile
+	)
+
 	hb.IsEnabled = true
 
 	err = hb.unhide()
@@ -443,7 +448,7 @@ func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
 		}
 	}
 
-	hfile, err := dns.ParseHostsFile(filepath.Join(dirHosts, hb.Name))
+	hfile, err = dns.ParseHostsFile(filepath.Join(dirHosts, hb.Name))
 	if err != nil {
 		return err
 	}
@@ -464,8 +469,9 @@ func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
 }
 
 func (srv *Server) hostsBlockDisable(hb *hostsBlock) (err error) {
-	hfile, found := srv.env.HostsFiles[hb.Name]
-	if !found {
+	var hfile *dns.HostsFile
+	hfile = srv.env.HostsFiles[hb.Name]
+	if hfile == nil {
 		return fmt.Errorf("unknown hosts block: %q", hb.Name)
 	}
 
@@ -481,23 +487,29 @@ func (srv *Server) hostsBlockDisable(hb *hostsBlock) (err error) {
 }
 
 func (srv *Server) apiHostsFileCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
-	res := &response{}
+	var (
+		res  = libhttp.EndpointResponse{}
+		name = epr.HttpRequest.Form.Get(paramNameName)
 
-	name := epr.HttpRequest.Form.Get(paramNameName)
+		hfile *dns.HostsFile
+		path  string
+		found bool
+	)
+
 	if len(name) == 0 {
 		res.Code = http.StatusBadRequest
-		res.Message = "hosts file name is invalid or empty"
-		return nil, res
+		res.Message = "parameter hosts file name is empty"
+		return nil, &res
 	}
 
-	_, found := srv.env.HostsFiles[name]
+	_, found = srv.env.HostsFiles[name]
 	if !found {
-		path := filepath.Join(dirHosts, name)
-		hfile, err := dns.NewHostsFile(path, nil)
+		path = filepath.Join(dirHosts, name)
+		hfile, err = dns.NewHostsFile(path, nil)
 		if err != nil {
 			res.Code = http.StatusInternalServerError
 			res.Message = err.Error()
-			return nil, res
+			return nil, &res
 		}
 		srv.env.HostsFiles[hfile.Name] = hfile
 	}
@@ -505,19 +517,23 @@ func (srv *Server) apiHostsFileCreate(epr *libhttp.EndpointRequest) (resbody []b
 	res.Code = http.StatusOK
 	res.Message = fmt.Sprintf("Hosts file %q has been created", name)
 
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 func (srv *Server) apiHostsFileGet(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
-	res := &response{}
+	var (
+		res  = libhttp.EndpointResponse{}
+		name = epr.HttpRequest.Form.Get(paramNameName)
 
-	name := epr.HttpRequest.Form.Get(paramNameName)
+		hf    *dns.HostsFile
+		found bool
+	)
 
-	hf, found := srv.env.HostsFiles[name]
+	hf, found = srv.env.HostsFiles[name]
 	if !found {
 		res.Code = http.StatusNotFound
 		res.Message = "invalid or empty hosts file " + name
-		return nil, res
+		return nil, &res
 	}
 	if hf.Records == nil || cap(hf.Records) == 0 {
 		hf.Records = make([]*dns.ResourceRecord, 0, 1)
@@ -526,24 +542,29 @@ func (srv *Server) apiHostsFileGet(epr *libhttp.EndpointRequest) (resbody []byte
 	res.Code = http.StatusOK
 	res.Data = hf.Records
 
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 func (srv *Server) apiHostsFileDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
-	res := &response{}
+	var (
+		res  = libhttp.EndpointResponse{}
+		name = epr.HttpRequest.Form.Get(paramNameName)
 
-	name := epr.HttpRequest.Form.Get(paramNameName)
+		hfile *dns.HostsFile
+		found bool
+	)
+
 	if len(name) == 0 {
 		res.Code = http.StatusBadRequest
-		res.Message = "empty or invalid host file name"
-		return nil, res
+		res.Message = "empty or invalid parameter for host file name"
+		return nil, &res
 	}
 
-	hfile, found := srv.env.HostsFiles[name]
+	hfile, found = srv.env.HostsFiles[name]
 	if !found {
 		res.Code = http.StatusBadRequest
 		res.Message = "apiDeleteHostsFile: " + name + " not found"
-		return nil, res
+		return nil, &res
 	}
 
 	// Remove the records associated with hosts file.
@@ -553,53 +574,61 @@ func (srv *Server) apiHostsFileDelete(epr *libhttp.EndpointRequest) (resbody []b
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	delete(srv.env.HostsFiles, name)
 
 	res.Code = http.StatusOK
 	res.Message = name + " has been deleted"
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 //
 // apiHostsFileRRCreate create new record and save it to the hosts file.
 //
 func (srv *Server) apiHostsFileRRCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
-	res := &response{}
+	var (
+		res           = libhttp.EndpointResponse{}
+		hostsFileName = epr.HttpRequest.Form.Get(paramNameName)
+
+		hfile *dns.HostsFile
+		rr    *dns.ResourceRecord
+		v     string
+		found bool
+	)
+
 	res.Code = http.StatusBadRequest
 
-	hostsFileName := epr.HttpRequest.Form.Get(paramNameName)
 	if len(hostsFileName) == 0 {
 		res.Message = "empty hosts file name in request path"
-		return nil, res
+		return nil, &res
 	}
 
-	hfile, found := srv.env.HostsFiles[hostsFileName]
+	hfile, found = srv.env.HostsFiles[hostsFileName]
 	if !found {
 		res.Message = "unknown hosts file name: " + hostsFileName
-		return nil, res
+		return nil, &res
 	}
 
-	rr := &dns.ResourceRecord{
+	rr = &dns.ResourceRecord{
 		Class: dns.RecordClassIN,
 	}
 
 	rr.Name = epr.HttpRequest.Form.Get(paramNameDomain)
 	if len(rr.Name) == 0 {
 		res.Message = "empty 'domain' query parameter"
-		return nil, res
+		return nil, &res
 	}
-	v := epr.HttpRequest.Form.Get(paramNameValue)
+	v = epr.HttpRequest.Form.Get(paramNameValue)
 	if len(v) == 0 {
 		res.Message = "empty 'value' query parameter"
-		return nil, res
+		return nil, &res
 	}
 	rr.Type = dns.RecordTypeFromAddress([]byte(v))
 	if rr.Type == 0 {
 		res.Message = "invalid address value: " + v
-		return nil, res
+		return nil, &res
 	}
 	rr.Value = v
 
@@ -607,55 +636,59 @@ func (srv *Server) apiHostsFileRRCreate(epr *libhttp.EndpointRequest) (resbody [
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	err = srv.dns.PopulateCachesByRR([]*dns.ResourceRecord{rr}, hostsFileName)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	res.Code = http.StatusOK
 	res.Data = rr
 
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 func (srv *Server) apiHostsFileRRDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
-	res := &liberrors.E{
-		Code: http.StatusBadRequest,
-	}
+	var (
+		res           = libhttp.EndpointResponse{}
+		hostsFileName = epr.HttpRequest.Form.Get(paramNameName)
+		domainName    = epr.HttpRequest.Form.Get(paramNameDomain)
 
-	hostsFileName := epr.HttpRequest.Form.Get(paramNameName)
+		hfile *dns.HostsFile
+		found bool
+	)
+
+	res.Code = http.StatusBadRequest
+
 	if len(hostsFileName) == 0 {
 		res.Message = "empty hosts file name in request path"
-		return nil, res
+		return nil, &res
 	}
-
-	hfile, found := srv.env.HostsFiles[hostsFileName]
-	if !found {
-		res.Message = "unknown hosts file name: " + hostsFileName
-		return nil, res
-	}
-
-	domainName := epr.HttpRequest.Form.Get(paramNameDomain)
 	if len(domainName) == 0 {
 		res.Message = "empty 'domain' query parameter"
-		return nil, res
+		return nil, &res
+	}
+
+	hfile, found = srv.env.HostsFiles[hostsFileName]
+	if !found {
+		res.Message = "unknown hosts file name: " + hostsFileName
+		return nil, &res
 	}
 
 	found = hfile.RemoveRecord(domainName)
 	if !found {
 		res.Message = "unknown domain name: " + domainName
-		return nil, res
+		return nil, &res
 	}
 	err = hfile.Save()
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	srv.dns.RemoveLocalCachesByNames([]string{domainName})
@@ -663,113 +696,135 @@ func (srv *Server) apiHostsFileRRDelete(epr *libhttp.EndpointRequest) (resbody [
 	res.Code = http.StatusOK
 	res.Message = "domain name '" + domainName + "' has been removed from hosts file"
 
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 func (srv *Server) apiZoneCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
-	res := &response{}
+	var (
+		res      = libhttp.EndpointResponse{}
+		zoneName = epr.HttpRequest.Form.Get(paramNameName)
+
+		zone     *dns.Zone
+		zoneFile string
+	)
+
 	res.Code = http.StatusBadRequest
 
-	zoneName := epr.HttpRequest.Form.Get(paramNameName)
 	if len(zoneName) == 0 {
 		res.Message = "empty or invalid zone file name"
-		return nil, res
+		return nil, &res
 	}
 
 	if !libnet.IsHostnameValid([]byte(zoneName), true) {
 		res.Message = "zone file name must be valid hostname"
-		return nil, res
+		return nil, &res
 	}
 
-	mf, ok := srv.env.Zones[zoneName]
-	if ok {
+	zone = srv.env.Zones[zoneName]
+	if zone != nil {
 		res.Code = http.StatusOK
-		res.Data = mf
-		return json.Marshal(res)
+		res.Data = zone
+		return json.Marshal(&res)
 	}
 
-	zoneFile := filepath.Join(dirZone, zoneName)
-	mf = dns.NewZone(zoneFile, zoneName)
-	err = mf.Save()
+	zoneFile = filepath.Join(dirZone, zoneName)
+	zone = dns.NewZone(zoneFile, zoneName)
+	err = zone.Save()
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
-	srv.env.Zones[zoneName] = mf
+	srv.env.Zones[zoneName] = zone
 
 	res.Code = http.StatusOK
-	res.Data = mf
+	res.Data = zone
 
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 func (srv *Server) apiZoneDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
-	res := &response{}
+	var (
+		res      = libhttp.EndpointResponse{}
+		zoneName = epr.HttpRequest.Form.Get(paramNameName)
+
+		zone  *dns.Zone
+		names []string
+		name  string
+	)
+
 	res.Code = http.StatusBadRequest
 
-	zoneName := epr.HttpRequest.Form.Get(paramNameName)
 	if len(zoneName) == 0 {
 		res.Message = "empty or invalid zone file name"
-		return nil, res
+		return nil, &res
 	}
 
-	mf, ok := srv.env.Zones[zoneName]
-	if !ok {
-		res.Message = "unknown zone file name " + zoneName
-		return nil, res
+	zone = srv.env.Zones[zoneName]
+	if zone == nil {
+		res.Message = "zone file not found: " + zoneName
+		return nil, &res
 	}
 
-	names := make([]string, 0, len(mf.Records))
-	for name := range mf.Records {
+	names = make([]string, 0, len(zone.Records))
+	for name = range zone.Records {
 		names = append(names, name)
 	}
 
 	srv.dns.RemoveLocalCachesByNames(names)
 	delete(srv.env.Zones, zoneName)
 
-	err = mf.Delete()
+	err = zone.Delete()
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	res.Code = http.StatusOK
 	res.Message = zoneName + " has been deleted"
 
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 //
 // apiZoneRRCreate create new RR for the zone file.
 //
 func (srv *Server) apiZoneRRCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
-	res := &response{}
+	var (
+		res          = libhttp.EndpointResponse{}
+		zoneFileName = epr.HttpRequest.Form.Get(paramNameName)
+		rrTypeValue  = epr.HttpRequest.Form.Get(paramNameType)
+
+		zoneFile *dns.Zone
+		rr       *dns.ResourceRecord
+		v        string
+		listRR   []*dns.ResourceRecord
+		rrType   int
+	)
+
 	res.Code = http.StatusBadRequest
 
-	zoneFileName := epr.HttpRequest.Form.Get(paramNameName)
 	if len(zoneFileName) == 0 {
 		res.Message = "empty or invalid zone file name"
-		return nil, res
+		return nil, &res
 	}
 
-	zoneFile := srv.env.Zones[zoneFileName]
+	zoneFile = srv.env.Zones[zoneFileName]
 	if zoneFile == nil {
 		res.Message = "unknown zone file name " + zoneFileName
-		return nil, res
+		return nil, &res
 	}
 
-	rrTypeValue := epr.HttpRequest.Form.Get(paramNameType)
-	rrType, err := strconv.Atoi(rrTypeValue)
+	rrType, err = strconv.Atoi(rrTypeValue)
 	if err != nil {
 		res.Message = fmt.Sprintf("invalid or empty RR type %q: %s",
 			rrTypeValue, err.Error())
-		return nil, res
+		return nil, &res
 	}
 
-	rr := &dns.ResourceRecord{}
+	rr = &dns.ResourceRecord{}
 	switch dns.RecordType(rrType) {
 	case dns.RecordTypeSOA:
 		rr.Value = &dns.RDataSOA{}
@@ -779,7 +834,7 @@ func (srv *Server) apiZoneRRCreate(epr *libhttp.EndpointRequest) (resbody []byte
 	err = json.Unmarshal(epr.RequestBody, rr)
 	if err != nil {
 		res.Message = "json.Unmarshal:" + err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	rr.Name = strings.TrimRight(rr.Name, ".")
@@ -787,9 +842,9 @@ func (srv *Server) apiZoneRRCreate(epr *libhttp.EndpointRequest) (resbody []byte
 	if rr.Type == dns.RecordTypePTR {
 		if len(rr.Name) == 0 {
 			res.Message = "empty PTR name"
-			return nil, res
+			return nil, &res
 		}
-		v := rr.Value.(string)
+		v = rr.Value.(string)
 		if len(v) == 0 {
 			rr.Value = zoneFileName
 		} else {
@@ -803,12 +858,12 @@ func (srv *Server) apiZoneRRCreate(epr *libhttp.EndpointRequest) (resbody []byte
 		}
 	}
 
-	listRR := []*dns.ResourceRecord{rr}
+	listRR = []*dns.ResourceRecord{rr}
 	err = srv.dns.PopulateCachesByRR(listRR, zoneFile.Path)
 	if err != nil {
 		res.Code = http.StatusBadRequest
 		res.Message = "PopulateCacheByRR: " + err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	// Update the Zone file.
@@ -816,7 +871,7 @@ func (srv *Server) apiZoneRRCreate(epr *libhttp.EndpointRequest) (resbody []byte
 	err = zoneFile.Save()
 	if err != nil {
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	res.Code = http.StatusOK
@@ -827,37 +882,43 @@ func (srv *Server) apiZoneRRCreate(epr *libhttp.EndpointRequest) (resbody []byte
 		res.Data = zoneFile.Records
 	}
 
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
 
 //
 // apiZoneRRDelete delete RR from the zone file.
 //
 func (srv *Server) apiZoneRRDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
-	res := &response{}
+	var (
+		res          = libhttp.EndpointResponse{}
+		zoneFileName = epr.HttpRequest.Form.Get(paramNameName)
+		paramType    = epr.HttpRequest.Form.Get(paramNameType)
+		rr           = dns.ResourceRecord{}
+
+		zone   *dns.Zone
+		rrType int
+	)
+
 	res.Code = http.StatusBadRequest
 
-	zoneFileName := epr.HttpRequest.Form.Get(paramNameName)
 	if len(zoneFileName) == 0 {
 		res.Message = "empty zone file name"
-		return nil, res
+		return nil, &res
 	}
 
-	mf := srv.env.Zones[zoneFileName]
-	if mf == nil {
+	zone = srv.env.Zones[zoneFileName]
+	if zone == nil {
 		res.Message = "unknown zone file name " + zoneFileName
-		return nil, res
+		return nil, &res
 	}
 
-	v := epr.HttpRequest.Form.Get(paramNameType)
-	rrType, err := strconv.Atoi(v)
+	rrType, err = strconv.Atoi(paramType)
 	if err != nil {
 		res.Message = fmt.Sprintf("invalid or empty param type %s: %s",
 			paramNameType, err)
-		return nil, res
+		return nil, &res
 	}
 
-	rr := dns.ResourceRecord{}
 	switch dns.RecordType(rrType) {
 	case dns.RecordTypeSOA:
 		rr.Value = &dns.RDataSOA{}
@@ -867,32 +928,31 @@ func (srv *Server) apiZoneRRDelete(epr *libhttp.EndpointRequest) (resbody []byte
 	err = json.Unmarshal(epr.RequestBody, &rr)
 	if err != nil {
 		res.Message = "json.Unmarshal:" + err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	if len(rr.Name) == 0 {
 		res.Message = "invalid or empty ResourceRecord.Name"
-		return nil, res
+		return nil, &res
 	}
 
 	// Remove the RR from caches.
 	err = srv.dns.RemoveCachesByRR(&rr)
 	if err != nil {
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	// Remove the RR from zone file.
-	err = mf.Remove(&rr)
+	err = zone.Remove(&rr)
 	if err != nil {
 		res.Message = err.Error()
-		return nil, res
+		return nil, &res
 	}
 
 	res.Code = http.StatusOK
-	res.Message = fmt.Sprintf("The RR type %d and name %s has been deleted",
-		rr.Type, rr.Name)
-	res.Data = mf.Records
+	res.Message = fmt.Sprintf("The RR type %d and name %s has been deleted", rr.Type, rr.Name)
+	res.Data = zone.Records
 
-	return json.Marshal(res)
+	return json.Marshal(&res)
 }
