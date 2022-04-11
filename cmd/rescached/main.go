@@ -13,9 +13,7 @@ import (
 	"time"
 
 	"github.com/shuLhan/share/lib/debug"
-	libio "github.com/shuLhan/share/lib/io"
 	"github.com/shuLhan/share/lib/memfs"
-	"github.com/shuLhan/share/lib/mlog"
 
 	"github.com/shuLhan/rescached-go/v4"
 )
@@ -104,50 +102,36 @@ func debugRuntime() {
 //
 func watchWww(env *rescached.Environment, running chan bool) {
 	var (
-		logp    = "watchWww"
-		changeq = make(chan *libio.NodeState, 64)
-		dw      = libio.DirWatcher{
-			Options: *env.HttpdOptions.Memfs.Opts,
-			Callback: func(ns *libio.NodeState) {
-				changeq <- ns
-			},
-		}
-		node      *memfs.Node
-		nChanges  int
-		err       error
-		isRunning bool = true
+		logp      = "watchWww"
+		tick      = time.NewTicker(5 * time.Second)
+		isRunning = true
+
+		dw       *memfs.DirWatcher
+		nChanges int
+		err      error
 	)
 
-	dw.Start()
-
-	tick := time.NewTicker(5 * time.Second)
+	dw, err = env.HttpdOptions.Memfs.Watch(memfs.WatchOptions{})
+	if err != nil {
+		log.Fatalf("%s: %s", logp, err)
+	}
 
 	for isRunning {
 		select {
-		case ns := <-changeq:
-			node, err = env.HttpdOptions.Memfs.Get(ns.Node.Path)
-			if err != nil {
-				log.Printf("%s: %q: %s", logp, ns.Node.Path, err)
-				continue
-			}
-			if node != nil {
-				err = node.Update(nil, 0)
-				if err != nil {
-					mlog.Errf("%s: %q: %s", logp, node.Path, err)
-					continue
-				}
-				nChanges++
-			}
+		case <-dw.C:
+			nChanges++
 
 		case <-tick.C:
-			if nChanges > 0 {
-				fmt.Printf("--- %d changes\n", nChanges)
-				err = env.HttpdOptions.Memfs.GoEmbed()
-				if err != nil {
-					log.Printf("%s", err)
-				}
-				nChanges = 0
+			if nChanges == 0 {
+				continue
 			}
+
+			fmt.Printf("--- %d changes\n", nChanges)
+			err = env.HttpdOptions.Memfs.GoEmbed()
+			if err != nil {
+				log.Printf("%s", err)
+			}
+			nChanges = 0
 
 		case <-running:
 			isRunning = false

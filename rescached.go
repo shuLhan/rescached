@@ -15,7 +15,7 @@ import (
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
 	"github.com/shuLhan/share/lib/http"
-	libio "github.com/shuLhan/share/lib/io"
+	"github.com/shuLhan/share/lib/memfs"
 )
 
 const (
@@ -27,7 +27,7 @@ const (
 type Server struct {
 	dns       *dns.Server
 	env       *Environment
-	rcWatcher *libio.Watcher
+	rcWatcher *memfs.Watcher
 
 	httpd       *http.Server
 	httpdRunner sync.Once
@@ -128,11 +128,7 @@ func (srv *Server) Start() (err error) {
 	}
 
 	if len(srv.env.FileResolvConf) > 0 {
-		srv.rcWatcher, err = libio.NewWatcher(
-			srv.env.FileResolvConf, 0, srv.watchResolvConf)
-		if err != nil {
-			log.Fatal("Start:", err)
-		}
+		go srv.watchResolvConf()
 	}
 
 	go func() {
@@ -194,21 +190,36 @@ func (srv *Server) Stop() {
 	fmt.Printf("%s: %d caches stored to %s\n", logp, n, cachesPath)
 }
 
-func (srv *Server) watchResolvConf(ns *libio.NodeState) {
-	switch ns.State {
-	case libio.FileStateDeleted:
-		log.Printf("= ResolvConf: file %q deleted\n", srv.env.FileResolvConf)
-		return
-	default:
-		ok, err := srv.env.loadResolvConf()
-		if err != nil {
-			log.Println("loadResolvConf: " + err.Error())
-			break
-		}
-		if !ok {
-			break
-		}
+// watchResolvConf watch an update to file resolv.conf.
+func (srv *Server) watchResolvConf() {
+	var (
+		logp = "watchResolvConf"
 
-		srv.dns.RestartForwarders(srv.env.NameServers)
+		ns  memfs.NodeState
+		err error
+	)
+
+	srv.rcWatcher, err = memfs.NewWatcher(srv.env.FileResolvConf, 0)
+	if err != nil {
+		log.Fatalf("%s: %s", logp, err)
+	}
+
+	for ns = range srv.rcWatcher.C {
+		switch ns.State {
+		case memfs.FileStateDeleted:
+			log.Printf("= %s: file %q deleted\n", logp, srv.env.FileResolvConf)
+			return
+		default:
+			ok, err := srv.env.loadResolvConf()
+			if err != nil {
+				log.Printf("%s: %s", logp, err)
+				break
+			}
+			if !ok {
+				break
+			}
+
+			srv.dns.RestartForwarders(srv.env.NameServers)
+		}
 	}
 }
