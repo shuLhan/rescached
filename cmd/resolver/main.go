@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"net"
-	"net/url"
 	"strings"
 	"time"
 
@@ -47,54 +45,6 @@ func initSystemResolver() (rc *libnet.ResolvConf, cl dns.Client) {
 	}
 
 	return
-}
-
-func createDNSClient(opts *options) (cl dns.Client) {
-	var (
-		ns     = opts.nameserver
-		iphost string
-		port   string
-	)
-
-	nsurl, err := url.Parse(ns)
-	if err != nil {
-		log.Fatalf("! invalid name server: %q\n", ns)
-	}
-
-	ipport := strings.Split(nsurl.Host, ":")
-	switch len(ipport) {
-	case 1:
-		iphost = ipport[0]
-	case 2:
-		iphost = ipport[0]
-		port = ipport[1]
-	default:
-		log.Fatalf("! invalid name server: %q\n", ns)
-	}
-
-	switch nsurl.Scheme {
-	case "udp":
-		cl, err = dns.NewUDPClient(nsurl.Host)
-	case "tcp":
-		cl, err = dns.NewTCPClient(nsurl.Host)
-	case "https":
-		ip := net.ParseIP(iphost)
-		if ip != nil {
-			if len(port) == 0 {
-				port = "853"
-			}
-			cl, err = dns.NewDoTClient(iphost+":"+port, opts.insecure)
-		} else {
-			cl, err = dns.NewDoHClient(ns, opts.insecure)
-		}
-	default:
-		log.Fatalf("! createDNSClient: unknown scheme %q", nsurl.Scheme)
-	}
-	if err != nil {
-		log.Fatal("! createDNSClient: " + err.Error())
-	}
-
-	return cl
 }
 
 func populateQueries(cr *libnet.ResolvConf, qname string) (queries []string) {
@@ -236,7 +186,10 @@ func main() {
 	if len(opts.nameserver) == 0 {
 		cl = systemResolver
 	} else {
-		cl = createDNSClient(opts)
+		cl, err = dns.NewClient(opts.nameserver, opts.insecure)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	queries := populateQueries(rc, opts.qname)
