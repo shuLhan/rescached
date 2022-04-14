@@ -42,24 +42,14 @@ type resolver struct {
 	insecure bool
 }
 
+// doCmdCaches call the rescached HTTP API to fetch all caches.
 func (rsol *resolver) doCmdCaches() {
 	var (
-		resc       *rescached.Client
-		answer     *dns.Answer
-		answers    []*dns.Answer
-		format     string
-		header     string
-		line       strings.Builder
-		err        error
-		x          int
-		maxNameLen int
+		resc = rsol.newRescachedClient()
+
+		answers []*dns.Answer
+		err     error
 	)
-
-	if len(rsol.rescachedUrl) == 0 {
-		rsol.rescachedUrl = defRescachedUrl
-	}
-
-	resc = rescached.NewClient(rsol.rescachedUrl, rsol.insecure)
 
 	answers, err = resc.Caches()
 	if err != nil {
@@ -68,31 +58,27 @@ func (rsol *resolver) doCmdCaches() {
 	}
 
 	fmt.Printf("Total caches: %d\n", len(answers))
+	printAnswers(answers)
+}
 
-	for _, answer = range answers {
-		if len(answer.QName) > maxNameLen {
-			maxNameLen = len(answer.QName)
-		}
+// doCmdCachesSearch call the rescached HTTP API to search the caches by
+// domain name.
+func (rsol *resolver) doCmdCachesSearch(q string) {
+	var (
+		resc = rsol.newRescachedClient()
+
+		listMsg []*dns.Message
+		err     error
+	)
+
+	listMsg, err = resc.CachesSearch(q)
+	if err != nil {
+		log.Printf("resolver: caches: %s", err)
+		return
 	}
 
-	format = fmt.Sprintf("%%4s | %%%ds | %%4s | %%5s | %%30s | %%30s", maxNameLen)
-	header = fmt.Sprintf(format, "#", "Name", "Type", "Class", "Received at", "Accessed at")
-	for x = 0; x < len(header); x++ {
-		line.WriteString("-")
-	}
-	fmt.Println(line.String())
-	fmt.Println(header)
-	fmt.Println(line.String())
-
-	format = fmt.Sprintf("%%4d | %%%ds | %%4s | %%5s | %%30s | %%30s\n", maxNameLen)
-	for x, answer = range answers {
-		fmt.Printf(format, x, answer.QName,
-			dns.RecordTypeNames[answer.RType],
-			dns.RecordClassName[answer.RClass],
-			time.Unix(answer.ReceivedAt, 0),
-			time.Unix(answer.AccessedAt, 0),
-		)
-	}
+	fmt.Printf("Total search: %d\n", len(listMsg))
+	printMessages(listMsg)
 }
 
 func (rsol *resolver) doCmdQuery(args []string) {
@@ -204,6 +190,15 @@ func (rsol *resolver) initSystemResolver() (err error) {
 	return nil
 }
 
+// newRescachedClient create new rescached Client.
+func (rsol *resolver) newRescachedClient() (resc *rescached.Client) {
+	if len(rsol.rescachedUrl) == 0 {
+		rsol.rescachedUrl = defRescachedUrl
+	}
+	resc = rescached.NewClient(rsol.rescachedUrl, rsol.insecure)
+	return resc
+}
+
 func (rsol *resolver) query(timeout time.Duration, qname string) (res *dns.Message, err error) {
 	var (
 		logp = "query"
@@ -255,12 +250,87 @@ func populateQueries(cr *libnet.ResolvConf, qname string) (queries []string) {
 	return
 }
 
+// printAnswers print list of DNS Answer to stdout.
+func printAnswers(answers []*dns.Answer) {
+	var (
+		answer     *dns.Answer
+		format     string
+		header     string
+		line       strings.Builder
+		x          int
+		maxNameLen int
+	)
+
+	for _, answer = range answers {
+		if len(answer.QName) > maxNameLen {
+			maxNameLen = len(answer.QName)
+		}
+	}
+
+	format = fmt.Sprintf("%%4s | %%%ds | %%4s | %%5s | %%30s | %%30s", maxNameLen)
+	header = fmt.Sprintf(format, "#", "Name", "Type", "Class", "Received at", "Accessed at")
+	for x = 0; x < len(header); x++ {
+		line.WriteString("-")
+	}
+	fmt.Println(line.String())
+	fmt.Println(header)
+	fmt.Println(line.String())
+
+	format = fmt.Sprintf("%%4d | %%%ds | %%4s | %%5s | %%30s | %%30s\n", maxNameLen)
+	for x, answer = range answers {
+		fmt.Printf(format, x, answer.QName,
+			dns.RecordTypeNames[answer.RType],
+			dns.RecordClassName[answer.RClass],
+			time.Unix(answer.ReceivedAt, 0),
+			time.Unix(answer.AccessedAt, 0),
+		)
+	}
+}
+
+// printMessages print list of DNS Message to standard output.
+func printMessages(listMsg []*dns.Message) {
+	var (
+		msg *dns.Message
+	)
+
+	for _, msg = range listMsg {
+		printMessage(msg)
+	}
+}
+
+// printMessage print a DNS Message to standard output.
+func printMessage(msg *dns.Message) {
+	var (
+		rr dns.ResourceRecord
+		x  int
+	)
+
+	fmt.Printf("\nQuestion: %+v\n", msg.Question)
+	fmt.Printf("  Header: %+v\n", msg.Header)
+
+	for x, rr = range msg.Answer {
+		fmt.Printf("  Answer #%d\n", x)
+		fmt.Printf("    Resource record: %s\n", rr.String())
+		fmt.Printf("    RDATA: %+v\n", rr.Value)
+	}
+	for x, rr = range msg.Authority {
+		fmt.Printf("  Authority #%d\n", x)
+		fmt.Printf("    Resource record: %s\n", rr.String())
+		fmt.Printf("    RDATA: %+v\n", rr.Value)
+	}
+	for x, rr = range msg.Additional {
+		fmt.Printf("  Additional #%d\n", x)
+		fmt.Printf("    Resource record: %s\n", rr.String())
+		fmt.Printf("    RDATA: %+v\n", rr.Value)
+	}
+}
+
+// printQueryResponse print query response from nameserver including its DNS
+// message as answer to stdout.
 func printQueryResponse(nameserver string, msg *dns.Message) {
 	var b strings.Builder
 
 	fmt.Fprintf(&b, "> From: %s", nameserver)
-	fmt.Fprintf(&b, "\n> Header: %+v", msg.Header)
-	fmt.Fprintf(&b, "\n> Question: %s", msg.Question.String())
 
 	b.WriteString("\n> Status: ")
 	switch msg.Header.RCode {
@@ -279,22 +349,7 @@ func printQueryResponse(nameserver string, msg *dns.Message) {
 	case dns.RCodeRefused:
 		b.WriteString(" Server refused the request")
 	}
-
-	for x, rr := range msg.Answer {
-		fmt.Fprintf(&b, "\n> Answer #%d:", x+1)
-		fmt.Fprintf(&b, "\n>> Resource record: %s", rr.String())
-		fmt.Fprintf(&b, "\n>> RDATA: %+v", rr.Value)
-	}
-	for x, rr := range msg.Authority {
-		fmt.Fprintf(&b, "\n> Authority #%d:", x+1)
-		fmt.Fprintf(&b, "\n>> Resource record: %s", rr.String())
-		fmt.Fprintf(&b, "\n>> RDATA: %+v", rr.Value)
-	}
-	for x, rr := range msg.Additional {
-		fmt.Fprintf(&b, "\n> Additional #%d:", x+1)
-		fmt.Fprintf(&b, "\n>> Resource record: %s", rr.String())
-		fmt.Fprintf(&b, "\n>> RDATA: %+v", rr.Value)
-	}
-
+	b.WriteString("\n> Response: ")
 	fmt.Println(b.String())
+	printMessage(msg)
 }

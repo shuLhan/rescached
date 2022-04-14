@@ -17,12 +17,15 @@ import (
 const (
 	cmdCaches = "caches"
 	cmdQuery  = "query"
+
+	subCmdSearch = "search"
 )
 
 func main() {
 	var (
 		rsol = new(resolver)
 
+		subCmd  string
 		args    []string
 		optHelp bool
 	)
@@ -52,7 +55,21 @@ func main() {
 
 	switch rsol.cmd {
 	case cmdCaches:
-		rsol.doCmdCaches()
+		args = args[1:]
+		if len(args) == 0 {
+			rsol.doCmdCaches()
+			return
+		}
+
+		subCmd = strings.ToLower(args[0])
+		switch subCmd {
+		case subCmdSearch:
+			args = args[1:]
+			if len(args) == 0 {
+				log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
+			}
+			rsol.doCmdCachesSearch(args[0])
+		}
 
 	case cmdQuery:
 		args = args[1:]
@@ -125,6 +142,13 @@ caches
 
 	Fetch and print all caches from rescached server.
 
+caches search <string>
+
+	Search the domain name in rescached caches.
+	This command can also be used to inspect each DNS message on the
+	caches.
+
+
 ==  Examples
 
 Query the IPv4 address for kilabit.info,
@@ -150,8 +174,11 @@ name server kilabit.info,
 
 	$ resolver -insecure -ns=https://kilabit.info/dns-query query kilabit.info
 
-Inspect the rescached's caches on server at http://127.0.0.1:5380
+Inspect the rescached's caches on server at http://127.0.0.1:5380,
 
 	$ resolver -server=http://127.0.0.1:5380 caches
-`)
+
+Search caches that contains "bit" on the domain name,
+
+	$ resolver -server=http://127.0.0.1:5380 caches search bit`)
 }

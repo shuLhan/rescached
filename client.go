@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/shuLhan/share/lib/dns"
 	libhttp "github.com/shuLhan/share/lib/http"
@@ -53,8 +54,43 @@ func (cl *Client) Caches() (answers []*dns.Answer, err error) {
 	}
 
 	if res.Code != http.StatusOK {
-		return nil, fmt.Errorf("%s: %s", logp, res.Code, res.Message)
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
 	}
 
 	return answers, nil
+}
+
+// CachesSearch search the answer in caches by its domain name and return it
+// as DNS message.
+func (cl *Client) CachesSearch(q string) (listMsg []*dns.Message, err error) {
+	var (
+		logp   = "CachesSearch"
+		params = url.Values{}
+		res    = libhttp.EndpointResponse{
+			Data: &listMsg,
+		}
+
+		path string
+		resb []byte
+	)
+
+	params.Set(paramNameQuery, q)
+
+	path = apiCachesSearch + "?" + params.Encode()
+	fmt.Printf("%s: path: %s\n", logp, path)
+	_, resb, err = cl.Get(path, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+
+	return listMsg, nil
 }

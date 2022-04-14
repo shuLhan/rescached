@@ -101,6 +101,14 @@ Fetch and print all caches from rescached server.
 --
 
 
+caches search <string>::
++
+--
+Search the domain name in rescached caches.
+This command can also be used to inspect each DNS message on the caches.
+--
+
+
 == EXIT STATUS
 
 Upon exit and success +resolver+ will return 0, or 1 otherwise.
@@ -131,9 +139,14 @@ name server kilabit.info,
 
 	$ resolver -ns=https://kilabit.info/dns-query query kilabit.info
 
-Inspect the rescached's caches on server at http://127.0.0.1:5380
+Inspect the rescached's caches on server at http://127.0.0.1:5380,
 
 	$ resolver -server=http://127.0.0.1:5380 caches
+
+Search caches that contains "bit" on the domain name,
+
+	$ resolver -server=http://127.0.0.1:5380 caches search bit
+
 
 == AUTHOR
 
