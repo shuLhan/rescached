@@ -155,7 +155,7 @@ func (rsol *resolver) doCmdQuery(args []string) {
 
 		fmt.Printf("= resolv.conf: %+v\n", rsol.conf)
 
-		queries = populateQueries(rsol.conf, rsol.qname)
+		queries = rsol.conf.PopulateQuery(rsol.qname)
 		timeout = time.Duration(rsol.conf.Timeout) * time.Second
 		maxAttempts = rsol.conf.Attempts
 	} else {
@@ -246,30 +246,6 @@ func (rsol *resolver) query(timeout time.Duration, qname string) (res *dns.Messa
 	}
 
 	return res, nil
-}
-
-func populateQueries(cr *libnet.ResolvConf, qname string) (queries []string) {
-	ndots := 0
-
-	for _, c := range qname {
-		if c == '.' {
-			ndots++
-			continue
-		}
-	}
-
-	if ndots >= cr.NDots {
-		queries = append(queries, qname)
-	} else {
-		if len(cr.Domain) > 0 {
-			queries = append(queries, qname+"."+cr.Domain)
-		}
-		for _, s := range cr.Search {
-			queries = append(queries, qname+"."+s)
-		}
-	}
-
-	return
 }
 
 // printAnswers print list of DNS Answer to stdout.
