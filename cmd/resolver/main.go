@@ -19,6 +19,7 @@ const (
 	cmdQuery  = "query"
 
 	subCmdSearch = "search"
+	subCmdRemove = "remove"
 )
 
 func main() {
@@ -63,12 +64,23 @@ func main() {
 
 		subCmd = strings.ToLower(args[0])
 		switch subCmd {
+		case subCmdRemove:
+			args = args[1:]
+			if len(args) == 0 {
+				log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
+			}
+			rsol.doCmdCachesRemove(args[0])
+
 		case subCmdSearch:
 			args = args[1:]
 			if len(args) == 0 {
 				log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
 			}
 			rsol.doCmdCachesSearch(args[0])
+
+		default:
+			log.Printf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
+			os.Exit(2)
 		}
 
 	case cmdQuery:
@@ -147,6 +159,10 @@ caches search <string>
 	Search the domain name in rescached caches.
 	This command can also be used to inspect each DNS message on the
 	caches.
+
+caches remove <string>
+
+	Remove the domain name from rescached caches.
 
 
 ==  Examples

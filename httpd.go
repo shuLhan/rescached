@@ -291,6 +291,8 @@ func (srv *Server) httpdAPIDeleteCaches(epr *libhttp.EndpointRequest) (resBody [
 	var (
 		res = libhttp.EndpointResponse{}
 		q   = epr.HttpRequest.Form.Get(paramNameName)
+
+		answers []*dns.Answer
 	)
 
 	if len(q) == 0 {
@@ -299,10 +301,10 @@ func (srv *Server) httpdAPIDeleteCaches(epr *libhttp.EndpointRequest) (resBody [
 		return nil, &res
 	}
 
-	srv.dns.RemoveCachesByNames([]string{q})
+	answers = srv.dns.RemoveCachesByNames([]string{q})
 
 	res.Code = http.StatusOK
-	res.Message = fmt.Sprintf("%q has been removed from caches", q)
+	res.Data = answers
 
 	return json.Marshal(&res)
 }

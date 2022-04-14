@@ -60,6 +60,36 @@ func (cl *Client) Caches() (answers []*dns.Answer, err error) {
 	return answers, nil
 }
 
+func (cl *Client) CachesRemove(q string) (listAnswer []*dns.Answer, err error) {
+	var (
+		logp   = "CachesRemove"
+		params = url.Values{}
+		res    = libhttp.EndpointResponse{
+			Data: &listAnswer,
+		}
+
+		resb []byte
+	)
+
+	params.Set(paramNameName, q)
+
+	_, resb, err = cl.Delete(apiCaches, nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+
+	return listAnswer, nil
+}
+
 // CachesSearch search the answer in caches by its domain name and return it
 // as DNS message.
 func (cl *Client) CachesSearch(q string) (listMsg []*dns.Message, err error) {
@@ -70,15 +100,12 @@ func (cl *Client) CachesSearch(q string) (listMsg []*dns.Message, err error) {
 			Data: &listMsg,
 		}
 
-		path string
 		resb []byte
 	)
 
 	params.Set(paramNameQuery, q)
 
-	path = apiCachesSearch + "?" + params.Encode()
-	fmt.Printf("%s: path: %s\n", logp, path)
-	_, resb, err = cl.Get(path, nil, nil)
+	_, resb, err = cl.Get(apiCachesSearch, nil, params)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}

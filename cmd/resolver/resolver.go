@@ -61,6 +61,28 @@ func (rsol *resolver) doCmdCaches() {
 	printAnswers(answers)
 }
 
+// doCmdCachesRemove remove an answer from caches by domain name.
+func (rsol *resolver) doCmdCachesRemove(q string) {
+	var (
+		resc = rsol.newRescachedClient()
+
+		listAnswer []*dns.Answer
+		err        error
+	)
+
+	listAnswer, err = resc.CachesRemove(q)
+	if err != nil {
+		log.Printf("resolver: caches: %s", err)
+		return
+	}
+
+	fmt.Printf("Total answer removed: %d\n", len(listAnswer))
+	if len(listAnswer) == 0 {
+		return
+	}
+	printAnswers(listAnswer)
+}
+
 // doCmdCachesSearch call the rescached HTTP API to search the caches by
 // domain name.
 func (rsol *resolver) doCmdCachesSearch(q string) {

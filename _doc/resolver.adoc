@@ -108,6 +108,12 @@ Search the domain name in rescached caches.
 This command can also be used to inspect each DNS message on the caches.
 --
 
+caches remove <string>::
++
+--
+Remove the domain name from rescached caches.
+--
+
 
 == EXIT STATUS
 
