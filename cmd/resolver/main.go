@@ -163,6 +163,7 @@ caches search <string>
 caches remove <string>
 
 	Remove the domain name from rescached caches.
+	If the parameter is "all", it will remove all caches.
 
 
 ==  Examples

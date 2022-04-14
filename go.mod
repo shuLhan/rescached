@@ -5,6 +5,6 @@ module github.com/shuLhan/rescached-go/v4
 
 go 1.16
 
-require github.com/shuLhan/share v0.36.1-0.20220414184434-86c787c31de4
+require github.com/shuLhan/share v0.36.1-0.20220414192731-ceba0704c6fc
 
 //replace github.com/shuLhan/share => ../share

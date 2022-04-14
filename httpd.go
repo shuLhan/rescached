@@ -79,7 +79,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		Path:         apiCaches,
 		RequestType:  libhttp.RequestTypeQuery,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpdAPIDeleteCaches,
+		Call:         srv.httpdAPICachesDelete,
 	})
 	if err != nil {
 		return err
@@ -287,7 +287,7 @@ func (srv *Server) apiCachesSearch(epr *libhttp.EndpointRequest) (resBody []byte
 	return json.Marshal(&res)
 }
 
-func (srv *Server) httpdAPIDeleteCaches(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpdAPICachesDelete(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 		q   = epr.HttpRequest.Form.Get(paramNameName)
@@ -300,8 +300,11 @@ func (srv *Server) httpdAPIDeleteCaches(epr *libhttp.EndpointRequest) (resBody [
 		res.Message = "empty query 'name' parameter"
 		return nil, &res
 	}
-
-	answers = srv.dns.RemoveCachesByNames([]string{q})
+	if q == "all" {
+		answers = srv.dns.CachesClear()
+	} else {
+		answers = srv.dns.RemoveCachesByNames([]string{q})
+	}
 
 	res.Code = http.StatusOK
 	res.Data = answers
