@@ -9,45 +9,72 @@
 
 == NAME
 
-resolver - a tool to query DNS record, specifically build for *rescached*(1)
-and developer.
+resolver - command line interface for DNS and rescached server.
 
 
 == SYNOPSIS
 
-+resolver+ [-ns nameserver] [-t type] [-c class] hostname
+resolver [-insecure] [-ns nameserver] [-server] <command> [args...]
 
 
 == DESCRIPTION
 
-+resolver+ is a tool to resolve hostname to address, or to query services
-on hostname by type (MX, SOA, TXT, etc.).
-It will return and print the DNS response.
+resolver is a tool to resolve hostname to IP address or to query services
+on hostname by type (MX, SOA, TXT, etc.) using standard DNS protocol with UDP,
+DNS over TLS (DoT), or DNS over HTTPS (DoH).
 
 
 == OPTIONS
 
-[[nameserver]]
-=== +nameserver+
-
-Value::		Internet address
-Format:: 	xxx.xxx.xxx.xxx[:port]
-Default::	One of +nameserver+ in +/etc/resolv.conf+
-Description:: 	This option define the DNS server where the resolver will
-send the query.
-
-[[type]]
-=== +type+
-
-Value::		DNS record type
-Format::	String
-Default::	A
-Description::	List of supported DNS record type,
+`-insecure`::
 +
-----
-TYPE (ID) - Description
+--
+Ignore invalid server certificate when querying DoT, DoH, or rescached server.
+--
 
-* A       (1) - a host Address
+`-ns <nameserver>`::
++
+--
+This option define the parent DNS server where the resolver send the query.
+Default to one of "nameserver" in `/etc/resolv.conf`.
+
+The nameserver is defined in the following format,
+
+		("udp"/"tcp"/"https") "://" (domain / ip-address) [":" port]
+
+Examples,
+
+* udp://194.233.68.184:53 for querying with UDP,
+* tcp://194.233.68.184:53 for querying with TCP,
+* https://194.233.68.184:853 for querying with DNS over TLS (DoT), and
+* https://kilabit.info/dns-query for querying with DNS over HTTPS (DoH).
+--
+
+`-server <rescached-URL>`::
++
+--
+Set the rescached HTTP server where commands will send.
+The rescached-URL use HTTP scheme:
+
+	("http" / "https") "://" (domain / ip-address) [":" port]
+
+Default to "https://127.0.0.1:5380" if its empty.
+--
+
+==  COMMANDS
+
+query <domain / ip-address> [type] [class]::
++
+--
+Query the domain or IP address with optional type and/or class.
+
+Unless the option "-ns" is given, the query command will use the
+nameserver defined in the system resolv.conf file.
+
+The "type" parameter define DNS record type to be queried.
+List of valid types,
+
+* A       (1) - a host Address (default)
 * NS      (2) - an authoritative Name Server
 * CNAME   (5) - the Canonical NAME for an alias
 * SOA     (6) - marks the Start of a zone of Authority
@@ -63,15 +90,15 @@ TYPE (ID) - Description
 * TXT    (16) - TeXT strings
 * AAAA   (28) - a host address in IPv6
 * SRV    (33) -  a SerViCe record
-----
 
-[[hostname]]
-=== +hostname+
+The "class" parameter is optional, its either IN (default), CS, or HS.
+--
 
-Value::		Internet hostname
-Format::	[subdomain].[domain][.TLD]
-Default::	-
-Description::	Hostname that will be queried to name server.
+caches::
++
+--
+Fetch and print all caches from rescached server.
+--
 
 
 == EXIT STATUS
@@ -79,22 +106,34 @@ Description::	Hostname that will be queried to name server.
 Upon exit and success +resolver+ will return 0, or 1 otherwise.
 
 
-== EXAMPLE
+== EXAMPLES
 
-Resolve the IPv4 address for kilabit.info using one of nameserver in
-`/etc/resolv.conf`,
+Query the IPv4 address for kilabit.info,
 
-	$ resolver kilabit.info
+	$ resolver query kilabit.info
 
-Resolve the IPv4 address for kilabit.info using 127.0.0.1 at port 54 as
+Query the mail exchange (MX) for domain kilabit.info,
+
+	$ resolver query kilabit.info MX
+
+Query the IPv4 address for kilabit.info using 127.0.0.1 at port 53 as
 name server,
 
-	$ resolver -ns 127.0.0.1:54 kilabit.info
+	$ resolver -ns=udp://127.0.0.1:53 query kilabit.info
 
-Resolve the mail exchange (MX) for kilabit.info,
+Query the IPv4 address of domain name "kilabit.info" using DNS over TLS at
+name server 194.233.68.184,
 
-	$ resolver -t MX kilabit.info
+	$ resolver -insecure -ns=https://194.233.68.184 query kilabit.info
 
+Query the IPv4 records of domain name "kilabit.info" using DNS over HTTPS on
+name server kilabit.info,
+
+	$ resolver -ns=https://kilabit.info/dns-query query kilabit.info
+
+Inspect the rescached's caches on server at http://127.0.0.1:5380
+
+	$ resolver -server=http://127.0.0.1:5380 caches
 
 == AUTHOR
 

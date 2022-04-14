@@ -15,7 +15,8 @@ import (
 
 // List of valid commands.
 const (
-	cmdQuery = "query"
+	cmdCaches = "caches"
+	cmdQuery  = "query"
 )
 
 func main() {
@@ -28,8 +29,9 @@ func main() {
 
 	log.SetFlags(0)
 
+	flag.BoolVar(&rsol.insecure, "insecure", false, "Ignore invalid server certificate.")
 	flag.StringVar(&rsol.nameserver, "ns", "", "Parent name server address using scheme based.")
-	flag.BoolVar(&rsol.insecure, "insecure", false, "Ignore invalid server certificate")
+	flag.StringVar(&rsol.rescachedUrl, "server", defRescachedUrl, "Set the rescached HTTP server.")
 	flag.BoolVar(&optHelp, "h", false, "")
 
 	flag.Parse()
@@ -49,6 +51,9 @@ func main() {
 	rsol.cmd = strings.ToLower(args[0])
 
 	switch rsol.cmd {
+	case cmdCaches:
+		rsol.doCmdCaches()
+
 	case cmdQuery:
 		args = args[1:]
 		if len(args) == 0 {
@@ -69,25 +74,36 @@ func help() {
 
 ==  Usage
 
-	resolver [-ns nameserver] [-insecure] <command> <args>
+	resolver [-insecure] [-ns nameserver] [-server] <command> [args...]
 
 ==  Options
 
-Accepted command is query.
-
--ns nameserver
-
-	Parent name server address using scheme based.
-	For example,
-	udp://35.240.172.103:53 for querying with UDP,
-	tcp://35.240.172.103:53 for querying with TCP,
-	https://35.240.172:103:853 for querying with DNS over TLS (DoT), and
-	https://kilabit.info/dns-query for querying with DNS over HTTPS (DoH).
+The following options affect the commands operation.
 
 -insecure
 
 	Ignore invalid server certificate when querying DoT, DoH, or rescached
 	server.
+
+-ns nameserver
+
+	Parent name server address using scheme based.
+	For example,
+
+	* udp://35.240.172.103:53 for querying with UDP,
+	* tcp://35.240.172.103:53 for querying with TCP,
+	* https://35.240.172:103:853 for querying with DNS over TLS (DoT), and
+	* https://kilabit.info/dns-query for querying with DNS over HTTPS
+	  (DoH).
+
+-server <rescached-URL>
+
+	Set the location of rescached HTTP server where commands will send.
+	The rescached-URL use HTTP scheme:
+
+		("http" / "https") "://" (domain / ip-address) [":" port]
+
+	Default to "https://127.0.0.1:5380" if its empty.
 
 ==  Commands
 
@@ -105,19 +121,37 @@ query <domain / ip-address> [type] [class]
 	Valid class are either IN, CS, HS.
 	Default value is IN.
 
+caches
+
+	Fetch and print all caches from rescached server.
+
 ==  Examples
 
-Query the MX records using UDP on name server 35.240.172.103,
+Query the IPv4 address for kilabit.info,
 
-	$ resolver -ns udp://35.240.172.103 query kilabit.info MX
+	$ resolver query kilabit.info
 
-Query the IPv4 records of domain name "kilabit.info" using DNS over TLS on
-name server 35.240.172.103,
+Query the mail exchange (MX) for domain kilabit.info,
 
-	$ resolver -ns https://35.240.172.103 -insecure query kilabit.info
+	$ resolver query kilabit.info MX
+
+Query the IPv4 address for kilabit.info using 127.0.0.1 at port 53 as
+name server,
+
+	$ resolver -ns=udp://127.0.0.1:53 query kilabit.info
+
+Query the IPv4 address of domain name "kilabit.info" using DNS over TLS at
+name server 194.233.68.184,
+
+	$ resolver -insecure -ns=https://194.233.68.184 query kilabit.info
 
 Query the IPv4 records of domain name "kilabit.info" using DNS over HTTPS on
 name server kilabit.info,
 
-	$ resolver -ns https://kilabit.info/dns-query query kilabit.info`)
+	$ resolver -insecure -ns=https://kilabit.info/dns-query query kilabit.info
+
+Inspect the rescached's caches on server at http://127.0.0.1:5380
+
+	$ resolver -server=http://127.0.0.1:5380 caches
+`)
 }

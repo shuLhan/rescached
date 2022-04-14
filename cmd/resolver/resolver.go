@@ -10,16 +10,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/shuLhan/rescached-go/v4"
 	"github.com/shuLhan/share/lib/dns"
 	libnet "github.com/shuLhan/share/lib/net"
 )
 
 const (
-	defAttempts   = 1
-	defQueryType  = "A"
-	defQueryClass = "IN"
-	defResolvConf = "/etc/resolv.conf"
-	defTimeout    = 5 * time.Second
+	defAttempts     = 1
+	defQueryType    = "A"
+	defQueryClass   = "IN"
+	defRescachedUrl = "http://127.0.0.1:5380"
+	defResolvConf   = "/etc/resolv.conf"
+	defTimeout      = 5 * time.Second
 )
 
 type resolver struct {
@@ -31,11 +33,66 @@ type resolver struct {
 	sqtype  string
 	sqclass string
 
-	nameserver string
-	qtype      dns.RecordType
-	qclass     dns.RecordClass
+	nameserver   string
+	rescachedUrl string
+
+	qtype  dns.RecordType
+	qclass dns.RecordClass
 
 	insecure bool
+}
+
+func (rsol *resolver) doCmdCaches() {
+	var (
+		resc       *rescached.Client
+		answer     *dns.Answer
+		answers    []*dns.Answer
+		format     string
+		header     string
+		line       strings.Builder
+		err        error
+		x          int
+		maxNameLen int
+	)
+
+	if len(rsol.rescachedUrl) == 0 {
+		rsol.rescachedUrl = defRescachedUrl
+	}
+
+	resc = rescached.NewClient(rsol.rescachedUrl, rsol.insecure)
+
+	answers, err = resc.Caches()
+	if err != nil {
+		log.Printf("resolver: caches: %s", err)
+		return
+	}
+
+	fmt.Printf("Total caches: %d\n", len(answers))
+
+	for _, answer = range answers {
+		if len(answer.QName) > maxNameLen {
+			maxNameLen = len(answer.QName)
+		}
+	}
+
+	format = fmt.Sprintf("%%4s | %%%ds | %%4s | %%5s | %%30s | %%30s", maxNameLen)
+	header = fmt.Sprintf(format, "#", "Name", "Type", "Class", "Received at", "Accessed at")
+	for x = 0; x < len(header); x++ {
+		line.WriteString("-")
+	}
+	fmt.Println(line.String())
+	fmt.Println(header)
+	fmt.Println(line.String())
+
+	format = fmt.Sprintf("%%4d | %%%ds | %%4s | %%5s | %%30s | %%30s\n", maxNameLen)
+	for x, answer = range answers {
+		fmt.Printf(format, x, answer.QName,
+			dns.RecordTypeNames[answer.RType],
+			dns.RecordClassName[answer.RClass],
+			time.Unix(answer.ReceivedAt, 0),
+			time.Unix(answer.AccessedAt, 0),
+		)
+	}
 }
 
 func (rsol *resolver) doCmdQuery(args []string) {
