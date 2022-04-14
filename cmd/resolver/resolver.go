@@ -275,7 +275,11 @@ func populateQueries(cr *libnet.ResolvConf, qname string) (queries []string) {
 // printAnswers print list of DNS Answer to stdout.
 func printAnswers(answers []*dns.Answer) {
 	var (
+		timeNow = time.Now()
+
 		answer     *dns.Answer
+		receivedAt time.Duration
+		accessedAt time.Duration
 		format     string
 		header     string
 		line       strings.Builder
@@ -289,7 +293,7 @@ func printAnswers(answers []*dns.Answer) {
 		}
 	}
 
-	format = fmt.Sprintf("%%4s | %%%ds | %%4s | %%5s | %%30s | %%30s", maxNameLen)
+	format = fmt.Sprintf("%%4s | %%%ds | %%4s | %%5s | %%12s | %%12s", maxNameLen)
 	header = fmt.Sprintf(format, "#", "Name", "Type", "Class", "Received at", "Accessed at")
 	for x = 0; x < len(header); x++ {
 		line.WriteString("-")
@@ -298,13 +302,15 @@ func printAnswers(answers []*dns.Answer) {
 	fmt.Println(header)
 	fmt.Println(line.String())
 
-	format = fmt.Sprintf("%%4d | %%%ds | %%4s | %%5s | %%30s | %%30s\n", maxNameLen)
+	format = fmt.Sprintf("%%4d | %%%ds | %%4s | %%5s | %%12s | %%12s\n", maxNameLen)
 	for x, answer = range answers {
+		receivedAt = timeNow.Sub(time.Unix(answer.ReceivedAt, 0)).Truncate(time.Second)
+		accessedAt = timeNow.Sub(time.Unix(answer.AccessedAt, 0)).Truncate(time.Second)
 		fmt.Printf(format, x, answer.QName,
 			dns.RecordTypeNames[answer.RType],
 			dns.RecordClassName[answer.RClass],
-			time.Unix(answer.ReceivedAt, 0),
-			time.Unix(answer.AccessedAt, 0),
+			receivedAt.String()+" ago",
+			accessedAt.String()+" ago",
 		)
 	}
 }
