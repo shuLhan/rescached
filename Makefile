@@ -91,6 +91,9 @@ dev:
 		go run ./cmd/rescached -config=cmd/rescached/rescached.cfg.test dev; \
 		sudo ./_bin/nft_dnstest_chain.sh flush
 
+serve-doc:
+	ciigo serve _doc
+
 ##
 ## Common tasks for installing and uninstalling program.
 ##
