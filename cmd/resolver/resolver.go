@@ -169,7 +169,7 @@ func (rsol *resolver) doCmdQuery(args []string) {
 
 	for _, qname = range queries {
 		for nAttempts = 0; nAttempts < maxAttempts; nAttempts++ {
-			fmt.Printf("< Query %s at %s\n", qname, rsol.dnsc.RemoteAddr())
+			fmt.Printf("\n< Query %s at %s\n", qname, rsol.dnsc.RemoteAddr())
 
 			res, err = rsol.query(timeout, qname)
 			if err != nil {
@@ -178,7 +178,10 @@ func (rsol *resolver) doCmdQuery(args []string) {
 			}
 
 			printQueryResponse(rsol.dnsc.RemoteAddr(), res)
-			return
+			if len(res.Answer) > 0 {
+				return
+			}
+			break
 		}
 	}
 }
