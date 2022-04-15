@@ -6,7 +6,7 @@ package rescached
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -58,29 +58,37 @@ func (hb *hostsBlock) update() (err error) {
 		return nil
 	}
 
-	fmt.Printf("hostsBlock %s: updating ...\n", hb.Name)
+	var (
+		logp = "hostsBlock.update"
 
-	res, err := http.Get(hb.URL)
+		res      *http.Response
+		body     []byte
+		errClose error
+	)
+
+	fmt.Printf("%s %s: updating ...\n", logp, hb.Name)
+
+	res, err = http.Get(hb.URL)
 	if err != nil {
-		return fmt.Errorf("hostsBlock.update %q: %w", hb.Name, err)
+		return fmt.Errorf("%s %s: %w", logp, hb.Name, err)
 	}
 	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("hostsBlock.update %q: %s", hb.Name, err)
+		errClose = res.Body.Close()
+		if errClose != nil {
+			log.Printf("%s %q: %s", logp, hb.Name, err)
 		}
 	}()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err = io.ReadAll(res.Body)
 	if err != nil {
-		return fmt.Errorf("hostsBlock.update %q: %w", hb.Name, err)
+		return fmt.Errorf("%s %q: %w", logp, hb.Name, err)
 	}
 
 	body = bytes.ReplaceAll(body, []byte("\r\n"), []byte("\n"))
 
-	err = ioutil.WriteFile(hb.file, body, 0644)
+	err = os.WriteFile(hb.file, body, 0644)
 	if err != nil {
-		return fmt.Errorf("hostsBlock.update %q: %w", hb.Name, err)
+		return fmt.Errorf("%s %q: %w", logp, hb.Name, err)
 	}
 
 	hb.initLastUpdated()

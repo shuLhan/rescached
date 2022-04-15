@@ -36,9 +36,6 @@ const (
 	keyDohBehindProxy      = "doh.behind_proxy"
 	keyHostsBlock          = "hosts_block"
 	keyHTTPPort            = "http.port"
-	keyIsEnabled           = "is_enabled"
-	keyIsSystem            = "is_system"
-	keyLastUpdated         = "last_updated"
 	keyListen              = "listen"
 	keyParent              = "parent"
 	keyWUIListen           = "wui.listen"
@@ -90,7 +87,7 @@ func LoadEnvironment(fileConfig string) (env *Environment, err error) {
 	env.fileConfig = fileConfig
 
 	if len(fileConfig) == 0 {
-		env.init()
+		_ = env.init()
 		return env, nil
 	}
 
@@ -266,10 +263,8 @@ func (env *Environment) save(file string) (in *ini.Ini, err error) {
 	in.Set(sectionNameDNS, subNameServer, keyDohBehindProxy,
 		fmt.Sprintf("%t", env.ServerOptions.DoHBehindProxy))
 
-	in.Set(sectionNameDNS, subNameServer, keyCachePruneDelay,
-		fmt.Sprintf("%s", env.ServerOptions.PruneDelay))
-	in.Set(sectionNameDNS, subNameServer, keyCachePruneThreshold,
-		fmt.Sprintf("%s", env.ServerOptions.PruneThreshold))
+	in.Set(sectionNameDNS, subNameServer, keyCachePruneDelay, env.ServerOptions.PruneDelay.String())
+	in.Set(sectionNameDNS, subNameServer, keyCachePruneThreshold, env.ServerOptions.PruneThreshold.String())
 
 	return in, nil
 }

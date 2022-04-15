@@ -33,7 +33,7 @@ DIR_BIN=/usr/bin
 DIR_MAN=/usr/share/man
 DIR_RESCACHED=/usr/share/rescached
 
-build: test memfs_generate.go
+build: lint test memfs_generate.go
 	mkdir -p _bin/$(GOOS)_$(GOARCH)
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) \
 		go build $(DEBUG) -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/...
@@ -52,7 +52,7 @@ test.prof:
 		-memprofile $(MEM_PROF) ./...
 
 lint:
-	-golangci-lint run --enable-all ./...
+	-golangci-lint run ./...
 
 memfs_generate.go: .FORCE
 	go run ./cmd/rescached embed

@@ -325,6 +325,7 @@ func (srv *Server) httpdAPIGetEnvironment(epr *libhttp.EndpointRequest) (resBody
 
 func (srv *Server) httpdAPIPostEnvironment(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
+		logp    = "httpdAPIPostEnvironment"
 		res     = libhttp.EndpointResponse{}
 		newOpts = new(Environment)
 	)
@@ -342,7 +343,12 @@ func (srv *Server) httpdAPIPostEnvironment(epr *libhttp.EndpointRequest) (resBod
 		return nil, &res
 	}
 
-	newOpts.init()
+	err = newOpts.init()
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = fmt.Sprintf("%s: %s", logp, err)
+		return nil, &res
+	}
 
 	fmt.Printf("new options: %+v\n", newOpts)
 
@@ -474,17 +480,22 @@ func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
 }
 
 func (srv *Server) hostsBlockDisable(hb *hostsBlock) (err error) {
-	var hfile *dns.HostsFile
+	var (
+		logp = "hostsBlockDisable"
+
+		hfile *dns.HostsFile
+	)
+
 	hfile = srv.env.HostsFiles[hb.Name]
 	if hfile == nil {
-		return fmt.Errorf("unknown hosts block: %q", hb.Name)
+		return fmt.Errorf("%s: unknown hosts block: %q", logp, hb.Name)
 	}
 
 	srv.dns.RemoveLocalCachesByNames(hfile.Names())
 
 	err = hb.hide()
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", logp, err)
 	}
 	delete(srv.env.HostsFiles, hb.Name)
 
@@ -872,7 +883,12 @@ func (srv *Server) apiZoneRRCreate(epr *libhttp.EndpointRequest) (resbody []byte
 	}
 
 	// Update the Zone file.
-	zoneFile.Add(rr)
+	err = zoneFile.Add(rr)
+	if err != nil {
+		res.Message = err.Error()
+		return nil, &res
+	}
+
 	err = zoneFile.Save()
 	if err != nil {
 		res.Message = err.Error()
