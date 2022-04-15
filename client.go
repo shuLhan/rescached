@@ -114,10 +114,33 @@ func (cl *Client) CachesSearch(q string) (listMsg []*dns.Message, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
-
 	if res.Code != http.StatusOK {
 		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
 	}
 
 	return listMsg, nil
+}
+
+// Env get the server environment.
+func (cl *Client) Env() (env *Environment, err error) {
+	var (
+		logp = "Env"
+		res  = libhttp.EndpointResponse{
+			Data: &env,
+		}
+		resb []byte
+	)
+
+	_, resb, err = cl.Get(apiEnvironment, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+	return env, nil
 }

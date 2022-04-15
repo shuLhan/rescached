@@ -16,6 +16,7 @@ import (
 // List of valid commands.
 const (
 	cmdCaches = "caches"
+	cmdEnv    = "env"
 	cmdQuery  = "query"
 
 	subCmdSearch = "search"
@@ -82,6 +83,9 @@ func main() {
 			log.Printf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
 			os.Exit(2)
 		}
+
+	case cmdEnv:
+		rsol.doCmdEnv()
 
 	case cmdQuery:
 		args = args[1:]
@@ -165,6 +169,11 @@ caches remove <string>
 	Remove the domain name from rescached caches.
 	If the parameter is "all", it will remove all caches.
 
+env
+
+	Fetch the current server environment and print it as JSON format to
+	stdout.
+
 
 ==  Examples
 
@@ -197,5 +206,17 @@ Inspect the rescached's caches on server at http://127.0.0.1:5380,
 
 Search caches that contains "bit" on the domain name,
 
-	$ resolver -server=http://127.0.0.1:5380 caches search bit`)
+	$ resolver caches search bit
+
+Remove caches that contains domain name "kilabit.info",
+
+	$ resolver caches remove kilabit.info
+
+Remove all caches in the server,
+
+	$ resolver caches remove all
+
+Fetch and print current server environment,
+
+	$ resolver env`)
 }

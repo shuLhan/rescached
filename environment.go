@@ -5,6 +5,7 @@ package rescached
 
 import (
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 
@@ -214,13 +215,21 @@ func (env *Environment) loadResolvConf() (ok bool, err error) {
 	return true, nil
 }
 
-//
-// write the options values back to file.
-//
-func (env *Environment) write(file string) (err error) {
-	in, err := ini.Open(file)
-	if err != nil {
-		return fmt.Errorf("write: %w", err)
+func (env *Environment) save(file string) (in *ini.Ini, err error) {
+	var (
+		logp = "save"
+
+		hb *hostsBlock
+		ns string
+	)
+
+	if len(file) == 0 {
+		in = &ini.Ini{}
+	} else {
+		in, err = ini.Open(file)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", logp, err)
+		}
 	}
 
 	in.Set(sectionNameRescached, "", keyFileResolvConf, env.FileResolvConf)
@@ -229,14 +238,14 @@ func (env *Environment) write(file string) (err error) {
 
 	in.UnsetAll(sectionNameRescached, "", keyHostsBlock)
 
-	for _, hb := range env.HostsBlocks {
+	for _, hb = range env.HostsBlocks {
 		if hb.IsEnabled {
 			in.Add(sectionNameRescached, "", keyHostsBlock, hb.URL)
 		}
 	}
 
 	in.UnsetAll(sectionNameDNS, subNameServer, keyParent)
-	for _, ns := range env.NameServers {
+	for _, ns = range env.NameServers {
 		in.Add(sectionNameDNS, subNameServer, keyParent, ns)
 	}
 
@@ -262,5 +271,41 @@ func (env *Environment) write(file string) (err error) {
 	in.Set(sectionNameDNS, subNameServer, keyCachePruneThreshold,
 		fmt.Sprintf("%s", env.ServerOptions.PruneThreshold))
 
-	return in.Save(file)
+	return in, nil
+}
+
+// Write the configuration as ini format to Writer w.
+func (env *Environment) Write(w io.Writer) (err error) {
+	if w == nil {
+		return nil
+	}
+
+	var (
+		logp = "Environment.Write"
+		in   *ini.Ini
+	)
+
+	in, err = env.save(env.fileConfig)
+	if err != nil {
+		return fmt.Errorf("%s: %w", logp, err)
+	}
+
+	return in.Write(w)
+}
+
+//
+// write the options values back to file.
+//
+func (env *Environment) write(file string) (err error) {
+	var (
+		in *ini.Ini
+	)
+	in, err = env.save(file)
+	if err != nil {
+		return err
+	}
+	if len(file) > 0 {
+		return in.Save(file)
+	}
+	return nil
 }

@@ -4,6 +4,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
@@ -101,6 +102,30 @@ func (rsol *resolver) doCmdCachesSearch(q string) {
 
 	fmt.Printf("Total search: %d\n", len(listMsg))
 	printMessages(listMsg)
+}
+
+func (rsol *resolver) doCmdEnv() {
+	var (
+		resc = rsol.newRescachedClient()
+
+		env     *rescached.Environment
+		envJson []byte
+		err     error
+	)
+
+	env, err = resc.Env()
+	if err != nil {
+		log.Printf("resolver: %s: %s", rsol.cmd, err)
+		return
+	}
+
+	envJson, err = json.MarshalIndent(env, "", "  ")
+	if err != nil {
+		log.Printf("resolver: %s: %s", rsol.cmd, err)
+		return
+	}
+
+	fmt.Printf("%s\n", envJson)
 }
 
 func (rsol *resolver) doCmdQuery(args []string) {

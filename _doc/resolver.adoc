@@ -3,7 +3,7 @@
 = RESOLVER(1)
 :doctype: manpage
 :man source: resolver
-:man version: 2018.08.26
+:man version: 2022.04.15
 :man manual: resolver
 
 
@@ -115,6 +115,12 @@ Remove the domain name from rescached caches.
 If the parameter is "all", it will remove all caches.
 --
 
+env::
++
+--
+Fetch the current server environment and print it as JSON format to stdout.
+--
+
 
 == EXIT STATUS
 
@@ -152,7 +158,19 @@ Inspect the rescached's caches on server at http://127.0.0.1:5380,
 
 Search caches that contains "bit" on the domain name,
 
-	$ resolver -server=http://127.0.0.1:5380 caches search bit
+	$ resolver caches search bit
+
+Remove caches that contains domain name "kilabit.info",
+
+	$ resolver caches remove kilabit.info
+
+Remove all caches in the server,
+
+	$ resolver caches remove all
+
+Fetch and print current server environment,
+
+	$ resolver env
 
 
 == AUTHOR
