@@ -6,8 +6,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 
@@ -126,6 +128,45 @@ func (rsol *resolver) doCmdEnv() {
 	}
 
 	fmt.Printf("%s\n", envJson)
+}
+
+// doCmdEnvUpdate update the server environment by reading the JSON formatted
+// environment from file or from stdin.
+func (rsol *resolver) doCmdEnvUpdate(fileOrStdin string) (err error) {
+	var (
+		resc = rsol.newRescachedClient()
+
+		env     *rescached.Environment
+		envJson []byte
+	)
+
+	if fileOrStdin == "-" {
+		envJson, err = io.ReadAll(os.Stdin)
+	} else {
+		envJson, err = os.ReadFile(fileOrStdin)
+	}
+	if err != nil {
+		return fmt.Errorf("%s %s: %w", cmdEnv, subCmdUpdate, err)
+	}
+
+	err = json.Unmarshal(envJson, &env)
+	if err != nil {
+		return fmt.Errorf("%s %s: %w", cmdEnv, subCmdUpdate, err)
+	}
+
+	env, err = resc.EnvUpdate(env)
+	if err != nil {
+		return fmt.Errorf("%s %s: %w", cmdEnv, subCmdUpdate, err)
+	}
+
+	envJson, err = json.MarshalIndent(env, "", "  ")
+	if err != nil {
+		return fmt.Errorf("%s %s: %w", cmdEnv, subCmdUpdate, err)
+	}
+
+	fmt.Printf("%s\n", envJson)
+
+	return nil
 }
 
 func (rsol *resolver) doCmdQuery(args []string) {

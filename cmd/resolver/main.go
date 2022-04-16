@@ -21,6 +21,7 @@ const (
 
 	subCmdSearch = "search"
 	subCmdRemove = "remove"
+	subCmdUpdate = "update"
 )
 
 func main() {
@@ -29,6 +30,7 @@ func main() {
 
 		subCmd  string
 		args    []string
+		err     error
 		optHelp bool
 	)
 
@@ -85,7 +87,29 @@ func main() {
 		}
 
 	case cmdEnv:
-		rsol.doCmdEnv()
+		args = args[1:]
+		if len(args) == 0 {
+			rsol.doCmdEnv()
+			return
+		}
+
+		subCmd = strings.ToLower(args[0])
+		switch subCmd {
+		case subCmdUpdate:
+			args = args[1:]
+			if len(args) == 0 {
+				log.Fatalf("resolver: %s %s: missing file argument", rsol.cmd, subCmd)
+			}
+
+			err = rsol.doCmdEnvUpdate(args[0])
+			if err != nil {
+				log.Fatalf("resolver: %s", err)
+			}
+
+		default:
+			log.Printf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
+			os.Exit(2)
+		}
 
 	case cmdQuery:
 		args = args[1:]
@@ -174,6 +198,12 @@ env
 	Fetch the current server environment and print it as JSON format to
 	stdout.
 
+env update <path-to-file / "-">
+
+	Update the server environment from JSON formatted file.
+	If the argument is "-", the new environment is read from stdin.
+	If the environment is valid, the server will be restarted.
+
 
 ==  Examples
 
@@ -218,5 +248,13 @@ Remove all caches in the server,
 
 Fetch and print current server environment,
 
-	$ resolver env`)
+	$ resolver env
+
+Update the server environment from JSON file in /tmp/env.json,
+
+	$ resolver env update /tmp/env.json
+
+Update the server environment by reading JSON from standard input,
+
+	$ cat /tmp/env.json | resolver env update -`)
 }

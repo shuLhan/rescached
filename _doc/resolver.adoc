@@ -121,6 +121,14 @@ env::
 Fetch the current server environment and print it as JSON format to stdout.
 --
 
+env update <path-to-file / "-">::
++
+--
+Update the server environment from JSON formatted file.
+If the argument is "-", the new environment is read from stdin.
+If the environment is valid, the server will be restarted.
+--
+
 
 == EXIT STATUS
 
@@ -171,6 +179,14 @@ Remove all caches in the server,
 Fetch and print current server environment,
 
 	$ resolver env
+
+Update the server environment from JSON file in /tmp/env.json,
+
+	$ resolver env update /tmp/env.json
+
+Update the server environment by reading JSON from standard input,
+
+	$ cat /tmp/env.json | resolver env update -
 
 
 == AUTHOR

@@ -144,3 +144,29 @@ func (cl *Client) Env() (env *Environment, err error) {
 	}
 	return env, nil
 }
+
+// EnvUpdate update the server environment using new Environment.
+func (cl *Client) EnvUpdate(envIn *Environment) (envOut *Environment, err error) {
+	var (
+		logp = "EnvUpdate"
+		res  = libhttp.EndpointResponse{
+			Data: &envOut,
+		}
+
+		resb []byte
+	)
+
+	_, resb, err = cl.PostJSON(apiEnvironment, nil, envIn)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+	return envOut, nil
+}

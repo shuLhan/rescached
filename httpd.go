@@ -98,15 +98,15 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	epAPIPostEnvironment := &libhttp.Endpoint{
+	apiEnvironmentUpdate := &libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         apiEnvironment,
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpdAPIPostEnvironment,
+		Call:         srv.httpApiEnvironmentUpdate,
 	}
 
-	err = srv.httpd.RegisterEndpoint(epAPIPostEnvironment)
+	err = srv.httpd.RegisterEndpoint(apiEnvironmentUpdate)
 	if err != nil {
 		return err
 	}
@@ -323,9 +323,9 @@ func (srv *Server) httpdAPIGetEnvironment(epr *libhttp.EndpointRequest) (resBody
 	return json.Marshal(&res)
 }
 
-func (srv *Server) httpdAPIPostEnvironment(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpApiEnvironmentUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
-		logp    = "httpdAPIPostEnvironment"
+		logp    = "httpApiEnvironmentUpdate"
 		res     = libhttp.EndpointResponse{}
 		newOpts = new(Environment)
 	)
@@ -371,6 +371,8 @@ func (srv *Server) httpdAPIPostEnvironment(epr *libhttp.EndpointRequest) (resBod
 
 	res.Code = http.StatusOK
 	res.Message = "Restarting DNS server"
+	res.Data = newOpts
+
 	return json.Marshal(&res)
 }
 
