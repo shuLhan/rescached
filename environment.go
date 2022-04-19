@@ -20,7 +20,8 @@ import (
 )
 
 const (
-	defWuiAddress = "127.0.0.1:5380"
+	defListenAddress = "127.0.0.1:53"
+	defWuiAddress    = "127.0.0.1:5380"
 )
 
 const (
@@ -95,20 +96,19 @@ func LoadEnvironment(dirBase, fileConfig string) (env *Environment, err error) {
 
 	env = newEnvironment(dirBase, fileConfig)
 
-	if len(fileConfig) == 0 {
-		_ = env.init()
-		return env, nil
+	if len(fileConfig) > 0 {
+		cfg, err = ini.Open(env.fileConfig)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %q: %s", logp, env.fileConfig, err)
+		}
+
+		err = cfg.Unmarshal(env)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %q: %s", logp, env.fileConfig, err)
+		}
 	}
 
-	cfg, err = ini.Open(env.fileConfig)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %q: %s", logp, env.fileConfig, err)
-	}
-
-	err = cfg.Unmarshal(env)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %q: %s", logp, env.fileConfig, err)
-	}
+	_ = env.init()
 
 	return env, nil
 }
@@ -130,7 +130,7 @@ func newEnvironment(dirBase, fileConfig string) *Environment {
 			Address: defWuiAddress,
 		},
 		ServerOptions: dns.ServerOptions{
-			ListenAddress: "127.0.0.1:53",
+			ListenAddress: defListenAddress,
 		},
 	}
 }
@@ -141,7 +141,7 @@ func (env *Environment) init() (err error) {
 		env.WUIListen = defWuiAddress
 	}
 	if len(env.ListenAddress) == 0 {
-		env.ListenAddress = "127.0.0.1:53"
+		env.ListenAddress = defListenAddress
 	}
 	if len(env.FileResolvConf) > 0 {
 		_, _ = env.loadResolvConf()

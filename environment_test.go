@@ -88,7 +88,7 @@ func TestLoadEnvironment(t *testing.T) {
 				},
 			},
 			HttpdOptions: &libhttp.ServerOptions{
-				Address: defWuiAddress,
+				Address: "127.0.0.1:5381",
 			},
 			ServerOptions: dns.ServerOptions{
 				ListenAddress: "127.0.0.1:5350",
