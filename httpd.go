@@ -25,10 +25,11 @@ const (
 	paramNameQuery  = "query"
 	paramNameType   = "type"
 	paramNameValue  = "value"
+	apiBlockd       = "/api/block.d"
+	apiBlockdUpdate = "/api/block.d/update"
 	apiCaches       = "/api/caches"
 	apiCachesSearch = "/api/caches/search"
 	apiEnvironment  = "/api/environment"
-	apiHostsBlock   = "/api/block.d"
 	apiHostsDir     = "/api/hosts.d/:name"
 	apiHostsDirRR   = "/api/hosts.d/:name/rr"
 	apiZone         = "/api/zone.d/:name"
@@ -111,10 +112,21 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         apiHostsBlock,
+		Path:         apiBlockd,
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiHostsBlockUpdate,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodPost,
+		Path:         apiBlockdUpdate,
+		RequestType:  libhttp.RequestTypeJSON,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.httpApiBlockdUpdate,
 	})
 	if err != nil {
 		return err
@@ -236,6 +248,67 @@ func (srv *Server) httpdRun() {
 	if err != nil {
 		log.Printf("httpServer.run: %s", err)
 	}
+}
+
+// httpApiBlockdUpdate fetch the latest hosts file from the hosts block
+// provider based on registered URL.
+//
+// # Request
+//
+//	POST /api/block.d/update
+//	Content-Type: application/json
+//
+//	{
+//		"Name": <block.d name>
+//	}
+//
+// # Response
+//
+// On success, the hosts file will be updated and the server will be
+// restarted.
+func (srv *Server) httpApiBlockdUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+	var (
+		logp = "httpApiBlockdUpdate"
+		res  = libhttp.EndpointResponse{}
+
+		hb     *hostsBlock
+		hbName string
+	)
+
+	err = json.Unmarshal(epr.RequestBody, &hb)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	hbName = strings.ToLower(hb.Name)
+
+	hb = srv.env.HostsBlocks[hbName]
+	if hb == nil {
+		res.Code = http.StatusBadRequest
+		res.Message = fmt.Sprintf("%s: unknown hosts block.d name: %s", logp, hbName)
+		return nil, &res
+	}
+
+	err = hb.update()
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = fmt.Sprintf("%s: %s", logp, err)
+		return nil, &res
+	}
+
+	srv.Stop()
+	err = srv.Start()
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		return nil, &res
+	}
+
+	res.Code = http.StatusOK
+	res.Message = fmt.Sprintf("%s: block.d %s has succesfully updated", logp, hbName)
+	res.Data = hb
+
+	return json.Marshal(&res)
 }
 
 func (srv *Server) apiCaches(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
