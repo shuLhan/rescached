@@ -100,8 +100,10 @@ serve-doc:
 
 install-common:
 	mkdir -p $(PREFIX)/etc/rescached
+	mkdir -p $(PREFIX)/etc/rescached/block.d
 	mkdir -p $(PREFIX)/etc/rescached/hosts.d
 	mkdir -p $(PREFIX)/etc/rescached/zone.d
+
 	cp $(RESCACHED_CFG)            $(PREFIX)/etc/rescached/
 	cp testdata/localhost.cert.pem $(PREFIX)/etc/rescached/
 	cp testdata/localhost.key.pem  $(PREFIX)/etc/rescached/

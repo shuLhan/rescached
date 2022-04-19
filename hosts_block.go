@@ -14,43 +14,84 @@ import (
 	"time"
 )
 
-//
-// List of blocked hosts sources.
-//
-var hostsBlockSources = []*hostsBlock{{
-	Name: "pgl.yoyo.org",
-	URL:  `http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext`,
-}, {
-	Name: "www.malwaredomainlist.com",
-	URL:  `http://www.malwaredomainlist.com/hostslist/hosts.txt`,
-}, {
-	Name: "winhelp2002.mvps.org",
-	URL:  `http://winhelp2002.mvps.org/hosts.txt`,
-}, {
-	Name: "someonewhocares.org",
-	URL:  `http://someonewhocares.org/hosts/hosts`,
-}}
+const (
+	lastUpdatedFormat = "2006-01-02 15:04:05 MST"
+)
 
 type hostsBlock struct {
 	lastUpdated time.Time
 
-	Name        string // Derived from hostname in URL.
-	URL         string
-	LastUpdated string
-	file        string
+	Name string `ini:"::name"` // Derived from hostname in URL.
+	URL  string `ini:"::url"`
 
-	IsEnabled bool
+	file         string
+	fileDisabled string
+	LastUpdated  string
+
+	IsEnabled   bool // True if the hosts file un-hidden in block.d directory.
+	isFileExist bool // True if the file exist and enabled or disabled.
 }
 
-func (hb *hostsBlock) init(sources []string) {
-	for _, src := range sources {
-		if hb.URL == src {
-			hb.IsEnabled = true
-			break
+// disable the hosts block by prefixing the file name with single dot.
+func (hb *hostsBlock) disable() (err error) {
+	err = os.Rename(hb.file, hb.fileDisabled)
+	if err != nil {
+		return fmt.Errorf("disable: %w", err)
+	}
+	hb.IsEnabled = false
+	return nil
+}
+
+// enable the hosts block file by removing the dot prefix from file name.
+func (hb *hostsBlock) enable() (err error) {
+	if hb.isFileExist {
+		err = os.Rename(hb.fileDisabled, hb.file)
+	} else {
+		err = os.WriteFile(hb.file, []byte(""), 0600)
+	}
+	if err != nil {
+		return fmt.Errorf("enable: %w", err)
+	}
+	hb.IsEnabled = true
+	hb.isFileExist = true
+	return nil
+}
+
+func (hb *hostsBlock) init(dirBase string) {
+	var (
+		fi  os.FileInfo
+		err error
+	)
+
+	hb.file = filepath.Join(dirBase, dirBlock, hb.Name)
+	hb.fileDisabled = filepath.Join(dirBase, dirBlock, "."+hb.Name)
+
+	fi, err = os.Stat(hb.file)
+	if err != nil {
+		hb.IsEnabled = false
+
+		fi, err = os.Stat(hb.fileDisabled)
+		if err != nil {
+			return
 		}
+
+		hb.isFileExist = true
+	} else {
+		hb.IsEnabled = true
+		hb.isFileExist = true
 	}
 
-	hb.initLastUpdated()
+	hb.lastUpdated = fi.ModTime()
+	hb.LastUpdated = hb.lastUpdated.Format(lastUpdatedFormat)
+}
+
+// isOld will return true if the host file has not been updated since seven
+// days.
+func (hb *hostsBlock) isOld() bool {
+	oneWeek := 7 * 24 * time.Hour
+	lastWeek := time.Now().Add(-1 * oneWeek)
+
+	return hb.lastUpdated.Before(lastWeek)
 }
 
 func (hb *hostsBlock) update() (err error) {
@@ -86,61 +127,17 @@ func (hb *hostsBlock) update() (err error) {
 
 	body = bytes.ReplaceAll(body, []byte("\r\n"), []byte("\n"))
 
-	err = os.WriteFile(hb.file, body, 0644)
+	if hb.IsEnabled {
+		err = os.WriteFile(hb.file, body, 0644)
+	} else {
+		err = os.WriteFile(hb.fileDisabled, body, 0644)
+	}
 	if err != nil {
 		return fmt.Errorf("%s %q: %w", logp, hb.Name, err)
 	}
 
-	hb.initLastUpdated()
+	hb.lastUpdated = time.Now()
+	hb.LastUpdated = hb.lastUpdated.Format(lastUpdatedFormat)
 
 	return nil
-}
-
-func (hb *hostsBlock) hide() (err error) {
-	oldFileName := filepath.Join(dirHosts, hb.Name)
-	newFileName := filepath.Join(dirHosts, "."+hb.Name)
-	err = os.Rename(oldFileName, newFileName)
-	if err != nil {
-		return err
-	}
-
-	hb.file = newFileName
-
-	return nil
-}
-
-func (hb *hostsBlock) isOld() bool {
-	oneWeek := 7 * 24 * time.Hour
-	lastWeek := time.Now().Add(-1 * oneWeek)
-
-	return hb.lastUpdated.Before(lastWeek)
-}
-
-//
-// unhide the hosts block file.
-//
-func (hb *hostsBlock) unhide() (err error) {
-	oldFileName := filepath.Join(dirHosts, "."+hb.Name)
-	newFileName := filepath.Join(dirHosts, hb.Name)
-	err = os.Rename(oldFileName, newFileName)
-	if err != nil {
-		return err
-	}
-
-	hb.file = newFileName
-	hb.initLastUpdated()
-
-	return nil
-}
-
-func (hb *hostsBlock) initLastUpdated() {
-	hb.file = filepath.Join(dirHosts, hb.Name)
-	fi, err := os.Stat(hb.file)
-	if err != nil {
-		hb.IsEnabled = false
-		return
-	}
-
-	hb.lastUpdated = fi.ModTime()
-	hb.LastUpdated = hb.lastUpdated.Format("2006-01-02 15:04:05 MST")
 }

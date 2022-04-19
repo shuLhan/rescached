@@ -12,16 +12,27 @@ file.resolvconf=
 debug=2
 wui.listen = 127.0.0.1:5381
 
-hosts_block = http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext
-hosts_block = http://www.malwaredomainlist.com/hostslist/hosts.txt
-hosts_block = http://winhelp2002.mvps.org/hosts.txt
-hosts_block = http://someonewhocares.org/hosts/hosts
+[block.d "pgl.yoyo.org"]
+name = pgl.yoyo.org
+url = http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext
+
+[block.d "www.malwaredomainlist.com"]
+name = www.malwaredomainlist.com
+url = http://www.malwaredomainlist.com/hostslist/hosts.txt
+
+[block.d "winhelp2002.mvps.org"]
+name = winhelp2002.mvps.org
+url = http://winhelp2002.mvps.org/hosts.txt
+
+[block.d "someonewhocares.org"]
+name = someonewhocares.org
+url = http://someonewhocares.org/hosts/hosts
 
 [dns "server"]
-#parent=udp://62.171.181.13
+parent=udp://10.8.0.1
 #parent=tcp://62.171.181.13
 ## DNS over TLS
-parent=https://62.171.181.13
+#parent=https://10.8.0.1
 ## DNS over HTTPS
 #parent=https://kilabit.info/dns-query
 

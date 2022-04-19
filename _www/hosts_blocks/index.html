@@ -90,8 +90,8 @@
 				renderHostsBlocks(env.HostsBlocks)
 			}
 
-			function onCheckHostblock(idx, val) {
-				resc.env.HostsBlocks[idx].IsEnabled = val
+			function onCheckHostblock(key, val) {
+				resc.env.HostsBlocks[key].IsEnabled = val
 			}
 
 			async function updateHostsBlocks() {
@@ -109,8 +109,12 @@
 				let parent = document.getElementById("HostsBlocks")
 				parent.innerHTML = ""
 
-				for (let x = 0; x < hostsBlocks.length; x++) {
-					let hostsBlock = hostsBlocks[x]
+				for (var k in hostsBlocks) {
+					if (!hostsBlocks.hasOwnProperty(k)) {
+						continue;
+					}
+
+					let hostsBlock = hostsBlocks[k]
 					let item = document.createElement("div")
 					item.classList.add("item")
 					item.innerHTML = `
@@ -118,7 +122,7 @@
 							<input
 								type="checkbox"
 								${hostsBlock.IsEnabled ? "checked" : ""}
-								oninput="onCheckHostblock('${x}', this.checked)"
+								oninput="onCheckHostblock('${k}', this.checked)"
 							/>
 						</span>
 						<span class="info">

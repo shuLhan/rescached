@@ -5,11 +5,9 @@ package rescached
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -376,19 +374,17 @@ func (srv *Server) httpApiEnvironmentUpdate(epr *libhttp.EndpointRequest) (resBo
 	return json.Marshal(&res)
 }
 
-//
 // apiHostsBlockUpdate set the HostsBlock to be enabled or disabled.
 //
 // If its status changes to enabled, unhide the hosts block file, populate the
-// hosts back to caches, and add it to list of HostsFiles.
+// hosts back to caches, and add it to list of hostsBlocksFile.
 //
 // If its status changes to disabled, remove the hosts from caches, hide it,
-// and remove it from list of HostsFiles.
-//
+// and remove it from list of hostsBlocksFile.
 func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res         = libhttp.EndpointResponse{}
-		hostsBlocks = make([]*hostsBlock, 0)
+		hostsBlocks = make(map[string]*hostsBlock, 0)
 
 		hbx *hostsBlock
 		hby *hostsBlock
@@ -444,39 +440,32 @@ func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []
 
 func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
 	var (
+		logp = "hostsBlockEnable"
+
 		hfile *dns.HostsFile
 	)
 
-	hb.IsEnabled = true
-
-	err = hb.unhide()
+	err = hb.enable()
 	if err != nil {
-		if !errors.Is(err, os.ErrNotExist) {
-			return err
-		}
-		// File not exist, fetch new from server.
-		err = hb.update()
-		if err != nil {
-			return err
-		}
-	}
-
-	hfile, err = dns.ParseHostsFile(filepath.Join(dirHosts, hb.Name))
-	if err != nil {
-		return err
-	}
-
-	err = srv.dns.PopulateCachesByRR(hfile.Records, hfile.Path)
-	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", logp, err)
 	}
 
 	err = hb.update()
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", logp, err)
 	}
 
-	srv.env.HostsFiles[hfile.Name] = hfile
+	hfile, err = dns.ParseHostsFile(hb.file)
+	if err != nil {
+		return fmt.Errorf("%s: %w", logp, err)
+	}
+
+	err = srv.dns.PopulateCachesByRR(hfile.Records, hfile.Path)
+	if err != nil {
+		return fmt.Errorf("%s: %w", logp, err)
+	}
+
+	srv.env.hostsBlocksFile[hfile.Name] = hfile
 
 	return nil
 }
@@ -488,18 +477,19 @@ func (srv *Server) hostsBlockDisable(hb *hostsBlock) (err error) {
 		hfile *dns.HostsFile
 	)
 
-	hfile = srv.env.HostsFiles[hb.Name]
+	hfile = srv.env.hostsBlocksFile[hb.Name]
 	if hfile == nil {
 		return fmt.Errorf("%s: unknown hosts block: %q", logp, hb.Name)
 	}
 
 	srv.dns.RemoveLocalCachesByNames(hfile.Names())
 
-	err = hb.hide()
+	err = hb.disable()
 	if err != nil {
 		return fmt.Errorf("%s: %w", logp, err)
 	}
-	delete(srv.env.HostsFiles, hb.Name)
+
+	delete(srv.env.hostsBlocksFile, hfile.Name)
 
 	return nil
 }
@@ -602,9 +592,7 @@ func (srv *Server) apiHostsFileDelete(epr *libhttp.EndpointRequest) (resbody []b
 	return json.Marshal(&res)
 }
 
-//
 // apiHostsFileRRCreate create new record and save it to the hosts file.
-//
 func (srv *Server) apiHostsFileRRCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res           = libhttp.EndpointResponse{}
@@ -806,9 +794,7 @@ func (srv *Server) apiZoneDelete(epr *libhttp.EndpointRequest) (resbody []byte, 
 	return json.Marshal(&res)
 }
 
-//
 // apiZoneRRCreate create new RR for the zone file.
-//
 func (srv *Server) apiZoneRRCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res          = libhttp.EndpointResponse{}
@@ -908,9 +894,7 @@ func (srv *Server) apiZoneRRCreate(epr *libhttp.EndpointRequest) (resbody []byte
 	return json.Marshal(&res)
 }
 
-//
 // apiZoneRRDelete delete RR from the zone file.
-//
 func (srv *Server) apiZoneRRDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res          = libhttp.EndpointResponse{}

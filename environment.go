@@ -23,6 +23,7 @@ const (
 )
 
 const (
+	sectionNameBlockd    = "block.d"
 	sectionNameDNS       = "dns"
 	sectionNameRescached = "rescached"
 
@@ -30,11 +31,12 @@ const (
 
 	keyDebug          = "debug"
 	keyFileResolvConf = "file.resolvconf"
+	keyName           = "name"
+	keyUrl            = "url"
 
 	keyCachePruneDelay     = "cache.prune_delay"
 	keyCachePruneThreshold = "cache.prune_threshold"
 	keyDohBehindProxy      = "doh.behind_proxy"
-	keyHostsBlock          = "hosts_block"
 	keyHTTPPort            = "http.port"
 	keyListen              = "listen"
 	keyParent              = "parent"
@@ -44,6 +46,7 @@ const (
 	keyTLSPort             = "tls.port"
 	keyTLSPrivateKey       = "tls.private_key"
 
+	dirBlock = "/etc/rescached/block.d"
 	dirHosts = "/etc/rescached/hosts.d"
 	dirZone  = "/etc/rescached/zone.d"
 )
@@ -52,9 +55,7 @@ var (
 	mfsWww *memfs.MemFS
 )
 
-//
 // Environment for running rescached.
-//
 type Environment struct {
 	HostsFiles map[string]*dns.HostsFile
 	Zones      map[string]*dns.Zone
@@ -63,8 +64,8 @@ type Environment struct {
 	FileResolvConf string `ini:"rescached::file.resolvconf"`
 	WUIListen      string `ini:"rescached::wui.listen"`
 
-	HostsBlocksRaw []string `ini:"rescached::hosts_block" json:"-"`
-	HostsBlocks    []*hostsBlock
+	HostsBlocks     map[string]*hostsBlock `ini:"block.d"`
+	hostsBlocksFile map[string]*dns.HostsFile
 
 	// The options for WUI HTTP server.
 	HttpdOptions *libhttp.ServerOptions `json:"-"`
@@ -74,9 +75,7 @@ type Environment struct {
 	Debug int `ini:"rescached::debug"`
 }
 
-//
 // LoadEnvironment initialize environment from configuration file.
-//
 func LoadEnvironment(fileConfig string) (env *Environment, err error) {
 	var (
 		logp = "LoadEnvironment"
@@ -104,11 +103,10 @@ func LoadEnvironment(fileConfig string) (env *Environment, err error) {
 	return env, nil
 }
 
-//
 // newEnvironment create and initialize options with default values.
-//
 func newEnvironment() *Environment {
 	return &Environment{
+		hostsBlocksFile: make(map[string]*dns.HostsFile),
 		HttpdOptions: &libhttp.ServerOptions{
 			Memfs:   mfsWww,
 			Address: defWuiAddress,
@@ -119,9 +117,7 @@ func newEnvironment() *Environment {
 	}
 }
 
-//
 // init check and initialize the environment instance with default values.
-//
 func (env *Environment) init() (err error) {
 	if len(env.WUIListen) == 0 {
 		env.WUIListen = defWuiAddress
@@ -172,14 +168,13 @@ func (env *Environment) init() (err error) {
 }
 
 func (env *Environment) initHostsBlock() {
-	env.HostsBlocks = hostsBlockSources
+	var (
+		dirBase = ""
 
-	for x, v := range env.HostsBlocksRaw {
-		env.HostsBlocksRaw[x] = strings.ToLower(v)
-	}
-
-	for _, hb := range env.HostsBlocks {
-		hb.init(env.HostsBlocksRaw)
+		hb *hostsBlock
+	)
+	for _, hb = range env.HostsBlocks {
+		hb.init(dirBase)
 	}
 }
 
@@ -216,8 +211,8 @@ func (env *Environment) save(file string) (in *ini.Ini, err error) {
 	var (
 		logp = "save"
 
-		hb *hostsBlock
-		ns string
+		hb   *hostsBlock
+		vstr string
 	)
 
 	if len(file) == 0 {
@@ -233,38 +228,28 @@ func (env *Environment) save(file string) (in *ini.Ini, err error) {
 	in.Set(sectionNameRescached, "", keyDebug, strconv.Itoa(env.Debug))
 	in.Set(sectionNameRescached, "", keyWUIListen, strings.TrimSpace(env.WUIListen))
 
-	in.UnsetAll(sectionNameRescached, "", keyHostsBlock)
-
 	for _, hb = range env.HostsBlocks {
-		if hb.IsEnabled {
-			in.Add(sectionNameRescached, "", keyHostsBlock, hb.URL)
-		}
+		in.Set(sectionNameBlockd, hb.Name, keyName, hb.Name)
+		in.Set(sectionNameBlockd, hb.Name, keyUrl, hb.URL)
 	}
 
 	in.UnsetAll(sectionNameDNS, subNameServer, keyParent)
-	for _, ns = range env.NameServers {
-		in.Add(sectionNameDNS, subNameServer, keyParent, ns)
+	for _, vstr = range env.NameServers {
+		in.Add(sectionNameDNS, subNameServer, keyParent, vstr)
 	}
 
-	in.Set(sectionNameDNS, subNameServer, keyListen,
-		env.ServerOptions.ListenAddress)
+	in.Set(sectionNameDNS, subNameServer, keyListen, env.ListenAddress)
 
-	in.Set(sectionNameDNS, subNameServer, keyHTTPPort,
-		strconv.Itoa(int(env.ServerOptions.HTTPPort)))
+	in.Set(sectionNameDNS, subNameServer, keyHTTPPort, strconv.Itoa(int(env.HTTPPort)))
 
-	in.Set(sectionNameDNS, subNameServer, keyTLSPort,
-		strconv.Itoa(int(env.ServerOptions.TLSPort)))
-	in.Set(sectionNameDNS, subNameServer, keyTLSCertificate,
-		env.ServerOptions.TLSCertFile)
-	in.Set(sectionNameDNS, subNameServer, keyTLSPrivateKey,
-		env.ServerOptions.TLSPrivateKey)
-	in.Set(sectionNameDNS, subNameServer, keyTLSAllowInsecure,
-		fmt.Sprintf("%t", env.ServerOptions.TLSAllowInsecure))
-	in.Set(sectionNameDNS, subNameServer, keyDohBehindProxy,
-		fmt.Sprintf("%t", env.ServerOptions.DoHBehindProxy))
+	in.Set(sectionNameDNS, subNameServer, keyTLSPort, strconv.Itoa(int(env.TLSPort)))
+	in.Set(sectionNameDNS, subNameServer, keyTLSCertificate, env.TLSCertFile)
+	in.Set(sectionNameDNS, subNameServer, keyTLSPrivateKey, env.TLSPrivateKey)
+	in.Set(sectionNameDNS, subNameServer, keyTLSAllowInsecure, fmt.Sprintf("%t", env.TLSAllowInsecure))
+	in.Set(sectionNameDNS, subNameServer, keyDohBehindProxy, fmt.Sprintf("%t", env.DoHBehindProxy))
 
-	in.Set(sectionNameDNS, subNameServer, keyCachePruneDelay, env.ServerOptions.PruneDelay.String())
-	in.Set(sectionNameDNS, subNameServer, keyCachePruneThreshold, env.ServerOptions.PruneThreshold.String())
+	in.Set(sectionNameDNS, subNameServer, keyCachePruneDelay, env.PruneDelay.String())
+	in.Set(sectionNameDNS, subNameServer, keyCachePruneThreshold, env.PruneThreshold.String())
 
 	return in, nil
 }
@@ -277,20 +262,23 @@ func (env *Environment) Write(w io.Writer) (err error) {
 
 	var (
 		logp = "Environment.Write"
-		in   *ini.Ini
+		outb []byte
 	)
 
-	in, err = env.save(env.fileConfig)
+	outb, err = ini.Marshal(env)
 	if err != nil {
 		return fmt.Errorf("%s: %w", logp, err)
 	}
 
-	return in.Write(w)
+	_, err = w.Write(outb)
+	if err != nil {
+		return fmt.Errorf("%s: %w", logp, err)
+	}
+
+	return nil
 }
 
-//
 // write the options values back to file.
-//
 func (env *Environment) write(file string) (err error) {
 	var (
 		in *ini.Ini

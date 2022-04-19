@@ -65,7 +65,12 @@ func New(env *Environment) (srv *Server, err error) {
 // it.
 //
 func (srv *Server) Start() (err error) {
-	logp := "Start"
+	var (
+		logp = "Start"
+
+		hb    *hostsBlock
+		hfile *dns.HostsFile
+	)
 
 	srv.dns, err = dns.NewServer(&srv.env.ServerOptions)
 	if err != nil {
@@ -94,10 +99,27 @@ func (srv *Server) Start() (err error) {
 	if err != nil {
 		return err
 	}
-	err = srv.dns.PopulateCachesByRR(systemHostsFile.Records,
-		systemHostsFile.Path)
+	err = srv.dns.PopulateCachesByRR(systemHostsFile.Records, systemHostsFile.Path)
 	if err != nil {
 		return err
+	}
+
+	for _, hb = range srv.env.HostsBlocks {
+		if !hb.IsEnabled {
+			continue
+		}
+
+		hfile, err = dns.ParseHostsFile(hb.file)
+		if err != nil {
+			return fmt.Errorf("%s: %w", logp, err)
+		}
+
+		err = srv.dns.PopulateCachesByRR(hfile.Records, hfile.Path)
+		if err != nil {
+			return fmt.Errorf("%s: %w", logp, err)
+		}
+
+		srv.env.hostsBlocksFile[hfile.Name] = hfile
 	}
 
 	srv.env.HostsFiles, err = dns.LoadHostsDir(dirHosts)
