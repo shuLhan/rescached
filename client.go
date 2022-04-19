@@ -32,6 +32,37 @@ func NewClient(serverUrl string, insecure bool) (cl *Client) {
 	return cl
 }
 
+// BlockdUpdate fetch the latest hosts file from the hosts block
+// provider based on registered URL.
+func (cl *Client) BlockdUpdate(blockdName string) (an interface{}, err error) {
+	var (
+		logp  = "BlockdUpdate"
+		hbReq = hostsBlock{
+			Name: blockdName,
+		}
+		res = libhttp.EndpointResponse{}
+
+		hb   *hostsBlock
+		resb []byte
+	)
+
+	_, resb, err = cl.PostJSON(apiBlockdUpdate, nil, &hbReq)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	res.Data = &hb
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+
+	return hb, nil
+}
+
 // Caches fetch all of non-local caches from server.
 func (cl *Client) Caches() (answers []*dns.Answer, err error) {
 	var (

@@ -45,6 +45,31 @@ type resolver struct {
 	insecure bool
 }
 
+// blockdUpdate fetch the latest hosts file from remote block.d URL defined by
+// its name.
+func (rsol *resolver) blockdUpdate(blockdName string) (err error) {
+	var (
+		resc = rsol.newRescachedClient()
+
+		hb     interface{}
+		hbjson []byte
+	)
+
+	hb, err = resc.BlockdUpdate(blockdName)
+	if err != nil {
+		return err
+	}
+
+	hbjson, err = json.MarshalIndent(hb, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(hbjson))
+
+	return nil
+}
+
 // doCmdCaches call the rescached HTTP API to fetch all caches.
 func (rsol *resolver) doCmdCaches() {
 	var (
@@ -252,10 +277,8 @@ func (rsol *resolver) doCmdQuery(args []string) {
 	}
 }
 
-//
 // initSystemResolver read the system resolv.conf to create fallback DNS
 // resolver.
-//
 func (rsol *resolver) initSystemResolver() (err error) {
 	var (
 		logp = "initSystemResolver"

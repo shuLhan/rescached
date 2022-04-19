@@ -94,6 +94,16 @@ List of valid types,
 The "class" parameter is optional, its either IN (default), CS, or HS.
 --
 
+block.d update <name>::
++
+--
+Fetch the latest hosts file from remote block.d URL defined by
+its name.
+On success, the hosts file will be updated and the server will be
+restarted.
+--
+
+
 caches::
 +
 --

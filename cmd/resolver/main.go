@@ -15,6 +15,7 @@ import (
 
 // List of valid commands.
 const (
+	cmdBlockd = "block.d"
 	cmdCaches = "caches"
 	cmdEnv    = "env"
 	cmdQuery  = "query"
@@ -58,6 +59,26 @@ func main() {
 	rsol.cmd = strings.ToLower(args[0])
 
 	switch rsol.cmd {
+	case cmdBlockd:
+		args = args[1:]
+		if len(args) == 0 {
+			log.Fatalf("resolver: %s: missing sub command", cmdBlockd)
+		}
+
+		subCmd = strings.ToLower(args[0])
+
+		switch subCmd {
+		case subCmdUpdate:
+			args = args[1:]
+			if len(args) == 0 {
+				log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
+			}
+			err = rsol.blockdUpdate(args[0])
+			if err != nil {
+				log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
+			}
+		}
+
 	case cmdCaches:
 		args = args[1:]
 		if len(args) == 0 {
@@ -177,6 +198,13 @@ query <domain / ip-address> [type] [class]
 
 	Valid class are either IN, CS, HS.
 	Default value is IN.
+
+block.d update <name>
+
+	Fetch the latest hosts file from remote block.d URL defined by
+	its name.
+	On success, the hosts file will be updated and the server will be
+	restarted.
 
 caches
 
