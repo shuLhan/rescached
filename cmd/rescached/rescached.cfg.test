@@ -16,10 +16,6 @@ wui.listen = 127.0.0.1:5381
 name = pgl.yoyo.org
 url = http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext
 
-[block.d "www.malwaredomainlist.com"]
-name = www.malwaredomainlist.com
-url = http://www.malwaredomainlist.com/hostslist/hosts.txt
-
 [block.d "winhelp2002.mvps.org"]
 name = winhelp2002.mvps.org
 url = http://winhelp2002.mvps.org/hosts.txt

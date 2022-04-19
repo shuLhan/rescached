@@ -19,10 +19,6 @@ url = http://someurl
 name = winhelp2002.mvps.org
 url = http://winhelp2002.mvps.org/hosts.txt
 
-[block.d "www.malwaredomainlist.com"]
-name = www.malwaredomainlist.com
-url = http://www.malwaredomainlist.com/hostslist/hosts.txt
-
 [dns "server"]
 listen = 127.0.0.1:5350
 tls.certificate =

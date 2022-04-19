@@ -69,10 +69,6 @@ func TestLoadEnvironment(t *testing.T) {
 					Name: "pgl.yoyo.org",
 					URL:  `http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext`,
 				},
-				"www.malwaredomainlist.com": &hostsBlock{
-					Name: "www.malwaredomainlist.com",
-					URL:  `http://www.malwaredomainlist.com/hostslist/hosts.txt`,
-				},
 				"winhelp2002.mvps.org": &hostsBlock{
 					Name: "winhelp2002.mvps.org",
 					URL:  `http://winhelp2002.mvps.org/hosts.txt`,
