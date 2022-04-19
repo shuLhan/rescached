@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -25,22 +26,29 @@ const (
 
 func main() {
 	var (
+		env        *rescached.Environment
+		rcd        *rescached.Server
+		dirBase    string
 		fileConfig string
+		cmd        string
 		running    chan bool
+		qsignal    chan os.Signal
+		err        error
 	)
 
 	log.SetFlags(0)
 	log.SetPrefix("rescached: ")
 
-	flag.StringVar(&fileConfig, "config", "", "path to configuration")
+	flag.StringVar(&dirBase, "dir-base", "", "Base directory for reading and storing rescached data.")
+	flag.StringVar(&fileConfig, "config", "", "Path to configuration.")
 	flag.Parse()
 
-	env, err := rescached.LoadEnvironment(fileConfig)
+	env, err = rescached.LoadEnvironment(dirBase, fileConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cmd := flag.Arg(0)
+	cmd = strings.ToLower(flag.Arg(0))
 
 	switch cmd {
 	case cmdEmbed:
@@ -55,7 +63,7 @@ func main() {
 		go watchWww(env, running)
 	}
 
-	rcd, err := rescached.New(env)
+	rcd, err = rescached.New(env)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,10 +77,9 @@ func main() {
 		go debugRuntime()
 	}
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGQUIT, syscall.SIGSEGV, syscall.SIGTERM,
-		syscall.SIGINT)
-	<-c
+	qsignal = make(chan os.Signal, 1)
+	signal.Notify(qsignal, syscall.SIGQUIT, syscall.SIGSEGV, syscall.SIGTERM, syscall.SIGINT)
+	<-qsignal
 	if cmd == cmdDev {
 		running <- false
 		<-running
@@ -96,10 +103,8 @@ func debugRuntime() {
 	}
 }
 
-//
 // watchWww watch any changes to files inside _www directory and regenerate
 // the embed file "memfs_generate.go".
-//
 func watchWww(env *rescached.Environment, running chan bool) {
 	var (
 		logp      = "watchWww"

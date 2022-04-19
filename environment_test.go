@@ -6,6 +6,7 @@ package rescached
 import (
 	"bytes"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/shuLhan/share/lib/dns"
@@ -60,7 +61,15 @@ parent = https://kilabit.info/dns-query
 
 func TestLoadEnvironment(t *testing.T) {
 	var (
-		expEnv = &Environment{
+		testDirBase = "./"
+		expEnv      = &Environment{
+			dirBase:        testDirBase,
+			pathDirBlock:   filepath.Join(testDirBase, dirBlock),
+			pathDirCaches:  filepath.Join(testDirBase, dirCaches),
+			pathDirHosts:   filepath.Join(testDirBase, dirHosts),
+			pathDirZone:    filepath.Join(testDirBase, dirZone),
+			pathFileCaches: filepath.Join(testDirBase, dirCaches, fileCaches),
+
 			fileConfig: "cmd/rescached/rescached.cfg.test",
 
 			WUIListen: "127.0.0.1:5381",
@@ -88,11 +97,10 @@ func TestLoadEnvironment(t *testing.T) {
 				},
 				TLSAllowInsecure: true,
 			},
-
 			Debug: 2,
 		}
-		expBuffer []byte
 
+		expBuffer []byte
 		gotEnv    *Environment
 		gotBuffer bytes.Buffer
 		err       error
@@ -103,7 +111,7 @@ func TestLoadEnvironment(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	gotEnv, err = LoadEnvironment("cmd/rescached/rescached.cfg.test")
+	gotEnv, err = LoadEnvironment(testDirBase, "cmd/rescached/rescached.cfg.test")
 	if err != nil {
 		t.Fatal(err)
 	}

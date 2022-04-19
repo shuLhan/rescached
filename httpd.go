@@ -512,7 +512,7 @@ func (srv *Server) apiHostsFileCreate(epr *libhttp.EndpointRequest) (resbody []b
 
 	_, found = srv.env.HostsFiles[name]
 	if !found {
-		path = filepath.Join(dirHosts, name)
+		path = filepath.Join(srv.env.pathDirHosts, name)
 		hfile, err = dns.NewHostsFile(path, nil)
 		if err != nil {
 			res.Code = http.StatusInternalServerError
@@ -733,7 +733,7 @@ func (srv *Server) apiZoneCreate(epr *libhttp.EndpointRequest) (resbody []byte, 
 		return json.Marshal(&res)
 	}
 
-	zoneFile = filepath.Join(dirZone, zoneName)
+	zoneFile = filepath.Join(srv.env.pathDirZone, zoneName)
 	zone = dns.NewZone(zoneFile, zoneName)
 	err = zone.Save()
 	if err != nil {

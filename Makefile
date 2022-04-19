@@ -87,9 +87,7 @@ clean:
 .PHONY: dev
 
 dev:
-	-sudo ./_bin/nft_dnstest_chain.sh; \
-		go run ./cmd/rescached -config=cmd/rescached/rescached.cfg.test dev; \
-		sudo ./_bin/nft_dnstest_chain.sh flush
+	go run ./cmd/rescached -dir-base=./_test -config=cmd/rescached/rescached.cfg.test dev
 
 serve-doc:
 	ciigo serve _doc

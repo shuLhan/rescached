@@ -20,12 +20,12 @@ func TestHostsBlock_init(t *testing.T) {
 
 	var (
 		testDirBase       = t.TempDir()
-		testDirBlock      = filepath.Join(testDirBase, dirBlock)
+		pathDirBlock      = filepath.Join(testDirBase, dirBlock)
 		fileEnabled       = "fileEnabled"
 		fileDisabled      = "fileDisabled"
 		fileNotExist      = "fileNotExist"
-		hostsFileEnabled  = filepath.Join(testDirBlock, fileEnabled)
-		hostsFileDisabled = filepath.Join(testDirBlock, "."+fileDisabled)
+		hostsFileEnabled  = filepath.Join(pathDirBlock, fileEnabled)
+		hostsFileDisabled = filepath.Join(pathDirBlock, "."+fileDisabled)
 
 		fiEnabled  os.FileInfo
 		fiDisabled os.FileInfo
@@ -34,7 +34,7 @@ func TestHostsBlock_init(t *testing.T) {
 		err        error
 	)
 
-	err = os.MkdirAll(testDirBlock, 0700)
+	err = os.MkdirAll(pathDirBlock, 0700)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func TestHostsBlock_init(t *testing.T) {
 			lastUpdated:  fiEnabled.ModTime(),
 			LastUpdated:  fiEnabled.ModTime().Format(lastUpdatedFormat),
 			file:         hostsFileEnabled,
-			fileDisabled: filepath.Join(testDirBlock, "."+fileEnabled),
+			fileDisabled: filepath.Join(pathDirBlock, "."+fileEnabled),
 			IsEnabled:    true,
 			isFileExist:  true,
 		},
@@ -80,7 +80,7 @@ func TestHostsBlock_init(t *testing.T) {
 			Name:         fileDisabled,
 			lastUpdated:  fiDisabled.ModTime(),
 			LastUpdated:  fiDisabled.ModTime().Format(lastUpdatedFormat),
-			file:         filepath.Join(testDirBlock, fileDisabled),
+			file:         filepath.Join(pathDirBlock, fileDisabled),
 			fileDisabled: hostsFileDisabled,
 			isFileExist:  true,
 		},
@@ -91,13 +91,13 @@ func TestHostsBlock_init(t *testing.T) {
 		},
 		exp: hostsBlock{
 			Name:         fileNotExist,
-			file:         filepath.Join(testDirBlock, fileNotExist),
-			fileDisabled: filepath.Join(testDirBlock, "."+fileNotExist),
+			file:         filepath.Join(pathDirBlock, fileNotExist),
+			fileDisabled: filepath.Join(pathDirBlock, "."+fileNotExist),
 		},
 	}}
 
 	for _, c = range cases {
-		c.hb.init(testDirBase)
+		c.hb.init(pathDirBlock)
 
 		test.Assert(t, c.desc, c.exp, c.hb)
 	}

@@ -6,6 +6,7 @@ package rescached
 import (
 	"fmt"
 	"io"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -46,9 +47,12 @@ const (
 	keyTLSPort             = "tls.port"
 	keyTLSPrivateKey       = "tls.private_key"
 
-	dirBlock = "/etc/rescached/block.d"
-	dirHosts = "/etc/rescached/hosts.d"
-	dirZone  = "/etc/rescached/zone.d"
+	dirBlock  = "/etc/rescached/block.d"
+	dirCaches = "/var/cache/rescached/"
+	dirHosts  = "/etc/rescached/hosts.d"
+	dirZone   = "/etc/rescached/zone.d"
+
+	fileCaches = "rescached.gob"
 )
 
 var (
@@ -59,6 +63,13 @@ var (
 type Environment struct {
 	HostsFiles map[string]*dns.HostsFile
 	Zones      map[string]*dns.Zone
+
+	dirBase        string
+	pathDirBlock   string
+	pathDirCaches  string
+	pathDirHosts   string
+	pathDirZone    string
+	pathFileCaches string
 
 	fileConfig     string
 	FileResolvConf string `ini:"rescached::file.resolvconf"`
@@ -76,36 +87,43 @@ type Environment struct {
 }
 
 // LoadEnvironment initialize environment from configuration file.
-func LoadEnvironment(fileConfig string) (env *Environment, err error) {
+func LoadEnvironment(dirBase, fileConfig string) (env *Environment, err error) {
 	var (
 		logp = "LoadEnvironment"
 		cfg  *ini.Ini
 	)
 
-	env = newEnvironment()
-	env.fileConfig = fileConfig
+	env = newEnvironment(dirBase, fileConfig)
 
 	if len(fileConfig) == 0 {
 		_ = env.init()
 		return env, nil
 	}
 
-	cfg, err = ini.Open(fileConfig)
+	cfg, err = ini.Open(env.fileConfig)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %q: %s", logp, fileConfig, err)
+		return nil, fmt.Errorf("%s: %q: %s", logp, env.fileConfig, err)
 	}
 
 	err = cfg.Unmarshal(env)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %q: %s", logp, fileConfig, err)
+		return nil, fmt.Errorf("%s: %q: %s", logp, env.fileConfig, err)
 	}
 
 	return env, nil
 }
 
 // newEnvironment create and initialize options with default values.
-func newEnvironment() *Environment {
+func newEnvironment(dirBase, fileConfig string) *Environment {
 	return &Environment{
+		dirBase:        dirBase,
+		pathDirBlock:   filepath.Join(dirBase, dirBlock),
+		pathDirCaches:  filepath.Join(dirBase, dirCaches),
+		pathDirHosts:   filepath.Join(dirBase, dirHosts),
+		pathDirZone:    filepath.Join(dirBase, dirZone),
+		pathFileCaches: filepath.Join(dirBase, dirCaches, fileCaches),
+
+		fileConfig:      filepath.Join(dirBase, fileConfig),
 		hostsBlocksFile: make(map[string]*dns.HostsFile),
 		HttpdOptions: &libhttp.ServerOptions{
 			Memfs:   mfsWww,
@@ -169,12 +187,10 @@ func (env *Environment) init() (err error) {
 
 func (env *Environment) initHostsBlock() {
 	var (
-		dirBase = ""
-
 		hb *hostsBlock
 	)
 	for _, hb = range env.HostsBlocks {
-		hb.init(dirBase)
+		hb.init(env.pathDirBlock)
 	}
 }
 

@@ -9,18 +9,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/dns"
 	"github.com/shuLhan/share/lib/http"
 	"github.com/shuLhan/share/lib/memfs"
-)
-
-const (
-	cachesDir  = "/var/cache/rescached/"
-	cachesFile = "rescached.gob"
 )
 
 // Server implement caching DNS server.
@@ -33,9 +27,7 @@ type Server struct {
 	httpdRunner sync.Once
 }
 
-//
 // New create and initialize new rescached server.
-//
 func New(env *Environment) (srv *Server, err error) {
 	if debug.Value >= 1 {
 		fmt.Printf("--- rescached: config: %+v\n", env)
@@ -60,16 +52,17 @@ func New(env *Environment) (srv *Server, err error) {
 	return srv, nil
 }
 
-//
 // Start the server, waiting for DNS query from clients, read it and response
 // it.
-//
 func (srv *Server) Start() (err error) {
 	var (
 		logp = "Start"
 
-		hb    *hostsBlock
-		hfile *dns.HostsFile
+		fcaches *os.File
+		hb      *hostsBlock
+		hfile   *dns.HostsFile
+		zone    *dns.Zone
+		answers []*dns.Answer
 	)
 
 	srv.dns, err = dns.NewServer(&srv.env.ServerOptions)
@@ -77,16 +70,14 @@ func (srv *Server) Start() (err error) {
 		return err
 	}
 
-	cachesPath := filepath.Join(cachesDir, cachesFile)
-
-	fcaches, err := os.Open(cachesPath)
+	fcaches, err = os.Open(srv.env.pathFileCaches)
 	if err == nil {
 		// Load stored caches from file.
-		answers, err := srv.dns.CachesLoad(fcaches)
+		answers, err = srv.dns.CachesLoad(fcaches)
 		if err != nil {
 			log.Printf("%s: %s", logp, err)
 		} else {
-			fmt.Printf("%s: %d caches loaded from %s\n", logp, len(answers), cachesPath)
+			fmt.Printf("%s: %d caches loaded from %s\n", logp, len(answers), srv.env.pathFileCaches)
 		}
 
 		err = fcaches.Close()
@@ -95,11 +86,11 @@ func (srv *Server) Start() (err error) {
 		}
 	}
 
-	systemHostsFile, err := dns.ParseHostsFile(dns.GetSystemHosts())
+	hfile, err = dns.ParseHostsFile(dns.GetSystemHosts())
 	if err != nil {
 		return err
 	}
-	err = srv.dns.PopulateCachesByRR(systemHostsFile.Records, systemHostsFile.Path)
+	err = srv.dns.PopulateCachesByRR(hfile.Records, hfile.Path)
 	if err != nil {
 		return err
 	}
@@ -122,31 +113,33 @@ func (srv *Server) Start() (err error) {
 		srv.env.hostsBlocksFile[hfile.Name] = hfile
 	}
 
-	srv.env.HostsFiles, err = dns.LoadHostsDir(dirHosts)
+	srv.env.HostsFiles, err = dns.LoadHostsDir(srv.env.pathDirHosts)
 	if err != nil {
-		return err
+		if !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
 	}
 
-	for _, hf := range srv.env.HostsFiles {
-		err = srv.dns.PopulateCachesByRR(hf.Records, hf.Path)
+	for _, hfile = range srv.env.HostsFiles {
+		err = srv.dns.PopulateCachesByRR(hfile.Records, hfile.Path)
 		if err != nil {
 			return err
 		}
 	}
 
-	srv.env.Zones, err = dns.LoadZoneDir(dirZone)
+	srv.env.Zones, err = dns.LoadZoneDir(srv.env.pathDirZone)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
 			return err
 		}
-		err = os.MkdirAll(dirZone, 0700)
+		err = os.MkdirAll(srv.env.pathDirZone, 0700)
 		if err != nil {
 			return err
 		}
 		err = nil
 	}
-	for _, zoneFile := range srv.env.Zones {
-		srv.dns.PopulateCaches(zoneFile.Messages(), zoneFile.Path)
+	for _, zone = range srv.env.Zones {
+		srv.dns.PopulateCaches(zone.Messages(), zone.Path)
 	}
 
 	if len(srv.env.FileResolvConf) > 0 {
@@ -176,31 +169,34 @@ func (srv *Server) run() {
 	}
 }
 
-//
 // Stop the server.
-//
 func (srv *Server) Stop() {
-	logp := "Stop"
+	var (
+		logp = "Stop"
+
+		fcaches *os.File
+		err     error
+		n       int
+	)
 
 	if srv.rcWatcher != nil {
 		srv.rcWatcher.Stop()
 	}
 	srv.dns.Stop()
 
-	cachesPath := filepath.Join(cachesDir, cachesFile)
-
 	// Stores caches to file for next start.
-	err := os.MkdirAll(cachesDir, 0700)
+	err = os.MkdirAll(srv.env.pathDirCaches, 0700)
 	if err != nil {
 		log.Printf("%s: %s", logp, err)
 		return
 	}
-	fcaches, err := os.Create(cachesPath)
+
+	fcaches, err = os.Create(srv.env.pathFileCaches)
 	if err != nil {
 		log.Printf("%s: %s", logp, err)
 		return
 	}
-	n, err := srv.dns.CachesSave(fcaches)
+	n, err = srv.dns.CachesSave(fcaches)
 	if err != nil {
 		log.Printf("%s: %s", logp, err)
 		// fall-through for Close.
@@ -209,7 +205,7 @@ func (srv *Server) Stop() {
 	if err != nil {
 		log.Printf("%s: %s", logp, err)
 	}
-	fmt.Printf("%s: %d caches stored to %s\n", logp, n, cachesPath)
+	fmt.Printf("%s: %d caches stored to %s\n", logp, n, srv.env.pathFileCaches)
 }
 
 // watchResolvConf watch an update to file resolv.conf.

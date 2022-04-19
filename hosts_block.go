@@ -57,14 +57,14 @@ func (hb *hostsBlock) enable() (err error) {
 	return nil
 }
 
-func (hb *hostsBlock) init(dirBase string) {
+func (hb *hostsBlock) init(pathDirBlock string) {
 	var (
 		fi  os.FileInfo
 		err error
 	)
 
-	hb.file = filepath.Join(dirBase, dirBlock, hb.Name)
-	hb.fileDisabled = filepath.Join(dirBase, dirBlock, "."+hb.Name)
+	hb.file = filepath.Join(pathDirBlock, hb.Name)
+	hb.fileDisabled = filepath.Join(pathDirBlock, "."+hb.Name)
 
 	fi, err = os.Stat(hb.file)
 	if err != nil {
