@@ -226,7 +226,7 @@ class Rescached {
 
 	async updateHostsBlocks(hostsBlocks) {
 		const httpRes = await fetch(
-			this.server + "/api/hosts_block",
+			this.server + "/api/block.d",
 			{
 				method: "POST",
 				headers: {

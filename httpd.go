@@ -28,7 +28,7 @@ const (
 	apiCaches       = "/api/caches"
 	apiCachesSearch = "/api/caches/search"
 	apiEnvironment  = "/api/environment"
-	apiHostsBlock   = "/api/hosts_block"
+	apiHostsBlock   = "/api/block.d"
 	apiHostsDir     = "/api/hosts.d/:name"
 	apiHostsDirRR   = "/api/hosts.d/:name/rr"
 	apiZone         = "/api/zone.d/:name"
