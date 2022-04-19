@@ -109,6 +109,11 @@ func (hb *hostsBlock) update() (err error) {
 
 	fmt.Printf("%s %s: updating ...\n", logp, hb.Name)
 
+	err = os.MkdirAll(filepath.Dir(hb.file), 0700)
+	if err != nil {
+		return fmt.Errorf("%s %s: %w", logp, hb.Name, err)
+	}
+
 	res, err = http.Get(hb.URL)
 	if err != nil {
 		return fmt.Errorf("%s %s: %w", logp, hb.Name, err)
