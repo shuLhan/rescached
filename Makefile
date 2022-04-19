@@ -87,7 +87,7 @@ clean:
 .PHONY: dev
 
 dev:
-	go run ./cmd/rescached -dir-base=./_test -config=cmd/rescached/rescached.cfg.test dev
+	go run ./cmd/rescached -dir-base=./_test -config=etc/rescached/rescached.cfg dev
 
 serve-doc:
 	ciigo serve _doc

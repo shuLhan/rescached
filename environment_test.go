@@ -61,7 +61,7 @@ parent = https://kilabit.info/dns-query
 
 func TestLoadEnvironment(t *testing.T) {
 	var (
-		testDirBase = "./"
+		testDirBase = "_test"
 		expEnv      = &Environment{
 			dirBase:        testDirBase,
 			pathDirBlock:   filepath.Join(testDirBase, dirBlock),
@@ -70,7 +70,7 @@ func TestLoadEnvironment(t *testing.T) {
 			pathDirZone:    filepath.Join(testDirBase, dirZone),
 			pathFileCaches: filepath.Join(testDirBase, dirCaches, fileCaches),
 
-			fileConfig: "cmd/rescached/rescached.cfg.test",
+			fileConfig: filepath.Join(testDirBase, "/etc/rescached/rescached.cfg"),
 
 			WUIListen: "127.0.0.1:5381",
 			HostsBlocks: map[string]*hostsBlock{
@@ -111,7 +111,7 @@ func TestLoadEnvironment(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	gotEnv, err = LoadEnvironment(testDirBase, "cmd/rescached/rescached.cfg.test")
+	gotEnv, err = LoadEnvironment(testDirBase, "/etc/rescached/rescached.cfg")
 	if err != nil {
 		t.Fatal(err)
 	}
