@@ -33,6 +33,8 @@ function getRRTypeName(k) {
 
 class Rescached {
 	static nanoSeconds = 1000000000
+	static apiBlockd = "/api/block.d"
+	static apiBlockdUpdate = "/api/block.d/update"
 	static apiCaches = "/api/caches"
 	static apiCachesSearch = "/api/caches/search"
 	static apiHostsd = "/api/hosts.d/"
@@ -41,6 +43,20 @@ class Rescached {
 	constructor(server) {
 		this.server = server
 		this.env = {}
+	}
+
+	async BlockdUpdate(name) {
+		let req = {
+			Name: name,
+		}
+		const httpRes = await fetch(Rescached.apiBlockdUpdate, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(req),
+		})
+		return await httpRes.json()
 	}
 
 	async Caches() {
@@ -225,16 +241,13 @@ class Rescached {
 	}
 
 	async updateHostsBlocks(hostsBlocks) {
-		const httpRes = await fetch(
-			this.server + "/api/block.d",
-			{
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(hostsBlocks),
+		const httpRes = await fetch(Rescached.apiBlockd, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
 			},
-		)
+			body: JSON.stringify(hostsBlocks),
+		})
 		return await httpRes.json()
 	}
 

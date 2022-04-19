@@ -35,6 +35,11 @@
 				display: inline-block;
 				width: calc(100% - 6em);
 			}
+			.item .info button {
+				display: inline-block;
+				margin: 0;
+				padding: 4px;
+			}
 			.item .info input {
 				width: calc(100% - 4em);
 			}
@@ -94,6 +99,20 @@
 				resc.env.HostsBlocks[key].IsEnabled = val
 			}
 
+			async function blockdUpdate(name) {
+				const res = await resc.BlockdUpdate(name)
+				if (res.code != 200) {
+					notifError("blockdUpdate: ", res.message)
+					return
+				}
+
+				resc.env.HostsBlocks[name] = res.data
+
+				notifInfo("The hosts blocks has been updated.")
+
+				renderHostsBlocks(resc.env.HostsBlocks)
+			}
+
 			async function updateHostsBlocks() {
 				const res = await resc.updateHostsBlocks(resc.env.HostsBlocks)
 				if (res.code != 200) {
@@ -126,7 +145,12 @@
 							/>
 						</span>
 						<span class="info">
-							<div>${hostsBlock.Name}</div>
+							<div>
+								${hostsBlock.Name}
+								<button onclick="blockdUpdate('${k}')">
+									Update
+								</button>
+							</div>
 							<div> URL: <input value="${hostsBlock.URL}" disabled /> </div>
 							<div> Last updated at ${hostsBlock.LastUpdated} </div>
 						</span>`
