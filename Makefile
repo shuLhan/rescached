@@ -20,14 +20,12 @@ MEM_PROF:=mem.prof
 DEBUG=
 
 RESCACHED_BIN=_bin/$(GOOS)_$(GOARCH)/rescached
-RESCACHED_MAN:=rescached.1.gz
-RESCACHED_CFG:=cmd/rescached/rescached.cfg
-RESCACHED_CFG_MAN:=_doc/rescached.cfg.5.gz
-
 RESOLVER_BIN=_bin/$(GOOS)_$(GOARCH)/resolver
-RESOLVER_MAN=_doc/resolver.1.gz
-
 RESOLVERBENCH_BIN=_bin/$(GOOS)_$(GOARCH)/resolverbench
+
+RESCACHED_MAN:=_sys/usr/share/man/man1/rescached.1.gz
+RESCACHED_CFG_MAN:=_sys/usr/share/man/man5/rescached.cfg.5.gz
+RESOLVER_MAN:=_sys/usr/share/man/man1/resolver.1.gz
 
 DIR_BIN=/usr/bin
 DIR_MAN=/usr/share/man
@@ -60,16 +58,16 @@ memfs_generate.go: .FORCE
 doc: $(RESCACHED_MAN) $(RESCACHED_CFG_MAN) $(RESOLVER_MAN)
 
 $(RESCACHED_MAN): README.adoc
-	asciidoctor --backend manpage $<
-	gzip -f rescached.1
+	asciidoctor --backend=manpage --destination-dir=_sys/usr/share/man/man1/ $<
+	gzip -f _sys/usr/share/man/man1/rescached.1
 
 $(RESCACHED_CFG_MAN): _doc/rescached.cfg.adoc
-	asciidoctor --backend manpage $<
-	gzip -f _doc/rescached.cfg.5
+	asciidoctor --backend=manpage --destination-dir=_sys/usr/share/man/man5/ $<
+	gzip -f _sys/usr/share/man/man5/rescached.cfg.5
 
 $(RESOLVER_MAN): _doc/resolver.adoc
-	asciidoctor --backend manpage $<
-	gzip -f _doc/resolver.1
+	asciidoctor --backend=manpage --destination-dir=_sys/usr/share/man/man1/ $<
+	gzip -f _sys/usr/share/man/man1/resolver.1
 
 distclean: clean
 	go clean -i ./...
@@ -98,13 +96,17 @@ serve-doc:
 
 install-common:
 	mkdir -p $(PREFIX)/etc/rescached
-	mkdir -p $(PREFIX)/etc/rescached/block.d
 	mkdir -p $(PREFIX)/etc/rescached/hosts.d
 	mkdir -p $(PREFIX)/etc/rescached/zone.d
 
-	cp $(RESCACHED_CFG)            $(PREFIX)/etc/rescached/
-	cp testdata/localhost.cert.pem $(PREFIX)/etc/rescached/
-	cp testdata/localhost.key.pem  $(PREFIX)/etc/rescached/
+	cp -f _sys/etc/rescached/rescached.cfg      $(PREFIX)/etc/rescached/
+	cp -f _sys/etc/rescached/localhost.pem      $(PREFIX)/etc/rescached/
+	cp -f _sys/etc/rescached/localhost.pem.key  $(PREFIX)/etc/rescached/
+
+	mkdir -p $(PREFIX)/etc/rescached/block.d
+	cp -f _sys/etc/rescached/block.d/.pgl.yoyo.org         $(PREFIX)/etc/rescached/block.d/
+	cp -f _sys/etc/rescached/block.d/.someonewhocares.org  $(PREFIX)/etc/rescached/block.d/
+	cp -f _sys/etc/rescached/block.d/.winhelp2002.mvps.org $(PREFIX)/etc/rescached/block.d/
 
 	mkdir -p               $(PREFIX)$(DIR_BIN)
 	cp -f $(RESCACHED_BIN) $(PREFIX)$(DIR_BIN)
@@ -135,8 +137,8 @@ uninstall-common:
 ##
 
 install: build install-common
-	mkdir -p                      $(PREFIX)/usr/lib/systemd/system
-	cp _scripts/rescached.service $(PREFIX)/usr/lib/systemd/system/
+	mkdir -p $(PREFIX)/usr/lib/systemd/system
+	cp _sys/usr/lib/systemd/system/rescached.service $(PREFIX)/usr/lib/systemd/system/
 
 uninstall: uninstall-common
 	systemctl stop rescached
@@ -156,7 +158,7 @@ install-macos: DIR_BIN=/usr/local/bin
 install-macos: DIR_MAN=/usr/local/share/man
 install-macos: DIR_RESCACHED=/usr/local/share/rescached
 install-macos: build install-common
-	cp _scripts/info.kilabit.rescached.plist /Library/LaunchDaemons/
+	cp _sys/Library/LaunchDaemons/info.kilabit.rescached.plist /Library/LaunchDaemons/
 
 deploy-macos: DIR_BIN=/usr/local/bin
 deploy-macos: build
