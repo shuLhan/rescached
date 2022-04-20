@@ -45,6 +45,54 @@ type resolver struct {
 	insecure bool
 }
 
+// blockdDisable disable specific hosts on block.d.
+func (rsol *resolver) blockdDisable(name string) (err error) {
+	var (
+		resc = rsol.newRescachedClient()
+
+		hb     interface{}
+		hbjson []byte
+	)
+
+	hb, err = resc.BlockdDisable(name)
+	if err != nil {
+		return err
+	}
+
+	hbjson, err = json.MarshalIndent(hb, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(hbjson))
+
+	return nil
+}
+
+// blockdEnable enable specific hosts on block.d.
+func (rsol *resolver) blockdEnable(name string) (err error) {
+	var (
+		resc = rsol.newRescachedClient()
+
+		hb     interface{}
+		hbjson []byte
+	)
+
+	hb, err = resc.BlockdEnable(name)
+	if err != nil {
+		return err
+	}
+
+	hbjson, err = json.MarshalIndent(hb, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(hbjson))
+
+	return nil
+}
+
 // blockdUpdate fetch the latest hosts file from remote block.d URL defined by
 // its name.
 func (rsol *resolver) blockdUpdate(blockdName string) (err error) {

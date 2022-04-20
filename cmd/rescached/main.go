@@ -108,7 +108,7 @@ func debugRuntime() {
 func watchWww(env *rescached.Environment, running chan bool) {
 	var (
 		logp      = "watchWww"
-		tick      = time.NewTicker(5 * time.Second)
+		tick      = time.NewTicker(3 * time.Second)
 		isRunning = true
 
 		dw       *memfs.DirWatcher

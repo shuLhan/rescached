@@ -94,6 +94,18 @@ List of valid types,
 The "class" parameter is optional, its either IN (default), CS, or HS.
 --
 
+block.d disable <name>::
++
+--
+Disable specific hosts on block.d.
+--
+
+block.d enable <name>::
++
+--
+Enable specific hosts on block.d.
+--
+
 block.d update <name>::
 +
 --

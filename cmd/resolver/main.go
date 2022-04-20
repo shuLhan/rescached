@@ -20,9 +20,11 @@ const (
 	cmdEnv    = "env"
 	cmdQuery  = "query"
 
-	subCmdSearch = "search"
-	subCmdRemove = "remove"
-	subCmdUpdate = "update"
+	subCmdEnable  = "enable"
+	subCmdDisable = "disable"
+	subCmdRemove  = "remove"
+	subCmdSearch  = "search"
+	subCmdUpdate  = "update"
 )
 
 func main() {
@@ -68,6 +70,26 @@ func main() {
 		subCmd = strings.ToLower(args[0])
 
 		switch subCmd {
+		case subCmdDisable:
+			args = args[1:]
+			if len(args) == 0 {
+				log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
+			}
+			err = rsol.blockdDisable(args[0])
+			if err != nil {
+				log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
+			}
+
+		case subCmdEnable:
+			args = args[1:]
+			if len(args) == 0 {
+				log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
+			}
+			err = rsol.blockdEnable(args[0])
+			if err != nil {
+				log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
+			}
+
 		case subCmdUpdate:
 			args = args[1:]
 			if len(args) == 0 {
@@ -198,6 +220,14 @@ query <domain / ip-address> [type] [class]
 
 	Valid class are either IN, CS, HS.
 	Default value is IN.
+
+block.d disable <name>
+
+	Disable specific hosts on block.d.
+
+block.d enable <name>
+
+	Enable specific hosts on block.d.
 
 block.d update <name>
 
