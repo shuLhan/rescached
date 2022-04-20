@@ -25,15 +25,22 @@ const (
 	paramNameQuery  = "query"
 	paramNameType   = "type"
 	paramNameValue  = "value"
-	apiBlockd       = "/api/block.d"
-	apiBlockdUpdate = "/api/block.d/update"
+
+	apiBlockd        = "/api/block.d"
+	apiBlockdDisable = "/api/block.d/disable"
+	apiBlockdEnable  = "/api/block.d/enable"
+	apiBlockdUpdate  = "/api/block.d/update"
+
 	apiCaches       = "/api/caches"
 	apiCachesSearch = "/api/caches/search"
-	apiEnvironment  = "/api/environment"
-	apiHostsDir     = "/api/hosts.d/:name"
-	apiHostsDirRR   = "/api/hosts.d/:name/rr"
-	apiZone         = "/api/zone.d/:name"
-	apiZoneRRType   = "/api/zone.d/:name/rr/:type"
+
+	apiEnvironment = "/api/environment"
+
+	apiHostsDir   = "/api/hosts.d/:name"
+	apiHostsDirRR = "/api/hosts.d/:name/rr"
+
+	apiZone       = "/api/zone.d/:name"
+	apiZoneRRType = "/api/zone.d/:name/rr/:type"
 )
 
 func (srv *Server) httpdInit() (err error) {
@@ -116,6 +123,28 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiHostsBlockUpdate,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodPost,
+		Path:         apiBlockdDisable,
+		RequestType:  libhttp.RequestTypeForm,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.httpApiBlockdDisable,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodPost,
+		Path:         apiBlockdEnable,
+		RequestType:  libhttp.RequestTypeForm,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.httpApiBlockdEnable,
 	})
 	if err != nil {
 		return err
@@ -248,6 +277,74 @@ func (srv *Server) httpdRun() {
 	if err != nil {
 		log.Printf("httpServer.run: %s", err)
 	}
+}
+
+// httpApiBlockdDisable disable the hosts block.d.
+func (srv *Server) httpApiBlockdDisable(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+	var (
+		res = libhttp.EndpointResponse{}
+
+		hb     *hostsBlock
+		hbName string
+	)
+
+	hbName = strings.ToLower(epr.HttpRequest.Form.Get(paramNameName))
+
+	hb = srv.env.HostsBlocks[hbName]
+	if hb == nil {
+		res.Code = http.StatusBadRequest
+		res.Message = fmt.Sprintf("hosts block.d name not found: %s", hbName)
+		return nil, &res
+	}
+
+	if hb.IsEnabled {
+		err = hb.disable()
+		if err != nil {
+			res.Code = http.StatusInternalServerError
+			res.Message = err.Error()
+			return nil, &res
+		}
+	}
+
+	res.Code = http.StatusOK
+	res.Message = fmt.Sprintf("hosts block.d %s has succesfully disabled", hbName)
+	res.Data = hb
+
+	return json.Marshal(&res)
+}
+
+// httpApiBlockdEnable enable the hosts block.d.
+func (srv *Server) httpApiBlockdEnable(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+	var (
+		res = libhttp.EndpointResponse{}
+
+		hb     *hostsBlock
+		hbName string
+	)
+
+	hbName = strings.ToLower(epr.HttpRequest.Form.Get(paramNameName))
+
+	hb = srv.env.HostsBlocks[hbName]
+	if hb == nil {
+		res.Code = http.StatusBadRequest
+		res.Message = fmt.Sprintf("hosts block.d name not found: %s", hbName)
+		return nil, &res
+	}
+
+	if !hb.IsEnabled {
+		err = hb.enable()
+		if err != nil {
+			res.Code = http.StatusInternalServerError
+			res.Message = err.Error()
+			return nil, &res
+		}
+	}
+
+	res.Code = http.StatusOK
+	res.Message = fmt.Sprintf("hosts block.d %s has succesfully enabled", hbName)
+	res.Data = hb
+
+	return json.Marshal(&res)
 }
 
 // httpApiBlockdUpdate fetch the latest hosts file from the hosts block

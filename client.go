@@ -32,6 +32,66 @@ func NewClient(serverUrl string, insecure bool) (cl *Client) {
 	return cl
 }
 
+// BlockdDisable disable specific hosts on block.d.
+func (cl *Client) BlockdDisable(blockdName string) (an interface{}, err error) {
+	var (
+		logp   = "BlockdDisable"
+		res    = libhttp.EndpointResponse{}
+		params = url.Values{}
+
+		hb   *hostsBlock
+		resb []byte
+	)
+
+	params.Set(paramNameName, blockdName)
+
+	_, resb, err = cl.PostForm(apiBlockdDisable, nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	res.Data = &hb
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+
+	return hb, nil
+}
+
+// BlockdEnable enable specific hosts on block.d.
+func (cl *Client) BlockdEnable(blockdName string) (an interface{}, err error) {
+	var (
+		logp   = "BlockdEnable"
+		res    = libhttp.EndpointResponse{}
+		params = url.Values{}
+
+		hb   *hostsBlock
+		resb []byte
+	)
+
+	params.Set(paramNameName, blockdName)
+
+	_, resb, err = cl.PostForm(apiBlockdEnable, nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	res.Data = &hb
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+
+	return hb, nil
+}
+
 // BlockdUpdate fetch the latest hosts file from the hosts block
 // provider based on registered URL.
 func (cl *Client) BlockdUpdate(blockdName string) (an interface{}, err error) {
