@@ -116,6 +116,9 @@ func LoadEnvironment(dirBase, fileConfig string) (env *Environment, err error) {
 // newEnvironment create and initialize options with default values.
 func newEnvironment(dirBase, fileConfig string) *Environment {
 	return &Environment{
+		HostsFiles: make(map[string]*dns.HostsFile),
+		Zones:      make(map[string]*dns.Zone),
+
 		dirBase:        dirBase,
 		pathDirBlock:   filepath.Join(dirBase, dirBlock),
 		pathDirCaches:  filepath.Join(dirBase, dirCaches),
