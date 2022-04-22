@@ -118,6 +118,11 @@ func (srv *Server) Start() (err error) {
 		if !errors.Is(err, os.ErrNotExist) {
 			return err
 		}
+		err = os.MkdirAll(srv.env.pathDirHosts, 0700)
+		if err != nil {
+			return err
+		}
+		err = nil
 	}
 
 	for _, hfile = range srv.env.HostsFiles {
