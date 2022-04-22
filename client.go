@@ -96,17 +96,17 @@ func (cl *Client) BlockdEnable(blockdName string) (an interface{}, err error) {
 // provider based on registered URL.
 func (cl *Client) BlockdUpdate(blockdName string) (an interface{}, err error) {
 	var (
-		logp  = "BlockdUpdate"
-		hbReq = hostsBlock{
-			Name: blockdName,
-		}
-		res = libhttp.EndpointResponse{}
+		logp   = "BlockdUpdate"
+		params = url.Values{}
+		res    = libhttp.EndpointResponse{}
 
 		hb   *hostsBlock
 		resb []byte
 	)
 
-	_, resb, err = cl.PostJSON(apiBlockdUpdate, nil, &hbReq)
+	params.Set(paramNameName, blockdName)
+
+	_, resb, err = cl.PostForm(apiBlockdUpdate, nil, params)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}

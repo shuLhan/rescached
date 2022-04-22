@@ -153,7 +153,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         apiBlockdUpdate,
-		RequestType:  libhttp.RequestTypeJSON,
+		RequestType:  libhttp.RequestTypeForm,
 		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.httpApiBlockdUpdate,
 	})
@@ -347,17 +347,15 @@ func (srv *Server) httpApiBlockdEnable(epr *libhttp.EndpointRequest) (resBody []
 	return json.Marshal(&res)
 }
 
-// httpApiBlockdUpdate fetch the latest hosts file from the hosts block
-// provider based on registered URL.
+// httpApiBlockdUpdate fetch the latest hosts file from the block.d provider
+// based on registered URL.
 //
 // # Request
 //
 //	POST /api/block.d/update
-//	Content-Type: application/json
+//	Content-Type: application/x-www-form-urlencoded
 //
-//	{
-//		"Name": <block.d name>
-//	}
+//	Name=<block.d name>
 //
 // # Response
 //
@@ -372,12 +370,7 @@ func (srv *Server) httpApiBlockdUpdate(epr *libhttp.EndpointRequest) (resBody []
 		hbName string
 	)
 
-	err = json.Unmarshal(epr.RequestBody, &hb)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", logp, err)
-	}
-
-	hbName = strings.ToLower(hb.Name)
+	hbName = strings.ToLower(epr.HttpRequest.Form.Get(paramNameName))
 
 	hb = srv.env.HostsBlocks[hbName]
 	if hb == nil {

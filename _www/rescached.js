@@ -46,15 +46,15 @@ class Rescached {
 	}
 
 	async BlockdUpdate(name) {
-		let req = {
-			Name: name,
-		}
+		let params = new URLSearchParams()
+		params.set("name", name)
+
 		const httpRes = await fetch(Rescached.apiBlockdUpdate, {
 			method: "POST",
 			headers: {
-				"Content-Type": "application/json",
+				"Content-Type": "application/x-www-form-urlencoded",
 			},
-			body: JSON.stringify(req),
+			body: params.toString(),
 		})
 		return await httpRes.json()
 	}
@@ -81,10 +81,7 @@ class Rescached {
 	async Search(query) {
 		console.log("Search: ", query)
 		const res = await fetch(
-			this.server +
-				Rescached.apiCachesSearch +
-				"?query=" +
-				query,
+			this.server + Rescached.apiCachesSearch + "?query=" + query,
 		)
 		return await res.json()
 	}
@@ -111,11 +108,9 @@ class Rescached {
 		const res = await httpRes.json()
 
 		if (httpRes.status === 200) {
-			res.data.PruneDelay =
-				res.data.PruneDelay / Rescached.nanoSeconds
+			res.data.PruneDelay = res.data.PruneDelay / Rescached.nanoSeconds
 			res.data.PruneThreshold =
-				res.data.PruneThreshold /
-				Rescached.nanoSeconds
+				res.data.PruneThreshold / Rescached.nanoSeconds
 
 			for (let k in res.data.HostsFiles) {
 				if (!res.data.HostsFiles.hasOwnProperty(k)) {
@@ -154,9 +149,7 @@ class Rescached {
 	}
 
 	async HostsFileGet(name) {
-		const httpRes = await fetch(
-			this.server + Rescached.apiHostsd + name,
-		)
+		const httpRes = await fetch(this.server + Rescached.apiHostsd + name)
 		let res = await httpRes.json()
 		if (httpRes.Status === 200) {
 			this.env.HostsFiles[name] = {
@@ -226,16 +219,13 @@ class Rescached {
 		got.PruneDelay = got.PruneDelay * this.nanoSeconds
 		got.PruneThreshold = got.PruneThreshold * this.nanoSeconds
 
-		const httpRes = await fetch(
-			this.server + "/api/environment",
-			{
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(got),
+		const httpRes = await fetch(this.server + "/api/environment", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
 			},
-		)
+			body: JSON.stringify(got),
+		})
 
 		return await httpRes.json()
 	}
@@ -252,12 +242,9 @@ class Rescached {
 	}
 
 	async ZoneFileCreate(name) {
-		const httpRes = await fetch(
-			this.server + Rescached.apiZoned + name,
-			{
-				method: "PUT",
-			},
-		)
+		const httpRes = await fetch(this.server + Rescached.apiZoned + name, {
+			method: "PUT",
+		})
 		let res = await httpRes.json()
 		if (res.code == 200) {
 			this.env.ZoneFiles[name] = res.data
@@ -266,12 +253,9 @@ class Rescached {
 	}
 
 	async ZoneFileDelete(name) {
-		const httpRes = await fetch(
-			this.server + Rescached.apiZoned + name,
-			{
-				method: "DELETE",
-			},
-		)
+		const httpRes = await fetch(this.server + Rescached.apiZoned + name, {
+			method: "DELETE",
+		})
 		let res = await httpRes.json()
 		if (res.code == 200) {
 			delete this.env.ZoneFiles[name]
@@ -280,12 +264,7 @@ class Rescached {
 	}
 
 	async ZoneFileRecordCreate(name, rr) {
-		let api =
-			this.server +
-			Rescached.apiZoned +
-			name +
-			"/rr/" +
-			rr.Type
+		let api = this.server + Rescached.apiZoned + name + "/rr/" + rr.Type
 		const httpRes = await fetch(api, {
 			method: "POST",
 			headers: {
@@ -307,12 +286,7 @@ class Rescached {
 	}
 
 	async ZoneFileRecordDelete(name, rr) {
-		let api =
-			this.server +
-			Rescached.apiZoned +
-			name +
-			"/rr/" +
-			rr.Type
+		let api = this.server + Rescached.apiZoned + name + "/rr/" + rr.Type
 		const httpRes = await fetch(api, {
 			method: "DELETE",
 			headers: {
