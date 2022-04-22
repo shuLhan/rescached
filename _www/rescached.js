@@ -23,6 +23,8 @@ const RRTypes = {
 	41: "OPT",
 }
 
+const paramNameName = "name"
+
 function getRRTypeName(k) {
 	let v = RRTypes[k]
 	if (v === "") {
@@ -37,7 +39,7 @@ class Rescached {
 	static apiBlockdUpdate = "/api/block.d/update"
 	static apiCaches = "/api/caches"
 	static apiCachesSearch = "/api/caches/search"
-	static apiHostsd = "/api/hosts.d/"
+	static apiHostsd = "/api/hosts.d"
 	static apiZoned = "/api/zone.d/"
 
 	constructor(server) {
@@ -86,23 +88,6 @@ class Rescached {
 		return await res.json()
 	}
 
-	async HostsFileCreate(name) {
-		const httpRes = await fetch(
-			this.server + Rescached.apiHostsd + name,
-			{
-				method: "PUT",
-			},
-		)
-		let res = await httpRes.json()
-		if (res.code === 200) {
-			this.env.HostsFiles[name] = {
-				Name: name,
-				Records: [],
-			}
-		}
-		return res
-	}
-
 	async getEnvironment() {
 		const httpRes = await fetch(this.server + "/api/environment")
 		const res = await httpRes.json()
@@ -134,13 +119,35 @@ class Rescached {
 		return v
 	}
 
-	async HostsFileDelete(name) {
-		const httpRes = await fetch(
-			this.server + Rescached.apiHostsd + name,
-			{
-				method: "DELETE",
+	async HostsFileCreate(name) {
+		var params = new URLSearchParams()
+		params.set(paramNameName, name)
+
+		const httpRes = await fetch(Rescached.apiHostsd, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
 			},
-		)
+			body: params.toString(),
+		})
+		let res = await httpRes.json()
+		if (res.code === 200) {
+			this.env.HostsFiles[name] = {
+				Name: name,
+				Records: [],
+			}
+		}
+		return res
+	}
+
+	async HostsFileDelete(name) {
+		var params = new URLSearchParams()
+		params.set(paramNameName, name)
+
+		var url = Rescached.apiHostsd + "?" + params.toString()
+		const httpRes = await fetch(url, {
+			method: "DELETE",
+		})
 		const res = await httpRes.json()
 		if (httpRes.status === 200) {
 			delete this.env.HostsFiles[name]
@@ -149,7 +156,12 @@ class Rescached {
 	}
 
 	async HostsFileGet(name) {
-		const httpRes = await fetch(this.server + Rescached.apiHostsd + name)
+		var params = new URLSearchParams()
+		params.set(paramNameName, name)
+
+		var url = Rescached.apiHostsd + "?"+ params.toString()
+		const httpRes = await fetch(url)
+
 		let res = await httpRes.json()
 		if (httpRes.Status === 200) {
 			this.env.HostsFiles[name] = {

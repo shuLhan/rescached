@@ -36,7 +36,7 @@ const (
 
 	apiEnvironment = "/api/environment"
 
-	apiHostsDir   = "/api/hosts.d/:name"
+	apiHostsDir   = "/api/hosts.d"
 	apiHostsDirRR = "/api/hosts.d/:name/rr"
 
 	apiZone       = "/api/zone.d/:name"
@@ -163,9 +163,9 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	// Register API to create new hosts file.
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
-		Method:       libhttp.RequestMethodPut,
+		Method:       libhttp.RequestMethodPost,
 		Path:         apiHostsDir,
-		RequestType:  libhttp.RequestTypeNone,
+		RequestType:  libhttp.RequestTypeForm,
 		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiHostsFileCreate,
 	})
@@ -176,7 +176,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
 		Path:         apiHostsDir,
-		RequestType:  libhttp.RequestTypeNone,
+		RequestType:  libhttp.RequestTypeQuery,
 		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiHostsFileGet,
 	})
@@ -187,7 +187,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
 		Path:         apiHostsDir,
-		RequestType:  libhttp.RequestTypeNone,
+		RequestType:  libhttp.RequestTypeQuery,
 		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiHostsFileDelete,
 	})
