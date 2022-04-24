@@ -122,64 +122,60 @@ func (rsol *resolver) doCmdBlockd(args []string) {
 }
 
 // doCmdCaches call the rescached HTTP API to fetch all caches.
-func (rsol *resolver) doCmdCaches() {
+func (rsol *resolver) doCmdCaches(args []string) {
 	var (
 		resc = rsol.newRescachedClient()
 
+		subCmd  string
 		answers []*dns.Answer
-		err     error
-	)
-
-	answers, err = resc.Caches()
-	if err != nil {
-		log.Printf("resolver: caches: %s", err)
-		return
-	}
-
-	fmt.Printf("Total caches: %d\n", len(answers))
-	printAnswers(answers)
-}
-
-// doCmdCachesRemove remove an answer from caches by domain name.
-func (rsol *resolver) doCmdCachesRemove(q string) {
-	var (
-		resc = rsol.newRescachedClient()
-
-		listAnswer []*dns.Answer
-		err        error
-	)
-
-	listAnswer, err = resc.CachesRemove(q)
-	if err != nil {
-		log.Printf("resolver: caches: %s", err)
-		return
-	}
-
-	fmt.Printf("Total answer removed: %d\n", len(listAnswer))
-	if len(listAnswer) == 0 {
-		return
-	}
-	printAnswers(listAnswer)
-}
-
-// doCmdCachesSearch call the rescached HTTP API to search the caches by
-// domain name.
-func (rsol *resolver) doCmdCachesSearch(q string) {
-	var (
-		resc = rsol.newRescachedClient()
-
 		listMsg []*dns.Message
 		err     error
 	)
 
-	listMsg, err = resc.CachesSearch(q)
-	if err != nil {
-		log.Printf("resolver: caches: %s", err)
+	if len(args) == 0 {
+		answers, err = resc.Caches()
+		if err != nil {
+			log.Fatalf("resolver: %s: %s", rsol.cmd, err)
+		}
+
+		fmt.Printf("Total caches: %d\n", len(answers))
+		printAnswers(answers)
 		return
 	}
 
-	fmt.Printf("Total search: %d\n", len(listMsg))
-	printMessages(listMsg)
+	subCmd = strings.ToLower(args[0])
+	switch subCmd {
+	case subCmdRemove:
+		args = args[1:]
+		if len(args) == 0 {
+			log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
+		}
+
+		answers, err = resc.CachesRemove(args[0])
+		if err != nil {
+			log.Fatalf("resolver: %s: %s", rsol.cmd, err)
+		}
+
+		fmt.Printf("Total answer removed: %d\n", len(answers))
+		printAnswers(answers)
+
+	case subCmdSearch:
+		args = args[1:]
+		if len(args) == 0 {
+			log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
+		}
+
+		listMsg, err = resc.CachesSearch(args[0])
+		if err != nil {
+			log.Fatalf("resolver: caches: %s", err)
+		}
+
+		fmt.Printf("Total search: %d\n", len(listMsg))
+		printMessages(listMsg)
+
+	default:
+		log.Fatalf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
+	}
 }
 
 func (rsol *resolver) doCmdEnv() {
@@ -457,6 +453,10 @@ func (rsol *resolver) query(timeout time.Duration, qname string) (res *dns.Messa
 
 // printAnswers print list of DNS Answer to stdout.
 func printAnswers(answers []*dns.Answer) {
+	if len(answers) == 0 {
+		return
+	}
+
 	var (
 		timeNow = time.Now()
 

@@ -69,32 +69,7 @@ func main() {
 		rsol.doCmdBlockd(args[1:])
 
 	case cmdCaches:
-		args = args[1:]
-		if len(args) == 0 {
-			rsol.doCmdCaches()
-			return
-		}
-
-		subCmd = strings.ToLower(args[0])
-		switch subCmd {
-		case subCmdRemove:
-			args = args[1:]
-			if len(args) == 0 {
-				log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
-			}
-			rsol.doCmdCachesRemove(args[0])
-
-		case subCmdSearch:
-			args = args[1:]
-			if len(args) == 0 {
-				log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
-			}
-			rsol.doCmdCachesSearch(args[0])
-
-		default:
-			log.Printf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
-			os.Exit(2)
-		}
+		rsol.doCmdCaches(args[1:])
 
 	case cmdEnv:
 		args = args[1:]
