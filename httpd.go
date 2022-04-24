@@ -36,7 +36,7 @@ const (
 
 	apiEnvironment = "/api/environment"
 
-	apiHostsDir   = "/api/hosts.d"
+	apiHostsd     = "/api/hosts.d"
 	apiHostsDirRR = "/api/hosts.d/:name/rr"
 
 	apiZone       = "/api/zone.d/:name"
@@ -164,21 +164,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	// Register API to create new hosts file.
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         apiHostsDir,
+		Path:         apiHostsd,
 		RequestType:  libhttp.RequestTypeForm,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiHostsFileCreate,
-	})
-	if err != nil {
-		return err
-	}
-	// Register API to get content of hosts file.
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
-		Method:       libhttp.RequestMethodGet,
-		Path:         apiHostsDir,
-		RequestType:  libhttp.RequestTypeQuery,
-		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiHostsFileGet,
+		Call:         srv.apiHostsdCreate,
 	})
 	if err != nil {
 		return err
@@ -186,10 +175,21 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	// Register API to delete hosts file.
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
-		Path:         apiHostsDir,
+		Path:         apiHostsd,
 		RequestType:  libhttp.RequestTypeQuery,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiHostsFileDelete,
+		Call:         srv.apiHostsdDelete,
+	})
+	if err != nil {
+		return err
+	}
+	// Register API to get content of hosts file.
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodGet,
+		Path:         apiHostsd,
+		RequestType:  libhttp.RequestTypeQuery,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.apiHostsdGet,
 	})
 	if err != nil {
 		return err
@@ -657,14 +657,36 @@ func (srv *Server) hostsBlockDisable(hb *hostsBlock) (err error) {
 	return nil
 }
 
-func (srv *Server) apiHostsFileCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+// apiHostsdCreate create new hosts file inside the hosts.d directory with the
+// name from request parameter.
+//
+// # Request
+//
+//	POST /api/hosts.d
+//	Content-Type: application/x-www-form-urlencoded
+//
+//	name=<hosts file name>
+//
+// # Response
+//
+// On success it will return the HostsFile object in JSON format.
+//
+//	Content-Type: application/json
+//
+//	{
+//		"code": 200,
+//		"data": <HostsFile>
+//	}
+//
+// This API is idempotent, which means, calling this API several times with
+// same name will return the same HostsFile object.
+func (srv *Server) apiHostsdCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res  = libhttp.EndpointResponse{}
 		name = epr.HttpRequest.Form.Get(paramNameName)
 
 		hfile *dns.HostsFile
 		path  string
-		found bool
 	)
 
 	if len(name) == 0 {
@@ -673,8 +695,8 @@ func (srv *Server) apiHostsFileCreate(epr *libhttp.EndpointRequest) (resbody []b
 		return nil, &res
 	}
 
-	_, found = srv.env.HostsFiles[name]
-	if !found {
+	hfile = srv.env.HostsFiles[name]
+	if hfile == nil {
 		path = filepath.Join(srv.env.pathDirHosts, name)
 		hfile, err = dns.NewHostsFile(path, nil)
 		if err != nil {
@@ -687,11 +709,82 @@ func (srv *Server) apiHostsFileCreate(epr *libhttp.EndpointRequest) (resbody []b
 
 	res.Code = http.StatusOK
 	res.Message = fmt.Sprintf("Hosts file %q has been created", name)
+	res.Data = hfile
 
 	return json.Marshal(&res)
 }
 
-func (srv *Server) apiHostsFileGet(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+// apiHostsdDelete delete a hosts file by name in hosts.d directory.
+//
+// # Request
+//
+//	DELETE /api/hosts.d?name=<name>
+//
+// # Response
+//
+// On success, if the hosts file name exists, the local caches associated with
+// hosts file will be removed and the hosts file will be deleted.
+// Server will return the deleted HostsFile object in JSON format,
+//
+//	Content-Type: application/json
+//
+//	{
+//		"code": 200,
+//		"data": <HostsFile>
+//	}
+//
+// On fail server will return 4xx or 5xx HTTP status code.
+func (srv *Server) apiHostsdDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+	var (
+		res  = libhttp.EndpointResponse{}
+		name = epr.HttpRequest.Form.Get(paramNameName)
+
+		hfile *dns.HostsFile
+		found bool
+	)
+
+	if len(name) == 0 {
+		res.Code = http.StatusBadRequest
+		res.Message = "empty or invalid parameter for host file name"
+		return nil, &res
+	}
+
+	hfile, found = srv.env.HostsFiles[name]
+	if !found {
+		res.Code = http.StatusBadRequest
+		res.Message = fmt.Sprintf("hosts file %s not found", name)
+		return nil, &res
+	}
+
+	// Remove the records associated with hosts file.
+	srv.dns.RemoveLocalCachesByNames(hfile.Names())
+
+	err = hfile.Delete()
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		return nil, &res
+	}
+
+	delete(srv.env.HostsFiles, name)
+
+	res.Code = http.StatusOK
+	res.Message = name + " has been deleted"
+	res.Data = hfile
+
+	return json.Marshal(&res)
+}
+
+// apiHostsdGet get the content of hosts file inside hosts.d by its file name.
+//
+// # Request
+//
+//	GET /api/hosts.d?name=<name>
+//
+// # Response
+//
+// On success, it will return list of resource record in JSON format.
+func (srv *Server) apiHostsdGet(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res  = libhttp.EndpointResponse{}
 		name = epr.HttpRequest.Form.Get(paramNameName)
@@ -713,45 +806,6 @@ func (srv *Server) apiHostsFileGet(epr *libhttp.EndpointRequest) (resbody []byte
 	res.Code = http.StatusOK
 	res.Data = hf.Records
 
-	return json.Marshal(&res)
-}
-
-func (srv *Server) apiHostsFileDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
-	var (
-		res  = libhttp.EndpointResponse{}
-		name = epr.HttpRequest.Form.Get(paramNameName)
-
-		hfile *dns.HostsFile
-		found bool
-	)
-
-	if len(name) == 0 {
-		res.Code = http.StatusBadRequest
-		res.Message = "empty or invalid parameter for host file name"
-		return nil, &res
-	}
-
-	hfile, found = srv.env.HostsFiles[name]
-	if !found {
-		res.Code = http.StatusBadRequest
-		res.Message = "apiDeleteHostsFile: " + name + " not found"
-		return nil, &res
-	}
-
-	// Remove the records associated with hosts file.
-	srv.dns.RemoveLocalCachesByNames(hfile.Names())
-
-	err = hfile.Delete()
-	if err != nil {
-		res.Code = http.StatusInternalServerError
-		res.Message = err.Error()
-		return nil, &res
-	}
-
-	delete(srv.env.HostsFiles, name)
-
-	res.Code = http.StatusOK
-	res.Message = name + " has been deleted"
 	return json.Marshal(&res)
 }
 
