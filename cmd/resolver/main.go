@@ -18,10 +18,14 @@ const (
 	cmdBlockd = "block.d"
 	cmdCaches = "caches"
 	cmdEnv    = "env"
+	cmdHostsd = "hosts.d"
 	cmdQuery  = "query"
 
-	subCmdEnable  = "enable"
+	subCmdCreate  = "create"
+	subCmdDelete  = "delete"
 	subCmdDisable = "disable"
+	subCmdEnable  = "enable"
+	subCmdGet     = "get"
 	subCmdRemove  = "remove"
 	subCmdSearch  = "search"
 	subCmdUpdate  = "update"
@@ -154,6 +158,9 @@ func main() {
 			os.Exit(2)
 		}
 
+	case cmdHostsd:
+		rsol.doCmdHostsd(args[1:])
+
 	case cmdQuery:
 		args = args[1:]
 		if len(args) == 0 {
@@ -262,6 +269,20 @@ env update <path-to-file / "-">
 	If the argument is "-", the new environment is read from stdin.
 	If the environment is valid, the server will be restarted.
 
+hosts.d create <name>
+
+	Create new hosts file inside the hosts.d directory with specific file
+	name.
+
+hosts.d delete <name>
+
+	Delete hosts file inside the hosts.d directory by file name.
+
+hosts.d get <name>
+
+	Get the content of hosts file inside the hosts.d directory by file
+	name.
+
 
 ==  Examples
 
@@ -314,5 +335,36 @@ Update the server environment from JSON file in /tmp/env.json,
 
 Update the server environment by reading JSON from standard input,
 
-	$ cat /tmp/env.json | resolver env update -`)
+	$ cat /tmp/env.json | resolver env update -
+
+Create new hosts file named "myhosts" inside the hosts.d directory,
+
+	$ resolver hosts.d create myhosts
+	OK
+
+Delete hosts file named "myhosts" inside the hosts.d directory,
+
+	$ resolver hosts.d delete myhosts
+	OK
+
+Get the content of hosts file named "myhosts" inside the hosts.d directory,
+
+	$ resolver hosts.d get myhosts
+	[
+	  {
+	    "Value": "127.0.0.1",
+	    "Name": "localhost",
+	    "Type": 1,
+	    "Class": 1,
+	    "TTL": 604800
+	  },
+	  {
+	    "Value": "::1",
+	    "Name": "localhost",
+	    "Type": 28,
+	    "Class": 1,
+	    "TTL": 604800
+	  }
+	]
+`)
 }

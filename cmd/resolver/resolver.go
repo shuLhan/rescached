@@ -242,6 +242,70 @@ func (rsol *resolver) doCmdEnvUpdate(fileOrStdin string) (err error) {
 	return nil
 }
 
+func (rsol *resolver) doCmdHostsd(args []string) {
+	if len(args) == 0 {
+		log.Fatalf("resolver: %s: missing argument", rsol.cmd)
+	}
+
+	var (
+		subCmd = strings.ToLower(args[0])
+
+		resc   *rescached.Client
+		listrr []*dns.ResourceRecord
+		jsonb  []byte
+		err    error
+	)
+	switch subCmd {
+	case subCmdCreate:
+		args = args[1:]
+		if len(args) == 0 {
+			log.Fatalf("resolver: %s %s: missing hosts name argument", rsol.cmd, subCmd)
+		}
+
+		resc = rsol.newRescachedClient()
+		_, err = resc.HostsdCreate(args[0])
+		if err != nil {
+			log.Fatalf("resolver: %s", err)
+		}
+		fmt.Println("OK")
+
+	case subCmdDelete:
+		args = args[1:]
+		if len(args) == 0 {
+			log.Fatalf("resolver: %s %s: missing hosts name argument", rsol.cmd, subCmd)
+		}
+
+		resc = rsol.newRescachedClient()
+		_, err = resc.HostsdDelete(args[0])
+		if err != nil {
+			log.Fatalf("resolver: %s", err)
+		}
+		fmt.Println("OK")
+
+	case subCmdGet:
+		args = args[1:]
+		if len(args) == 0 {
+			log.Fatalf("resolver: %s %s: missing hosts name argument", rsol.cmd, subCmd)
+		}
+
+		resc = rsol.newRescachedClient()
+		listrr, err = resc.HostsdGet(args[0])
+		if err != nil {
+			log.Fatalf("resolver: %s", err)
+		}
+
+		jsonb, err = json.MarshalIndent(listrr, "", "  ")
+		if err != nil {
+			log.Fatalf("resolver: %s", err)
+		}
+
+		fmt.Println(string(jsonb))
+
+	default:
+		log.Fatalf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
+	}
+}
+
 func (rsol *resolver) doCmdQuery(args []string) {
 	var (
 		maxAttempts = defAttempts

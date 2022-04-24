@@ -261,3 +261,90 @@ func (cl *Client) EnvUpdate(envIn *Environment) (envOut *Environment, err error)
 	}
 	return envOut, nil
 }
+
+// HostsdCreate create new hosts file inside the hosts.d with requested name.
+func (cl *Client) HostsdCreate(name string) (hostsFile *dns.HostsFile, err error) {
+	var (
+		logp = "HostsdCreate"
+		res  = libhttp.EndpointResponse{
+			Data: &hostsFile,
+		}
+		params = url.Values{}
+
+		resb []byte
+	)
+
+	params.Set(paramNameName, name)
+
+	_, resb, err = cl.PostForm(apiHostsd, nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+	return hostsFile, nil
+}
+
+// HostsdDelete delete hosts file inside the hosts.d by file name.
+func (cl *Client) HostsdDelete(name string) (hostsFile *dns.HostsFile, err error) {
+	var (
+		logp = "HostsdDelete"
+		res  = libhttp.EndpointResponse{
+			Data: &hostsFile,
+		}
+		params = url.Values{}
+
+		resb []byte
+	)
+
+	params.Set(paramNameName, name)
+
+	_, resb, err = cl.Delete(apiHostsd, nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+	return hostsFile, nil
+}
+
+// HostsdGet get the content of hosts file inside the hosts.d by file name.
+func (cl *Client) HostsdGet(name string) (listrr []*dns.ResourceRecord, err error) {
+	var (
+		logp = "HostsdGet"
+		res  = libhttp.EndpointResponse{
+			Data: &listrr,
+		}
+		params = url.Values{}
+
+		resb []byte
+	)
+
+	params.Set(paramNameName, name)
+
+	_, resb, err = cl.Get(apiHostsd, nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+	return listrr, nil
+}
