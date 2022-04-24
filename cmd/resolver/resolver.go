@@ -45,77 +45,80 @@ type resolver struct {
 	insecure bool
 }
 
-// blockdDisable disable specific hosts on block.d.
-func (rsol *resolver) blockdDisable(name string) (err error) {
+func (rsol *resolver) doCmdBlockd(args []string) {
+	if len(args) == 0 {
+		log.Fatalf("resolver: %s: missing sub command", rsol.cmd)
+	}
+
 	var (
 		resc = rsol.newRescachedClient()
 
 		hb     interface{}
 		hbjson []byte
+		subCmd string
+		err    error
 	)
 
-	hb, err = resc.BlockdDisable(name)
-	if err != nil {
-		return err
+	subCmd = strings.ToLower(args[0])
+
+	switch subCmd {
+	case subCmdDisable:
+		args = args[1:]
+		if len(args) == 0 {
+			log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
+		}
+
+		hb, err = resc.BlockdDisable(args[0])
+		if err != nil {
+			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
+		}
+
+		hbjson, err = json.MarshalIndent(hb, "", "  ")
+		if err != nil {
+			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
+		}
+
+		fmt.Println(string(hbjson))
+
+	case subCmdEnable:
+		args = args[1:]
+		if len(args) == 0 {
+			log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
+		}
+
+		hb, err = resc.BlockdEnable(args[0])
+		if err != nil {
+			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
+		}
+
+		hbjson, err = json.MarshalIndent(hb, "", "  ")
+		if err != nil {
+			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
+		}
+
+		fmt.Println(string(hbjson))
+
+	case subCmdUpdate:
+		args = args[1:]
+		if len(args) == 0 {
+			log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
+		}
+
+		hb, err = resc.BlockdUpdate(args[0])
+		if err != nil {
+			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
+		}
+
+		hbjson, err = json.MarshalIndent(hb, "", "  ")
+		if err != nil {
+			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
+		}
+
+		fmt.Println(string(hbjson))
+
+	default:
+		log.Fatalf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
 	}
-
-	hbjson, err = json.MarshalIndent(hb, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(hbjson))
-
-	return nil
-}
-
-// blockdEnable enable specific hosts on block.d.
-func (rsol *resolver) blockdEnable(name string) (err error) {
-	var (
-		resc = rsol.newRescachedClient()
-
-		hb     interface{}
-		hbjson []byte
-	)
-
-	hb, err = resc.BlockdEnable(name)
-	if err != nil {
-		return err
-	}
-
-	hbjson, err = json.MarshalIndent(hb, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(hbjson))
-
-	return nil
-}
-
-// blockdUpdate fetch the latest hosts file from remote block.d URL defined by
-// its name.
-func (rsol *resolver) blockdUpdate(blockdName string) (err error) {
-	var (
-		resc = rsol.newRescachedClient()
-
-		hb     interface{}
-		hbjson []byte
-	)
-
-	hb, err = resc.BlockdUpdate(blockdName)
-	if err != nil {
-		return err
-	}
-
-	hbjson, err = json.MarshalIndent(hb, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(hbjson))
-
-	return nil
 }
 
 // doCmdCaches call the rescached HTTP API to fetch all caches.

@@ -66,44 +66,7 @@ func main() {
 
 	switch rsol.cmd {
 	case cmdBlockd:
-		args = args[1:]
-		if len(args) == 0 {
-			log.Fatalf("resolver: %s: missing sub command", cmdBlockd)
-		}
-
-		subCmd = strings.ToLower(args[0])
-
-		switch subCmd {
-		case subCmdDisable:
-			args = args[1:]
-			if len(args) == 0 {
-				log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
-			}
-			err = rsol.blockdDisable(args[0])
-			if err != nil {
-				log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
-			}
-
-		case subCmdEnable:
-			args = args[1:]
-			if len(args) == 0 {
-				log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
-			}
-			err = rsol.blockdEnable(args[0])
-			if err != nil {
-				log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
-			}
-
-		case subCmdUpdate:
-			args = args[1:]
-			if len(args) == 0 {
-				log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
-			}
-			err = rsol.blockdUpdate(args[0])
-			if err != nil {
-				log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
-			}
-		}
+		rsol.doCmdBlockd(args[1:])
 
 	case cmdCaches:
 		args = args[1:]
