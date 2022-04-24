@@ -35,9 +35,7 @@ func main() {
 	var (
 		rsol = new(resolver)
 
-		subCmd  string
 		args    []string
-		err     error
 		optHelp bool
 	)
 
@@ -72,29 +70,7 @@ func main() {
 		rsol.doCmdCaches(args[1:])
 
 	case cmdEnv:
-		args = args[1:]
-		if len(args) == 0 {
-			rsol.doCmdEnv()
-			return
-		}
-
-		subCmd = strings.ToLower(args[0])
-		switch subCmd {
-		case subCmdUpdate:
-			args = args[1:]
-			if len(args) == 0 {
-				log.Fatalf("resolver: %s %s: missing file argument", rsol.cmd, subCmd)
-			}
-
-			err = rsol.doCmdEnvUpdate(args[0])
-			if err != nil {
-				log.Fatalf("resolver: %s", err)
-			}
-
-		default:
-			log.Printf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
-			os.Exit(2)
-		}
+		rsol.doCmdEnv(args[1:])
 
 	case cmdHostsd:
 		rsol.doCmdHostsd(args[1:])

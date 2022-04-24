@@ -178,36 +178,55 @@ func (rsol *resolver) doCmdCaches(args []string) {
 	}
 }
 
-func (rsol *resolver) doCmdEnv() {
+func (rsol *resolver) doCmdEnv(args []string) {
 	var (
 		resc = rsol.newRescachedClient()
 
 		env     *rescached.Environment
+		subCmd  string
 		envJson []byte
 		err     error
 	)
 
-	env, err = resc.Env()
-	if err != nil {
-		log.Printf("resolver: %s: %s", rsol.cmd, err)
+	if len(args) == 0 {
+		env, err = resc.Env()
+		if err != nil {
+			log.Fatalf("resolver: %s: %s", rsol.cmd, err)
+		}
+
+		envJson, err = json.MarshalIndent(env, "", "  ")
+		if err != nil {
+			log.Fatalf("resolver: %s: %s", rsol.cmd, err)
+		}
+
+		fmt.Println(string(envJson))
 		return
 	}
 
-	envJson, err = json.MarshalIndent(env, "", "  ")
-	if err != nil {
-		log.Printf("resolver: %s: %s", rsol.cmd, err)
-		return
+	subCmd = strings.ToLower(args[0])
+	switch subCmd {
+	case subCmdUpdate:
+		args = args[1:]
+		if len(args) == 0 {
+			log.Fatalf("resolver: %s %s: missing file argument", rsol.cmd, subCmd)
+		}
+
+		err = rsol.doCmdEnvUpdate(resc, args[0])
+		if err != nil {
+			log.Fatalf("resolver: %s", err)
+		}
+
+	default:
+		log.Printf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
+		os.Exit(2)
 	}
 
-	fmt.Printf("%s\n", envJson)
 }
 
 // doCmdEnvUpdate update the server environment by reading the JSON formatted
 // environment from file or from stdin.
-func (rsol *resolver) doCmdEnvUpdate(fileOrStdin string) (err error) {
+func (rsol *resolver) doCmdEnvUpdate(resc *rescached.Client, fileOrStdin string) (err error) {
 	var (
-		resc = rsol.newRescachedClient()
-
 		env     *rescached.Environment
 		envJson []byte
 	)
@@ -236,7 +255,7 @@ func (rsol *resolver) doCmdEnvUpdate(fileOrStdin string) (err error) {
 		return fmt.Errorf("%s %s: %w", cmdEnv, subCmdUpdate, err)
 	}
 
-	fmt.Printf("%s\n", envJson)
+	fmt.Println(string(envJson))
 
 	return nil
 }
