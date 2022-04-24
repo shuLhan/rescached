@@ -40,6 +40,7 @@ class Rescached {
 	static apiCaches = "/api/caches"
 	static apiCachesSearch = "/api/caches/search"
 	static apiHostsd = "/api/hosts.d"
+	static apiHostsdRR = "/api/hosts.d/rr"
 	static apiZoned = "/api/zone.d/"
 
 	constructor(server) {
@@ -159,7 +160,7 @@ class Rescached {
 		var params = new URLSearchParams()
 		params.set(paramNameName, name)
 
-		var url = Rescached.apiHostsd + "?"+ params.toString()
+		var url = Rescached.apiHostsd + "?" + params.toString()
 		const httpRes = await fetch(url)
 
 		let res = await httpRes.json()
@@ -172,21 +173,18 @@ class Rescached {
 		return res
 	}
 
-	async HostsFileRecordAdd(hostsFile, domain, value) {
+	async HostsdRecordAdd(hostsFile, domain, value) {
 		let params = new URLSearchParams()
+		params.set("name", hostsFile)
 		params.set("domain", domain)
 		params.set("value", value)
 
-		const api =
-			this.server +
-			Rescached.apiHostsd +
-			hostsFile +
-			"/rr" +
-			"?" +
-			params.toString()
-
-		const httpRes = await fetch(api, {
+		const httpRes = await fetch(Rescached.apiHostsdRR, {
 			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+			body: params.toString(),
 		})
 		const res = await httpRes.json()
 		if (httpRes.Status === 200) {
@@ -196,17 +194,12 @@ class Rescached {
 		return res
 	}
 
-	async HostsFileRecordDelete(hostsFile, domain) {
+	async HostsdRecordDelete(hostsFile, domain) {
 		let params = new URLSearchParams()
+		params.set("name", hostsFile)
 		params.set("domain", domain)
 
-		const api =
-			this.server +
-			Rescached.apiHostsd +
-			hostsFile +
-			"/rr" +
-			"?" +
-			params.toString()
+		const api = Rescached.apiHostsdRR + "?" + params.toString()
 
 		const httpRes = await fetch(api, {
 			method: "DELETE",

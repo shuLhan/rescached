@@ -36,8 +36,8 @@ const (
 
 	apiEnvironment = "/api/environment"
 
-	apiHostsd     = "/api/hosts.d"
-	apiHostsDirRR = "/api/hosts.d/:name/rr"
+	apiHostsd   = "/api/hosts.d"
+	apiHostsdRR = "/api/hosts.d/rr"
 
 	apiZone       = "/api/zone.d/:name"
 	apiZoneRRType = "/api/zone.d/:name/rr/:type"
@@ -198,10 +198,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	// Register API to create one record in hosts file.
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         apiHostsDirRR,
-		RequestType:  libhttp.RequestTypeQuery,
+		Path:         apiHostsdRR,
+		RequestType:  libhttp.RequestTypeForm,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiHostsFileRRCreate,
+		Call:         srv.apiHostsdRecordAdd,
 	})
 	if err != nil {
 		return err
@@ -210,10 +210,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	// Register API to delete a record from hosts file.
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
-		Path:         apiHostsDirRR,
+		Path:         apiHostsdRR,
 		RequestType:  libhttp.RequestTypeQuery,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiHostsFileRRDelete,
+		Call:         srv.apiHostsdRecordDelete,
 	})
 	if err != nil {
 		return err
@@ -809,8 +809,31 @@ func (srv *Server) apiHostsdGet(epr *libhttp.EndpointRequest) (resbody []byte, e
 	return json.Marshal(&res)
 }
 
-// apiHostsFileRRCreate create new record and save it to the hosts file.
-func (srv *Server) apiHostsFileRRCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+// apiHostsdRecordAdd add new record and save it to the hosts file.
+//
+// # Request
+//
+// Request format,
+//
+//	POST /hosts.d/rr
+//	content-type: application/x-www-form-urlencoded
+//
+//	name=&domain=&value=
+//
+// Parameters,
+//
+// - name: the hosts file name where record to be added.
+// - domain: the domain name.
+// - value: the IPv4 or IPv6 address of domain name.
+//
+// If the domain name already exist, the new record will be appended to the
+// end of file.
+//
+// # Response
+//
+// On success, a single line "<domain> <value>" will be appended to the hosts
+// file as new record and return it to the caller.
+func (srv *Server) apiHostsdRecordAdd(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res           = libhttp.EndpointResponse{}
 		hostsFileName = epr.HttpRequest.Form.Get(paramNameName)
@@ -875,7 +898,17 @@ func (srv *Server) apiHostsFileRRCreate(epr *libhttp.EndpointRequest) (resbody [
 	return json.Marshal(&res)
 }
 
-func (srv *Server) apiHostsFileRRDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+// apiHostsdRecordDelete delete a record from hosts file by domain name.
+//
+// # Request
+//
+//	DELETE /hosts.d/record?name=&domain=
+//
+// # Response
+//
+// If the hosts file "name" exist and domain name exist, it will return HTTP
+// status code 200.
+func (srv *Server) apiHostsdRecordDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res           = libhttp.EndpointResponse{}
 		hostsFileName = epr.HttpRequest.Form.Get(paramNameName)

@@ -149,7 +149,7 @@
 					notifError("invalid or empty IP address")
 					return
 				}
-				let res = await resc.HostsFileRecordAdd(hostsFile, newRecord.Name, newRecord.Value)
+				let res = await resc.HostsdRecordAdd(hostsFile, newRecord.Name, newRecord.Value)
 				if (res.code >= 400) {
 					notifError("failed to add record for " + hostsFile + ": " + res.message)
 					return
@@ -158,7 +158,7 @@
 			}
 
 			async function onDeleteRecord(domain) {
-				let res = await resc.HostsFileRecordDelete(activeHostsFile.Name, domain)
+				let res = await resc.HostsdRecordDelete(activeHostsFile.Name, domain)
 				if (res.code !== 200) {
 					notifError("Failed to delete record " + domain)
 					return
