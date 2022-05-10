@@ -348,3 +348,35 @@ func (cl *Client) HostsdGet(name string) (listrr []*dns.ResourceRecord, err erro
 	}
 	return listrr, nil
 }
+
+// HostsdRecordAdd add new resource record to the hosts file.
+func (cl *Client) HostsdRecordAdd(hostsName, domain, value string) (record *dns.ResourceRecord, err error) {
+	var (
+		logp = "HostsdRecordAdd"
+		res  = libhttp.EndpointResponse{
+			Data: &record,
+		}
+		params = url.Values{}
+
+		resb []byte
+	)
+
+	params.Set(paramNameName, hostsName)
+	params.Set(paramNameDomain, domain)
+	params.Set(paramNameValue, value)
+
+	_, resb, err = cl.PostForm(apiHostsdRR, nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+
+	return record, nil
+}

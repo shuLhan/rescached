@@ -319,8 +319,51 @@ func (rsol *resolver) doCmdHostsd(args []string) {
 
 		fmt.Println(string(jsonb))
 
+	case subCmdRR:
+		rsol.doCmdHostsdRecord(args[1:])
+
 	default:
 		log.Fatalf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
+	}
+}
+
+func (rsol *resolver) doCmdHostsdRecord(args []string) {
+	if len(args) == 0 {
+		log.Fatalf("resolver: %s %s %s: missing arguments", rsol.cmd, cmdHostsd, subCmdRR)
+	}
+
+	var (
+		subCmd = strings.ToLower(args[0])
+
+		resc   *rescached.Client
+		record *dns.ResourceRecord
+		jsonb  []byte
+		err    error
+	)
+
+	switch subCmd {
+	case subCmdAdd:
+		args = args[1:]
+		if len(args) < 3 {
+			log.Fatalf("resolver: missing arguments")
+		}
+
+		resc = rsol.newRescachedClient()
+		record, err = resc.HostsdRecordAdd(args[0], args[1], args[2])
+		if err != nil {
+			log.Fatalf("resolver: %s", err)
+		}
+
+		jsonb, err = json.MarshalIndent(record, "", "  ")
+		if err != nil {
+			log.Fatalf("resolver: %s", err)
+		}
+
+		fmt.Println(string(jsonb))
+
+	case subCmdDelete:
+	default:
+		log.Fatalf("resolver: %s %s: unknown command %s", rsol.cmd, subCmdRR, subCmd)
 	}
 }
 

@@ -21,11 +21,13 @@ const (
 	cmdHostsd = "hosts.d"
 	cmdQuery  = "query"
 
+	subCmdAdd     = "add"
 	subCmdCreate  = "create"
 	subCmdDelete  = "delete"
 	subCmdDisable = "disable"
 	subCmdEnable  = "enable"
 	subCmdGet     = "get"
+	subCmdRR      = "rr"
 	subCmdRemove  = "remove"
 	subCmdSearch  = "search"
 	subCmdUpdate  = "update"
@@ -197,6 +199,13 @@ hosts.d get <name>
 	Get the content of hosts file inside the hosts.d directory by file
 	name.
 
+hosts.d rr add <name> <domain> <value>
+
+	Insert a new record and save it to the hosts file identified by
+	"name".
+	If the domain name already exists, the new record will be appended
+	instead of replaced.
+
 
 ==  Examples
 
@@ -280,5 +289,15 @@ Get the content of hosts file named "myhosts" inside the hosts.d directory,
 	    "TTL": 604800
 	  }
 	]
-`)
+
+Add new record "127.0.0.1 my.hosts" to hosts file named "hosts",
+
+	$ resolver hosts.d rr add hosts my.hosts 127.0.0.1
+	{
+	  "Value": "127.0.0.1",
+	  "Name": "my.hosts",
+	  "Type": 1,
+	  "Class": 1,
+	  "TTL": 604800
+	}`)
 }
