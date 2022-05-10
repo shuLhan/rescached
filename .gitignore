@@ -3,6 +3,8 @@
 /_bin/darwin_amd64
 /_bin/linux_amd64
 /_doc/*.html
+/_test/etc/rescached/hosts.d/hosts
+/_test/var/cache/rescached/
 /cover.html
 /cover.out
 /heap*
