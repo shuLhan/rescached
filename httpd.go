@@ -39,8 +39,8 @@ const (
 	apiHostsd   = "/api/hosts.d"
 	apiHostsdRR = "/api/hosts.d/rr"
 
-	apiZone       = "/api/zone.d"
-	apiZoneRRType = "/api/zone.d/:name/rr/:type"
+	apiZoned       = "/api/zone.d"
+	apiZonedRRType = "/api/zone.d/:name/rr/:type"
 )
 
 func (srv *Server) httpdInit() (err error) {
@@ -220,41 +220,42 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
-		Method:       libhttp.RequestMethodPut,
-		Path:         apiZone,
-		RequestType:  libhttp.RequestTypeNone,
+		Method:       libhttp.RequestMethodPost,
+		Path:         apiZoned,
+		RequestType:  libhttp.RequestTypeForm,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiZoneCreate,
+		Call:         srv.apiZonedCreate,
 	})
 	if err != nil {
 		return err
 	}
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
-		Path:         apiZone,
+		Path:         apiZoned,
 		RequestType:  libhttp.RequestTypeNone,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiZoneDelete,
+		Call:         srv.apiZonedDelete,
 	})
 	if err != nil {
 		return err
 	}
+
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         apiZoneRRType,
+		Path:         apiZonedRRType,
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiZoneRRCreate,
+		Call:         srv.apiZonedRRCreate,
 	})
 	if err != nil {
 		return err
 	}
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
-		Path:         apiZoneRRType,
+		Path:         apiZonedRRType,
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiZoneRRDelete,
+		Call:         srv.apiZonedRRDelete,
 	})
 	if err != nil {
 		return err
@@ -957,7 +958,7 @@ func (srv *Server) apiHostsdRecordDelete(epr *libhttp.EndpointRequest) (resbody 
 	return json.Marshal(&res)
 }
 
-func (srv *Server) apiZoneCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+func (srv *Server) apiZonedCreate(epr *libhttp.EndpointRequest) (resb []byte, err error) {
 	var (
 		res      = libhttp.EndpointResponse{}
 		zoneName = epr.HttpRequest.Form.Get(paramNameName)
@@ -999,10 +1000,11 @@ func (srv *Server) apiZoneCreate(epr *libhttp.EndpointRequest) (resbody []byte, 
 	res.Code = http.StatusOK
 	res.Data = zone
 
-	return json.Marshal(&res)
+	resb, err = json.Marshal(&res)
+	return resb, err
 }
 
-func (srv *Server) apiZoneDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, err error) {
 	var (
 		res      = libhttp.EndpointResponse{}
 		zoneName = epr.HttpRequest.Form.Get(paramNameName)
@@ -1042,12 +1044,13 @@ func (srv *Server) apiZoneDelete(epr *libhttp.EndpointRequest) (resbody []byte, 
 
 	res.Code = http.StatusOK
 	res.Message = zoneName + " has been deleted"
+	res.Data = zone
 
 	return json.Marshal(&res)
 }
 
-// apiZoneRRCreate create new RR for the zone file.
-func (srv *Server) apiZoneRRCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+// apiZonedRRCreate create new RR for the zone file.
+func (srv *Server) apiZonedRRCreate(epr *libhttp.EndpointRequest) (resb []byte, err error) {
 	var (
 		res          = libhttp.EndpointResponse{}
 		zoneFileName = epr.HttpRequest.Form.Get(paramNameName)
@@ -1146,8 +1149,8 @@ func (srv *Server) apiZoneRRCreate(epr *libhttp.EndpointRequest) (resbody []byte
 	return json.Marshal(&res)
 }
 
-// apiZoneRRDelete delete RR from the zone file.
-func (srv *Server) apiZoneRRDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
+// apiZonedRRDelete delete RR from the zone file.
+func (srv *Server) apiZonedRRDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res          = libhttp.EndpointResponse{}
 		zoneFileName = epr.HttpRequest.Form.Get(paramNameName)

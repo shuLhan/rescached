@@ -411,3 +411,65 @@ func (cl *Client) HostsdRecordDelete(hostsName, domain string) (record *dns.Reso
 
 	return record, nil
 }
+
+// ZonedCreate create new zone file.
+func (cl *Client) ZonedCreate(name string) (zone *dns.Zone, err error) {
+	var (
+		logp = "ZonedCreate"
+		res  = libhttp.EndpointResponse{
+			Data: &zone,
+		}
+		params = url.Values{}
+
+		resb []byte
+	)
+
+	params.Set(paramNameName, name)
+
+	_, resb, err = cl.PostForm(apiZoned, nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+	return zone, nil
+}
+
+// ZonedDelete delete zone file by name.
+func (cl *Client) ZonedDelete(name string) (zone *dns.Zone, err error) {
+	var (
+		logp = "ZonedDelete"
+		res  = libhttp.EndpointResponse{
+			Data: &zone,
+		}
+		params = url.Values{}
+
+		httpRes *http.Response
+		resb    []byte
+	)
+
+	params.Set(paramNameName, name)
+
+	httpRes, resb, err = cl.Delete(apiZoned, nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if httpRes.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("%s: %s", logp, httpRes.Status)
+	}
+
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+	return zone, nil
+}

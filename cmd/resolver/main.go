@@ -20,6 +20,7 @@ const (
 	cmdEnv    = "env"
 	cmdHostsd = "hosts.d"
 	cmdQuery  = "query"
+	cmdZoned  = "zone.d"
 
 	subCmdAdd     = "add"
 	subCmdCreate  = "create"
@@ -84,6 +85,10 @@ func main() {
 		}
 
 		rsol.doCmdQuery(args)
+
+	case cmdZoned:
+		args = args[1:]
+		rsol.doCmdZoned(args)
 
 	default:
 		log.Printf("resolver: unknown command: %s", rsol.cmd)
@@ -228,6 +233,17 @@ hosts.d rr add <name> <domain> <value>
 hosts.d rr delete <name> <domain>
 
 	Delete record from hosts file "name" by domain name.
+
+
+===  MANAGING ZONE.D
+
+zone.d create <name>
+
+	Create new zone file inside the zone.d directory.
+
+zone.d delete <name>
+
+	Delete zone file inside the zone.d directory.
 
 
 ==  Examples

@@ -468,6 +468,50 @@ func (rsol *resolver) doCmdQuery(args []string) {
 	}
 }
 
+func (rsol *resolver) doCmdZoned(args []string) {
+	if len(args) == 0 {
+		log.Fatalf("resolver: %s: missing argument", rsol.cmd)
+	}
+
+	var (
+		subCmd = strings.ToLower(args[0])
+
+		resc *rescached.Client
+		err  error
+	)
+
+	switch subCmd {
+	case subCmdCreate:
+		args = args[1:]
+		if len(args) == 0 {
+			log.Fatalf("resolver: %s %s: missing parameter name", rsol.cmd, subCmd)
+		}
+
+		resc = rsol.newRescachedClient()
+		_, err = resc.ZonedCreate(args[0])
+		if err != nil {
+			log.Fatalf("resolver: %s", err)
+		}
+		fmt.Println("OK")
+
+	case subCmdDelete:
+		args = args[1:]
+		if len(args) == 0 {
+			log.Fatalf("resolver: %s %s: missing parameter name", rsol.cmd, subCmd)
+		}
+
+		resc = rsol.newRescachedClient()
+		_, err = resc.ZonedDelete(args[0])
+		if err != nil {
+			log.Fatalf("resolver: %s", err)
+		}
+		fmt.Println("OK")
+
+	default:
+		log.Fatalf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
+	}
+}
+
 // initSystemResolver read the system resolv.conf to create fallback DNS
 // resolver.
 func (rsol *resolver) initSystemResolver() (err error) {

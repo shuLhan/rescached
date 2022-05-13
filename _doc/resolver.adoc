@@ -202,6 +202,17 @@ Delete record from hosts file "name" by domain name.
 --
 
 
+===  MANAGING ZONE.D
+
+zone.d create <name>::
++
+Create new zone file inside the zone.d directory.
+
+zone.d delete <name>::
++
+Delete zone file inside the zone.d directory.
+
+
 == EXIT STATUS
 
 Upon exit and success +resolver+ will return 0, or 1 otherwise.
