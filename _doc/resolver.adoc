@@ -181,12 +181,21 @@ instead of replaced.
 --
 
 
+hosts.d rr delete <name> <domain>::
++
+--
+Delete record from hosts file "name" by domain name.
+--
+
+
 == EXIT STATUS
 
 Upon exit and success +resolver+ will return 0, or 1 otherwise.
 
 
 == EXAMPLES
+
+===  QUERY EXAMPLES
 
 Query the IPv4 address for kilabit.info,
 
@@ -215,6 +224,9 @@ Inspect the rescached's caches on server at http://127.0.0.1:5380,
 
 	$ resolver -server=http://127.0.0.1:5380 caches
 
+
+===  MANAGING CACHES
+
 Search caches that contains "bit" on the domain name,
 
 	$ resolver caches search bit
@@ -227,6 +239,9 @@ Remove all caches in the server,
 
 	$ resolver caches remove all
 
+
+===  MANAGING ENVIRONMENT
+
 Fetch and print current server environment,
 
 	$ resolver env
@@ -238,6 +253,9 @@ Update the server environment from JSON file in /tmp/env.json,
 Update the server environment by reading JSON from standard input,
 
 	$ cat /tmp/env.json | resolver env update -
+
+
+===  MANAGING HOSTS.D
 
 Create new hosts file named "myhosts" inside the hosts.d directory,
 
@@ -269,6 +287,8 @@ Get the content of hosts file named "myhosts" inside the hosts.d directory,
 	  }
 	]
 
+===  MANAGING RECORD ON HOSTS.D
+
 Add new record "127.0.0.1 my.hosts" to hosts file named "hosts",
 
 	$ resolver hosts.d rr add hosts my.hosts 127.0.0.1
@@ -280,6 +300,16 @@ Add new record "127.0.0.1 my.hosts" to hosts file named "hosts",
 	  "TTL": 604800
 	}
 
+Delete record "my.hosts" from hosts file "hosts",
+
+	$ resolver hosts.d rr delete hosts my.hosts
+	{
+	  "Value": "127.0.0.1",
+	  "Name": "my.hosts",
+	  "Type": 1,
+	  "Class": 1,
+	  "TTL": 604800
+	}
 
 == AUTHOR
 

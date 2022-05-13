@@ -915,6 +915,7 @@ func (srv *Server) apiHostsdRecordDelete(epr *libhttp.EndpointRequest) (resbody 
 		domainName    = epr.HttpRequest.Form.Get(paramNameDomain)
 
 		hfile *dns.HostsFile
+		rr    *dns.ResourceRecord
 		found bool
 	)
 
@@ -935,8 +936,8 @@ func (srv *Server) apiHostsdRecordDelete(epr *libhttp.EndpointRequest) (resbody 
 		return nil, &res
 	}
 
-	found = hfile.RemoveRecord(domainName)
-	if !found {
+	rr = hfile.RemoveRecord(domainName)
+	if rr == nil {
 		res.Message = "unknown domain name: " + domainName
 		return nil, &res
 	}
@@ -951,6 +952,7 @@ func (srv *Server) apiHostsdRecordDelete(epr *libhttp.EndpointRequest) (resbody 
 
 	res.Code = http.StatusOK
 	res.Message = "domain name '" + domainName + "' has been removed from hosts file"
+	res.Data = rr
 
 	return json.Marshal(&res)
 }

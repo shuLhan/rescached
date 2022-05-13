@@ -206,6 +206,10 @@ hosts.d rr add <name> <domain> <value>
 	If the domain name already exists, the new record will be appended
 	instead of replaced.
 
+hosts.d rr delete <name> <domain>
+
+	Delete record from hosts file "name" by domain name.
+
 
 ==  Examples
 
@@ -293,6 +297,17 @@ Get the content of hosts file named "myhosts" inside the hosts.d directory,
 Add new record "127.0.0.1 my.hosts" to hosts file named "hosts",
 
 	$ resolver hosts.d rr add hosts my.hosts 127.0.0.1
+	{
+	  "Value": "127.0.0.1",
+	  "Name": "my.hosts",
+	  "Type": 1,
+	  "Class": 1,
+	  "TTL": 604800
+	}
+
+Delete record "my.hosts" from hosts file "hosts",
+
+	$ resolver hosts.d rr delete hosts my.hosts
 	{
 	  "Value": "127.0.0.1",
 	  "Name": "my.hosts",

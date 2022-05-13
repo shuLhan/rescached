@@ -362,6 +362,24 @@ func (rsol *resolver) doCmdHostsdRecord(args []string) {
 		fmt.Println(string(jsonb))
 
 	case subCmdDelete:
+		args = args[1:]
+		if len(args) <= 1 {
+			log.Fatalf("resolver: %s %s: missing arguments", rsol.cmd, subCmd)
+		}
+
+		resc = rsol.newRescachedClient()
+		record, err = resc.HostsdRecordDelete(args[0], args[1])
+		if err != nil {
+			log.Fatalf("resolver: %s", err)
+		}
+
+		jsonb, err = json.MarshalIndent(record, "", "  ")
+		if err != nil {
+			log.Fatalf("resolver: %s", err)
+		}
+
+		fmt.Println(string(jsonb))
+
 	default:
 		log.Fatalf("resolver: %s %s: unknown command %s", rsol.cmd, subCmdRR, subCmd)
 	}

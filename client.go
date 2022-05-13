@@ -380,3 +380,34 @@ func (cl *Client) HostsdRecordAdd(hostsName, domain, value string) (record *dns.
 
 	return record, nil
 }
+
+// HostsdRecordDelete delete a record from hosts file by domain name.
+func (cl *Client) HostsdRecordDelete(hostsName, domain string) (record *dns.ResourceRecord, err error) {
+	var (
+		logp = "HostsdRecordDelete"
+		res  = libhttp.EndpointResponse{
+			Data: &record,
+		}
+		params = url.Values{}
+
+		resb []byte
+	)
+
+	params.Set(paramNameName, hostsName)
+	params.Set(paramNameDomain, domain)
+
+	_, resb, err = cl.Delete(apiHostsdRR, nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+
+	return record, nil
+}
