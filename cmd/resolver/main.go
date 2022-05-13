@@ -93,7 +93,9 @@ func main() {
 
 func help() {
 	fmt.Println(`
-= resolver: command line interface for DNS and rescached server
+= resolver
+
+resolver is command line interface for DNS and rescached server
 
 ==  Usage
 
@@ -130,6 +132,8 @@ The following options affect the commands operation.
 
 ==  Commands
 
+===  QUERY
+
 query <domain / ip-address> [type] [class]
 
 	Query the domain or IP address with optional type and/or class.
@@ -143,6 +147,9 @@ query <domain / ip-address> [type] [class]
 
 	Valid class are either IN, CS, HS.
 	Default value is IN.
+
+
+===  MANAGING BLOCK.D
 
 block.d disable <name>
 
@@ -159,6 +166,9 @@ block.d update <name>
 	On success, the hosts file will be updated and the server will be
 	restarted.
 
+
+===  MANAGING CACHES
+
 caches
 
 	Fetch and print all caches from rescached server.
@@ -174,6 +184,9 @@ caches remove <string>
 	Remove the domain name from rescached caches.
 	If the parameter is "all", it will remove all caches.
 
+
+===  MANAGING ENVIRONMENT
+
 env
 
 	Fetch the current server environment and print it as JSON format to
@@ -184,6 +197,9 @@ env update <path-to-file / "-">
 	Update the server environment from JSON formatted file.
 	If the argument is "-", the new environment is read from stdin.
 	If the environment is valid, the server will be restarted.
+
+
+===  MANAGING HOSTS.D
 
 hosts.d create <name>
 
@@ -199,6 +215,9 @@ hosts.d get <name>
 	Get the content of hosts file inside the hosts.d directory by file
 	name.
 
+
+===  MANAGING RECORD IN HOSTS.D
+
 hosts.d rr add <name> <domain> <value>
 
 	Insert a new record and save it to the hosts file identified by
@@ -212,6 +231,8 @@ hosts.d rr delete <name> <domain>
 
 
 ==  Examples
+
+===  QUERY
 
 Query the IPv4 address for kilabit.info,
 
@@ -236,6 +257,9 @@ name server kilabit.info,
 
 	$ resolver -insecure -ns=https://kilabit.info/dns-query query kilabit.info
 
+
+===  MANAGING CACHES
+
 Inspect the rescached's caches on server at http://127.0.0.1:5380,
 
 	$ resolver -server=http://127.0.0.1:5380 caches
@@ -252,6 +276,9 @@ Remove all caches in the server,
 
 	$ resolver caches remove all
 
+
+===  MANAGING ENVIRONMENT
+
 Fetch and print current server environment,
 
 	$ resolver env
@@ -263,6 +290,9 @@ Update the server environment from JSON file in /tmp/env.json,
 Update the server environment by reading JSON from standard input,
 
 	$ cat /tmp/env.json | resolver env update -
+
+
+===  MANAGING HOSTS.D
 
 Create new hosts file named "myhosts" inside the hosts.d directory,
 
@@ -293,6 +323,9 @@ Get the content of hosts file named "myhosts" inside the hosts.d directory,
 	    "TTL": 604800
 	  }
 	]
+
+
+===  MANAGING RECORD IN HOSTS.D
 
 Add new record "127.0.0.1 my.hosts" to hosts file named "hosts",
 

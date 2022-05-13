@@ -63,6 +63,8 @@ Default to "https://127.0.0.1:5380" if its empty.
 
 ==  COMMANDS
 
+===  QUERY
+
 query <domain / ip-address> [type] [class]::
 +
 --
@@ -94,6 +96,9 @@ List of valid types,
 The "class" parameter is optional, its either IN (default), CS, or HS.
 --
 
+
+===  MANAGING BLOCK.D
+
 block.d disable <name>::
 +
 --
@@ -116,6 +121,8 @@ restarted.
 --
 
 
+===  MANAGING CACHES
+
 caches::
 +
 --
@@ -137,6 +144,9 @@ Remove the domain name from rescached caches.
 If the parameter is "all", it will remove all caches.
 --
 
+
+===  MANAGING ENVIRONMENT
+
 env::
 +
 --
@@ -150,6 +160,9 @@ Update the server environment from JSON formatted file.
 If the argument is "-", the new environment is read from stdin.
 If the environment is valid, the server will be restarted.
 --
+
+
+===  MANAGING HOSTS.D
 
 hosts.d create <name>::
 +
@@ -171,6 +184,8 @@ Get the content of hosts file inside the hosts.d directory by file name.
 --
 
 
+===  MANAGING RECORD IN HOSTS.D
+
 hosts.d rr add <name> <domain> <value>::
 +
 --
@@ -179,7 +194,6 @@ Insert a new record and save it to the hosts file identified by
 If the domain name already exists, the new record will be appended
 instead of replaced.
 --
-
 
 hosts.d rr delete <name> <domain>::
 +
@@ -195,7 +209,7 @@ Upon exit and success +resolver+ will return 0, or 1 otherwise.
 
 == EXAMPLES
 
-===  QUERY EXAMPLES
+===  QUERY
 
 Query the IPv4 address for kilabit.info,
 
@@ -287,7 +301,7 @@ Get the content of hosts file named "myhosts" inside the hosts.d directory,
 	  }
 	]
 
-===  MANAGING RECORD ON HOSTS.D
+===  MANAGING RECORD IN HOSTS.D
 
 Add new record "127.0.0.1 my.hosts" to hosts file named "hosts",
 
