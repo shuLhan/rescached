@@ -39,7 +39,7 @@ const (
 	apiHostsd   = "/api/hosts.d"
 	apiHostsdRR = "/api/hosts.d/rr"
 
-	apiZone       = "/api/zone.d/:name"
+	apiZone       = "/api/zone.d"
 	apiZoneRRType = "/api/zone.d/:name/rr/:type"
 )
 

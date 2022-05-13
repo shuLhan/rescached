@@ -94,7 +94,7 @@
 
 		<div class="nav-left">
 			<h3>Zone files</h3>
-			<div id="ZoneFiles"></div>
+			<div id="Zones"></div>
 
 			<label for="newZoneFile"> New zone file: </label>
 			<input id="newZoneFile" />
@@ -303,7 +303,7 @@
 					notifError(res.message)
 					return
 				}
-				renderZoneFiles(resc.env.ZoneFiles)
+				renderZones(resc.env.Zones)
 				resetActiveZone()
 			}
 
@@ -318,7 +318,7 @@
 					notifError(res.message)
 					return
 				}
-				renderZoneFiles(resc.env.ZoneFiles)
+				renderZones(resc.env.Zones)
 			}
 
 			async function deleteZoneFile() {
@@ -327,7 +327,7 @@
 					notifError(res.message)
 					return
 				}
-				renderZoneFiles(resc.env.ZoneFiles)
+				renderZones(resc.env.Zones)
 				resetActiveZone()
 				notifInfo(res.message)
 			}
@@ -408,14 +408,14 @@
 				}
 			}
 
-			function renderZoneFiles(zoneFiles) {
-				let wrapper = document.getElementById("ZoneFiles")
+			function renderZones(zones) {
+				let wrapper = document.getElementById("Zones")
 				out = ""
-				for (let name in zoneFiles) {
-					if (!zoneFiles.hasOwnProperty(name)) {
+				for (let name in zones) {
+					if (!zones.hasOwnProperty(name)) {
 						continue
 					}
-					let zoneFile = zoneFiles[name]
+					let zoneFile = zones[name]
 					out += `
 						<div class="item">
 							<span onclick="setActiveZone('${zoneFile.Name}')">
@@ -528,7 +528,7 @@
 			}
 
 			function setActiveZone(name) {
-				activeZone = resc.env.ZoneFiles[name]
+				activeZone = resc.env.Zones[name]
 				console.log("setActiveZone: ", activeZone)
 				renderActiveZone()
 				renderActiveZoneSOA()
