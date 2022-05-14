@@ -4,6 +4,7 @@
 package rescached
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -39,8 +40,8 @@ const (
 	apiHostsd   = "/api/hosts.d"
 	apiHostsdRR = "/api/hosts.d/rr"
 
-	apiZoned       = "/api/zone.d"
-	apiZonedRRType = "/api/zone.d/:name/rr/:type"
+	apiZoned   = "/api/zone.d"
+	apiZonedRR = "/api/zone.d/rr"
 )
 
 func (srv *Server) httpdInit() (err error) {
@@ -242,17 +243,17 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         apiZonedRRType,
+		Path:         apiZonedRR,
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiZonedRRCreate,
+		Call:         srv.apiZonedRRAdd,
 	})
 	if err != nil {
 		return err
 	}
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
-		Path:         apiZonedRRType,
+		Path:         apiZonedRR,
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiZonedRRDelete,
@@ -1049,48 +1050,97 @@ func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, er
 	return json.Marshal(&res)
 }
 
-// apiZonedRRCreate create new RR for the zone file.
-func (srv *Server) apiZonedRRCreate(epr *libhttp.EndpointRequest) (resb []byte, err error) {
+type zoneRecordRequest struct {
+	Zone      string `json:"zone"`
+	Type      string `json:"type"`
+	Record    string `json:"record"`
+	recordRaw []byte
+	rtype     dns.RecordType
+}
+
+// apiZonedRRAdd create new RR for the zone file.
+//
+// # Request
+//
+//	POST /zone.d/rr
+//	Content-Type: application/json
+//
+//	{
+//		"zone": <string>,
+//		"type": <string>,
+//		"record": <base64 string|base64 JSON>
+//	}
+//
+// For example, to add A record for subdomain "www" to zone file "my.zone",
+// the request format would be,
+//
+//	{
+//		"zone": "my.zone",
+//		"type": "A",
+//		"record": "eyJOYW1lIjoid3d3IiwiVmFsdWUiOiIxMjcuMC4wLjEifQ=="
+//	}
+//
+// Where "record" value is equal to `{"Name":"www","Value":"127.0.0.1"}`.
+//
+// # Response
+//
+// On success, it will return the record being added to the zone file, in the
+// JSON format.
+func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err error) {
 	var (
-		res          = libhttp.EndpointResponse{}
-		zoneFileName = epr.HttpRequest.Form.Get(paramNameName)
-		rrTypeValue  = epr.HttpRequest.Form.Get(paramNameType)
+		res = libhttp.EndpointResponse{}
+		req = zoneRecordRequest{}
 
 		zoneFile *dns.Zone
 		rr       *dns.ResourceRecord
-		v        string
 		listRR   []*dns.ResourceRecord
-		rrType   int
+		rrValue  string
+		ok       bool
 	)
 
 	res.Code = http.StatusBadRequest
 
-	if len(zoneFileName) == 0 {
+	err = json.Unmarshal(epr.RequestBody, &req)
+	if err != nil {
+		res.Message = fmt.Sprintf("invalid request: %s", err.Error())
+		return nil, &res
+	}
+
+	if len(req.Zone) == 0 {
 		res.Message = "empty or invalid zone file name"
 		return nil, &res
 	}
 
-	zoneFile = srv.env.Zones[zoneFileName]
+	zoneFile = srv.env.Zones[req.Zone]
 	if zoneFile == nil {
-		res.Message = "unknown zone file name " + zoneFileName
+		res.Message = "unknown zone file name: " + req.Zone
 		return nil, &res
 	}
 
-	rrType, err = strconv.Atoi(rrTypeValue)
+	req.Type = strings.ToUpper(req.Type)
+	req.rtype, ok = dns.RecordTypes[req.Type]
+	if !ok {
+		res.Message = fmt.Sprintf("invalid or empty RR type %q: %s", req.Type, err.Error())
+		return nil, &res
+	}
+
+	req.recordRaw, err = base64.StdEncoding.DecodeString(req.Record)
 	if err != nil {
-		res.Message = fmt.Sprintf("invalid or empty RR type %q: %s",
-			rrTypeValue, err.Error())
+		res.Message = fmt.Sprintf("invalid record value: %s", err.Error())
 		return nil, &res
 	}
 
 	rr = &dns.ResourceRecord{}
-	switch dns.RecordType(rrType) {
+	switch req.rtype {
 	case dns.RecordTypeSOA:
 		rr.Value = &dns.RDataSOA{}
 	case dns.RecordTypeMX:
 		rr.Value = &dns.RDataMX{}
+	default:
+		rr.Value = rrValue
 	}
-	err = json.Unmarshal(epr.RequestBody, rr)
+
+	err = json.Unmarshal(req.recordRaw, rr)
 	if err != nil {
 		res.Message = "json.Unmarshal:" + err.Error()
 		return nil, &res
@@ -1103,17 +1153,16 @@ func (srv *Server) apiZonedRRCreate(epr *libhttp.EndpointRequest) (resb []byte, 
 			res.Message = "empty PTR name"
 			return nil, &res
 		}
-		v = rr.Value.(string)
-		if len(v) == 0 {
-			rr.Value = zoneFileName
+		if len(rrValue) == 0 {
+			rr.Value = req.Zone
 		} else {
-			rr.Value = v + "." + zoneFileName
+			rr.Value = rrValue + "." + req.Zone
 		}
 	} else {
 		if len(rr.Name) == 0 {
-			rr.Name = zoneFileName
+			rr.Name = req.Zone
 		} else {
-			rr.Name += "." + zoneFileName
+			rr.Name += "." + req.Zone
 		}
 	}
 
@@ -1140,11 +1189,7 @@ func (srv *Server) apiZonedRRCreate(epr *libhttp.EndpointRequest) (resb []byte, 
 
 	res.Code = http.StatusOK
 	res.Message = fmt.Sprintf("%s record has been saved", dns.RecordTypeNames[rr.Type])
-	if rr.Type == dns.RecordTypeSOA {
-		res.Data = rr
-	} else {
-		res.Data = zoneFile.Records
-	}
+	res.Data = rr
 
 	return json.Marshal(&res)
 }

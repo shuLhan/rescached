@@ -353,12 +353,11 @@
 						newRR.Value = document.getElementById("rr_value").value
 				}
 				console.log("createRR: ", newRR)
-				let res = await resc.ZoneFileRecordCreate(activeZone.Name, newRR)
+				let res = await resc.ZonedRecordAdd(activeZone.Name, newRR)
 				if (res.code != 200) {
 					notifError(res.message)
 					return
 				}
-				activeZone.Records = res.data
 				renderActiveZoneRecords()
 				notifInfo(res.message)
 			}
@@ -519,7 +518,7 @@
 				console.log("saveSOA: ", activeZone.SOA.Value)
 				let rr = activeZone.SOA
 				rr.Type = 6
-				let res = await resc.ZoneFileRecordCreate(activeZone.Name, rr)
+				let res = await resc.ZonedRecordAdd(activeZone.Name, rr)
 				if (res.code != 200) {
 					notifError(res.message)
 					return

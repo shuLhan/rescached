@@ -293,20 +293,21 @@ class Rescached {
 		return res
 	}
 
-	async ZoneFileRecordCreate(name, rr) {
-		let api =
-			this.server +
-			Rescached.apiZoned +
-			name +
-			"/rr/" +
-			rr.Type
-		const httpRes = await fetch(api, {
+	async ZonedRecordAdd(name, rr) {
+		let req = {
+			"zone": name,
+			"type": getRRTypeName(rr.Type),
+			"record": btoa(JSON.stringify(rr)),
+		}
+
+		const httpRes = await fetch(Rescached.apiZonedRR, {
 			method: "POST",
 			headers: {
 				[headerContentType]: contentTypeJson,
 			},
-			body: JSON.stringify(rr),
+			body: JSON.stringify(req),
 		})
+
 		let res = await httpRes.json()
 		if (httpRes.status === 200) {
 			let zf = this.env.Zones[name]
@@ -314,7 +315,8 @@ class Rescached {
 				// SOA.
 				zf.SOA = res.data
 			} else {
-				zf.Records = res.data
+				let rr = res.data
+				zf.Records[rr.Name].push(rr)
 			}
 		}
 		return res
