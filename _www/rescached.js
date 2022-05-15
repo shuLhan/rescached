@@ -27,6 +27,7 @@ const contentTypeForm = "application/x-www-form-urlencoded"
 const contentTypeJson = "application/json"
 
 const paramNameName = "name"
+const paramNameZone = "zone"
 
 const headerContentType = "Content-Type"
 
@@ -295,9 +296,9 @@ class Rescached {
 
 	async ZonedRecordAdd(name, rr) {
 		let req = {
-			"zone": name,
-			"type": getRRTypeName(rr.Type),
-			"record": btoa(JSON.stringify(rr)),
+			zone: name,
+			type: getRRTypeName(rr.Type),
+			record: btoa(JSON.stringify(rr)),
 		}
 
 		const httpRes = await fetch(Rescached.apiZonedRR, {
@@ -322,23 +323,21 @@ class Rescached {
 		return res
 	}
 
-	async ZoneFileRecordDelete(name, rr) {
-		let api =
-			this.server +
-			Rescached.apiZoned +
-			name +
-			"/rr/" +
-			rr.Type
+	async ZonedRecordDelete(zone, rr) {
+		let params = new URLSearchParams()
+		params.set(paramNameZone, zone)
+		params.set("type", getRRTypeName(rr.Type))
+		params.set("record", btoa(JSON.stringify(rr)))
+
+		let api = Rescached.apiZonedRR + "?" + params.toString()
+
 		const httpRes = await fetch(api, {
 			method: "DELETE",
-			headers: {
-				[headerContentType]: contentTypeJson,
-			},
-			body: JSON.stringify(rr),
 		})
+
 		let res = await httpRes.json()
 		if (httpRes.status === 200) {
-			this.env.Zones[name].Records = res.data
+			this.env.Zones[zone].Records = res.data
 		}
 		return res
 	}

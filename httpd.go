@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/shuLhan/share/lib/dns"
@@ -23,7 +22,9 @@ const (
 	defHTTPDRootDir = "_www"
 	paramNameDomain = "domain"
 	paramNameName   = "name"
+	paramNameZone   = "zone"
 	paramNameQuery  = "query"
+	paramNameRecord = "record"
 	paramNameType   = "type"
 	paramNameValue  = "value"
 
@@ -254,7 +255,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
 		Path:         apiZonedRR,
-		RequestType:  libhttp.RequestTypeJSON,
+		RequestType:  libhttp.RequestTypeForm,
 		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.apiZonedRRDelete,
 	})
@@ -1195,46 +1196,67 @@ func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err
 }
 
 // apiZonedRRDelete delete RR from the zone file.
+//
+// # Request
+//
+//	DELETE /zone.d/rr?zone=<string>&type=<string>&record=<base64 json>
+//
+// Parameters,
+//
+//   - zone: the zone name,
+//   - type: the record type,
+//   - record: the content of record with its domain name and value.
+//
+// # Response
+//
+// On success it will return all the records in the zone.
 func (srv *Server) apiZonedRRDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
-		res          = libhttp.EndpointResponse{}
-		zoneFileName = epr.HttpRequest.Form.Get(paramNameName)
-		paramType    = epr.HttpRequest.Form.Get(paramNameType)
-		rr           = dns.ResourceRecord{}
+		res = libhttp.EndpointResponse{}
+		req = zoneRecordRequest{}
+		rr  = dns.ResourceRecord{}
 
-		zone   *dns.Zone
-		rrType int
+		zone *dns.Zone
+		ok   bool
 	)
 
 	res.Code = http.StatusBadRequest
 
-	if len(zoneFileName) == 0 {
+	req.Zone = epr.HttpRequest.Form.Get(paramNameZone)
+	if len(req.Zone) == 0 {
 		res.Message = "empty zone file name"
 		return nil, &res
 	}
 
-	zone = srv.env.Zones[zoneFileName]
+	zone = srv.env.Zones[req.Zone]
 	if zone == nil {
-		res.Message = "unknown zone file name " + zoneFileName
+		res.Message = "unknown zone file name " + req.Zone
 		return nil, &res
 	}
 
-	rrType, err = strconv.Atoi(paramType)
+	req.Type = epr.HttpRequest.Form.Get(paramNameType)
+	req.rtype, ok = dns.RecordTypes[req.Type]
+	if !ok {
+		res.Message = fmt.Sprintf("invalid or empty param type %s: %s", paramNameType, err)
+		return nil, &res
+	}
+
+	req.Record = epr.HttpRequest.Form.Get(paramNameRecord)
+	req.recordRaw, err = base64.StdEncoding.DecodeString(req.Record)
 	if err != nil {
-		res.Message = fmt.Sprintf("invalid or empty param type %s: %s",
-			paramNameType, err)
+		res.Message = fmt.Sprintf("invalid record value: %s", err.Error())
 		return nil, &res
 	}
 
-	switch dns.RecordType(rrType) {
+	switch req.rtype {
 	case dns.RecordTypeSOA:
 		rr.Value = &dns.RDataSOA{}
 	case dns.RecordTypeMX:
 		rr.Value = &dns.RDataMX{}
 	}
-	err = json.Unmarshal(epr.RequestBody, &rr)
+	err = json.Unmarshal(req.recordRaw, &rr)
 	if err != nil {
-		res.Message = "json.Unmarshal:" + err.Error()
+		res.Message = "json.Unmarshal: " + err.Error()
 		return nil, &res
 	}
 

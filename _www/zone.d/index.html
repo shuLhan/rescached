@@ -364,13 +364,11 @@
 
 			async function deleteRR(name, idx) {
 				let rr = activeZone.Records[name][idx]
-				console.log("deleteRR: ", rr)
-				let res = await resc.ZoneFileRecordDelete(activeZone.Name, rr)
+				let res = await resc.ZonedRecordDelete(activeZone.Name, rr)
 				if (res.code != 200) {
 					notifError(res.message)
 					return
 				}
-				activeZone.Records = res.data
 				renderActiveZoneRecords()
 				notifInfo(res.message)
 			}
