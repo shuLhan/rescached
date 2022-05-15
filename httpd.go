@@ -222,6 +222,17 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodGet,
+		Path:         apiZoned,
+		RequestType:  libhttp.RequestTypeNone,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.apiZoned,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         apiZoned,
 		RequestType:  libhttp.RequestTypeForm,
@@ -958,6 +969,37 @@ func (srv *Server) apiHostsdRecordDelete(epr *libhttp.EndpointRequest) (resbody 
 	res.Data = rr
 
 	return json.Marshal(&res)
+}
+
+// apiZoned return all zone files in JSON format.
+//
+// # Request
+//
+//	GET /api/zone.d
+//
+// # Response
+//
+// On success, it will return HTTP status code 200 with all zone formatted as
+// JSON in the body,
+//
+//	Content-Type: application/json
+//
+//	{
+//		"code": 200,
+//		"data": {
+//			"<zone name>: <dns.Zone>,
+//			...
+//		}
+//	}
+func (srv *Server) apiZoned(epr *libhttp.EndpointRequest) (resb []byte, err error) {
+	var (
+		res = libhttp.EndpointResponse{}
+	)
+
+	res.Code = http.StatusOK
+	res.Data = srv.env.Zones
+	resb, err = json.Marshal(&res)
+	return resb, err
 }
 
 func (srv *Server) apiZonedCreate(epr *libhttp.EndpointRequest) (resb []byte, err error) {
