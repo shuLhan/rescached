@@ -829,7 +829,7 @@ func (srv *Server) apiHostsdGet(epr *libhttp.EndpointRequest) (resbody []byte, e
 //
 // Request format,
 //
-//	POST /hosts.d/rr
+//	POST /api/hosts.d/rr
 //	content-type: application/x-www-form-urlencoded
 //
 //	name=&domain=&value=
@@ -916,7 +916,7 @@ func (srv *Server) apiHostsdRecordAdd(epr *libhttp.EndpointRequest) (resbody []b
 //
 // # Request
 //
-//	DELETE /hosts.d/record?name=&domain=
+//	DELETE /api/hosts.d/record?name=&domain=
 //
 // # Response
 //
@@ -1097,7 +1097,7 @@ func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, er
 //
 // # Request
 //
-//	POST /zone.d/rr
+//	POST /api/zone.d/rr
 //	Content-Type: application/json
 //
 //	{
@@ -1233,7 +1233,7 @@ func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err
 //
 // # Request
 //
-//	DELETE /zone.d/rr?zone=<string>&type=<string>&record=<base64 json>
+//	DELETE /api/zone.d/rr?zone=<string>&type=<string>&record=<base64 json>
 //
 // Parameters,
 //
