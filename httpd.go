@@ -1051,14 +1051,6 @@ func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, er
 	return json.Marshal(&res)
 }
 
-type zoneRecordRequest struct {
-	Zone      string `json:"zone"`
-	Type      string `json:"type"`
-	Record    string `json:"record"`
-	recordRaw []byte
-	rtype     dns.RecordType
-}
-
 // apiZonedRRAdd create new RR for the zone file.
 //
 // # Request
