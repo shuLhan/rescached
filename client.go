@@ -413,6 +413,30 @@ func (cl *Client) HostsdRecordDelete(hostsName, domain string) (record *dns.Reso
 	return record, nil
 }
 
+// Zoned fetch and return list of zone managed on server.
+func (cl *Client) Zoned() (zones map[string]*dns.Zone, err error) {
+	var (
+		logp = "Zoned"
+		res  = libhttp.EndpointResponse{}
+
+		resBody []byte
+	)
+
+	res.Data = &zones
+
+	_, resBody, err = cl.Get(apiZoned, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	err = json.Unmarshal(resBody, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	return zones, nil
+}
+
 // ZonedCreate create new zone file.
 func (cl *Client) ZonedCreate(name string) (zone *dns.Zone, err error) {
 	var (

@@ -204,6 +204,10 @@ Delete record from hosts file "name" by domain name.
 
 ===  MANAGING ZONE.D
 
+`zone.d`::
++
+Fetch and print all zones in the server, including their SOA.
+
 zone.d create <name>::
 +
 Create new zone file inside the zone.d directory.
@@ -359,6 +363,14 @@ Delete record "my.hosts" from hosts file "hosts",
 	  "Class": 1,
 	  "TTL": 604800
 	}
+
+===  MANAGING ZONE.D
+
+Print all zone in the server,
+
+	$ resolver zone.d
+	my.zone
+	  SOA: {MName:my.zone RName: Serial:0 Refresh:0 Retry:0 Expire:0 Minimum:0}
 
 
 ===  MANAGING RECORD IN ZONE.D

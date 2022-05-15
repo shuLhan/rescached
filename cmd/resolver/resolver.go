@@ -470,16 +470,30 @@ func (rsol *resolver) doCmdQuery(args []string) {
 }
 
 func (rsol *resolver) doCmdZoned(args []string) {
+	var (
+		resc = rsol.newRescachedClient()
+
+		zone     *dns.Zone
+		zones    map[string]*dns.Zone
+		zoneName string
+		subCmd   string
+		err      error
+	)
+
 	if len(args) == 0 {
-		log.Fatalf("resolver: %s: missing argument", rsol.cmd)
+		zones, err = resc.Zoned()
+		if err != nil {
+			log.Fatalf("resolver: %s: %s", rsol.cmd, err)
+		}
+
+		for zoneName, zone = range zones {
+			fmt.Println(zoneName)
+			fmt.Printf("  SOA: %+v\n", zone.SOA)
+		}
+		return
 	}
 
-	var (
-		subCmd = strings.ToLower(args[0])
-		resc   = rsol.newRescachedClient()
-
-		err error
-	)
+	subCmd = strings.ToLower(args[0])
 
 	switch subCmd {
 	case subCmdCreate:
