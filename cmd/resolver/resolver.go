@@ -10,6 +10,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -475,9 +476,9 @@ func (rsol *resolver) doCmdZoned(args []string) {
 
 	var (
 		subCmd = strings.ToLower(args[0])
+		resc   = rsol.newRescachedClient()
 
-		resc *rescached.Client
-		err  error
+		err error
 	)
 
 	switch subCmd {
@@ -487,7 +488,6 @@ func (rsol *resolver) doCmdZoned(args []string) {
 			log.Fatalf("resolver: %s %s: missing parameter name", rsol.cmd, subCmd)
 		}
 
-		resc = rsol.newRescachedClient()
 		_, err = resc.ZonedCreate(args[0])
 		if err != nil {
 			log.Fatalf("resolver: %s", err)
@@ -500,16 +500,118 @@ func (rsol *resolver) doCmdZoned(args []string) {
 			log.Fatalf("resolver: %s %s: missing parameter name", rsol.cmd, subCmd)
 		}
 
-		resc = rsol.newRescachedClient()
 		_, err = resc.ZonedDelete(args[0])
 		if err != nil {
 			log.Fatalf("resolver: %s", err)
 		}
 		fmt.Println("OK")
 
+	case subCmdRR:
+		rsol.doCmdZonedRR(resc, args[1:])
+
 	default:
 		log.Fatalf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
 	}
+}
+
+func (rsol *resolver) doCmdZonedRR(resc *rescached.Client, args []string) {
+	var (
+		cmdAction = strings.ToLower(args[0])
+	)
+
+	args = args[1:]
+
+	switch cmdAction {
+	case subCmdAdd:
+		rsol.doCmdZonedRRAdd(resc, args)
+
+	default:
+		log.Fatalf("resolver: %s %s: unknown action: %q", rsol.cmd, subCmdRR, cmdAction)
+	}
+}
+
+// doCmdZonedRRAdd add new record to the zone.
+// This command accept the following arguments:
+//
+//	0      1        2     3      4       5
+//	<zone> <domain> <ttl> <type> <class> <value> ...
+//
+// List of valid type are A, NS, CNAME, PTR, MX, TXT, and AAAA.
+// For the MX record we pass two parameters:
+//
+//	5      6
+//	<pref> <exchange>
+func (rsol *resolver) doCmdZonedRRAdd(resc *rescached.Client, args []string) {
+	if len(args) < 6 {
+		log.Fatalf("resolver: %s %s %s: missing arguments", rsol.cmd, subCmdRR, subCmdAdd)
+	}
+
+	var (
+		zone = strings.ToLower(args[0])
+		rreq = dns.ResourceRecord{}
+
+		rres   *dns.ResourceRecord
+		vstr   string
+		vuint  uint64
+		vbytes []byte
+		err    error
+		ok     bool
+	)
+
+	rreq.Name = strings.ToLower(args[1])
+	if rreq.Name == "@" {
+		rreq.Name = ""
+	}
+
+	vuint, err = strconv.ParseUint(args[2], 10, 64)
+	if err != nil {
+		log.Fatalf("resolver: invalid TTL: %q", args[2])
+	}
+
+	rreq.TTL = uint32(vuint)
+
+	vstr = strings.ToUpper(args[3])
+	rreq.Type, ok = dns.RecordTypes[vstr]
+	if !ok {
+		log.Fatalf("resolver: invalid record type: %q", vstr)
+	}
+
+	vstr = strings.ToUpper(args[4])
+	rreq.Class, ok = dns.RecordClasses[vstr]
+	if !ok {
+		log.Fatalf("resolver: invalid record class: %q", vstr)
+	}
+
+	vstr = args[5]
+
+	if rreq.Type == dns.RecordTypeMX {
+		if len(args) < 6 {
+			log.Fatalf("resolver: missing argument for MX record")
+		}
+		vuint, err = strconv.ParseUint(vstr, 10, 64)
+		if err != nil {
+			log.Fatalf("resolver: invalid MX preference: %q", vstr)
+		}
+		var rrMX = &dns.RDataMX{
+			Preference: int16(vuint),
+			Exchange:   args[6],
+		}
+		rreq.Value = rrMX
+	} else {
+		rreq.Value = args[5]
+	}
+
+	rres, err = resc.ZonedRecordAdd(zone, rreq)
+	if err != nil {
+		log.Fatalf("resolver: %s", err)
+	}
+
+	vbytes, err = json.MarshalIndent(rres, "", "  ")
+	if err != nil {
+		log.Fatalf("resolver: %s", err)
+	}
+
+	fmt.Println(string(vbytes))
 }
 
 // initSystemResolver read the system resolv.conf to create fallback DNS

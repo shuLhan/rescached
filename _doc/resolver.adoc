@@ -213,6 +213,30 @@ zone.d delete <name>::
 Delete zone file inside the zone.d directory.
 
 
+===  MANAGING RECORD IN ZONE.D
+
+zone.d rr add <zone> <"@" | subdomain> <ttl> <type> <class> <value> ...::
++
+--
+Add new record into the zone file.
+
+The domain name can be set to origin using "@" or empty string, subdomain
+(without ending with "."), or fully qualified domain name (end with ".").
+
+If ttl is set to 0, it will default to 604800 (7 days).
+
+List of valid type are A, NS, CNAME, PTR, MX, TXT, and AAAA.
+
+List of valid class are IN, CS, HS.
+
+The value parameter can be more than one, for example, the MX record
+we pass two parameters:
+
+	<pref> <exchange>
+
+See the example below for more information.
+--
+
 == EXIT STATUS
 
 Upon exit and success +resolver+ will return 0, or 1 otherwise.
@@ -335,6 +359,34 @@ Delete record "my.hosts" from hosts file "hosts",
 	  "Class": 1,
 	  "TTL": 604800
 	}
+
+
+===  MANAGING RECORD IN ZONE.D
+
+Assume that we have create zone "my.zone".
+
+Add IPv4 address "127.0.0.1" for domain my.zone,
+
+	$ resolver zone.d rr add my.zone @ 0 A IN 127.0.0.1
+	{
+	  "Value": "127.0.0.1",
+	  "Name": "my.zone",
+	  "Type": 1,
+	  "Class": 1,
+	  "TTL": 604800
+	}
+
+Add subdomain "www" with IPv4 address "192.168.1.2" to zone "my.zone",
+
+	$ resolver zone.d rr add my.zone www 0 A IN 192.168.1.2
+	{
+	  "Value": "192.168.1.2",
+	  "Name": "www.my.zone",
+	  "Type": 1,
+	  "Class": 1,
+	  "TTL": 604800
+	}
+
 
 == AUTHOR
 

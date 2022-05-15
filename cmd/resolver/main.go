@@ -148,7 +148,7 @@ query <domain / ip-address> [type] [class]
 
 	Valid type are either A, NS, CNAME, SOA, MB, MG, MR, NULL,
 	WKS, PTR, HINFO, MINFO, MX, TXT, AAAA, or SRV.
-	Default value is A."
+	Default value is A.
 
 	Valid class are either IN, CS, HS.
 	Default value is IN.
@@ -245,6 +245,20 @@ zone.d delete <name>
 
 	Delete zone file inside the zone.d directory.
 
+
+===  MANAGING RECORD IN ZONE.D
+
+zone.d rr add <zone> <domain> <ttl> <type> <class> <value> ...
+
+	Add new record into the zone file.
+	If domain ttl is set to 0, it will default to 604800 (7 days).
+	List of valid type are A, NS, CNAME, PTR, MX, TXT, and AAAA.
+	The value parameter can be more than one, for example, the MX record
+	we pass two parameters:
+
+		<pref> <exchange>
+
+	See the example below for more information.
 
 ==  Examples
 

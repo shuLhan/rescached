@@ -4,6 +4,7 @@
 package rescached
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -472,4 +473,51 @@ func (cl *Client) ZonedDelete(name string) (zone *dns.Zone, err error) {
 		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
 	}
 	return zone, nil
+}
+
+// ZonedRecordAdd add new record to zone file.
+func (cl *Client) ZonedRecordAdd(zone string, rreq dns.ResourceRecord) (rres *dns.ResourceRecord, err error) {
+	var (
+		logp = "ZonedRecordAdd"
+		zrr  = zoneRecordRequest{
+			Zone: zone,
+		}
+
+		res  *libhttp.EndpointResponse
+		rawb []byte
+		ok   bool
+	)
+
+	fmt.Printf("ZonedRecordAdd: %+v\n", rreq)
+
+	zrr.Type, ok = dns.RecordTypeNames[rreq.Type]
+	if !ok {
+		return nil, fmt.Errorf("%s: unknown record type: %d", logp, rreq.Type)
+	}
+
+	rawb, err = json.Marshal(rreq)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	zrr.Record = base64.StdEncoding.EncodeToString(rawb)
+
+	_, rawb, err = cl.PostJSON(apiZonedRR, nil, zrr)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	rres = &dns.ResourceRecord{}
+	res = &libhttp.EndpointResponse{
+		Data: rres,
+	}
+	err = json.Unmarshal(rawb, res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+
+	return rres, nil
 }
