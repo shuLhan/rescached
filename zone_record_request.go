@@ -10,7 +10,7 @@ import (
 // zoneRecordRequest contains the request parameters for adding or deleting
 // record on zone.d.
 type zoneRecordRequest struct {
-	Zone      string `json:"zone"`
+	Name      string `json:"name"`
 	Type      string `json:"type"`
 	Record    string `json:"record"`
 	recordRaw []byte

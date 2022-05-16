@@ -22,7 +22,6 @@ const (
 	defHTTPDRootDir = "_www"
 	paramNameDomain = "domain"
 	paramNameName   = "name"
-	paramNameZone   = "zone"
 	paramNameQuery  = "query"
 	paramNameRecord = "record"
 	paramNameType   = "type"
@@ -1106,10 +1105,10 @@ func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, er
 //
 // # Request
 //
-//	GET /api/zone.d/rr?zone=<string>
+//	GET /api/zone.d/rr?name=<string>
 //
 // Parameters,
-//   - zone: the zone file name where records to be fetched.
+//   - name: the zone file name where records to be fetched.
 //
 // # Response
 //
@@ -1125,7 +1124,7 @@ func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, er
 //	}
 func (srv *Server) apiZonedRR(epr *libhttp.EndpointRequest) (resb []byte, err error) {
 	var (
-		zoneName = epr.HttpRequest.Form.Get(paramNameZone)
+		zoneName = epr.HttpRequest.Form.Get(paramNameName)
 		res      = libhttp.EndpointResponse{}
 
 		zone *dns.Zone
@@ -1199,14 +1198,14 @@ func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err
 		return nil, &res
 	}
 
-	if len(req.Zone) == 0 {
+	if len(req.Name) == 0 {
 		res.Message = "empty or invalid zone file name"
 		return nil, &res
 	}
 
-	zoneFile = srv.env.Zones[req.Zone]
+	zoneFile = srv.env.Zones[req.Name]
 	if zoneFile == nil {
-		res.Message = "unknown zone file name: " + req.Zone
+		res.Message = "unknown zone file name: " + req.Name
 		return nil, &res
 	}
 
@@ -1247,15 +1246,15 @@ func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err
 			return nil, &res
 		}
 		if len(rrValue) == 0 {
-			rr.Value = req.Zone
+			rr.Value = req.Name
 		} else {
-			rr.Value = rrValue + "." + req.Zone
+			rr.Value = rrValue + "." + req.Name
 		}
 	} else {
 		if len(rr.Name) == 0 {
-			rr.Name = req.Zone
+			rr.Name = req.Name
 		} else {
-			rr.Name += "." + req.Zone
+			rr.Name += "." + req.Name
 		}
 	}
 
@@ -1291,11 +1290,11 @@ func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err
 //
 // # Request
 //
-//	DELETE /api/zone.d/rr?zone=<string>&type=<string>&record=<base64 json>
+//	DELETE /api/zone.d/rr?name=<string>&type=<string>&record=<base64 json>
 //
 // Parameters,
 //
-//   - zone: the zone name,
+//   - name: the zone name,
 //   - type: the record type,
 //   - record: the content of record with its domain name and value.
 //
@@ -1314,15 +1313,15 @@ func (srv *Server) apiZonedRRDelete(epr *libhttp.EndpointRequest) (resbody []byt
 
 	res.Code = http.StatusBadRequest
 
-	req.Zone = epr.HttpRequest.Form.Get(paramNameZone)
-	if len(req.Zone) == 0 {
+	req.Name = epr.HttpRequest.Form.Get(paramNameName)
+	if len(req.Name) == 0 {
 		res.Message = "empty zone file name"
 		return nil, &res
 	}
 
-	zone = srv.env.Zones[req.Zone]
+	zone = srv.env.Zones[req.Name]
 	if zone == nil {
-		res.Message = "unknown zone file name " + req.Zone
+		res.Message = "unknown zone file name " + req.Name
 		return nil, &res
 	}
 

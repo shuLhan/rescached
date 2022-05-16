@@ -27,7 +27,6 @@ const contentTypeForm = "application/x-www-form-urlencoded"
 const contentTypeJson = "application/json"
 
 const paramNameName = "name"
-const paramNameZone = "zone"
 
 const headerContentType = "Content-Type"
 
@@ -297,7 +296,7 @@ class Rescached {
 	// ZonedRecords fetch the RR on specific zone.
 	async ZonedRecords(name) {
 		let params = new URLSearchParams()
-		params.set(paramNameZone, name)
+		params.set(paramNameName, name)
 
 		let url = Rescached.apiZonedRR + "?" + params.toString()
 		const httpRes = await fetch(url)
@@ -307,7 +306,7 @@ class Rescached {
 
 	async ZonedRecordAdd(name, rr) {
 		let req = {
-			zone: name,
+			name: name,
 			type: getRRTypeName(rr.Type),
 			record: btoa(JSON.stringify(rr)),
 		}
@@ -328,6 +327,9 @@ class Rescached {
 				zf.SOA = res.data
 			} else {
 				let rr = res.data
+				if (zf.Records == null) {
+					zf.Records = {}
+				}
 				zf.Records[rr.Name].push(rr)
 			}
 		}
@@ -336,7 +338,7 @@ class Rescached {
 
 	async ZonedRecordDelete(zone, rr) {
 		let params = new URLSearchParams()
-		params.set(paramNameZone, zone)
+		params.set(paramNameName, zone)
 		params.set("type", getRRTypeName(rr.Type))
 		params.set("record", btoa(JSON.stringify(rr)))
 

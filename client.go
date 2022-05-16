@@ -511,7 +511,7 @@ func (cl *Client) ZonedRecords(zone string) (zoneRecords dns.ZoneRecords, err er
 		resBody []byte
 	)
 
-	params.Set(paramNameZone, zone)
+	params.Set(paramNameName, zone)
 
 	_, resBody, err = cl.Get(apiZonedRR, nil, params)
 	if err != nil {
@@ -527,19 +527,17 @@ func (cl *Client) ZonedRecords(zone string) (zoneRecords dns.ZoneRecords, err er
 }
 
 // ZonedRecordAdd add new record to zone file.
-func (cl *Client) ZonedRecordAdd(zone string, rreq dns.ResourceRecord) (rres *dns.ResourceRecord, err error) {
+func (cl *Client) ZonedRecordAdd(name string, rreq dns.ResourceRecord) (rres *dns.ResourceRecord, err error) {
 	var (
 		logp = "ZonedRecordAdd"
 		zrr  = zoneRecordRequest{
-			Zone: zone,
+			Name: name,
 		}
 
 		res  *libhttp.EndpointResponse
 		rawb []byte
 		ok   bool
 	)
-
-	fmt.Printf("ZonedRecordAdd: %+v\n", rreq)
 
 	zrr.Type, ok = dns.RecordTypeNames[rreq.Type]
 	if !ok {
