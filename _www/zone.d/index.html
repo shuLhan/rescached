@@ -457,6 +457,9 @@
 				let w = document.getElementById("list_records")
 				out = ""
 				for (const [name, listRR] of Object.entries(activeZone.Records)) {
+					if (listRR == null || !Array.isArray(listRR)) {
+						continue
+					}
 					listRR.forEach((rr, idx) => {
 						out += `
 							<div class="rr">
@@ -524,9 +527,15 @@
 				notifInfo(res.message)
 			}
 
-			function setActiveZone(name) {
+			async function setActiveZone(name) {
 				activeZone = resc.env.Zones[name]
-				console.log("setActiveZone: ", activeZone)
+				let res = await resc.ZonedRecords(name)
+				if (res.code != 200) {
+					notifError(res.message)
+					return
+				}
+				activeZone.Records = res.data
+				console.log("setActiveZone: records: ", activeZone.Records)
 				renderActiveZone()
 				renderActiveZoneSOA()
 				renderActiveZoneRecords()

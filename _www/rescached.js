@@ -294,6 +294,17 @@ class Rescached {
 		return res
 	}
 
+	// ZonedRecords fetch the RR on specific zone.
+	async ZonedRecords(name) {
+		let params = new URLSearchParams()
+		params.set(paramNameZone, name)
+
+		let url = Rescached.apiZonedRR + "?" + params.toString()
+		const httpRes = await fetch(url)
+		let res = await httpRes.json()
+		return res
+	}
+
 	async ZonedRecordAdd(name, rr) {
 		let req = {
 			zone: name,
