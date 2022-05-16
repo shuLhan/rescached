@@ -499,6 +499,33 @@ func (cl *Client) ZonedDelete(name string) (zone *dns.Zone, err error) {
 	return zone, nil
 }
 
+// ZoneRecords fetch the zone records by its name.
+func (cl *Client) ZonedRecords(zone string) (zoneRecords dns.ZoneRecords, err error) {
+	var (
+		logp   = "ZonedRecords"
+		params = url.Values{}
+		res    = libhttp.EndpointResponse{
+			Data: &zoneRecords,
+		}
+
+		resBody []byte
+	)
+
+	params.Set(paramNameZone, zone)
+
+	_, resBody, err = cl.Get(apiZonedRR, nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	err = json.Unmarshal(resBody, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	return zoneRecords, nil
+}
+
 // ZonedRecordAdd add new record to zone file.
 func (cl *Client) ZonedRecordAdd(zone string, rreq dns.ResourceRecord) (rres *dns.ResourceRecord, err error) {
 	var (

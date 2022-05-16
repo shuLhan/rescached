@@ -219,6 +219,10 @@ Delete zone file inside the zone.d directory.
 
 ===  MANAGING RECORD IN ZONE.D
 
+`zone.d rr get <zone>`::
+
+Get and print all records in the zone.
+
 zone.d rr add <zone> <"@" | subdomain> <ttl> <type> <class> <value> ...::
 +
 --
@@ -376,6 +380,16 @@ Print all zone in the server,
 ===  MANAGING RECORD IN ZONE.D
 
 Assume that we have create zone "my.zone".
+
+Get all records in the zone "my.zone",
+
+	$ resolver zone.d rr get my.zone
+	my.zone
+	  604800 MX IN map[Exchange:mail.my.zone Preference:10]
+	  604800  A IN 127.0.0.2
+	  604800  A IN 127.0.0.3
+	www.my.zone
+	  604800  A IN 192.168.1.2
 
 Add IPv4 address "127.0.0.1" for domain my.zone,
 

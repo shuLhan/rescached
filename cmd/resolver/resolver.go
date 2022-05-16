@@ -529,15 +529,23 @@ func (rsol *resolver) doCmdZoned(args []string) {
 }
 
 func (rsol *resolver) doCmdZonedRR(resc *rescached.Client, args []string) {
+	if len(args) == 0 {
+		log.Fatalf("resolver: %s %s: missing arguments", rsol.cmd, subCmdRR)
+	}
+
 	var (
-		cmdAction = strings.ToLower(args[0])
+		cmdAction string
 	)
 
+	cmdAction = strings.ToLower(args[0])
 	args = args[1:]
 
 	switch cmdAction {
 	case subCmdAdd:
 		rsol.doCmdZonedRRAdd(resc, args)
+
+	case subCmdGet:
+		rsol.doCmdZonedRRGet(resc, args)
 
 	default:
 		log.Fatalf("resolver: %s %s: unknown action: %q", rsol.cmd, subCmdRR, cmdAction)
@@ -626,6 +634,37 @@ func (rsol *resolver) doCmdZonedRRAdd(resc *rescached.Client, args []string) {
 	}
 
 	fmt.Println(string(vbytes))
+}
+
+// doCmdZonedRRGet get and print the records on zone.
+func (rsol *resolver) doCmdZonedRRGet(resc *rescached.Client, args []string) {
+	if len(args) == 0 {
+		log.Fatalf("resolver: missing zone argument")
+	}
+
+	var (
+		zoneRecords dns.ZoneRecords
+		dname       string
+		listRR      []*dns.ResourceRecord
+		rr          *dns.ResourceRecord
+		err         error
+	)
+
+	zoneRecords, err = resc.ZonedRecords(args[0])
+	if err != nil {
+		log.Fatalf("resolver: %s", err)
+	}
+
+	for dname, listRR = range zoneRecords {
+		fmt.Println(dname)
+		for _, rr = range listRR {
+			fmt.Printf("  %6d %2s %2s %v\n",
+				rr.TTL,
+				dns.RecordTypeNames[rr.Type],
+				dns.RecordClassName[rr.Class],
+				rr.Value)
+		}
+	}
 }
 
 // initSystemResolver read the system resolv.conf to create fallback DNS
