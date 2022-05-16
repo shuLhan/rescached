@@ -254,6 +254,16 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodGet,
+		Path:         apiZonedRR,
+		RequestType:  libhttp.RequestTypeQuery,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.apiZonedRR,
+	})
+	if err != nil {
+		return err
+	}
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         apiZonedRR,
 		RequestType:  libhttp.RequestTypeJSON,
@@ -273,7 +283,6 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -1091,6 +1100,55 @@ func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, er
 	res.Data = zone
 
 	return json.Marshal(&res)
+}
+
+// apiZonedRR fetch all records on specific zone by its name.
+//
+// # Request
+//
+//	GET /api/zone.d/rr?zone=<string>
+//
+// Parameters,
+//   - zone: the zone file name where records to be fetched.
+//
+// # Response
+//
+// If the zone file exist, it will return HTTP status code 200 with response
+// body contains mapping of domain name and records.
+//
+//	{
+//		"code": 200,
+//		"data": {
+//			"<domain>": [dns.ResourceRecord],
+//			...
+//		}
+//	}
+func (srv *Server) apiZonedRR(epr *libhttp.EndpointRequest) (resb []byte, err error) {
+	var (
+		zoneName = epr.HttpRequest.Form.Get(paramNameZone)
+		res      = libhttp.EndpointResponse{}
+
+		zone *dns.Zone
+	)
+
+	res.Code = http.StatusBadRequest
+
+	if len(zoneName) == 0 {
+		res.Message = fmt.Sprintf("unknown or empty zone parameter: %q", zoneName)
+		return nil, &res
+	}
+
+	zone = srv.env.Zones[zoneName]
+	if zone == nil {
+		res.Message = fmt.Sprintf("unknown or empty zone parameter: %q", zoneName)
+		return nil, &res
+	}
+
+	res.Code = http.StatusOK
+	res.Data = zone.Records
+
+	resb, err = json.Marshal(&res)
+	return resb, err
 }
 
 // apiZonedRRAdd create new RR for the zone file.
