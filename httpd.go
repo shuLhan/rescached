@@ -1301,14 +1301,19 @@ func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err
 // # Response
 //
 // On success it will return all the records in the zone.
+//
+// On fail it will return,
+//   - 400: if one of the parameter is invalid or empty.
+//   - 404: if the record to be deleted not found.
 func (srv *Server) apiZonedRRDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 		req = zoneRecordRequest{}
-		rr  = dns.ResourceRecord{}
+		rr  = &dns.ResourceRecord{}
 
-		zone *dns.Zone
-		ok   bool
+		zone    *dns.Zone
+		rrValue string
+		ok      bool
 	)
 
 	res.Code = http.StatusBadRequest
@@ -1344,27 +1349,49 @@ func (srv *Server) apiZonedRRDelete(epr *libhttp.EndpointRequest) (resbody []byt
 		rr.Value = &dns.RDataSOA{}
 	case dns.RecordTypeMX:
 		rr.Value = &dns.RDataMX{}
+	default:
+		rr.Value = rrValue
 	}
-	err = json.Unmarshal(req.recordRaw, &rr)
+	err = json.Unmarshal(req.recordRaw, rr)
 	if err != nil {
 		res.Message = "json.Unmarshal: " + err.Error()
 		return nil, &res
 	}
 
-	if len(rr.Name) == 0 {
-		res.Message = "invalid or empty ResourceRecord.Name"
-		return nil, &res
+	rr.Name = strings.TrimRight(rr.Name, ".")
+
+	if rr.Type == dns.RecordTypePTR {
+		if len(rr.Name) == 0 {
+			res.Message = "empty PTR name"
+			return nil, &res
+		}
+		if len(rrValue) == 0 {
+			rr.Value = req.Name
+		} else {
+			rr.Value = rrValue + "." + req.Name
+		}
+	} else {
+		if len(rr.Name) == 0 {
+			rr.Name = req.Name
+		} else {
+			rr.Name += "." + req.Name
+		}
 	}
 
 	// Remove the RR from caches.
-	err = srv.dns.RemoveCachesByRR(&rr)
+	rr, err = srv.dns.RemoveCachesByRR(rr)
 	if err != nil {
 		res.Message = err.Error()
 		return nil, &res
 	}
+	if rr == nil {
+		res.Code = http.StatusNotFound
+		res.Message = "record not found"
+		return nil, &res
+	}
 
 	// Remove the RR from zone file.
-	err = zone.Remove(&rr)
+	err = zone.Remove(rr)
 	if err != nil {
 		res.Message = err.Error()
 		return nil, &res

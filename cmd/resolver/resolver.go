@@ -534,15 +534,17 @@ func (rsol *resolver) doCmdZonedRR(resc *rescached.Client, args []string) {
 	}
 
 	var (
-		cmdAction string
+		cmdAction = strings.ToLower(args[0])
 	)
 
-	cmdAction = strings.ToLower(args[0])
 	args = args[1:]
 
 	switch cmdAction {
 	case subCmdAdd:
 		rsol.doCmdZonedRRAdd(resc, args)
+
+	case subCmdDelete:
+		rsol.doCmdZonedRRDelete(resc, args)
 
 	case subCmdGet:
 		rsol.doCmdZonedRRGet(resc, args)
@@ -636,6 +638,72 @@ func (rsol *resolver) doCmdZonedRRAdd(resc *rescached.Client, args []string) {
 	fmt.Println(string(vbytes))
 }
 
+// doCmdZonedRRDelete delete record from zone.
+// This command accept the following arguments:
+//
+//	0      1        2      3       4
+//	<zone> <domain> <type> <class> <value> ...
+func (rsol *resolver) doCmdZonedRRDelete(resc *rescached.Client, args []string) {
+	if len(args) < 5 {
+		log.Fatalf("resolver: %s %s %s: missing arguments", rsol.cmd, subCmdRR, subCmdDelete)
+	}
+
+	var (
+		zone = strings.ToLower(args[0])
+		rreq = dns.ResourceRecord{}
+
+		zoneRecords dns.ZoneRecords
+		vstr        string
+		vuint       uint64
+		err         error
+		ok          bool
+	)
+
+	rreq.Name = strings.ToLower(args[1])
+	if rreq.Name == "@" {
+		rreq.Name = ""
+	}
+
+	vstr = strings.ToUpper(args[2])
+	rreq.Type, ok = dns.RecordTypes[vstr]
+	if !ok {
+		log.Fatalf("resolver: invalid record type: %q", vstr)
+	}
+
+	vstr = strings.ToUpper(args[3])
+	rreq.Class, ok = dns.RecordClasses[vstr]
+	if !ok {
+		log.Fatalf("resolver: invalid record class: %q", vstr)
+	}
+
+	vstr = args[4]
+
+	if rreq.Type == dns.RecordTypeMX {
+		if len(args) < 5 {
+			log.Fatalf("resolver: missing argument for MX record")
+		}
+		vuint, err = strconv.ParseUint(vstr, 10, 64)
+		if err != nil {
+			log.Fatalf("resolver: invalid MX preference: %q", vstr)
+		}
+		var rrMX = &dns.RDataMX{
+			Preference: int16(vuint),
+			Exchange:   args[5],
+		}
+		rreq.Value = rrMX
+	} else {
+		rreq.Value = vstr
+	}
+
+	zoneRecords, err = resc.ZonedRecordDelete(zone, rreq)
+	if err != nil {
+		log.Fatalf("resolver: %s", err)
+	}
+
+	fmt.Println("OK")
+	printZoneRecords(zoneRecords)
+}
+
 // doCmdZonedRRGet get and print the records on zone.
 func (rsol *resolver) doCmdZonedRRGet(resc *rescached.Client, args []string) {
 	if len(args) == 0 {
@@ -644,9 +712,6 @@ func (rsol *resolver) doCmdZonedRRGet(resc *rescached.Client, args []string) {
 
 	var (
 		zoneRecords dns.ZoneRecords
-		dname       string
-		listRR      []*dns.ResourceRecord
-		rr          *dns.ResourceRecord
 		err         error
 	)
 
@@ -655,16 +720,7 @@ func (rsol *resolver) doCmdZonedRRGet(resc *rescached.Client, args []string) {
 		log.Fatalf("resolver: %s", err)
 	}
 
-	for dname, listRR = range zoneRecords {
-		fmt.Println(dname)
-		for _, rr = range listRR {
-			fmt.Printf("  %6d %2s %2s %v\n",
-				rr.TTL,
-				dns.RecordTypeNames[rr.Type],
-				dns.RecordClassName[rr.Class],
-				rr.Value)
-		}
-	}
+	printZoneRecords(zoneRecords)
 }
 
 // initSystemResolver read the system resolv.conf to create fallback DNS
@@ -842,4 +898,23 @@ func printQueryResponse(nameserver string, msg *dns.Message) {
 	b.WriteString("\n> Response: ")
 	fmt.Println(b.String())
 	printMessage(msg)
+}
+
+func printZoneRecords(zr dns.ZoneRecords) {
+	var (
+		dname  string
+		listRR []*dns.ResourceRecord
+		rr     *dns.ResourceRecord
+	)
+
+	for dname, listRR = range zr {
+		fmt.Println(dname)
+		for _, rr = range listRR {
+			fmt.Printf("  %6d %2s %2s %v\n",
+				rr.TTL,
+				dns.RecordTypeNames[rr.Type],
+				dns.RecordClassName[rr.Class],
+				rr.Value)
+		}
+	}
 }

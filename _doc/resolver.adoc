@@ -245,6 +245,13 @@ we pass two parameters:
 See the example below for more information.
 --
 
+`zone.d rr delete <zone> <"@" | subdomain> <type> <class> <value>`::
++
+--
+Delete record from zone by its subdomain, type, class, and value.
+--
+
+
 == EXIT STATUS
 
 Upon exit and success +resolver+ will return 0, or 1 otherwise.
@@ -394,6 +401,10 @@ Get all records in the zone "my.zone",
 Add IPv4 address "127.0.0.1" for domain my.zone,
 
 	$ resolver zone.d rr add my.zone @ 0 A IN 127.0.0.1
+
+or
+
+	$ resolver zone.d rr add my.zone "" 0 A IN 127.0.0.1
 	{
 	  "Value": "127.0.0.1",
 	  "Name": "my.zone",
@@ -401,6 +412,11 @@ Add IPv4 address "127.0.0.1" for domain my.zone,
 	  "Class": 1,
 	  "TTL": 604800
 	}
+
+and to delete the above record,
+
+	$ resolver zone.d rr delete my.zone @ A IN 127.0.0.1
+	OK
 
 Add subdomain "www" with IPv4 address "192.168.1.2" to zone "my.zone",
 
@@ -413,6 +429,10 @@ Add subdomain "www" with IPv4 address "192.168.1.2" to zone "my.zone",
 	  "TTL": 604800
 	}
 
+and to delete the above record,
+
+	$ resolver zone.d rr delete my.zone www A IN 192.168.1.2
+	OK
 
 == AUTHOR
 

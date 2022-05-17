@@ -570,3 +570,49 @@ func (cl *Client) ZonedRecordAdd(name string, rreq dns.ResourceRecord) (rres *dn
 
 	return rres, nil
 }
+
+// ZonedRecordDelete delete record from zone file.
+func (cl *Client) ZonedRecordDelete(name string, rreq dns.ResourceRecord) (zoneRecords dns.ZoneRecords, err error) {
+	var (
+		logp   = "ZonedRecordDelete"
+		params = url.Values{}
+
+		res  *libhttp.EndpointResponse
+		vstr string
+		rawb []byte
+		ok   bool
+	)
+
+	params.Set(paramNameName, name)
+
+	vstr, ok = dns.RecordTypeNames[rreq.Type]
+	if !ok {
+		return nil, fmt.Errorf("%s: unknown record type: %d", logp, rreq.Type)
+	}
+	params.Set(paramNameType, vstr)
+
+	rawb, err = json.Marshal(rreq)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	vstr = base64.StdEncoding.EncodeToString(rawb)
+	params.Set(paramNameRecord, vstr)
+
+	_, rawb, err = cl.Delete(apiZonedRR, nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	res = &libhttp.EndpointResponse{
+		Data: &zoneRecords,
+	}
+	err = json.Unmarshal(rawb, res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+
+	return zoneRecords, nil
+}
