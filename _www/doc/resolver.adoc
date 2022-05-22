@@ -71,6 +71,12 @@ Default to https://127.0.0.1:5380 if its empty.
 
 ==  COMMANDS
 
+=== GENERAL
+
+`help`::
++
+Print the general usage.
+
 ===  QUERY
 
 `query <domain / ip-address> [type] [class]`::

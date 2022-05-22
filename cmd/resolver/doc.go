@@ -56,6 +56,10 @@ Default to https://127.0.0.1:5380 if its empty.
 
 # COMMANDS
 
+General commands,
+
+	help    # Print this message.
+
 Query the DNS server,
 
 	query <domain / ip-address> [type] [class]

@@ -16,6 +16,7 @@ const (
 	cmdBlockd = "block.d"
 	cmdCaches = "caches"
 	cmdEnv    = "env"
+	cmdHelp   = "help"
 	cmdHostsd = "hosts.d"
 	cmdQuery  = "query"
 	cmdZoned  = "zone.d"
@@ -40,8 +41,7 @@ func main() {
 	var (
 		rsol = new(resolver)
 
-		args    []string
-		optHelp bool
+		args []string
 	)
 
 	log.SetFlags(0)
@@ -49,16 +49,10 @@ func main() {
 	flag.BoolVar(&rsol.insecure, "insecure", false, "Ignore invalid server certificate.")
 	flag.StringVar(&rsol.nameserver, "ns", "", "Parent name server address using scheme based.")
 	flag.StringVar(&rsol.rescachedUrl, "server", defRescachedUrl, "Set the rescached HTTP server.")
-	flag.BoolVar(&optHelp, "h", false, "")
 
 	flag.Parse()
 
 	args = flag.Args()
-
-	if optHelp {
-		fmt.Println(Usage)
-		os.Exit(1)
-	}
 
 	if len(args) == 0 {
 		fmt.Println(Usage)
@@ -76,6 +70,10 @@ func main() {
 
 	case cmdEnv:
 		rsol.doCmdEnv(args[1:])
+
+	case cmdHelp:
+		fmt.Println(Usage)
+		os.Exit(1)
 
 	case cmdHostsd:
 		rsol.doCmdHostsd(args[1:])
