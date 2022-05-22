@@ -82,7 +82,7 @@
     <div id="HostsBlocks" class="block_source"></div>
 
     <div>
-        <button onclick="updateHostsBlocks()">Save</button>
+        <button onclick="blockdUpdate()">Save</button>
     </div>
 
     <script src="/index.js"></script>
@@ -110,10 +110,10 @@
             resc.env.HostsBlocks[key].IsEnabled = val
         }
 
-        async function blockdUpdate(name) {
-            const res = await resc.BlockdUpdate(name)
+        async function blockdFetch(name) {
+            const res = await resc.BlockdFetch(name)
             if (res.code != 200) {
-                notifError("blockdUpdate: ", res.message)
+                notifError("blockdFetch: ", res.message)
                 return
             }
 
@@ -124,10 +124,10 @@
             renderHostsBlocks(resc.env.HostsBlocks)
         }
 
-        async function updateHostsBlocks() {
-            const res = await resc.updateHostsBlocks(resc.env.HostsBlocks)
+        async function blockdUpdate() {
+            const res = await resc.BlockdUpdate(resc.env.HostsBlocks)
             if (res.code != 200) {
-                notifError("updateHostsBlocks: ", res.message)
+                notifError("blockdUpdate: ", res.message)
                 return
             }
 
@@ -158,7 +158,7 @@
 						<span class="info">
 							<div>
 								${hostsBlock.Name}
-								<button onclick="blockdUpdate('${k}')">
+								<button onclick="blockdFetch('${k}')">
 									Update
 								</button>
 							</div>

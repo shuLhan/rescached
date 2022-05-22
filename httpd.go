@@ -27,15 +27,15 @@ const (
 	paramNameType   = "type"
 	paramNameValue  = "value"
 
-	apiBlockd        = "/api/block.d"
-	apiBlockdDisable = "/api/block.d/disable"
-	apiBlockdEnable  = "/api/block.d/enable"
-	apiBlockdUpdate  = "/api/block.d/update"
+	httpApiBlockd        = "/api/block.d"
+	httpApiBlockdDisable = "/api/block.d/disable"
+	httpApiBlockdEnable  = "/api/block.d/enable"
+	httpApiBlockdFetch   = "/api/block.d/fetch"
 
-	apiCaches       = "/api/caches"
-	apiCachesSearch = "/api/caches/search"
+	httpApiCaches       = "/api/caches"
+	httpApiCachesSearch = "/api/caches/search"
 
-	apiEnvironment = "/api/environment"
+	httpApiEnvironment = "/api/environment"
 
 	apiHostsd   = "/api/hosts.d"
 	apiHostsdRR = "/api/hosts.d/rr"
@@ -59,68 +59,11 @@ func (srv *Server) httpdInit() (err error) {
 }
 
 func (srv *Server) httpdRegisterEndpoints() (err error) {
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
-		Method:       libhttp.RequestMethodGet,
-		Path:         apiCaches,
-		RequestType:  libhttp.RequestTypeQuery,
-		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiCaches,
-	})
-	if err != nil {
-		return err
-	}
+	// Register HTTP APIs to manage block.d.
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
-		Path:         apiCachesSearch,
-		RequestType:  libhttp.RequestTypeQuery,
-		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiCachesSearch,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
-		Method:       libhttp.RequestMethodDelete,
-		Path:         apiCaches,
-		RequestType:  libhttp.RequestTypeQuery,
-		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpdAPICachesDelete,
-	})
-	if err != nil {
-		return err
-	}
-
-	epAPIGetEnvironment := &libhttp.Endpoint{
-		Method:       libhttp.RequestMethodGet,
-		Path:         apiEnvironment,
-		RequestType:  libhttp.RequestTypeJSON,
-		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpdAPIGetEnvironment,
-	}
-
-	err = srv.httpd.RegisterEndpoint(epAPIGetEnvironment)
-	if err != nil {
-		return err
-	}
-
-	apiEnvironmentUpdate := &libhttp.Endpoint{
-		Method:       libhttp.RequestMethodPost,
-		Path:         apiEnvironment,
-		RequestType:  libhttp.RequestTypeJSON,
-		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpApiEnvironmentUpdate,
-	}
-
-	err = srv.httpd.RegisterEndpoint(apiEnvironmentUpdate)
-	if err != nil {
-		return err
-	}
-
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
-		Method:       libhttp.RequestMethodGet,
-		Path:         apiBlockd,
+		Path:         httpApiBlockd,
 		RequestType:  libhttp.RequestTypeNone,
 		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.httpApiBlockdList,
@@ -130,11 +73,11 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
-		Method:       libhttp.RequestMethodPost,
-		Path:         apiBlockd,
+		Method:       libhttp.RequestMethodPut,
+		Path:         httpApiBlockd,
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.apiHostsBlockUpdate,
+		Call:         srv.httpApiBlockdUpdate,
 	})
 	if err != nil {
 		return err
@@ -142,7 +85,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         apiBlockdDisable,
+		Path:         httpApiBlockdDisable,
 		RequestType:  libhttp.RequestTypeForm,
 		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.httpApiBlockdDisable,
@@ -153,7 +96,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         apiBlockdEnable,
+		Path:         httpApiBlockdEnable,
 		RequestType:  libhttp.RequestTypeForm,
 		ResponseType: libhttp.ResponseTypeJSON,
 		Call:         srv.httpApiBlockdEnable,
@@ -164,16 +107,76 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         apiBlockdUpdate,
+		Path:         httpApiBlockdFetch,
 		RequestType:  libhttp.RequestTypeForm,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpApiBlockdUpdate,
+		Call:         srv.httpApiBlockdFetch,
 	})
 	if err != nil {
 		return err
 	}
 
-	// Register API to create new hosts file.
+	// Register HTTP APIs to manage caches.
+
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodGet,
+		Path:         httpApiCaches,
+		RequestType:  libhttp.RequestTypeQuery,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.httpApiCaches,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodDelete,
+		Path:         httpApiCaches,
+		RequestType:  libhttp.RequestTypeQuery,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.httpApiCachesDelete,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodGet,
+		Path:         httpApiCachesSearch,
+		RequestType:  libhttp.RequestTypeQuery,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.httpApiCachesSearch,
+	})
+	if err != nil {
+		return err
+	}
+
+	// Register HTTP APIs to manage environment.
+
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodGet,
+		Path:         httpApiEnvironment,
+		RequestType:  libhttp.RequestTypeJSON,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.httpApiEnvironmentGet,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodPost,
+		Path:         httpApiEnvironment,
+		RequestType:  libhttp.RequestTypeJSON,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.httpApiEnvironmentUpdate,
+	})
+	if err != nil {
+		return err
+	}
+
+	// Register HTTP APIs to manage hosts.d.
+
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         apiHostsd,
@@ -341,6 +344,21 @@ func (srv *Server) httpApiBlockdList(epr *libhttp.EndpointRequest) (resBody []by
 }
 
 // httpApiBlockdDisable disable the hosts block.d.
+//
+// # Request
+//
+//	POST /api/block.d/disable
+//	Content-Type: application/x-www-form-urlencoded
+//
+//	name=<name>
+//
+// # Response
+//
+// On success, it will return the affected Blockd object.
+//
+//	{
+//		"data": <Blockd>
+//	}
 func (srv *Server) httpApiBlockdDisable(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
@@ -375,6 +393,21 @@ func (srv *Server) httpApiBlockdDisable(epr *libhttp.EndpointRequest) (resBody [
 }
 
 // httpApiBlockdEnable enable the hosts block.d.
+//
+// # Request
+//
+//	POST /api/block.d/enable
+//	Content-Type: application/x-www-form-urlencoded
+//
+//	name=<name>
+//
+// # Response
+//
+// On success, it will return the affected Blockd object.
+//
+//	{
+//		"data": <Blockd>
+//	}
 func (srv *Server) httpApiBlockdEnable(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
@@ -408,7 +441,7 @@ func (srv *Server) httpApiBlockdEnable(epr *libhttp.EndpointRequest) (resBody []
 	return json.Marshal(&res)
 }
 
-// httpApiBlockdUpdate fetch the latest hosts file from the block.d provider
+// httpApiBlockdFetch fetch the latest hosts file from the block.d provider
 // based on registered URL.
 //
 // # Request
@@ -422,9 +455,9 @@ func (srv *Server) httpApiBlockdEnable(epr *libhttp.EndpointRequest) (resBody []
 //
 // On success, the hosts file will be updated and the server will be
 // restarted.
-func (srv *Server) httpApiBlockdUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpApiBlockdFetch(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
-		logp = "httpApiBlockdUpdate"
+		logp = "httpApiBlockdFetch"
 		res  = libhttp.EndpointResponse{}
 
 		hb     *Blockd
@@ -462,7 +495,7 @@ func (srv *Server) httpApiBlockdUpdate(epr *libhttp.EndpointRequest) (resBody []
 	return json.Marshal(&res)
 }
 
-func (srv *Server) apiCaches(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpApiCaches(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res     = libhttp.EndpointResponse{}
 		answers = srv.dns.CachesLRU()
@@ -476,7 +509,7 @@ func (srv *Server) apiCaches(epr *libhttp.EndpointRequest) (resBody []byte, err 
 	return json.Marshal(&res)
 }
 
-func (srv *Server) apiCachesSearch(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpApiCachesSearch(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 		q   = epr.HttpRequest.Form.Get(paramNameQuery)
@@ -509,7 +542,7 @@ func (srv *Server) apiCachesSearch(epr *libhttp.EndpointRequest) (resBody []byte
 	return json.Marshal(&res)
 }
 
-func (srv *Server) httpdAPICachesDelete(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpApiCachesDelete(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 		q   = epr.HttpRequest.Form.Get(paramNameName)
@@ -534,7 +567,20 @@ func (srv *Server) httpdAPICachesDelete(epr *libhttp.EndpointRequest) (resBody [
 	return json.Marshal(&res)
 }
 
-func (srv *Server) httpdAPIGetEnvironment(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+// httpApiEnvironmentGet get the current Environment.
+//
+// # Request
+//
+//	GET /api/environment
+//
+// # Response
+//
+//	Content-Type: application/json
+//
+//	{
+//		"data": <Environment>
+//	}
+func (srv *Server) httpApiEnvironmentGet(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 	)
@@ -545,6 +591,24 @@ func (srv *Server) httpdAPIGetEnvironment(epr *libhttp.EndpointRequest) (resBody
 	return json.Marshal(&res)
 }
 
+// httpApiEnvironmentUpdate update the environment and restart the service.
+//
+// # Request
+//
+//	POST /api/environment
+//	Content-Type: application/json
+//
+//	{
+//		<Environment>
+//	}
+//
+// # Response
+//
+//	Content-Type: application/json
+//
+//	{
+//		"data": <Environment>
+//	}
 func (srv *Server) httpApiEnvironmentUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		logp    = "httpApiEnvironmentUpdate"
@@ -598,15 +662,18 @@ func (srv *Server) httpApiEnvironmentUpdate(epr *libhttp.EndpointRequest) (resBo
 	return json.Marshal(&res)
 }
 
-// apiHostsBlockUpdate set the HostsBlock to be enabled or disabled.
+// httpApiBlockdUpdate set the HostsBlock to be enabled or disabled.
 //
 // If its status changes to enabled, unhide the hosts block file, populate the
 // hosts back to caches, and add it to list of hostBlockdFile.
 //
 // If its status changes to disabled, remove the hosts from caches, hide it,
 // and remove it from list of hostBlockdFile.
-func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+//
+// # Request
+func (srv *Server) httpApiBlockdUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
+		logp       = "httpApiBlockdUpdate"
 		res        = libhttp.EndpointResponse{}
 		hostBlockd = make(map[string]*Blockd, 0)
 
@@ -651,7 +718,7 @@ func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []
 
 	err = srv.env.write(srv.env.fileConfig)
 	if err != nil {
-		log.Println("apiHostsBlockUpdate:", err.Error())
+		log.Printf("%s: %s", logp, err.Error())
 		res.Message = err.Error()
 		return nil, &res
 	}
@@ -883,9 +950,9 @@ func (srv *Server) apiHostsdGet(epr *libhttp.EndpointRequest) (resbody []byte, e
 //
 // Parameters,
 //
-// - name: the hosts file name where record to be added.
-// - domain: the domain name.
-// - value: the IPv4 or IPv6 address of domain name.
+//   - name: the hosts file name where record to be added.
+//   - domain: the domain name.
+//   - value: the IPv4 or IPv6 address of domain name.
 //
 // If the domain name already exist, the new record will be appended to the
 // end of file.

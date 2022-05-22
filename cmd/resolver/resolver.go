@@ -117,7 +117,7 @@ func (rsol *resolver) doCmdBlockd(args []string) {
 			log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
 		}
 
-		blockd, err = resc.BlockdUpdate(args[0])
+		blockd, err = resc.BlockdFetch(args[0])
 		if err != nil {
 			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
 		}

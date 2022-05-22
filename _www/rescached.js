@@ -2,25 +2,25 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 const RRTypes = {
-  1: "A",
-  2: "NS",
-  3: "MD",
-  4: "MF",
-  5: "CNAME",
-  6: "SOA",
-  7: "MB",
-  8: "MG",
-  9: "MR",
-  10: "NULL",
-  11: "WKS",
-  12: "PTR",
-  13: "HINFO",
-  14: "MINFO",
-  15: "MX",
-  16: "TXT",
-  28: "AAAA",
-  33: "SRV",
-  41: "OPT",
+  1 : "A",
+  2 : "NS",
+  3 : "MD",
+  4 : "MF",
+  5 : "CNAME",
+  6 : "SOA",
+  7 : "MB",
+  8 : "MG",
+  9 : "MR",
+  10 : "NULL",
+  11 : "WKS",
+  12 : "PTR",
+  13 : "HINFO",
+  14 : "MINFO",
+  15 : "MX",
+  16 : "TXT",
+  28 : "AAAA",
+  33 : "SRV",
+  41 : "OPT",
 };
 
 const contentTypeForm = "application/x-www-form-urlencoded";
@@ -41,7 +41,7 @@ function getRRTypeName(k) {
 class Rescached {
   static nanoSeconds = 1000000000;
   static apiBlockd = "/api/block.d";
-  static apiBlockdUpdate = "/api/block.d/update";
+  static apiBlockdFetch = "/api/block.d/fetch";
   static apiCaches = "/api/caches";
   static apiCachesSearch = "/api/caches/search";
   static apiHostsd = "/api/hosts.d";
@@ -54,44 +54,52 @@ class Rescached {
     this.env = {};
   }
 
-  async BlockdUpdate(name) {
+  async BlockdFetch(name) {
     let params = new URLSearchParams();
     params.set("name", name);
 
-    const httpRes = await fetch(Rescached.apiBlockdUpdate, {
-      method: "POST",
-      headers: {
-        [headerContentType]: contentTypeForm,
+    const httpRes = await fetch(Rescached.apiBlockdFetch, {
+      method : "POST",
+      headers : {
+        [headerContentType] : contentTypeForm,
       },
-      body: params.toString(),
+      body : params.toString(),
+    });
+    return await httpRes.json();
+  }
+
+  async BlockdUpdate(hostsBlocks) {
+    const httpRes = await fetch(Rescached.apiBlockd, {
+      method : "PUT",
+      headers : {
+        [headerContentType] : contentTypeJson,
+      },
+      body : JSON.stringify(hostsBlocks),
     });
     return await httpRes.json();
   }
 
   async Caches() {
     const res = await fetch(this.server + Rescached.apiCaches, {
-      headers: {
-        Connection: "keep-alive",
+      headers : {
+        Connection : "keep-alive",
       },
     });
     return await res.json();
   }
 
   async CacheRemove(qname) {
-    const res = await fetch(
-      this.server + Rescached.apiCaches + "?name=" + qname,
-      {
-        method: "DELETE",
-      }
-    );
+    const res =
+        await fetch(this.server + Rescached.apiCaches + "?name=" + qname, {
+          method : "DELETE",
+        });
     return await res.json();
   }
 
   async Search(query) {
     console.log("Search: ", query);
-    const res = await fetch(
-      this.server + Rescached.apiCachesSearch + "?query=" + query
-    );
+    const res = await fetch(this.server + Rescached.apiCachesSearch +
+                            "?query=" + query);
     return await res.json();
   }
 
@@ -130,17 +138,17 @@ class Rescached {
     params.set(paramNameName, name);
 
     const httpRes = await fetch(Rescached.apiHostsd, {
-      method: "POST",
-      headers: {
-        [headerContentType]: contentTypeForm,
+      method : "POST",
+      headers : {
+        [headerContentType] : contentTypeForm,
       },
-      body: params.toString(),
+      body : params.toString(),
     });
     let res = await httpRes.json();
     if (res.code === 200) {
       this.env.HostsFiles[name] = {
-        Name: name,
-        Records: [],
+        Name : name,
+        Records : [],
       };
     }
     return res;
@@ -152,7 +160,7 @@ class Rescached {
 
     var url = Rescached.apiHostsd + "?" + params.toString();
     const httpRes = await fetch(url, {
-      method: "DELETE",
+      method : "DELETE",
     });
     const res = await httpRes.json();
     if (httpRes.status === 200) {
@@ -171,8 +179,8 @@ class Rescached {
     let res = await httpRes.json();
     if (httpRes.Status === 200) {
       this.env.HostsFiles[name] = {
-        Name: name,
-        Records: res.data,
+        Name : name,
+        Records : res.data,
       };
     }
     return res;
@@ -185,11 +193,11 @@ class Rescached {
     params.set("value", value);
 
     const httpRes = await fetch(Rescached.apiHostsdRR, {
-      method: "POST",
-      headers: {
-        [headerContentType]: contentTypeForm,
+      method : "POST",
+      headers : {
+        [headerContentType] : contentTypeForm,
       },
-      body: params.toString(),
+      body : params.toString(),
     });
     const res = await httpRes.json();
     if (httpRes.Status === 200) {
@@ -207,7 +215,7 @@ class Rescached {
     const api = Rescached.apiHostsdRR + "?" + params.toString();
 
     const httpRes = await fetch(api, {
-      method: "DELETE",
+      method : "DELETE",
     });
     const res = await httpRes.json();
     if (httpRes.Status === 200) {
@@ -230,24 +238,13 @@ class Rescached {
     got.PruneThreshold = got.PruneThreshold * this.nanoSeconds;
 
     const httpRes = await fetch(this.server + "/api/environment", {
-      method: "POST",
-      headers: {
-        [headerContentType]: contentTypeJson,
+      method : "POST",
+      headers : {
+        [headerContentType] : contentTypeJson,
       },
-      body: JSON.stringify(got),
+      body : JSON.stringify(got),
     });
 
-    return await httpRes.json();
-  }
-
-  async updateHostsBlocks(hostsBlocks) {
-    const httpRes = await fetch(Rescached.apiBlockd, {
-      method: "POST",
-      headers: {
-        [headerContentType]: contentTypeJson,
-      },
-      body: JSON.stringify(hostsBlocks),
-    });
     return await httpRes.json();
   }
 
@@ -256,11 +253,11 @@ class Rescached {
     params.set(paramNameName, name);
 
     const httpRes = await fetch(Rescached.apiZoned, {
-      method: "POST",
-      headers: {
-        [headerContentType]: contentTypeForm,
+      method : "POST",
+      headers : {
+        [headerContentType] : contentTypeForm,
       },
-      body: params.toString(),
+      body : params.toString(),
     });
     let res = await httpRes.json();
     if (res.code == 200) {
@@ -275,7 +272,7 @@ class Rescached {
 
     let url = Rescached.apiZoned + "?" + params.toString();
     const httpRes = await fetch(url, {
-      method: "DELETE",
+      method : "DELETE",
     });
     let res = await httpRes.json();
     if (res.code == 200) {
@@ -297,17 +294,17 @@ class Rescached {
 
   async ZonedRecordAdd(name, rr) {
     let req = {
-      name: name,
-      type: getRRTypeName(rr.Type),
-      record: btoa(JSON.stringify(rr)),
+      name : name,
+      type : getRRTypeName(rr.Type),
+      record : btoa(JSON.stringify(rr)),
     };
 
     const httpRes = await fetch(Rescached.apiZonedRR, {
-      method: "POST",
-      headers: {
-        [headerContentType]: contentTypeJson,
+      method : "POST",
+      headers : {
+        [headerContentType] : contentTypeJson,
       },
-      body: JSON.stringify(req),
+      body : JSON.stringify(req),
     });
 
     let res = await httpRes.json();
@@ -335,7 +332,7 @@ class Rescached {
     let api = Rescached.apiZonedRR + "?" + params.toString();
 
     const httpRes = await fetch(api, {
-      method: "DELETE",
+      method : "DELETE",
     });
 
     let res = await httpRes.json();
