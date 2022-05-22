@@ -9,12 +9,12 @@
 
 == NAME
 
-resolver - command line interface for DNS and rescached server.
+resolver - command line interface (CLI) for DNS and rescached server.
 
 
 == SYNOPSIS
 
-resolver [-insecure] [-ns nameserver] [-server] <command> [args...]
+resolver [-insecure] [-ns=<dns-URL>] [-server=<rescached-URL>] <command> [args...]
 
 
 == DESCRIPTION
@@ -22,6 +22,9 @@ resolver [-insecure] [-ns nameserver] [-server] <command> [args...]
 resolver is a tool to resolve hostname to IP address or to query services
 on hostname by type (MX, SOA, TXT, etc.) using standard DNS protocol with UDP,
 DNS over TLS (DoT), or DNS over HTTPS (DoH).
+
+It is also provide CLI to the rescached server to manage environment, block.d,
+hosts.d, and zone.d; as in the web user interface.
 
 
 == OPTIONS
@@ -32,13 +35,14 @@ The following options affect the commands operation.
 +
 --
 Ignore invalid server certificate when querying DoT, DoH, or rescached server.
+This option only affect the `query` command.
 --
 
-`-ns <nameserver>`::
+`-ns=<dns-URL>`::
 +
 --
 This option define the parent DNS server where the resolver send the query.
-Default to one of "nameserver" in `/etc/resolv.conf`.
+This option only affect the `query` command.
 
 The nameserver is defined in the following format,
 
@@ -50,24 +54,26 @@ Examples,
 * tcp://194.233.68.184:53 for querying with TCP,
 * https://194.233.68.184:853 for querying with DNS over TLS (DoT), and
 * https://kilabit.info/dns-query for querying with DNS over HTTPS (DoH).
+
+Default to one of "nameserver" in `/etc/resolv.conf`.
 --
 
-`-server <rescached-URL>`::
+`-server=<rescached-URL>`::
 +
 --
-Set the rescached HTTP server where commands will send.
+Set the rescached HTTP server where commands, except query, will be send.
 The rescached-URL use HTTP scheme:
 
 	("http" / "https") "://" (domain / ip-address) [":" port]
 
-Default to "https://127.0.0.1:5380" if its empty.
+Default to https://127.0.0.1:5380 if its empty.
 --
 
 ==  COMMANDS
 
 ===  QUERY
 
-query <domain / ip-address> [type] [class]::
+`query <domain / ip-address> [type] [class]`::
 +
 --
 Query the domain or IP address with optional type and/or class.

@@ -1,12 +1,6 @@
 ## SPDX-FileCopyrightText: 2018 M. Shulhan <ms@kilabit.info>
 ## SPDX-License-Identifier: GPL-3.0-or-later
 
-.PHONY: test test.prof lint build debug doc
-.PHONY: install-common uninstall-common
-.PHONY: install deploy uninstall
-.PHONY: install-macos deploy-macos uninstall-macos
-.PHONY: clean distclean
-.PHONY: deploy-personal-server
 .FORCE:
 
 CGO_ENABLED:=$(shell go env CGO_ENABLED)
@@ -18,6 +12,7 @@ COVER_HTML:=cover.html
 CPU_PROF:=cpu.prof
 MEM_PROF:=mem.prof
 DEBUG=
+LD_FLAGS=
 
 RESCACHED_BIN=_bin/$(GOOS)_$(GOARCH)/rescached
 RESOLVER_BIN=_bin/$(GOOS)_$(GOARCH)/resolver
@@ -31,14 +26,29 @@ DIR_BIN=/usr/bin
 DIR_MAN=/usr/share/man
 DIR_RESCACHED=/usr/share/rescached
 
-build: lint test memfs_generate.go
-	mkdir -p _bin/$(GOOS)_$(GOARCH)
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) \
-		go build $(DEBUG) -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/...
+##---- Tasks for testing, linting, and building program.
+
+.PHONY: test test.prof lint debug build resolver rescached
+
+build: lint test resolver rescached
+
+## Build with race detection.
 
 debug: CGO_ENABLED=1
 debug: DEBUG=-race -v
 debug: test build
+
+
+resolver: LD_FLAGS=-ldflags="-X 'main.Usage=$$(go tool doc ./cmd/resolver)'"
+resolver:
+	mkdir -p _bin/$(GOOS)_$(GOARCH)
+	go build $(DEBUG) $(LD_FLAGS) -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/resolver
+
+rescached:
+	mkdir -p _bin/$(GOOS)_$(GOARCH)
+	go run ./cmd/rescached embed
+	go build $(DEBUG) $(LD_FLAGS) -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/rescached
+
 
 test:
 	go test $(DEBUG) -count=1 -coverprofile=$(COVER_OUT) ./...
@@ -52,8 +62,24 @@ test.prof:
 lint:
 	-golangci-lint run ./...
 
-memfs_generate.go: .FORCE
-	go run ./cmd/rescached embed
+
+##---- Cleaning up.
+
+.PHONY: clean distclean
+
+distclean: clean
+	go clean -i ./...
+
+clean:
+	rm -f cmd/rescached/memfs.go
+	rm -f testdata/rescached.pid
+	rm -f $(COVER_OUT) $(COVER_HTML)
+	rm -f $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
+
+
+##---- Documentation tasks.
+
+.PHONY: doc
 
 doc: $(RESCACHED_MAN) $(RESCACHED_CFG_MAN) $(RESOLVER_MAN)
 
@@ -69,27 +95,18 @@ $(RESOLVER_MAN): _www/doc/resolver.adoc
 	asciidoctor --backend=manpage --destination-dir=_sys/usr/share/man/man1/ $<
 	gzip -f _sys/usr/share/man/man1/resolver.1
 
-distclean: clean
-	go clean -i ./...
 
-clean:
-	rm -f cmd/rescached/memfs.go
-	rm -f testdata/rescached.pid
-	rm -f $(COVER_OUT) $(COVER_HTML)
-	rm -f $(RESCACHED_BIN) $(RESOLVER_BIN) $(RESOLVERBENCH_BIN)
-
-##
-## Development tasks
-##
+##---- Development tasks
 
 .PHONY: dev
 
 dev:
 	go run ./cmd/rescached -dir-base=./_test -config=etc/rescached/rescached.cfg dev
 
-##
-## Common tasks for installing and uninstalling program.
-##
+
+##---- Common tasks for installing and uninstalling program.
+
+.PHONY: install-common uninstall-common
 
 install-common:
 	mkdir -p $(PREFIX)/etc/rescached
@@ -129,9 +146,10 @@ uninstall-common:
 	rm -f $(PREFIX)$(DIR_BIN)/resolver
 	rm -f $(PREFIX)$(DIR_BIN)/rescached
 
-##
-## Tasks for installing and uninstalling on GNU/Linux with systemd.
-##
+
+##---- Tasks for installing and uninstalling on GNU/Linux with systemd.
+
+.PHONY: install deploy uninstall
 
 install: build install-common
 	mkdir -p $(PREFIX)/usr/lib/systemd/system
@@ -147,9 +165,10 @@ deploy: build
 	sudo rsync _bin/$(GOOS)_$(GOARCH)/resolver  $(DIR_BIN)/
 	sudo systemctl restart rescached
 
-##
-## Tasks for installing and uninstalling service on macOS
-##
+
+##---- Tasks for installing and uninstalling service on macOS.
+
+.PHONY: install-macos deploy-macos uninstall-macos
 
 install-macos: DIR_BIN=/usr/local/bin
 install-macos: DIR_MAN=/usr/local/share/man
@@ -171,9 +190,10 @@ uninstall-macos: uninstall-common
 	launchctl unload info.kilabit.rescached
 	rm -f /Library/LaunchDaemons/info.kilabit.rescached.plist
 
-##
-## Tasks for deploying to public DNS server.
-##
+
+##---- Tasks for deploying to public DNS server.
+
+.PHONY: deploy-personal-server
 
 build-linux-amd64: CGO_ENABLED=0
 build-linux-amd64: GOOS=linux
