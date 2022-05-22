@@ -77,6 +77,10 @@ Default to https://127.0.0.1:5380 if its empty.
 +
 Print the general usage.
 
+`version`::
++
+Print the program version.
+
 ===  QUERY
 
 `query <domain / ip-address> [type] [class]`::

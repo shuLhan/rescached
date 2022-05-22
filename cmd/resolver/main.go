@@ -9,17 +9,20 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	"github.com/shuLhan/rescached-go/v4"
 )
 
 // List of valid commands.
 const (
-	cmdBlockd = "block.d"
-	cmdCaches = "caches"
-	cmdEnv    = "env"
-	cmdHelp   = "help"
-	cmdHostsd = "hosts.d"
-	cmdQuery  = "query"
-	cmdZoned  = "zone.d"
+	cmdBlockd  = "block.d"
+	cmdCaches  = "caches"
+	cmdEnv     = "env"
+	cmdHelp    = "help"
+	cmdHostsd  = "hosts.d"
+	cmdQuery   = "query"
+	cmdVersion = "version"
+	cmdZoned   = "zone.d"
 
 	subCmdAdd     = "add"
 	subCmdCreate  = "create"
@@ -34,7 +37,7 @@ const (
 )
 
 var (
-	Usage string // Overwritten by build.
+	Usage string // Contains usage of program, overwritten by build.
 )
 
 func main() {
@@ -85,6 +88,9 @@ func main() {
 		}
 
 		rsol.doCmdQuery(args)
+
+	case cmdVersion:
+		fmt.Println(rescached.Version)
 
 	case cmdZoned:
 		args = args[1:]

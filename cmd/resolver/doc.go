@@ -59,6 +59,7 @@ Default to https://127.0.0.1:5380 if its empty.
 General commands,
 
 	help    # Print this message.
+	version # Print the program version.
 
 Query the DNS server,
 

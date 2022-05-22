@@ -17,6 +17,10 @@ import (
 	"github.com/shuLhan/share/lib/memfs"
 )
 
+var (
+	Version string // Contains version of program, overwritten by build.
+)
+
 // Server implement caching DNS server.
 type Server struct {
 	dns       *dns.Server

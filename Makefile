@@ -6,6 +6,7 @@
 CGO_ENABLED:=$(shell go env CGO_ENABLED)
 GOOS:=$(shell go env GOOS)
 GOARCH:=$(shell go env GOARCH)
+VERSION=$(shell git describe --long | sed 's/\([^-]*-g\)/r\1/;s/-/./g')
 
 COVER_OUT:=cover.out
 COVER_HTML:=cover.html
@@ -39,15 +40,16 @@ debug: DEBUG=-race -v
 debug: test build
 
 
-resolver: LD_FLAGS=-ldflags="-X 'main.Usage=$$(go tool doc ./cmd/resolver)'"
+resolver: LD_FLAGS =-X 'main.Usage=$$(go tool doc ./cmd/resolver)'
+resolver: LD_FLAGS+=-X 'github.com/shuLhan/rescached-go/v4.Version=${VERSION}'
 resolver:
 	mkdir -p _bin/$(GOOS)_$(GOARCH)
-	go build $(DEBUG) $(LD_FLAGS) -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/resolver
+	go build $(DEBUG) -ldflags="$(LD_FLAGS)" -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/resolver
 
 rescached:
 	mkdir -p _bin/$(GOOS)_$(GOARCH)
 	go run ./cmd/rescached embed
-	go build $(DEBUG) $(LD_FLAGS) -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/rescached
+	go build $(DEBUG) -ldflags="$(LD_FLAGS)" -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/rescached
 
 
 test:
