@@ -306,13 +306,13 @@ func (srv *Server) httpApiBlockdDisable(epr *libhttp.EndpointRequest) (resBody [
 	var (
 		res = libhttp.EndpointResponse{}
 
-		hb     *hostsBlock
+		hb     *Blockd
 		hbName string
 	)
 
 	hbName = strings.ToLower(epr.HttpRequest.Form.Get(paramNameName))
 
-	hb = srv.env.HostsBlocks[hbName]
+	hb = srv.env.HostBlockd[hbName]
 	if hb == nil {
 		res.Code = http.StatusBadRequest
 		res.Message = fmt.Sprintf("hosts block.d name not found: %s", hbName)
@@ -340,13 +340,13 @@ func (srv *Server) httpApiBlockdEnable(epr *libhttp.EndpointRequest) (resBody []
 	var (
 		res = libhttp.EndpointResponse{}
 
-		hb     *hostsBlock
+		hb     *Blockd
 		hbName string
 	)
 
 	hbName = strings.ToLower(epr.HttpRequest.Form.Get(paramNameName))
 
-	hb = srv.env.HostsBlocks[hbName]
+	hb = srv.env.HostBlockd[hbName]
 	if hb == nil {
 		res.Code = http.StatusBadRequest
 		res.Message = fmt.Sprintf("hosts block.d name not found: %s", hbName)
@@ -388,13 +388,13 @@ func (srv *Server) httpApiBlockdUpdate(epr *libhttp.EndpointRequest) (resBody []
 		logp = "httpApiBlockdUpdate"
 		res  = libhttp.EndpointResponse{}
 
-		hb     *hostsBlock
+		hb     *Blockd
 		hbName string
 	)
 
 	hbName = strings.ToLower(epr.HttpRequest.Form.Get(paramNameName))
 
-	hb = srv.env.HostsBlocks[hbName]
+	hb = srv.env.HostBlockd[hbName]
 	if hb == nil {
 		res.Code = http.StatusBadRequest
 		res.Message = fmt.Sprintf("%s: unknown hosts block.d name: %s", logp, hbName)
@@ -562,20 +562,20 @@ func (srv *Server) httpApiEnvironmentUpdate(epr *libhttp.EndpointRequest) (resBo
 // apiHostsBlockUpdate set the HostsBlock to be enabled or disabled.
 //
 // If its status changes to enabled, unhide the hosts block file, populate the
-// hosts back to caches, and add it to list of hostsBlocksFile.
+// hosts back to caches, and add it to list of hostBlockdFile.
 //
 // If its status changes to disabled, remove the hosts from caches, hide it,
-// and remove it from list of hostsBlocksFile.
+// and remove it from list of hostBlockdFile.
 func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
-		res         = libhttp.EndpointResponse{}
-		hostsBlocks = make(map[string]*hostsBlock, 0)
+		res        = libhttp.EndpointResponse{}
+		hostBlockd = make(map[string]*Blockd, 0)
 
-		hbx *hostsBlock
-		hby *hostsBlock
+		hbx *Blockd
+		hby *Blockd
 	)
 
-	err = json.Unmarshal(epr.RequestBody, &hostsBlocks)
+	err = json.Unmarshal(epr.RequestBody, &hostBlockd)
 	if err != nil {
 		res.Code = http.StatusBadRequest
 		res.Message = err.Error()
@@ -584,8 +584,8 @@ func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []
 
 	res.Code = http.StatusInternalServerError
 
-	for _, hbx = range hostsBlocks {
-		for _, hby = range srv.env.HostsBlocks {
+	for _, hbx = range hostBlockd {
+		for _, hby = range srv.env.HostBlockd {
 			if hbx.Name != hby.Name {
 				continue
 			}
@@ -594,13 +594,13 @@ func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []
 			}
 
 			if hbx.IsEnabled {
-				err = srv.hostsBlockEnable(hby)
+				err = srv.blockdEnable(hby)
 				if err != nil {
 					res.Message = err.Error()
 					return nil, &res
 				}
 			} else {
-				err = srv.hostsBlockDisable(hby)
+				err = srv.blockdDisable(hby)
 				if err != nil {
 					res.Message = err.Error()
 					return nil, &res
@@ -618,14 +618,14 @@ func (srv *Server) apiHostsBlockUpdate(epr *libhttp.EndpointRequest) (resBody []
 	}
 
 	res.Code = http.StatusOK
-	res.Data = hostsBlocks
+	res.Data = hostBlockd
 
 	return json.Marshal(&res)
 }
 
-func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
+func (srv *Server) blockdEnable(hb *Blockd) (err error) {
 	var (
-		logp = "hostsBlockEnable"
+		logp = "blockdEnable"
 
 		hfile *dns.HostsFile
 	)
@@ -650,19 +650,19 @@ func (srv *Server) hostsBlockEnable(hb *hostsBlock) (err error) {
 		return fmt.Errorf("%s: %w", logp, err)
 	}
 
-	srv.env.hostsBlocksFile[hfile.Name] = hfile
+	srv.env.hostBlockdFile[hfile.Name] = hfile
 
 	return nil
 }
 
-func (srv *Server) hostsBlockDisable(hb *hostsBlock) (err error) {
+func (srv *Server) blockdDisable(hb *Blockd) (err error) {
 	var (
-		logp = "hostsBlockDisable"
+		logp = "blockdDisable"
 
 		hfile *dns.HostsFile
 	)
 
-	hfile = srv.env.hostsBlocksFile[hb.Name]
+	hfile = srv.env.hostBlockdFile[hb.Name]
 	if hfile == nil {
 		return fmt.Errorf("%s: unknown hosts block: %q", logp, hb.Name)
 	}
@@ -674,7 +674,7 @@ func (srv *Server) hostsBlockDisable(hb *hostsBlock) (err error) {
 		return fmt.Errorf("%s: %w", logp, err)
 	}
 
-	delete(srv.env.hostsBlocksFile, hfile.Name)
+	delete(srv.env.hostBlockdFile, hfile.Name)
 
 	return nil
 }

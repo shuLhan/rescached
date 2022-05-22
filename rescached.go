@@ -63,7 +63,7 @@ func (srv *Server) Start() (err error) {
 		logp = "Start"
 
 		fcaches *os.File
-		hb      *hostsBlock
+		hb      *Blockd
 		hfile   *dns.HostsFile
 		zone    *dns.Zone
 		answers []*dns.Answer
@@ -99,7 +99,7 @@ func (srv *Server) Start() (err error) {
 		return err
 	}
 
-	for _, hb = range srv.env.HostsBlocks {
+	for _, hb = range srv.env.HostBlockd {
 		if !hb.IsEnabled {
 			continue
 		}
@@ -114,7 +114,7 @@ func (srv *Server) Start() (err error) {
 			return fmt.Errorf("%s: %w", logp, err)
 		}
 
-		srv.env.hostsBlocksFile[hfile.Name] = hfile
+		srv.env.hostBlockdFile[hfile.Name] = hfile
 	}
 
 	srv.env.HostsFiles, err = dns.LoadHostsDir(srv.env.pathDirHosts)

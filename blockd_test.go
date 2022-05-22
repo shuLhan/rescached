@@ -11,11 +11,11 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
-func TestHostsBlock_init(t *testing.T) {
+func TestBlockd_init(t *testing.T) {
 	type testCase struct {
 		desc string
-		hb   hostsBlock
-		exp  hostsBlock
+		hb   Blockd
+		exp  Blockd
 	}
 
 	var (
@@ -59,10 +59,10 @@ func TestHostsBlock_init(t *testing.T) {
 
 	cases = []testCase{{
 		desc: "With hosts block file enabled",
-		hb: hostsBlock{
+		hb: Blockd{
 			Name: fileEnabled,
 		},
-		exp: hostsBlock{
+		exp: Blockd{
 			Name:         fileEnabled,
 			lastUpdated:  fiEnabled.ModTime(),
 			LastUpdated:  fiEnabled.ModTime().Format(lastUpdatedFormat),
@@ -73,10 +73,10 @@ func TestHostsBlock_init(t *testing.T) {
 		},
 	}, {
 		desc: "With hosts block file disabled",
-		hb: hostsBlock{
+		hb: Blockd{
 			Name: fileDisabled,
 		},
-		exp: hostsBlock{
+		exp: Blockd{
 			Name:         fileDisabled,
 			lastUpdated:  fiDisabled.ModTime(),
 			LastUpdated:  fiDisabled.ModTime().Format(lastUpdatedFormat),
@@ -86,10 +86,10 @@ func TestHostsBlock_init(t *testing.T) {
 		},
 	}, {
 		desc: "With hosts block file not exist",
-		hb: hostsBlock{
+		hb: Blockd{
 			Name: fileNotExist,
 		},
-		exp: hostsBlock{
+		exp: Blockd{
 			Name:         fileNotExist,
 			file:         filepath.Join(pathDirBlock, fileNotExist),
 			fileDisabled: filepath.Join(pathDirBlock, "."+fileNotExist),

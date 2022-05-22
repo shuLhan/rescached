@@ -76,8 +76,8 @@ type Environment struct {
 	FileResolvConf string `ini:"rescached::file.resolvconf"`
 	WUIListen      string `ini:"rescached::wui.listen"`
 
-	HostsBlocks     map[string]*hostsBlock `ini:"block.d"`
-	hostsBlocksFile map[string]*dns.HostsFile
+	HostBlockd     map[string]*Blockd `ini:"block.d"`
+	hostBlockdFile map[string]*dns.HostsFile
 
 	// The options for WUI HTTP server.
 	HttpdOptions *libhttp.ServerOptions `json:"-"`
@@ -126,8 +126,8 @@ func newEnvironment(dirBase, fileConfig string) *Environment {
 		pathDirZone:    filepath.Join(dirBase, dirZone),
 		pathFileCaches: filepath.Join(dirBase, dirCaches, fileCaches),
 
-		fileConfig:      filepath.Join(dirBase, fileConfig),
-		hostsBlocksFile: make(map[string]*dns.HostsFile),
+		fileConfig:     filepath.Join(dirBase, fileConfig),
+		hostBlockdFile: make(map[string]*dns.HostsFile),
 		HttpdOptions: &libhttp.ServerOptions{
 			Memfs:   mfsWww,
 			Address: defWuiAddress,
@@ -190,9 +190,9 @@ func (env *Environment) init() (err error) {
 
 func (env *Environment) initHostsBlock() {
 	var (
-		hb *hostsBlock
+		hb *Blockd
 	)
-	for _, hb = range env.HostsBlocks {
+	for _, hb = range env.HostBlockd {
 		hb.init(env.pathDirBlock)
 	}
 }
@@ -230,7 +230,7 @@ func (env *Environment) save(file string) (in *ini.Ini, err error) {
 	var (
 		logp = "save"
 
-		hb   *hostsBlock
+		hb   *Blockd
 		vstr string
 	)
 
@@ -247,7 +247,7 @@ func (env *Environment) save(file string) (in *ini.Ini, err error) {
 	in.Set(sectionNameRescached, "", keyDebug, strconv.Itoa(env.Debug))
 	in.Set(sectionNameRescached, "", keyWUIListen, strings.TrimSpace(env.WUIListen))
 
-	for _, hb = range env.HostsBlocks {
+	for _, hb = range env.HostBlockd {
 		in.Set(sectionNameBlockd, hb.Name, keyName, hb.Name)
 		in.Set(sectionNameBlockd, hb.Name, keyUrl, hb.URL)
 	}

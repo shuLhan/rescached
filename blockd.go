@@ -18,7 +18,7 @@ const (
 	lastUpdatedFormat = "2006-01-02 15:04:05 MST"
 )
 
-type hostsBlock struct {
+type Blockd struct {
 	lastUpdated time.Time
 
 	Name string `ini:"::name"` // Derived from hostname in URL.
@@ -33,7 +33,7 @@ type hostsBlock struct {
 }
 
 // disable the hosts block by prefixing the file name with single dot.
-func (hb *hostsBlock) disable() (err error) {
+func (hb *Blockd) disable() (err error) {
 	err = os.Rename(hb.file, hb.fileDisabled)
 	if err != nil {
 		return fmt.Errorf("disable: %w", err)
@@ -43,7 +43,7 @@ func (hb *hostsBlock) disable() (err error) {
 }
 
 // enable the hosts block file by removing the dot prefix from file name.
-func (hb *hostsBlock) enable() (err error) {
+func (hb *Blockd) enable() (err error) {
 	if hb.isFileExist {
 		err = os.Rename(hb.fileDisabled, hb.file)
 	} else {
@@ -57,7 +57,7 @@ func (hb *hostsBlock) enable() (err error) {
 	return nil
 }
 
-func (hb *hostsBlock) init(pathDirBlock string) {
+func (hb *Blockd) init(pathDirBlock string) {
 	var (
 		fi  os.FileInfo
 		err error
@@ -87,20 +87,20 @@ func (hb *hostsBlock) init(pathDirBlock string) {
 
 // isOld will return true if the host file has not been updated since seven
 // days.
-func (hb *hostsBlock) isOld() bool {
+func (hb *Blockd) isOld() bool {
 	oneWeek := 7 * 24 * time.Hour
 	lastWeek := time.Now().Add(-1 * oneWeek)
 
 	return hb.lastUpdated.Before(lastWeek)
 }
 
-func (hb *hostsBlock) update() (err error) {
+func (hb *Blockd) update() (err error) {
 	if !hb.isOld() {
 		return nil
 	}
 
 	var (
-		logp = "hostsBlock.update"
+		logp = "Blockd.update"
 
 		res      *http.Response
 		body     []byte

@@ -73,16 +73,16 @@ func TestLoadEnvironment(t *testing.T) {
 			fileConfig: filepath.Join(testDirBase, "/etc/rescached/rescached.cfg"),
 
 			WUIListen: "127.0.0.1:5381",
-			HostsBlocks: map[string]*hostsBlock{
-				"pgl.yoyo.org": &hostsBlock{
+			HostBlockd: map[string]*Blockd{
+				"pgl.yoyo.org": &Blockd{
 					Name: "pgl.yoyo.org",
 					URL:  `http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext`,
 				},
-				"winhelp2002.mvps.org": &hostsBlock{
+				"winhelp2002.mvps.org": &Blockd{
 					Name: "winhelp2002.mvps.org",
 					URL:  `http://winhelp2002.mvps.org/hosts.txt`,
 				},
-				"someonewhocares.org": &hostsBlock{
+				"someonewhocares.org": &Blockd{
 					Name: "someonewhocares.org",
 					URL:  `http://someonewhocares.org/hosts/hosts`,
 				},
@@ -120,7 +120,7 @@ func TestLoadEnvironment(t *testing.T) {
 
 	test.Assert(t, "LoadEnvironment", expEnv, gotEnv)
 
-	gotEnv.HostsBlocks["test"] = &hostsBlock{
+	gotEnv.HostBlockd["test"] = &Blockd{
 		Name: "test",
 		URL:  "http://someurl",
 	}

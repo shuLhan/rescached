@@ -40,7 +40,7 @@ func (cl *Client) BlockdDisable(blockdName string) (an interface{}, err error) {
 		res    = libhttp.EndpointResponse{}
 		params = url.Values{}
 
-		hb   *hostsBlock
+		hb   *Blockd
 		resb []byte
 	)
 
@@ -70,7 +70,7 @@ func (cl *Client) BlockdEnable(blockdName string) (an interface{}, err error) {
 		res    = libhttp.EndpointResponse{}
 		params = url.Values{}
 
-		hb   *hostsBlock
+		hb   *Blockd
 		resb []byte
 	)
 
@@ -101,7 +101,7 @@ func (cl *Client) BlockdUpdate(blockdName string) (an interface{}, err error) {
 		params = url.Values{}
 		res    = libhttp.EndpointResponse{}
 
-		hb   *hostsBlock
+		hb   *Blockd
 		resb []byte
 	)
 
