@@ -61,11 +61,11 @@ $(RESCACHED_MAN): README.adoc
 	asciidoctor --backend=manpage --destination-dir=_sys/usr/share/man/man1/ $<
 	gzip -f _sys/usr/share/man/man1/rescached.1
 
-$(RESCACHED_CFG_MAN): _doc/rescached.cfg.adoc
+$(RESCACHED_CFG_MAN): _www/doc/rescached.cfg.adoc
 	asciidoctor --backend=manpage --destination-dir=_sys/usr/share/man/man5/ $<
 	gzip -f _sys/usr/share/man/man5/rescached.cfg.5
 
-$(RESOLVER_MAN): _doc/resolver.adoc
+$(RESOLVER_MAN): _www/doc/resolver.adoc
 	asciidoctor --backend=manpage --destination-dir=_sys/usr/share/man/man1/ $<
 	gzip -f _sys/usr/share/man/man1/resolver.1
 
@@ -86,9 +86,6 @@ clean:
 
 dev:
 	go run ./cmd/rescached -dir-base=./_test -config=etc/rescached/rescached.cfg dev
-
-serve-doc:
-	ciigo serve _doc
 
 ##
 ## Common tasks for installing and uninstalling program.

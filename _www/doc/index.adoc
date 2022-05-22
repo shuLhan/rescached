@@ -1,0 +1,35 @@
+// SPDX-FileCopyrightText: 2022 M. Shulhan <ms@kilabit.info>
+// SPDX-License-Identifier: GPL-3.0-or-later
+= rescached documentation
+Shulhan <ms@kilabit.info>
+
+link:CHANGELOG.html[CHANGELOG]:: Log for each release.
+
+link:README.html[rescached]:: Manual page for rescached program.
+
+link:rescached.cfg.html[rescached.cfg]:: Manual page for rescached
+configuration.
+
+link:resolver.html[resolver]:: Manual page for resolver.
+
+link:benchmark.html[Benchmark]:: The latest benchmark of rescached server.
+
+
+[#todo]
+==  TODO
+
+* zone.d rr add - check for duplicate value.
+
+* Prioritize the order of hosts file to be loaded:
+** block.d
+** hosts.d
+** zone.d
+** /etc/hosts
+
+* Generate unique ID for each RR in caches/zone for deletion.
+
+* Move repository to sr.ht
+
+* Implement DNS type 65
+
+* Implement DNSSec

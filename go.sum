@@ -1,3 +1,9 @@
+git.sr.ht/~shulhan/asciidoctor-go v0.2.0 h1:CRlqq2CEONKvNfRBVZLwEArSsq5j77h6sU02tN3oD9E=
+git.sr.ht/~shulhan/asciidoctor-go v0.2.0/go.mod h1:B0a6l1ZfmXKPGOuC5ZT8ICjOMxV5z8dGkAJjAdW8DZc=
+git.sr.ht/~shulhan/ciigo v0.8.1 h1:d1iShGX3ArVwtPZJUlpSgcgS+PMlwLjfLmOrsmECbII=
+git.sr.ht/~shulhan/ciigo v0.8.1/go.mod h1:pOmpgVSLjkmhAEqJciX/Vd80CCoVd/kIl4ipTMI5vkc=
+github.com/shuLhan/share v0.35.0/go.mod h1:laKGR1DNboj8+INRIC9VFYRiVEu/IIjrLurUmTHXkw0=
+github.com/shuLhan/share v0.37.0/go.mod h1:laKGR1DNboj8+INRIC9VFYRiVEu/IIjrLurUmTHXkw0=
 github.com/shuLhan/share v0.37.1-0.20220517151646-345ee16b214a h1:ObIeMvsFoBxPX+ejNUVl/w8ziKfr9cbAB8ELN3FnlTI=
 github.com/shuLhan/share v0.37.1-0.20220517151646-345ee16b214a/go.mod h1:laKGR1DNboj8+INRIC9VFYRiVEu/IIjrLurUmTHXkw0=
 golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=

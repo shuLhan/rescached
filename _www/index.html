@@ -2,167 +2,183 @@
 <!-- SPDX-FileCopyrightText: 2021 M. Shulhan <ms@kilabit.info -->
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-		<link rel="icon" type="image/png" href="/favicon.png" />
-		<link rel="stylesheet" href="/index.css" />
-		<title>rescached</title>
 
-		<style>
-			.message {
-				padding: 1em 0px;
-				border-bottom: 1px solid silver;
-			}
-			#summary {
-				margin: 1em 0;
-			}
-			#caches {
-				height: 20em;
-				overflow: auto;
-				font-family: monospace;
-			}
-			.RType {
-				width: 3em;
-				display: inline-block;
-			}
-			.rr {
-				border-bottom: 1px dashed silver;
-				margin-left: 1em;
-				width: 100%;
-			}
-			.rr.header {
-				font-weight: bold;
-			}
-			.rr span {
-				display: inline-block;
-			}
-			.kind {
-				width: 9em;
-			}
-			.type {
-				width: 5em;
-			}
-			.ttl {
-				width: 6em;
-			}
-			.value {
-				word-wrap: anywhere;
-				width: calc(100% - 24em);
-			}
-		</style>
-	</head>
-	<body onload="main()">
-		<nav class="menu">
-			<a href="/" class="active"> rescached </a>
-			/
-			<a href="/environment/"> Environment </a>
-			/
-			<a href="/block.d/"> block.d </a>
-			/
-			<a href="/hosts.d/"> hosts.d </a>
-			/
-			<a href="/zone.d/"> zone.d </a>
-		</nav>
-		<form id="form_search">
-			<div class="search">
-				Caches:
-				<input name="query" />
-				<button onclick="doSearch()">Search</button>
-				<button onclick="doClearResult()">Clear result</button>
-			</div>
-		</form>
-		<div id="result"></div>
-		<div id="notif"></div>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="stylesheet" href="/index.css" />
+    <title>rescached</title>
 
-		<div id="summary"></div>
-		<div id="caches"></div>
+    <style>
+        .message {
+            padding: 1em 0px;
+            border-bottom: 1px solid silver;
+        }
 
-		<script src="/index.js"></script>
-		<script src="/rescached.js"></script>
-		<script>
-			let resc = null
-			let cachePoller = null
-			let dateFmt = new Intl.DateTimeFormat(undefined, {
-				year: "numeric",
-				month: "numeric",
-				day: "numeric",
-				hour: "numeric",
-				minute: "numeric",
-				second: "numeric",
-			})
-			let searchResults = []
+        #summary {
+            margin: 1em 0;
+        }
 
-			async function main() {
-				resc = new Rescached("")
-				const res = await resc.Caches()
-				if (res.code != 200) {
-					notifError(`doSearch ${query}: ${res.message}`)
-					return
-				}
-				renderCaches(res.data)
-				cachePoller = setInterval(pollCaches, 10000)
+        #caches {
+            height: 20em;
+            overflow: auto;
+            font-family: monospace;
+        }
 
-				// Catch the enter key on input text search.
-				document.getElementById("form_search").addEventListener("submit", (e) => {
-					e.preventDefault()
-				})
-			}
+        .RType {
+            width: 3em;
+            display: inline-block;
+        }
 
-			async function pollCaches() {
-				const res = await resc.Caches()
-				if (res.code != 200) {
-					notifError(`doSearch ${query}: ${res.message}`)
-					return
-				}
-				renderCaches(res.data)
-			}
+        .rr {
+            border-bottom: 1px dashed silver;
+            margin-left: 1em;
+            width: 100%;
+        }
 
-			async function doCacheRemove(idx, qname) {
-				const res = await resc.CacheRemove(qname)
-				if (res.code != 200) {
-					notifError(`doCacheRemove ${qname}: ${res.message}`)
-					return
-				}
+        .rr.header {
+            font-weight: bold;
+        }
 
-				notifInfo(`Record ${qname} has been removed from cache`)
+        .rr span {
+            display: inline-block;
+        }
 
-				// Remove the record from search result and re-render it.
-				searchResults.splice(idx, 1)
-				onSearchResult(searchResults)
-			}
+        .kind {
+            width: 9em;
+        }
 
-			async function doSearch() {
-				const query = document.getElementsByName("query")[0].value
-				console.log("doSearch: ", query)
-				const res = await resc.Search(query)
-				if (res.code != 200) {
-					notifError(`doSearch ${query}: ${res.message}`)
-					return
-				}
-				searchResults = res.data
-				onSearchResult(res.data)
-			}
+        .type {
+            width: 5em;
+        }
 
-			async function doClearResult() {
-				searchResults = []
-				document.getElementById("result").innerHTML = ""
-			}
+        .ttl {
+            width: 6em;
+        }
 
-			function onSearchResult(dnsRecords) {
-				const elResult = document.getElementById("result")
-				elResult.innerHTML = ""
+        .value {
+            word-wrap: anywhere;
+            width: calc(100% - 24em);
+        }
+    </style>
+</head>
 
-				if (dnsRecords.length === 0) {
-					elResult.innerHTML = "<div>No matches record found.</div>"
-					return
-				}
+<body onload="main()">
+    <nav class="menu">
+        <a href="/" class="active"> rescached </a>
+        /
+        <a href="/environment/"> Environment </a>
+        /
+        <a href="/block.d/"> block.d </a>
+        /
+        <a href="/hosts.d/"> hosts.d </a>
+        /
+        <a href="/zone.d/"> zone.d </a>
+        /
+        <a href="/doc/"> Documentation </a>
+    </nav>
+    <form id="form_search">
+        <div class="search">
+            Caches:
+            <input name="query" />
+            <button onclick="doSearch()">Search</button>
+            <button onclick="doClearResult()">Clear result</button>
+        </div>
+    </form>
+    <div id="result"></div>
+    <div id="notif"></div>
 
-				for (let x = 0; x < dnsRecords.length; x++) {
-					const record = dnsRecords[x]
-					const divRecord = document.createElement("div")
-					divRecord.classList.add("message")
-					innerHTML = `
+    <div id="summary"></div>
+    <div id="caches"></div>
+
+    <script src="/index.js"></script>
+    <script src="/rescached.js"></script>
+    <script>
+        let resc = null;
+        let cachePoller = null;
+        let dateFmt = new Intl.DateTimeFormat(undefined, {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric",
+        });
+        let searchResults = [];
+
+        async function main() {
+            resc = new Rescached("");
+            const res = await resc.Caches();
+            if (res.code != 200) {
+                notifError(`doSearch ${query}: ${res.message}`);
+                return;
+            }
+            renderCaches(res.data);
+            cachePoller = setInterval(pollCaches, 10000);
+
+            // Catch the enter key on input text search.
+            document
+                .getElementById("form_search")
+                .addEventListener("submit", (e) => {
+                    e.preventDefault();
+                });
+        }
+
+        async function pollCaches() {
+            const res = await resc.Caches();
+            if (res.code != 200) {
+                notifError(`doSearch ${query}: ${res.message}`);
+                return;
+            }
+            renderCaches(res.data);
+        }
+
+        async function doCacheRemove(idx, qname) {
+            const res = await resc.CacheRemove(qname);
+            if (res.code != 200) {
+                notifError(`doCacheRemove ${qname}: ${res.message}`);
+                return;
+            }
+
+            notifInfo(`Record ${qname} has been removed from cache`);
+
+            // Remove the record from search result and re-render it.
+            searchResults.splice(idx, 1);
+            onSearchResult(searchResults);
+        }
+
+        async function doSearch() {
+            const query = document.getElementsByName("query")[0].value;
+            console.log("doSearch: ", query);
+            const res = await resc.Search(query);
+            if (res.code != 200) {
+                notifError(`doSearch ${query}: ${res.message}`);
+                return;
+            }
+            searchResults = res.data;
+            onSearchResult(res.data);
+        }
+
+        async function doClearResult() {
+            searchResults = [];
+            document.getElementById("result").innerHTML = "";
+        }
+
+        function onSearchResult(dnsRecords) {
+            const elResult = document.getElementById("result");
+            elResult.innerHTML = "";
+
+            if (dnsRecords.length === 0) {
+                elResult.innerHTML = "<div>No matches record found.</div>";
+                return;
+            }
+
+            for (let x = 0; x < dnsRecords.length; x++) {
+                const record = dnsRecords[x];
+                const divRecord = document.createElement("div");
+                divRecord.classList.add("message");
+                innerHTML = `
 						<div class="qname">
 							${record.Question.Name}
 							<button class="b-remove"
@@ -175,57 +191,60 @@
 							<span class="ttl"> TTL </span>
 							<span class="value"> Value </span>
 						</div>
-					`
-					if (record.Answer !== null && record.Answer.length > 0) {
-						innerHTML += renderRR(record.Answer, "Answer")
-					}
-					if (record.Authority !== null && record.Authority.length > 0) {
-						innerHTML += renderRR(record.Authority, "Authority")
-					}
-					if (record.Additional !== null && record.Additional.length > 0) {
-						innerHTML += renderRR(record.Additional, "Additional")
-					}
+					`;
+                if (record.Answer !== null && record.Answer.length > 0) {
+                    innerHTML += renderRR(record.Answer, "Answer");
+                }
+                if (record.Authority !== null && record.Authority.length > 0) {
+                    innerHTML += renderRR(record.Authority, "Authority");
+                }
+                if (record.Additional !== null && record.Additional.length > 0) {
+                    innerHTML += renderRR(record.Additional, "Additional");
+                }
 
-					divRecord.innerHTML = innerHTML
-					elResult.appendChild(divRecord)
-				}
-			}
+                divRecord.innerHTML = innerHTML;
+                elResult.appendChild(divRecord);
+            }
+        }
 
-			function renderCaches(answers) {
-				document.getElementById("summary").innerHTML = `
+        function renderCaches(answers) {
+            document.getElementById("summary").innerHTML = `
 						Total caches: ${answers.length}
-				`
-				let w = document.getElementById("caches")
-				let out = `
-				`
-				for (let x = answers.length - 1; x >= 0; x--) {
-					let answer = answers[x]
-					out += `
+				`;
+            let w = document.getElementById("caches");
+            let out = `
+				`;
+            for (let x = answers.length - 1; x >= 0; x--) {
+                let answer = answers[x];
+                out += `
 						<div class="cache">
-							<span class="AccessedAt">${dateFmt.format(new Date(answer.AccessedAt * 1000))}</span>
+							<span class="AccessedAt">${dateFmt.format(
+                new Date(answer.AccessedAt * 1000)
+              )}</span>
 							<span class="RType">${resc.GetRRTypeName(answer.RType)}</span>
 							<span class="QName">${answer.QName}</span>
-						</div>`
-				}
-				w.innerHTML = out
-			}
+						</div>`;
+            }
+            w.innerHTML = out;
+        }
 
-			function renderRR(listRR, title) {
-				let innerHTML = ""
+        function renderRR(listRR, title) {
+            let innerHTML = "";
 
-				for (let x = 0; x < listRR.length; x++) {
-					const rr = listRR[x]
-					innerHTML += `
+            for (let x = 0; x < listRR.length; x++) {
+                const rr = listRR[x];
+                innerHTML += `
 						<div class="rr">
 							<span class="kind"> ${title} </span>
 							<span class="type"> ${getRRTypeName(rr.Type)} </span>
 							<span class="ttl"> ${rr.TTL} </span>
 							<span class="value"> ${JSON.stringify(rr.Value, null, 2)} </span>
 						</div>
-					`
-				}
-				return innerHTML
-			}
-		</script>
-	</body>
+					`;
+            }
+            return innerHTML;
+        }
+    </script>
+</body>
+
 </html>

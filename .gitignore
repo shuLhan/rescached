@@ -2,10 +2,10 @@
 /TODO
 /_bin/darwin_amd64
 /_bin/linux_amd64
-/_doc/*.html
 /_test/etc/rescached/hosts.d/hosts
 /_test/etc/rescached/zone.d/
 /_test/var/cache/rescached/
+/_www/doc/*.html
 /cover.html
 /cover.out
 /heap*

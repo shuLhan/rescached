@@ -3,15 +3,15 @@ Upstream-Name: rescached-go
 Upstream-Contact: Shulhan <ms@kilabit.info>
 Source: https://github.com/shuLhan/rescached-go
 
-Files: _doc/images/*
+Files: _www/doc/images/*
 Copyright: 2021 Shulhan <ms@kilabit.info>
 License: GPL-3.0-or-later
 
-Files: _doc/rescached.cfg.5.gz
+Files: _www/doc/rescached.cfg.5.gz
 Copyright: 2020 Shulhan <ms@kilabit.info>
 License: GPL-3.0-or-later
 
-Files: _doc/resolver.1.gz
+Files: _www/doc/resolver.1.gz
 Copyright: 2020 Shulhan <ms@kilabit.info>
 License: GPL-3.0-or-later
 

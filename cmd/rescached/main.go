@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"git.sr.ht/~shulhan/ciigo"
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/memfs"
 
@@ -61,6 +62,7 @@ func main() {
 	case cmdDev:
 		running = make(chan bool)
 		go watchWww(env, running)
+		go watchWwwDoc()
 	}
 
 	rcd, err = rescached.New(env)
@@ -153,4 +155,21 @@ func watchWww(env *rescached.Environment, running chan bool) {
 	}
 	dw.Stop()
 	running <- false
+}
+
+func watchWwwDoc() {
+	var (
+		logp        = "watchWwwDoc"
+		convertOpts = ciigo.ConvertOptions{
+			Root:         "_www/doc",
+			HtmlTemplate: "_www/doc/html.tmpl",
+		}
+
+		err error
+	)
+
+	err = ciigo.Watch(&convertOpts)
+	if err != nil {
+		log.Fatalf("%s: %s", logp, err)
+	}
 }

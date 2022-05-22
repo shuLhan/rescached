@@ -2,333 +2,306 @@
 <!-- SPDX-FileCopyrightText: 2021 M. Shulhan <ms@kilabit.info -->
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-		<link rel="icon" type="image/png" href="/favicon.png" />
-		<link rel="stylesheet" href="/index.css" />
-		<title>rescached | Environment</title>
 
-		<style>
-			.input > label {
-				width: 11em;
-				display: inline-block;
-			}
-			.input > input,
-			.input > select {
-				width: calc(100% - 13em);
-				display: inline-block;
-			}
-			.input {
-				margin-top: 1em;
-			}
-			.input-deletable {
-				width: 100%;
-			}
-			.input-deletable > input {
-				max-width: calc(100% - 6em);
-			}
-			.input-deletable > button {
-				width: 5em;
-			}
-			.input-checkbox {
-				width: calc(100% - 13em);
-				display: inline-block;
-			}
-			.input-checkbox input[type="checkbox"] {
-				width: auto;
-			}
-			.section-bottom {
-				margin: 2em 0px;
-			}
-		</style>
-	</head>
-	<body onload="onLoad()">
-		<nav class="menu">
-			<a href="/"> rescached </a>
-			/
-			<a href="/environment/" class="active"> Environment </a>
-			/
-			<a href="/block.d/"> block.d </a>
-			/
-			<a href="/hosts.d/"> hosts.d </a>
-			/
-			<a href="/zone.d/"> zone.d </a>
-		</nav>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="stylesheet" href="/index.css" />
+    <title>rescached | Environment</title>
 
-		<div id="notif"></div>
+    <style>
+        .input>label {
+            width: 11em;
+            display: inline-block;
+        }
 
-		<div class="environment">
-			<p>
-				This page allow you to change the rescached environment. Upon save, the rescached service
-				will be restarted.
-			</p>
+        .input>input,
+        .input>select {
+            width: calc(100% - 13em);
+            display: inline-block;
+        }
 
-			<h3>rescached</h3>
+        .input {
+            margin-top: 1em;
+        }
 
-			<div class="input">
-				<label for="FileResolvConf"> System resolv.conf </label>
-				<input id="FileResolvConf" oninput="onInput('FileResolvConf', this.value)" />
-				<span class="input-info-toggler" onclick="toggleInfo('FileResolvConf_info')">?</span>
-				<div id="FileResolvConf_info" class="input-info" style="display: none">
-					A path to dynamically generated resolv.conf(5) by resolvconf(8). If set, the
-					nameserver values in referenced file will replace 'parent' value and 'parent' will
-					become a fallback in case the referenced file being deleted or can not be parsed.
-				</div>
-			</div>
+        .input-deletable {
+            width: 100%;
+        }
 
-			<div class="input">
-				<label for="Debug"> Debug level </label>
-				<input id="Debug" type="number" min="0" max="3" oninput="onInput('Debug', this.value)" />
-				<span class="input-info-toggler" onclick="toggleInfo('Debug_info')">?</span>
-				<div id="Debug_info" class="input-info" style="display: none">
-					This option only used for debugging program or if user want to monitor what kind of
-					traffic goes in and out of rescached.
-				</div>
-			</div>
+        .input-deletable>input {
+            max-width: calc(100% - 6em);
+        }
 
-			<h3>DNS server</h3>
+        .input-deletable>button {
+            width: 5em;
+        }
 
-			<div class="input">
-				<label for="nameservers"> Parent name servers </label>
-				<span class="input-info-toggler" onclick="toggleInfo('nameservers_info')">?</span>
-				<div id="nameservers_info" class="input-info" style="display: none">
-					List of parent DNS servers.
-				</div>
-				<div id="nameservers"></div>
-				<button onclick="handleAddNameserver()">Add</button>
-			</div>
+        .input-checkbox {
+            width: calc(100% - 13em);
+            display: inline-block;
+        }
 
-			<div class="input">
-				<label for="ListenAddress"> Listen address </label>
-				<input id="ListenAddress" oninput="onInput('ListenAddress', this.value)" />
-				<span class="input-info-toggler" onclick="toggleInfo('ListenAddress_info')">?</span>
-				<div id="ListenAddress_info" class="input-info" style="display: none">
-					Address in local network where rescached will listening for query from client
-					through UDP and TCP.
-					<br />
-					If you want rescached to serve a query from another host in your local network,
-					change this value to <tt>0.0.0.0:53</tt>.
-				</div>
-			</div>
+        .input-checkbox input[type="checkbox"] {
+            width: auto;
+        }
 
-			<div class="input">
-				<label for="HTTPPort"> HTTP listen port </label>
-				<input
-					id="HTTPPort"
-					type="number"
-					min="0"
-					max="65535"
-					oninput="onInput('HTTPPort', parseInt(this.value))"
-				/>
-				<span class="input-info-toggler" onclick="toggleInfo('HTTPPort_info')">?</span>
-				<div id="HTTPPort_info" class="input-info" style="display: none">
-					Port to serve DNS over HTTP
-				</div>
-			</div>
+        .section-bottom {
+            margin: 2em 0px;
+        }
+    </style>
+</head>
 
-			<div class="input">
-				<label for="TLSPort"> TLS listen port </label>
-				<input
-					id="TLSPort"
-					type="number"
-					min="0"
-					max="65535"
-					oninput="onInput('TLSPort', parseInt(this.value))"
-				/>
-				<span class="input-info-toggler" onclick="toggleInfo('TLSPort_info')">?</span>
-				<div id="TLSPort_info" class="input-info" style="display: none">
-					Port to serve DNS over TLS
-				</div>
-			</div>
+<body onload="onLoad()">
+    <nav class="menu">
+        <a href="/"> rescached </a>
+        /
+        <a href="/environment/" class="active"> Environment </a>
+        /
+        <a href="/block.d/"> block.d </a>
+        /
+        <a href="/hosts.d/"> hosts.d </a>
+        /
+        <a href="/zone.d/"> zone.d </a>
+        /
+        <a href="/doc/"> Documentation </a>
+    </nav>
 
-			<div class="input">
-				<label for="TLSCertFile"> TLS certificate </label>
-				<input
-					id="TLSCertFile"
-					placeholder="/path/to/certificate"
-					oninput="onInput('TLSCertFile', this.value)"
-				/>
-				<span class="input-info-toggler" onclick="toggleInfo('TLSCertFile_info')">?</span>
-				<div id="TLSCertFile_info" class="input-info" style="display: none">
-					Path to certificate file to serve DNS over TLS and HTTPS
-				</div>
-			</div>
+    <div id="notif"></div>
 
-			<div class="input">
-				<label for="TLSPrivateKey"> TLS private key </label>
-				<input
-					id="TLSPrivateKey"
-					placeholder="/path/to/certificate/private.key"
-					oninput="onInput('TLSPrivateKey', this.value)"
-				/>
-				<span class="input-info-toggler" onclick="toggleInfo('TLSPrivateKey_info')">?</span>
-				<div id="TLSPrivateKey_info" class="input-info" style="display: none">
-					Path to certificate private key file to serve DNS over TLS and HTTPS.
-				</div>
-			</div>
+    <div class="environment">
+        <p>
+            This page allow you to change the rescached environment. Upon save, the rescached service
+            will be restarted.
+        </p>
 
-			<div class="input">
-				<label for="TLSAllowInsecure"> TLS allow insecure </label>
-				<div class="input-checkbox">
-					<input
-						id="TLSAllowInsecure"
-						type="checkbox"
-						oninput="onInput('TLSAllowInsecure', this.checked)"
-					/>
-					<span class="suffix"> Yes </span>
-				</div>
-				<span class="input-info-toggler" onclick="toggleInfo('TLSAllowInsecure_info')">?</span>
-				<div id="TLSAllowInsecure_info" class="input-info" style="display: none">
-					If its true, allow serving DoH and DoT with self signed certificate.
-				</div>
-			</div>
+        <h3>rescached</h3>
 
-			<div class="input">
-				<label for="DoHBehindProxy"> DoH behind proxy </label>
-				<div class="input-checkbox">
-					<input
-						id="DoHBehindProxy"
-						type="checkbox"
-						oninput="onInput('DoHBehindProxy', this.checked)"
-					/>
-					<span class="suffix"> Yes </span>
-				</div>
-				<span class="input-info-toggler" onclick="toggleInfo('DoHBehindProxy_info')">?</span>
-				<div id="DoHBehindProxy_info" class="input-info" style="display: none">
-					If its true, serve DNS over HTTP only, even if certificate files is defined. This
-					allow serving DNS request forwarded by another proxy server.
-				</div>
-			</div>
+        <div class="input">
+            <label for="FileResolvConf"> System resolv.conf </label>
+            <input id="FileResolvConf" oninput="onInput('FileResolvConf', this.value)" />
+            <span class="input-info-toggler" onclick="toggleInfo('FileResolvConf_info')">?</span>
+            <div id="FileResolvConf_info" class="input-info" style="display: none">
+                A path to dynamically generated resolv.conf(5) by resolvconf(8). If set, the
+                nameserver values in referenced file will replace 'parent' value and 'parent' will
+                become a fallback in case the referenced file being deleted or can not be parsed.
+            </div>
+        </div>
 
-			<div class="input">
-				<label for="PruneDelay"> Prune delay </label>
-				<input
-					id="PruneDelay"
-					type="number"
-					min="3600"
-					max="36000"
-					oninput="onInput('PruneDelay', parseInt(this.value))"
-				/>
-				<span class="input-info-toggler" onclick="toggleInfo('PruneDelay_info')">?</span>
-				<div id="PruneDelay_info" class="input-info" style="display: none">
-					Delay for pruning caches. Every N seconds, rescached will traverse all caches and
-					remove response that has not been accessed less than cache.prune_threshold. Its
-					value must be equal or greater than 1 hour (3600 seconds).
-				</div>
-			</div>
+        <div class="input">
+            <label for="Debug"> Debug level </label>
+            <input id="Debug" type="number" min="0" max="3" oninput="onInput('Debug', this.value)" />
+            <span class="input-info-toggler" onclick="toggleInfo('Debug_info')">?</span>
+            <div id="Debug_info" class="input-info" style="display: none">
+                This option only used for debugging program or if user want to monitor what kind of
+                traffic goes in and out of rescached.
+            </div>
+        </div>
 
-			<div class="input">
-				<label for="PruneThreshold"> Prune threshold </label>
-				<input
-					id="PruneThreshold"
-					type="number"
-					min="-36000"
-					max="-3600"
-					oninput="onInput('PruneThreshold', parseInt(this.value))"
-				/>
-				<span class="input-info-toggler" onclick="toggleInfo('PruneThreshold_info')">?</span>
-				<div id="PruneThreshold_info" class="input-info" style="display: none">
-					The duration when the cache will be considered expired. Its value must be negative
-					and greater or equal than -1 hour (-3600 seconds).
-				</div>
-			</div>
+        <h3>DNS server</h3>
 
-			<div class="section-bottom">
-				<div>
-					<button onclick="handleSave()">Save</button>
-				</div>
-			</div>
-		</div>
+        <div class="input">
+            <label for="nameservers"> Parent name servers </label>
+            <span class="input-info-toggler" onclick="toggleInfo('nameservers_info')">?</span>
+            <div id="nameservers_info" class="input-info" style="display: none">
+                List of parent DNS servers.
+            </div>
+            <div id="nameservers"></div>
+            <button onclick="handleAddNameserver()">Add</button>
+        </div>
 
-		<script src="/index.js"></script>
-		<script src="/rescached.js"></script>
-		<script>
-			let resc = null
+        <div class="input">
+            <label for="ListenAddress"> Listen address </label>
+            <input id="ListenAddress" oninput="onInput('ListenAddress', this.value)" />
+            <span class="input-info-toggler" onclick="toggleInfo('ListenAddress_info')">?</span>
+            <div id="ListenAddress_info" class="input-info" style="display: none">
+                Address in local network where rescached will listening for query from client
+                through UDP and TCP.
+                <br />
+                If you want rescached to serve a query from another host in your local network,
+                change this value to <tt>0.0.0.0:53</tt>.
+            </div>
+        </div>
 
-			async function getEnvironment() {
-				const res = await resc.getEnvironment()
-				if (res.code != 200) {
-					notifError(res.message)
-					return
-				}
-				const env = res.data
+        <div class="input">
+            <label for="HTTPPort"> HTTP listen port </label>
+            <input id="HTTPPort" type="number" min="0" max="65535" oninput="onInput('HTTPPort', parseInt(this.value))" />
+            <span class="input-info-toggler" onclick="toggleInfo('HTTPPort_info')">?</span>
+            <div id="HTTPPort_info" class="input-info" style="display: none">
+                Port to serve DNS over HTTP
+            </div>
+        </div>
 
-				// Set all input values using env data.
-				document.getElementById("FileResolvConf").value = env.FileResolvConf
-				document.getElementById("Debug").value = env.Debug
+        <div class="input">
+            <label for="TLSPort"> TLS listen port </label>
+            <input id="TLSPort" type="number" min="0" max="65535" oninput="onInput('TLSPort', parseInt(this.value))" />
+            <span class="input-info-toggler" onclick="toggleInfo('TLSPort_info')">?</span>
+            <div id="TLSPort_info" class="input-info" style="display: none">
+                Port to serve DNS over TLS
+            </div>
+        </div>
 
-				renderNameservers()
+        <div class="input">
+            <label for="TLSCertFile"> TLS certificate </label>
+            <input id="TLSCertFile" placeholder="/path/to/certificate" oninput="onInput('TLSCertFile', this.value)" />
+            <span class="input-info-toggler" onclick="toggleInfo('TLSCertFile_info')">?</span>
+            <div id="TLSCertFile_info" class="input-info" style="display: none">
+                Path to certificate file to serve DNS over TLS and HTTPS
+            </div>
+        </div>
 
-				document.getElementById("ListenAddress").value = env.ListenAddress
-				document.getElementById("HTTPPort").value = env.HTTPPort
-				document.getElementById("TLSPort").value = env.TLSPort
-				document.getElementById("TLSCertFile").value = env.TLSCertFile
-				document.getElementById("TLSPrivateKey").value = env.TLSPrivateKey
+        <div class="input">
+            <label for="TLSPrivateKey"> TLS private key </label>
+            <input id="TLSPrivateKey" placeholder="/path/to/certificate/private.key" oninput="onInput('TLSPrivateKey', this.value)" />
+            <span class="input-info-toggler" onclick="toggleInfo('TLSPrivateKey_info')">?</span>
+            <div id="TLSPrivateKey_info" class="input-info" style="display: none">
+                Path to certificate private key file to serve DNS over TLS and HTTPS.
+            </div>
+        </div>
 
-				document.getElementById("TLSAllowInsecure").checked = env.TLSAllowInsecure
-				document.getElementById("DoHBehindProxy").checked = env.DoHBehindProxy
+        <div class="input">
+            <label for="TLSAllowInsecure"> TLS allow insecure </label>
+            <div class="input-checkbox">
+                <input id="TLSAllowInsecure" type="checkbox" oninput="onInput('TLSAllowInsecure', this.checked)" />
+                <span class="suffix"> Yes </span>
+            </div>
+            <span class="input-info-toggler" onclick="toggleInfo('TLSAllowInsecure_info')">?</span>
+            <div id="TLSAllowInsecure_info" class="input-info" style="display: none">
+                If its true, allow serving DoH and DoT with self signed certificate.
+            </div>
+        </div>
 
-				document.getElementById("PruneDelay").value = env.PruneDelay
-				document.getElementById("PruneThreshold").value = env.PruneThreshold
-			}
+        <div class="input">
+            <label for="DoHBehindProxy"> DoH behind proxy </label>
+            <div class="input-checkbox">
+                <input id="DoHBehindProxy" type="checkbox" oninput="onInput('DoHBehindProxy', this.checked)" />
+                <span class="suffix"> Yes </span>
+            </div>
+            <span class="input-info-toggler" onclick="toggleInfo('DoHBehindProxy_info')">?</span>
+            <div id="DoHBehindProxy_info" class="input-info" style="display: none">
+                If its true, serve DNS over HTTP only, even if certificate files is defined. This
+                allow serving DNS request forwarded by another proxy server.
+            </div>
+        </div>
 
-			function handleAddNameserver() {
-				resc.env.NameServers.push("")
-				renderNameservers()
-			}
+        <div class="input">
+            <label for="PruneDelay"> Prune delay </label>
+            <input id="PruneDelay" type="number" min="3600" max="36000" oninput="onInput('PruneDelay', parseInt(this.value))" />
+            <span class="input-info-toggler" onclick="toggleInfo('PruneDelay_info')">?</span>
+            <div id="PruneDelay_info" class="input-info" style="display: none">
+                Delay for pruning caches. Every N seconds, rescached will traverse all caches and
+                remove response that has not been accessed less than cache.prune_threshold. Its
+                value must be equal or greater than 1 hour (3600 seconds).
+            </div>
+        </div>
 
-			async function handleSave() {
-				console.log("handleSave: ", resc.env)
-				let res = await resc.updateEnvironment()
-				if (res.code !== 200) {
-					notifError(res.message)
-					return
-				}
-				notifInfo("Environment has been saved!")
-			}
+        <div class="input">
+            <label for="PruneThreshold"> Prune threshold </label>
+            <input id="PruneThreshold" type="number" min="-36000" max="-3600" oninput="onInput('PruneThreshold', parseInt(this.value))" />
+            <span class="input-info-toggler" onclick="toggleInfo('PruneThreshold_info')">?</span>
+            <div id="PruneThreshold_info" class="input-info" style="display: none">
+                The duration when the cache will be considered expired. Its value must be negative
+                and greater or equal than -1 hour (-3600 seconds).
+            </div>
+        </div>
 
-			function onDeleteNameserver(x) {
-				resc.env.NameServers.splice(x, 1)
-				renderNameservers()
-			}
+        <div class="section-bottom">
+            <div>
+                <button onclick="handleSave()">Save</button>
+            </div>
+        </div>
+    </div>
 
-			function onInput(key, value) {
-				console.log("onInput ", key, ": ", value)
-				resc.env[key] = value
-			}
+    <script src="/index.js"></script>
+    <script src="/rescached.js"></script>
+    <script>
+        let resc = null
 
-			function onInputNameserver(x, newv) {
-				resc.env.NameServers[x] = newv
-			}
+        async function getEnvironment() {
+            const res = await resc.getEnvironment()
+            if (res.code != 200) {
+                notifError(res.message)
+                return
+            }
+            const env = res.data
 
-			function onLoad() {
-				resc = new Rescached("")
-				getEnvironment()
-			}
+            // Set all input values using env data.
+            document.getElementById("FileResolvConf").value = env.FileResolvConf
+            document.getElementById("Debug").value = env.Debug
 
-			function renderNameservers() {
-				let listNS = document.getElementById("nameservers")
-				listNS.innerHTML = ""
+            renderNameservers()
 
-				if (resc.env.NameServers === null) {
-					resc.env.NameServers = []
-					return
-				}
+            document.getElementById("ListenAddress").value = env.ListenAddress
+            document.getElementById("HTTPPort").value = env.HTTPPort
+            document.getElementById("TLSPort").value = env.TLSPort
+            document.getElementById("TLSCertFile").value = env.TLSCertFile
+            document.getElementById("TLSPrivateKey").value = env.TLSPrivateKey
 
-				for (let x = 0; x < resc.env.NameServers.length; x++) {
-					let ns = resc.env.NameServers[x]
+            document.getElementById("TLSAllowInsecure").checked = env.TLSAllowInsecure
+            document.getElementById("DoHBehindProxy").checked = env.DoHBehindProxy
 
-					let el = document.createElement("div")
-					el.classList.add("input-deletable")
-					el.innerHTML = `
+            document.getElementById("PruneDelay").value = env.PruneDelay
+            document.getElementById("PruneThreshold").value = env.PruneThreshold
+        }
+
+        function handleAddNameserver() {
+            resc.env.NameServers.push("")
+            renderNameservers()
+        }
+
+        async function handleSave() {
+            console.log("handleSave: ", resc.env)
+            let res = await resc.updateEnvironment()
+            if (res.code !== 200) {
+                notifError(res.message)
+                return
+            }
+            notifInfo("Environment has been saved!")
+        }
+
+        function onDeleteNameserver(x) {
+            resc.env.NameServers.splice(x, 1)
+            renderNameservers()
+        }
+
+        function onInput(key, value) {
+            console.log("onInput ", key, ": ", value)
+            resc.env[key] = value
+        }
+
+        function onInputNameserver(x, newv) {
+            resc.env.NameServers[x] = newv
+        }
+
+        function onLoad() {
+            resc = new Rescached("")
+            getEnvironment()
+        }
+
+        function renderNameservers() {
+            let listNS = document.getElementById("nameservers")
+            listNS.innerHTML = ""
+
+            if (resc.env.NameServers === null) {
+                resc.env.NameServers = []
+                return
+            }
+
+            for (let x = 0; x < resc.env.NameServers.length; x++) {
+                let ns = resc.env.NameServers[x]
+
+                let el = document.createElement("div")
+                el.classList.add("input-deletable")
+                el.innerHTML = `
 						<input value="${ns}" oninput="onInputNameserver(${x}, this.value)">
 						<button onclick="onDeleteNameserver(${x})">
 							Delete
 						</button>`
-					listNS.appendChild(el)
-				}
-			}
-		</script>
-	</body>
+                listNS.appendChild(el)
+            }
+        }
+    </script>
+</body>
+
 </html>
