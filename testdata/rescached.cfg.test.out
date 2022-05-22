@@ -1,7 +1,7 @@
 [rescached]
 file.resolvconf =
 wui.listen = 127.0.0.1:5381
-debug = 2
+debug = 1
 
 [block.d "pgl.yoyo.org"]
 name = pgl.yoyo.org

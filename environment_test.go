@@ -97,7 +97,7 @@ func TestLoadEnvironment(t *testing.T) {
 				},
 				TLSAllowInsecure: true,
 			},
-			Debug: 2,
+			Debug: 1,
 		}
 
 		expBuffer []byte
