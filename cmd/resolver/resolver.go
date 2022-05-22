@@ -47,22 +47,34 @@ type resolver struct {
 }
 
 func (rsol *resolver) doCmdBlockd(args []string) {
-	if len(args) == 0 {
-		log.Fatalf("resolver: %s: missing sub command", rsol.cmd)
-	}
-
 	var (
 		resc = rsol.newRescachedClient()
 
-		hb     interface{}
-		hbjson []byte
-		subCmd string
-		err    error
+		hostBlockd map[string]*rescached.Blockd
+		hb         interface{}
+		hbjson     []byte
+		subCmd     string
+		err        error
 	)
 
-	subCmd = strings.ToLower(args[0])
+	if len(args) > 0 {
+		subCmd = strings.ToLower(args[0])
+	}
 
 	switch subCmd {
+	case "":
+		hostBlockd, err = resc.Blockd()
+		if err != nil {
+			log.Fatalf("resolver: %s: %s", rsol.cmd, err)
+		}
+
+		hbjson, err = json.MarshalIndent(hostBlockd, "", "  ")
+		if err != nil {
+			log.Fatalf("resolver: %s: %s", rsol.cmd, err)
+		}
+
+		fmt.Println(string(hbjson))
+
 	case subCmdDisable:
 		args = args[1:]
 		if len(args) == 0 {

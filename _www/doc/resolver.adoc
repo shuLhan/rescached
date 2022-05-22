@@ -117,19 +117,13 @@ The "class" parameter is optional, its either IN (default), CS, or HS.
 
 ===  MANAGING BLOCK.D
 
-block.d disable <name>::
-+
---
-Disable specific hosts on block.d.
---
+`block.d`:: List all block.d hosts file.
 
-block.d enable <name>::
-+
---
-Enable specific hosts on block.d.
---
+`block.d disable <name>`:: Disable specific hosts on block.d.
 
-block.d update <name>::
+`block.d enable <name>`:: Enable specific hosts on block.d.
+
+`block.d update <name>`::
 +
 --
 Fetch the latest hosts file from remote block.d URL defined by

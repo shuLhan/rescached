@@ -67,6 +67,7 @@ Query the DNS server,
 
 Managing block.d files,
 
+	block.d                # List all hosts in block.d.
 	block.d disable <name>
 	block.d enable <name>
 	block.d update <name>
