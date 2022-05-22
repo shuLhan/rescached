@@ -61,13 +61,12 @@ func (cl *Client) Blockd() (hostBlockd map[string]*Blockd, err error) {
 }
 
 // BlockdDisable disable specific hosts on block.d.
-func (cl *Client) BlockdDisable(blockdName string) (an interface{}, err error) {
+func (cl *Client) BlockdDisable(blockdName string) (blockd *Blockd, err error) {
 	var (
 		logp   = "BlockdDisable"
 		res    = libhttp.EndpointResponse{}
 		params = url.Values{}
 
-		hb   *Blockd
 		resb []byte
 	)
 
@@ -78,7 +77,7 @@ func (cl *Client) BlockdDisable(blockdName string) (an interface{}, err error) {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	res.Data = &hb
+	res.Data = &blockd
 	err = json.Unmarshal(resb, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
@@ -87,17 +86,16 @@ func (cl *Client) BlockdDisable(blockdName string) (an interface{}, err error) {
 		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
 	}
 
-	return hb, nil
+	return blockd, nil
 }
 
 // BlockdEnable enable specific hosts on block.d.
-func (cl *Client) BlockdEnable(blockdName string) (an interface{}, err error) {
+func (cl *Client) BlockdEnable(blockdName string) (blockd *Blockd, err error) {
 	var (
 		logp   = "BlockdEnable"
 		res    = libhttp.EndpointResponse{}
 		params = url.Values{}
 
-		hb   *Blockd
 		resb []byte
 	)
 
@@ -108,7 +106,7 @@ func (cl *Client) BlockdEnable(blockdName string) (an interface{}, err error) {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	res.Data = &hb
+	res.Data = &blockd
 	err = json.Unmarshal(resb, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
@@ -117,18 +115,17 @@ func (cl *Client) BlockdEnable(blockdName string) (an interface{}, err error) {
 		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
 	}
 
-	return hb, nil
+	return blockd, nil
 }
 
 // BlockdUpdate fetch the latest hosts file from the hosts block
 // provider based on registered URL.
-func (cl *Client) BlockdUpdate(blockdName string) (an interface{}, err error) {
+func (cl *Client) BlockdUpdate(blockdName string) (blockd *Blockd, err error) {
 	var (
 		logp   = "BlockdUpdate"
 		params = url.Values{}
 		res    = libhttp.EndpointResponse{}
 
-		hb   *Blockd
 		resb []byte
 	)
 
@@ -139,7 +136,7 @@ func (cl *Client) BlockdUpdate(blockdName string) (an interface{}, err error) {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	res.Data = &hb
+	res.Data = &blockd
 	err = json.Unmarshal(resb, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
@@ -148,7 +145,7 @@ func (cl *Client) BlockdUpdate(blockdName string) (an interface{}, err error) {
 		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
 	}
 
-	return hb, nil
+	return blockd, nil
 }
 
 // Caches fetch all of non-local caches from server.

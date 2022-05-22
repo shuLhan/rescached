@@ -51,8 +51,8 @@ func (rsol *resolver) doCmdBlockd(args []string) {
 		resc = rsol.newRescachedClient()
 
 		hostBlockd map[string]*rescached.Blockd
-		hb         interface{}
-		hbjson     []byte
+		blockd     *rescached.Blockd
+		vbytes     []byte
 		subCmd     string
 		err        error
 	)
@@ -68,12 +68,12 @@ func (rsol *resolver) doCmdBlockd(args []string) {
 			log.Fatalf("resolver: %s: %s", rsol.cmd, err)
 		}
 
-		hbjson, err = json.MarshalIndent(hostBlockd, "", "  ")
+		vbytes, err = json.MarshalIndent(hostBlockd, "", "  ")
 		if err != nil {
 			log.Fatalf("resolver: %s: %s", rsol.cmd, err)
 		}
 
-		fmt.Println(string(hbjson))
+		fmt.Println(string(vbytes))
 
 	case subCmdDisable:
 		args = args[1:]
@@ -81,17 +81,17 @@ func (rsol *resolver) doCmdBlockd(args []string) {
 			log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
 		}
 
-		hb, err = resc.BlockdDisable(args[0])
+		blockd, err = resc.BlockdDisable(args[0])
 		if err != nil {
 			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
 		}
 
-		hbjson, err = json.MarshalIndent(hb, "", "  ")
+		vbytes, err = json.MarshalIndent(blockd, "", "  ")
 		if err != nil {
 			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
 		}
 
-		fmt.Println(string(hbjson))
+		fmt.Println(string(vbytes))
 
 	case subCmdEnable:
 		args = args[1:]
@@ -99,17 +99,17 @@ func (rsol *resolver) doCmdBlockd(args []string) {
 			log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
 		}
 
-		hb, err = resc.BlockdEnable(args[0])
+		blockd, err = resc.BlockdEnable(args[0])
 		if err != nil {
 			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
 		}
 
-		hbjson, err = json.MarshalIndent(hb, "", "  ")
+		vbytes, err = json.MarshalIndent(blockd, "", "  ")
 		if err != nil {
 			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
 		}
 
-		fmt.Println(string(hbjson))
+		fmt.Println(string(vbytes))
 
 	case subCmdUpdate:
 		args = args[1:]
@@ -117,17 +117,17 @@ func (rsol *resolver) doCmdBlockd(args []string) {
 			log.Fatalf("resolver: %s %s: missing argument", rsol.cmd, subCmd)
 		}
 
-		hb, err = resc.BlockdUpdate(args[0])
+		blockd, err = resc.BlockdUpdate(args[0])
 		if err != nil {
 			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
 		}
 
-		hbjson, err = json.MarshalIndent(hb, "", "  ")
+		vbytes, err = json.MarshalIndent(blockd, "", "  ")
 		if err != nil {
 			log.Fatalf("resolver: %s %s: %s", rsol.cmd, subCmd, err)
 		}
 
-		fmt.Println(string(hbjson))
+		fmt.Println(string(vbytes))
 
 	default:
 		log.Fatalf("resolver: %s: unknown sub command: %s", rsol.cmd, subCmd)
