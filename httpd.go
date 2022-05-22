@@ -119,6 +119,17 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+		Method:       libhttp.RequestMethodGet,
+		Path:         apiBlockd,
+		RequestType:  libhttp.RequestTypeNone,
+		ResponseType: libhttp.ResponseTypeJSON,
+		Call:         srv.httpApiBlockdList,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         apiBlockd,
 		RequestType:  libhttp.RequestTypeJSON,
@@ -299,6 +310,34 @@ func (srv *Server) httpdRun() {
 	if err != nil {
 		log.Printf("httpServer.run: %s", err)
 	}
+}
+
+// httpApiBlockdList fetch the list of block.d files.
+//
+// # Request
+//
+//	GET /api/block.d
+//
+// # Response
+//
+// On success it will return list of hosts in block.d,
+//
+//	{
+//		"data": {
+//			"<name>": <Blockd>
+//			...
+//		}
+//	}
+func (srv *Server) httpApiBlockdList(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+	var (
+		res = libhttp.EndpointResponse{}
+	)
+
+	res.Code = http.StatusOK
+	res.Data = srv.env.HostBlockd
+
+	resBody, err = json.Marshal(&res)
+	return resBody, err
 }
 
 // httpApiBlockdDisable disable the hosts block.d.

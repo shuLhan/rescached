@@ -33,6 +33,33 @@ func NewClient(serverUrl string, insecure bool) (cl *Client) {
 	return cl
 }
 
+// Blockd return list of all block.d files on the server.
+func (cl *Client) Blockd() (hostBlockd map[string]*Blockd, err error) {
+	var (
+		logp = "Blockd"
+		res  = libhttp.EndpointResponse{}
+
+		resb []byte
+	)
+
+	_, resb, err = cl.Get(apiBlockd, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+
+	res.Data = &hostBlockd
+
+	err = json.Unmarshal(resb, &res)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", logp, err)
+	}
+	if res.Code != http.StatusOK {
+		return nil, fmt.Errorf("%s: %d %s", logp, res.Code, res.Message)
+	}
+
+	return hostBlockd, nil
+}
+
 // BlockdDisable disable specific hosts on block.d.
 func (cl *Client) BlockdDisable(blockdName string) (an interface{}, err error) {
 	var (
