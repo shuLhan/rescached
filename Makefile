@@ -63,6 +63,7 @@ test.prof:
 
 lint:
 	-golangci-lint run ./...
+	-reuse lint
 
 
 ##---- Cleaning up.
