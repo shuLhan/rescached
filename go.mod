@@ -7,7 +7,7 @@ go 1.16
 
 require (
 	git.sr.ht/~shulhan/ciigo v0.8.1
-	github.com/shuLhan/share v0.37.1-0.20220517151646-345ee16b214a
+	github.com/shuLhan/share v0.38.0
 )
 
 //replace github.com/shuLhan/share => ../share

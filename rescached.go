@@ -77,7 +77,7 @@ func (srv *Server) Start() (err error) {
 	fcaches, err = os.Open(srv.env.pathFileCaches)
 	if err == nil {
 		// Load stored caches from file.
-		answers, err = srv.dns.CachesLoad(fcaches)
+		answers, err = srv.dns.Caches.ExternalLoad(fcaches)
 		if err != nil {
 			log.Printf("%s: %s", logp, err)
 		} else {
@@ -94,7 +94,7 @@ func (srv *Server) Start() (err error) {
 	if err != nil {
 		return err
 	}
-	err = srv.dns.PopulateCachesByRR(hfile.Records, hfile.Path)
+	err = srv.dns.Caches.InternalPopulateRecords(hfile.Records, hfile.Path)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (srv *Server) Start() (err error) {
 			return fmt.Errorf("%s: %w", logp, err)
 		}
 
-		err = srv.dns.PopulateCachesByRR(hfile.Records, hfile.Path)
+		err = srv.dns.Caches.InternalPopulateRecords(hfile.Records, hfile.Path)
 		if err != nil {
 			return fmt.Errorf("%s: %w", logp, err)
 		}
@@ -130,7 +130,7 @@ func (srv *Server) Start() (err error) {
 	}
 
 	for _, hfile = range srv.env.HostsFiles {
-		err = srv.dns.PopulateCachesByRR(hfile.Records, hfile.Path)
+		err = srv.dns.Caches.InternalPopulateRecords(hfile.Records, hfile.Path)
 		if err != nil {
 			return err
 		}
@@ -148,7 +148,7 @@ func (srv *Server) Start() (err error) {
 		err = nil
 	}
 	for _, zone = range srv.env.Zones {
-		srv.dns.PopulateCaches(zone.Messages(), zone.Path)
+		srv.dns.Caches.InternalPopulate(zone.Messages(), zone.Path)
 	}
 
 	if len(srv.env.FileResolvConf) > 0 {
@@ -205,7 +205,7 @@ func (srv *Server) Stop() {
 		log.Printf("%s: %s", logp, err)
 		return
 	}
-	n, err = srv.dns.CachesSave(fcaches)
+	n, err = srv.dns.Caches.ExternalSave(fcaches)
 	if err != nil {
 		log.Printf("%s: %s", logp, err)
 		// fall-through for Close.

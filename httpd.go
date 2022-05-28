@@ -498,7 +498,7 @@ func (srv *Server) httpApiBlockdFetch(epr *libhttp.EndpointRequest) (resBody []b
 func (srv *Server) httpApiCaches(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res     = libhttp.EndpointResponse{}
-		answers = srv.dns.CachesLRU()
+		answers = srv.dns.Caches.ExternalLRU()
 	)
 	res.Code = http.StatusOK
 	if len(answers) == 0 {
@@ -531,7 +531,7 @@ func (srv *Server) httpApiCachesSearch(epr *libhttp.EndpointRequest) (resBody []
 		return nil, &res
 	}
 
-	listMsg = srv.dns.SearchCaches(re)
+	listMsg = srv.dns.Caches.ExternalSearch(re)
 	if listMsg == nil {
 		listMsg = make([]*dns.Message, 0)
 	}
@@ -556,9 +556,9 @@ func (srv *Server) httpApiCachesDelete(epr *libhttp.EndpointRequest) (resBody []
 		return nil, &res
 	}
 	if q == "all" {
-		answers = srv.dns.CachesClear()
+		answers = srv.dns.Caches.ExternalClear()
 	} else {
-		answers = srv.dns.RemoveCachesByNames([]string{q})
+		answers = srv.dns.Caches.ExternalRemoveNames([]string{q})
 	}
 
 	res.Code = http.StatusOK
@@ -751,7 +751,7 @@ func (srv *Server) blockdEnable(hb *Blockd) (err error) {
 		return fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = srv.dns.PopulateCachesByRR(hfile.Records, hfile.Path)
+	err = srv.dns.Caches.InternalPopulateRecords(hfile.Records, hfile.Path)
 	if err != nil {
 		return fmt.Errorf("%s: %w", logp, err)
 	}
@@ -773,7 +773,7 @@ func (srv *Server) blockdDisable(hb *Blockd) (err error) {
 		return fmt.Errorf("%s: unknown hosts block: %q", logp, hb.Name)
 	}
 
-	srv.dns.RemoveLocalCachesByNames(hfile.Names())
+	srv.dns.Caches.InternalRemoveNames(hfile.Names())
 
 	err = hb.disable()
 	if err != nil {
@@ -885,7 +885,7 @@ func (srv *Server) apiHostsdDelete(epr *libhttp.EndpointRequest) (resbody []byte
 	}
 
 	// Remove the records associated with hosts file.
-	srv.dns.RemoveLocalCachesByNames(hfile.Names())
+	srv.dns.Caches.InternalRemoveNames(hfile.Names())
 
 	err = hfile.Delete()
 	if err != nil {
@@ -1013,7 +1013,7 @@ func (srv *Server) apiHostsdRecordAdd(epr *libhttp.EndpointRequest) (resbody []b
 		return nil, &res
 	}
 
-	err = srv.dns.PopulateCachesByRR([]*dns.ResourceRecord{rr}, hostsFileName)
+	err = srv.dns.Caches.InternalPopulateRecords([]*dns.ResourceRecord{rr}, hostsFileName)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -1076,7 +1076,7 @@ func (srv *Server) apiHostsdRecordDelete(epr *libhttp.EndpointRequest) (resbody 
 		return nil, &res
 	}
 
-	srv.dns.RemoveLocalCachesByNames([]string{domainName})
+	srv.dns.Caches.InternalRemoveNames([]string{domainName})
 
 	res.Code = http.StatusOK
 	res.Message = "domain name '" + domainName + "' has been removed from hosts file"
@@ -1190,7 +1190,7 @@ func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, er
 		names = append(names, name)
 	}
 
-	srv.dns.RemoveLocalCachesByNames(names)
+	srv.dns.Caches.InternalRemoveNames(names)
 	delete(srv.env.Zones, zoneName)
 
 	err = zone.Delete()
@@ -1365,7 +1365,7 @@ func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err
 	}
 
 	listRR = []*dns.ResourceRecord{rr}
-	err = srv.dns.PopulateCachesByRR(listRR, zoneFile.Path)
+	err = srv.dns.Caches.InternalPopulateRecords(listRR, zoneFile.Path)
 	if err != nil {
 		res.Code = http.StatusBadRequest
 		res.Message = "PopulateCacheByRR: " + err.Error()
@@ -1485,7 +1485,7 @@ func (srv *Server) apiZonedRRDelete(epr *libhttp.EndpointRequest) (resbody []byt
 	}
 
 	// Remove the RR from caches.
-	rr, err = srv.dns.RemoveCachesByRR(rr)
+	rr, err = srv.dns.Caches.InternalRemoveRecord(rr)
 	if err != nil {
 		res.Message = err.Error()
 		return nil, &res
