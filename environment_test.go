@@ -74,17 +74,17 @@ func TestLoadEnvironment(t *testing.T) {
 
 			WUIListen: "127.0.0.1:5381",
 			HostBlockd: map[string]*Blockd{
-				"pgl.yoyo.org": &Blockd{
-					Name: "pgl.yoyo.org",
-					URL:  `http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext`,
+				"a.block": &Blockd{
+					Name: "a.block",
+					URL:  "http://127.0.0.1:11180/hosts/a",
 				},
-				"winhelp2002.mvps.org": &Blockd{
-					Name: "winhelp2002.mvps.org",
-					URL:  `http://winhelp2002.mvps.org/hosts.txt`,
+				"b.block": &Blockd{
+					Name: "b.block",
+					URL:  "http://127.0.0.1:11180/hosts/b",
 				},
-				"someonewhocares.org": &Blockd{
-					Name: "someonewhocares.org",
-					URL:  `http://someonewhocares.org/hosts/hosts`,
+				"c.block": &Blockd{
+					Name: "c.block",
+					URL:  "http://127.0.0.1:11180/hosts/c",
 				},
 			},
 			HttpdOptions: &libhttp.ServerOptions{
@@ -130,5 +130,5 @@ func TestLoadEnvironment(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	test.Assert(t, "Write", expBuffer, gotBuffer.Bytes())
+	test.Assert(t, "Write", string(expBuffer), gotBuffer.String())
 }

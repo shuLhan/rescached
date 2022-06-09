@@ -3,21 +3,21 @@ file.resolvconf =
 wui.listen = 127.0.0.1:5381
 debug = 1
 
-[block.d "pgl.yoyo.org"]
-name = pgl.yoyo.org
-url = http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext
+[block.d "a.block"]
+name = a.block
+url = http://127.0.0.1:11180/hosts/a
 
-[block.d "someonewhocares.org"]
-name = someonewhocares.org
-url = http://someonewhocares.org/hosts/hosts
+[block.d "b.block"]
+name = b.block
+url = http://127.0.0.1:11180/hosts/b
+
+[block.d "c.block"]
+name = c.block
+url = http://127.0.0.1:11180/hosts/c
 
 [block.d "test"]
 name = test
 url = http://someurl
-
-[block.d "winhelp2002.mvps.org"]
-name = winhelp2002.mvps.org
-url = http://winhelp2002.mvps.org/hosts.txt
 
 [dns "server"]
 listen = 127.0.0.1:5350
