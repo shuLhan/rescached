@@ -925,7 +925,15 @@ func (srv *Server) apiHostsdDelete(epr *libhttp.EndpointRequest) (resbody []byte
 //
 // # Request
 //
+// Format,
+//
 //	GET /api/hosts.d?name=<name>
+//
+// Parameters,
+//
+//   - name: string, optional, the name of hosts file where content to be
+//     fetch.
+//     If its empty, it will return all hosts files.
 //
 // # Response
 //
@@ -938,6 +946,13 @@ func (srv *Server) apiHostsdGet(epr *libhttp.EndpointRequest) (resbody []byte, e
 		hf    *dns.HostsFile
 		found bool
 	)
+
+	name = strings.TrimSpace(name)
+	if len(name) == 0 {
+		res.Code = http.StatusOK
+		res.Data = srv.env.HostsFiles
+		return json.Marshal(&res)
+	}
 
 	hf, found = srv.env.HostsFiles[name]
 	if !found {
