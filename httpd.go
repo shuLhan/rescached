@@ -671,14 +671,35 @@ func (srv *Server) httpApiEnvironmentUpdate(epr *libhttp.EndpointRequest) (resBo
 // and remove it from list of hostBlockdFile.
 //
 // # Request
+//
+// Format,
+//
+//	PUT /api/block.d
+//	Content-Type: application/json
+//
+//	{
+//		"<Blockd name>": <Blockd>,
+//		...
+//	}
+//
+// # Response
+//
+// On success, it will return the list of Blockd objects.
+//
+//	{
+//		"data": {
+//			"<Blockd name>": <Blockd>,
+//			...
+//		}
+//	}
 func (srv *Server) httpApiBlockdUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		logp       = "httpApiBlockdUpdate"
 		res        = libhttp.EndpointResponse{}
 		hostBlockd = make(map[string]*Blockd, 0)
 
-		hbx *Blockd
-		hby *Blockd
+		blockdReq *Blockd
+		blockdCur *Blockd
 	)
 
 	err = json.Unmarshal(epr.RequestBody, &hostBlockd)
@@ -690,28 +711,28 @@ func (srv *Server) httpApiBlockdUpdate(epr *libhttp.EndpointRequest) (resBody []
 
 	res.Code = http.StatusInternalServerError
 
-	for _, hbx = range hostBlockd {
-		for _, hby = range srv.env.HostBlockd {
-			if hbx.Name != hby.Name {
+	for _, blockdReq = range hostBlockd {
+		for _, blockdCur = range srv.env.HostBlockd {
+			if blockdReq.Name != blockdCur.Name {
 				continue
 			}
-			if hbx.IsEnabled == hby.IsEnabled {
+			if blockdReq.IsEnabled == blockdCur.IsEnabled {
 				break
 			}
 
-			if hbx.IsEnabled {
-				err = srv.blockdEnable(hby)
+			if blockdReq.IsEnabled {
+				err = srv.blockdEnable(blockdCur)
 				if err != nil {
 					res.Message = err.Error()
 					return nil, &res
 				}
 			} else {
-				err = srv.blockdDisable(hby)
+				err = srv.blockdDisable(blockdCur)
 				if err != nil {
 					res.Message = err.Error()
 					return nil, &res
 				}
-				hby.IsEnabled = false
+				blockdCur.IsEnabled = false
 			}
 		}
 	}

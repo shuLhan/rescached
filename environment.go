@@ -62,9 +62,6 @@ var (
 
 // Environment for running rescached.
 type Environment struct {
-	HostsFiles map[string]*dns.HostsFile
-	Zones      map[string]*dns.Zone
-
 	dirBase        string
 	pathDirBlock   string
 	pathDirCaches  string
@@ -78,6 +75,8 @@ type Environment struct {
 
 	HostBlockd     map[string]*Blockd `ini:"block.d"`
 	hostBlockdFile map[string]*dns.HostsFile
+	HostsFiles     map[string]*dns.HostsFile
+	Zones          map[string]*dns.Zone
 
 	// The options for WUI HTTP server.
 	HttpdOptions *libhttp.ServerOptions `json:"-"`

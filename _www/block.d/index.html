@@ -79,7 +79,7 @@
             <span class="info"> Name </span>
         </div>
     </div>
-    <div id="HostsBlocks" class="block_source"></div>
+    <div id="HostBlockd" class="block_source"></div>
 
     <div>
         <button onclick="blockdUpdate()">Save</button>
@@ -103,11 +103,11 @@
             }
 
             let env = res.data
-            renderHostsBlocks(env.HostsBlocks)
+            renderHostBlockd(env.HostBlockd)
         }
 
         function onCheckHostblock(key, val) {
-            resc.env.HostsBlocks[key].IsEnabled = val
+            resc.env.HostBlockd[key].IsEnabled = val
         }
 
         async function blockdFetch(name) {
@@ -117,34 +117,34 @@
                 return
             }
 
-            resc.env.HostsBlocks[name] = res.data
+            resc.env.HostBlockd[name] = res.data
 
             notifInfo("The hosts blocks has been updated.")
 
-            renderHostsBlocks(resc.env.HostsBlocks)
+            renderHostBlockd(resc.env.HostBlockd)
         }
 
         async function blockdUpdate() {
-            const res = await resc.BlockdUpdate(resc.env.HostsBlocks)
+            const res = await resc.BlockdUpdate(resc.env.HostBlockd)
             if (res.code != 200) {
                 notifError("blockdUpdate: ", res.message)
                 return
             }
 
-            renderHostsBlocks(res.data)
+            renderHostBlockd(res.data)
             notifInfo("The hosts blocks has been updated.")
         }
 
-        function renderHostsBlocks(hostsBlocks) {
-            let parent = document.getElementById("HostsBlocks")
+        function renderHostBlockd(hostsBlockd) {
+            let parent = document.getElementById("HostBlockd")
             parent.innerHTML = ""
 
-            for (var k in hostsBlocks) {
-                if (!hostsBlocks.hasOwnProperty(k)) {
+            for (var k in hostsBlockd) {
+                if (!hostsBlockd.hasOwnProperty(k)) {
                     continue;
                 }
 
-                let hostsBlock = hostsBlocks[k]
+                let hostsBlock = hostsBlockd[k]
                 let item = document.createElement("div")
                 item.classList.add("item")
                 item.innerHTML = `
