@@ -234,10 +234,10 @@ class Rescached {
 
     Object.assign(got, this.env);
 
-    got.PruneDelay = got.PruneDelay * this.nanoSeconds;
-    got.PruneThreshold = got.PruneThreshold * this.nanoSeconds;
+    got.PruneDelay = got.PruneDelay * Rescached.nanoSeconds;
+    got.PruneThreshold = got.PruneThreshold * Rescached.nanoSeconds;
 
-    const httpRes = await fetch(this.server + "/api/environment", {
+    const httpRes = await fetch("/api/environment", {
       method : "POST",
       headers : {
         [headerContentType] : contentTypeJson,

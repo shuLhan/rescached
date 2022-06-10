@@ -595,6 +595,8 @@ func (srv *Server) httpApiEnvironmentGet(epr *libhttp.EndpointRequest) (resBody 
 //
 // # Request
 //
+// Format,
+//
 //	POST /api/environment
 //	Content-Type: application/json
 //
@@ -611,41 +613,36 @@ func (srv *Server) httpApiEnvironmentGet(epr *libhttp.EndpointRequest) (resBody 
 //	}
 func (srv *Server) httpApiEnvironmentUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
-		logp    = "httpApiEnvironmentUpdate"
-		res     = libhttp.EndpointResponse{}
-		newOpts = new(Environment)
+		res    = libhttp.EndpointResponse{}
+		newEnv = new(Environment)
 	)
 
-	err = json.Unmarshal(epr.RequestBody, newOpts)
+	err = json.Unmarshal(epr.RequestBody, newEnv)
 	if err != nil {
 		res.Code = http.StatusBadRequest
 		res.Message = err.Error()
 		return nil, &res
 	}
 
-	if len(newOpts.NameServers) == 0 {
+	if len(newEnv.ServerOptions.NameServers) == 0 {
 		res.Code = http.StatusBadRequest
-		res.Message = "at least one parent name servers must be defined"
+		res.Message = "At least one parent name servers must be defined"
 		return nil, &res
 	}
 
-	err = newOpts.init()
-	if err != nil {
-		res.Code = http.StatusInternalServerError
-		res.Message = fmt.Sprintf("%s: %s", logp, err)
-		return nil, &res
+	srv.env.ServerOptions = newEnv.ServerOptions
+	if len(srv.env.ServerOptions.ListenAddress) == 0 {
+		srv.env.ServerOptions.ListenAddress = defListenAddress
 	}
 
-	fmt.Printf("new options: %+v\n", newOpts)
+	srv.env.Debug = newEnv.Debug
 
-	err = newOpts.write(srv.env.fileConfig)
+	err = srv.env.write(srv.env.fileConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		return nil, &res
 	}
-
-	srv.env = newOpts
 
 	srv.Stop()
 	err = srv.Start()
@@ -657,7 +654,7 @@ func (srv *Server) httpApiEnvironmentUpdate(epr *libhttp.EndpointRequest) (resBo
 
 	res.Code = http.StatusOK
 	res.Message = "Restarting DNS server"
-	res.Data = newOpts
+	res.Data = srv.env
 
 	return json.Marshal(&res)
 }

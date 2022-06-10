@@ -142,8 +142,8 @@ func (env *Environment) init() (err error) {
 	if len(env.WUIListen) == 0 {
 		env.WUIListen = defWuiAddress
 	}
-	if len(env.ListenAddress) == 0 {
-		env.ListenAddress = defListenAddress
+	if len(env.ServerOptions.ListenAddress) == 0 {
+		env.ServerOptions.ListenAddress = defListenAddress
 	}
 	if len(env.FileResolvConf) > 0 {
 		_, _ = env.loadResolvConf()

@@ -91,7 +91,7 @@
 
         <div class="input">
             <label for="Debug"> Debug level </label>
-            <input id="Debug" type="number" min="0" max="3" oninput="onInput('Debug', this.value)" />
+            <input id="Debug" type="number" min="0" max="3" oninput="onInput('Debug', parseInt(this.value))" />
             <span class="input-info-toggler" onclick="toggleInfo('Debug_info')">?</span>
             <div id="Debug_info" class="input-info" style="display: none">
                 This option only used for debugging program or if user want to monitor what kind of
@@ -224,6 +224,7 @@
                 notifError(res.message)
                 return
             }
+
             const env = res.data
 
             // Set all input values using env data.
