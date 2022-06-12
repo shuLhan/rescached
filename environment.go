@@ -75,8 +75,8 @@ type Environment struct {
 
 	HostBlockd     map[string]*Blockd `ini:"block.d"`
 	hostBlockdFile map[string]*dns.HostsFile
-	HostsFiles     map[string]*dns.HostsFile
-	Zones          map[string]*dns.Zone
+	hostsd         map[string]*dns.HostsFile
+	zoned          map[string]*dns.Zone
 
 	// The options for WUI HTTP server.
 	HttpdOptions *libhttp.ServerOptions `json:"-"`
@@ -115,8 +115,8 @@ func LoadEnvironment(dirBase, fileConfig string) (env *Environment, err error) {
 // newEnvironment create and initialize options with default values.
 func newEnvironment(dirBase, fileConfig string) *Environment {
 	return &Environment{
-		HostsFiles: make(map[string]*dns.HostsFile),
-		Zones:      make(map[string]*dns.Zone),
+		hostsd: make(map[string]*dns.HostsFile),
+		zoned:  make(map[string]*dns.Zone),
 
 		dirBase:        dirBase,
 		pathDirBlock:   filepath.Join(dirBase, dirBlock),

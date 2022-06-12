@@ -117,7 +117,7 @@ func (srv *Server) Start() (err error) {
 		srv.env.hostBlockdFile[hfile.Name] = hfile
 	}
 
-	srv.env.HostsFiles, err = dns.LoadHostsDir(srv.env.pathDirHosts)
+	srv.env.hostsd, err = dns.LoadHostsDir(srv.env.pathDirHosts)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
 			return err
@@ -129,14 +129,14 @@ func (srv *Server) Start() (err error) {
 		err = nil
 	}
 
-	for _, hfile = range srv.env.HostsFiles {
+	for _, hfile = range srv.env.hostsd {
 		err = srv.dns.Caches.InternalPopulateRecords(hfile.Records, hfile.Path)
 		if err != nil {
 			return err
 		}
 	}
 
-	srv.env.Zones, err = dns.LoadZoneDir(srv.env.pathDirZone)
+	srv.env.zoned, err = dns.LoadZoneDir(srv.env.pathDirZone)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
 			return err
@@ -147,7 +147,7 @@ func (srv *Server) Start() (err error) {
 		}
 		err = nil
 	}
-	for _, zone = range srv.env.Zones {
+	for _, zone = range srv.env.zoned {
 		srv.dns.Caches.InternalPopulate(zone.Messages(), zone.Path)
 	}
 

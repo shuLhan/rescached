@@ -841,7 +841,7 @@ func (srv *Server) apiHostsdCreate(epr *libhttp.EndpointRequest) (resbody []byte
 		return nil, &res
 	}
 
-	hfile = srv.env.HostsFiles[name]
+	hfile = srv.env.hostsd[name]
 	if hfile == nil {
 		path = filepath.Join(srv.env.pathDirHosts, name)
 		hfile, err = dns.NewHostsFile(path, nil)
@@ -850,7 +850,7 @@ func (srv *Server) apiHostsdCreate(epr *libhttp.EndpointRequest) (resbody []byte
 			res.Message = err.Error()
 			return nil, &res
 		}
-		srv.env.HostsFiles[hfile.Name] = hfile
+		srv.env.hostsd[hfile.Name] = hfile
 	}
 
 	res.Code = http.StatusOK
@@ -895,7 +895,7 @@ func (srv *Server) apiHostsdDelete(epr *libhttp.EndpointRequest) (resbody []byte
 		return nil, &res
 	}
 
-	hfile, found = srv.env.HostsFiles[name]
+	hfile, found = srv.env.hostsd[name]
 	if !found {
 		res.Code = http.StatusBadRequest
 		res.Message = fmt.Sprintf("hosts file %s not found", name)
@@ -912,7 +912,7 @@ func (srv *Server) apiHostsdDelete(epr *libhttp.EndpointRequest) (resbody []byte
 		return nil, &res
 	}
 
-	delete(srv.env.HostsFiles, name)
+	delete(srv.env.hostsd, name)
 
 	res.Code = http.StatusOK
 	res.Message = name + " has been deleted"
@@ -950,11 +950,11 @@ func (srv *Server) apiHostsdGet(epr *libhttp.EndpointRequest) (resbody []byte, e
 	name = strings.TrimSpace(name)
 	if len(name) == 0 {
 		res.Code = http.StatusOK
-		res.Data = srv.env.HostsFiles
+		res.Data = srv.env.hostsd
 		return json.Marshal(&res)
 	}
 
-	hf, found = srv.env.HostsFiles[name]
+	hf, found = srv.env.hostsd[name]
 	if !found {
 		res.Code = http.StatusNotFound
 		res.Message = "invalid or empty hosts file " + name
@@ -1012,7 +1012,7 @@ func (srv *Server) apiHostsdRecordAdd(epr *libhttp.EndpointRequest) (resbody []b
 		return nil, &res
 	}
 
-	hfile, found = srv.env.HostsFiles[hostsFileName]
+	hfile, found = srv.env.hostsd[hostsFileName]
 	if !found {
 		res.Message = "unknown hosts file name: " + hostsFileName
 		return nil, &res
@@ -1091,7 +1091,7 @@ func (srv *Server) apiHostsdRecordDelete(epr *libhttp.EndpointRequest) (resbody 
 		return nil, &res
 	}
 
-	hfile, found = srv.env.HostsFiles[hostsFileName]
+	hfile, found = srv.env.hostsd[hostsFileName]
 	if !found {
 		res.Message = "unknown hosts file name: " + hostsFileName
 		return nil, &res
@@ -1144,7 +1144,7 @@ func (srv *Server) apiZoned(epr *libhttp.EndpointRequest) (resb []byte, err erro
 	)
 
 	res.Code = http.StatusOK
-	res.Data = srv.env.Zones
+	res.Data = srv.env.zoned
 	resb, err = json.Marshal(&res)
 	return resb, err
 }
@@ -1170,7 +1170,7 @@ func (srv *Server) apiZonedCreate(epr *libhttp.EndpointRequest) (resb []byte, er
 		return nil, &res
 	}
 
-	zone = srv.env.Zones[zoneName]
+	zone = srv.env.zoned[zoneName]
 	if zone != nil {
 		res.Code = http.StatusOK
 		res.Data = zone
@@ -1186,7 +1186,7 @@ func (srv *Server) apiZonedCreate(epr *libhttp.EndpointRequest) (resb []byte, er
 		return nil, &res
 	}
 
-	srv.env.Zones[zoneName] = zone
+	srv.env.zoned[zoneName] = zone
 
 	res.Code = http.StatusOK
 	res.Data = zone
@@ -1212,7 +1212,7 @@ func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, er
 		return nil, &res
 	}
 
-	zone = srv.env.Zones[zoneName]
+	zone = srv.env.zoned[zoneName]
 	if zone == nil {
 		res.Message = "zone file not found: " + zoneName
 		return nil, &res
@@ -1224,7 +1224,7 @@ func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, er
 	}
 
 	srv.dns.Caches.InternalRemoveNames(names)
-	delete(srv.env.Zones, zoneName)
+	delete(srv.env.zoned, zoneName)
 
 	err = zone.Delete()
 	if err != nil {
@@ -1276,7 +1276,7 @@ func (srv *Server) apiZonedRR(epr *libhttp.EndpointRequest) (resb []byte, err er
 		return nil, &res
 	}
 
-	zone = srv.env.Zones[zoneName]
+	zone = srv.env.zoned[zoneName]
 	if zone == nil {
 		res.Message = fmt.Sprintf("unknown or empty zone parameter: %q", zoneName)
 		return nil, &res
@@ -1342,7 +1342,7 @@ func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err
 		return nil, &res
 	}
 
-	zoneFile = srv.env.Zones[req.Name]
+	zoneFile = srv.env.zoned[req.Name]
 	if zoneFile == nil {
 		res.Message = "unknown zone file name: " + req.Name
 		return nil, &res
@@ -1463,7 +1463,7 @@ func (srv *Server) apiZonedRRDelete(epr *libhttp.EndpointRequest) (resbody []byt
 		return nil, &res
 	}
 
-	zone = srv.env.Zones[req.Name]
+	zone = srv.env.zoned[req.Name]
 	if zone == nil {
 		res.Message = "unknown zone file name " + req.Name
 		return nil, &res
