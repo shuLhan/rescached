@@ -1498,6 +1498,7 @@ func (srv *Server) apiZonedRRDelete(epr *libhttp.EndpointRequest) (resbody []byt
 	}
 
 	rr.Name = strings.TrimRight(rr.Name, ".")
+	rr.Name = strings.TrimRight(rr.Name, zone.Name)
 
 	if rr.Type == dns.RecordTypePTR {
 		if len(rr.Name) == 0 {
