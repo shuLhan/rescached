@@ -134,10 +134,10 @@
             renderCaches(res.data);
         }
 
-        async function doCacheRemove(idx, qname) {
-            const res = await resc.CacheRemove(qname);
+        async function CachesRemove(idx, qname) {
+            const res = await resc.CachesRemove(qname);
             if (res.code != 200) {
-                notifError(`doCacheRemove ${qname}: ${res.message}`);
+                notifError(`CachesRemove ${qname}: ${res.message}`);
                 return;
             }
 
@@ -151,7 +151,7 @@
         async function doSearch() {
             const query = document.getElementsByName("query")[0].value;
             console.log("doSearch: ", query);
-            const res = await resc.Search(query);
+            const res = await resc.CachesSearch(query);
             if (res.code != 200) {
                 notifError(`doSearch ${query}: ${res.message}`);
                 return;
@@ -179,19 +179,19 @@
                 const divRecord = document.createElement("div");
                 divRecord.classList.add("message");
                 innerHTML = `
-						<div class="qname">
-							${record.Question.Name}
-							<button class="b-remove"
-								onclick="doCacheRemove(${x}, '${record.Question.Name}')"
-							>Remove from cache</button>
-						</div>
-						<div class="rr header">
-							<span class="kind"></span>
-							<span class="type"> Type </span>
-							<span class="ttl"> TTL </span>
-							<span class="value"> Value </span>
-						</div>
-					`;
+                    <div class="qname">
+                        ${record.Question.Name}
+                        <button class="b-remove"
+                            onclick="CachesRemove(${x}, '${record.Question.Name}')"
+                        >Remove from cache</button>
+                    </div>
+                    <div class="rr header">
+                        <span class="kind"></span>
+                        <span class="type"> Type </span>
+                        <span class="ttl"> TTL </span>
+                        <span class="value"> Value </span>
+                    </div>
+                `;
                 if (record.Answer !== null && record.Answer.length > 0) {
                     innerHTML += renderRR(record.Answer, "Answer");
                 }
@@ -208,22 +208,18 @@
         }
 
         function renderCaches(answers) {
-            document.getElementById("summary").innerHTML = `
-						Total caches: ${answers.length}
-				`;
+            document.getElementById("summary").innerHTML = `Total caches: ${answers.length}`;
             let w = document.getElementById("caches");
-            let out = `
-				`;
+            let out = "";
             for (let x = answers.length - 1; x >= 0; x--) {
                 let answer = answers[x];
                 out += `
-						<div class="cache">
-							<span class="AccessedAt">${dateFmt.format(
-                new Date(answer.AccessedAt * 1000)
-              )}</span>
-							<span class="RType">${resc.GetRRTypeName(answer.RType)}</span>
-							<span class="QName">${answer.QName}</span>
-						</div>`;
+                    <div class="cache">
+                        <span class="AccessedAt">${dateFmt.format( new Date(answer.AccessedAt * 1000))}</span>
+                        <span class="RType">${resc.GetRRTypeName(answer.RType)}</span>
+                        <span class="QName">${answer.QName}</span>
+                    </div>
+                `;
             }
             w.innerHTML = out;
         }
@@ -234,13 +230,13 @@
             for (let x = 0; x < listRR.length; x++) {
                 const rr = listRR[x];
                 innerHTML += `
-						<div class="rr">
-							<span class="kind"> ${title} </span>
-							<span class="type"> ${getRRTypeName(rr.Type)} </span>
-							<span class="ttl"> ${rr.TTL} </span>
-							<span class="value"> ${JSON.stringify(rr.Value, null, 2)} </span>
-						</div>
-					`;
+                    <div class="rr">
+                        <span class="kind"> ${title} </span>
+                        <span class="type"> ${getRRTypeName(rr.Type)} </span>
+                        <span class="ttl"> ${rr.TTL} </span>
+                        <span class="value"> ${JSON.stringify(rr.Value, null, 2)} </span>
+                    </div>
+                `;
             }
             return innerHTML;
         }

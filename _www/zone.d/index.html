@@ -112,11 +112,11 @@
 
     <div class="nav-left">
         <h3>Zone files</h3>
-        <div id="Zones"></div>
+        <div id="Zoned"></div>
 
         <label for="newZoneFile"> New zone file: </label>
         <input id="newZoneFile" />
-        <button onclick="createZoneFile()">Create</button>
+        <button onclick="ZonedCreate()">Create</button>
     </div>
 
     <div class="content">
@@ -273,7 +273,7 @@
             </div>
 
             <div class="actions">
-                <button class="create" onclick="createRR()">Create</button>
+                <button class="create" onclick="ZonedRecordAdd()">Create</button>
             </div>
         </div>
     </div>
@@ -291,41 +291,41 @@
         async function main() {
             resc = new Rescached("")
 
-            let res = await resc.getEnvironment()
+            let res = await resc.Zoned()
             if (res.code != 200) {
                 notifError(res.message)
                 return
             }
-            renderZones(resc.env.Zones)
+            renderZoned(resc.zoned)
             resetActiveZone()
         }
 
-        async function createZoneFile() {
+        async function ZonedCreate() {
             let name = document.getElementById("newZoneFile").value
             if (name === "") {
                 notifError("The zone file name must not be empty")
                 return
             }
-            let res = await resc.ZoneFileCreate(name)
+            let res = await resc.ZonedCreate(name)
             if (res.code != 200) {
                 notifError(res.message)
                 return
             }
-            renderZones(resc.env.Zones)
+            renderZoned(resc.zoned)
         }
 
-        async function deleteZoneFile() {
-            let res = await resc.ZoneFileDelete(activeZone.Name)
+        async function ZonedDelete() {
+            let res = await resc.ZonedDelete(activeZone.Name)
             if (res.code != 200) {
                 notifError(res.message)
                 return
             }
-            renderZones(resc.env.Zones)
+            renderZoned(resc.zoned)
             resetActiveZone()
             notifInfo(res.message)
         }
 
-        async function createRR() {
+        async function ZonedRecordAdd() {
             newRR.Type = parseInt(document.getElementById("rr_type").value)
             switch (newRR.Type) {
                 case 12: // PTR
@@ -345,7 +345,9 @@
                     newRR.Name = document.getElementById("rr_name").value
                     newRR.Value = document.getElementById("rr_value").value
             }
-            console.log("createRR: ", newRR)
+
+            console.log("ZonedRecordAdd: ", newRR)
+
             let res = await resc.ZonedRecordAdd(activeZone.Name, newRR)
             if (res.code != 200) {
                 notifError(res.message)
@@ -355,8 +357,9 @@
             notifInfo(res.message)
         }
 
-        async function deleteRR(name, idx) {
+        async function ZonedRecordDelete(name, idx) {
             let rr = activeZone.Records[name][idx]
+            console.log("ZonedRecordDelete: ", rr)
             let res = await resc.ZonedRecordDelete(activeZone.Name, rr)
             if (res.code != 200) {
                 notifError(res.message)
@@ -398,20 +401,20 @@
             }
         }
 
-        function renderZones(zones) {
-            let wrapper = document.getElementById("Zones")
+        function renderZoned(zoned) {
+            let wrapper = document.getElementById("Zoned")
             out = ""
-            for (let name in zones) {
-                if (!zones.hasOwnProperty(name)) {
+            for (let name in zoned) {
+                if (!zoned.hasOwnProperty(name)) {
                     continue
                 }
-                let zoneFile = zones[name]
+                let zoneFile = zoned[name]
                 out += `
-						<div class="item">
-							<span onclick="setActiveZone('${zoneFile.Name}')">
-								${zoneFile.Name}
-							</span>
-						</div>`
+                        <div class="item">
+                            <span onclick="setActiveZone('${zoneFile.Name}')">
+                                ${zoneFile.Name}
+                            </span>
+                        </div>`
             }
             wrapper.innerHTML = out
         }
@@ -419,16 +422,56 @@
         function renderActiveZone() {
             let w = document.getElementById("activeZone")
             w.innerHTML = `
-					<h3>
-						${activeZone.Name}
-						<button
-							class="action-delete"
-							onclick="deleteZoneFile()"
-						>
-							Delete
-						</button>
-					</h3>
-				`
+                <h3>
+                    ${activeZone.Name}
+                    <button
+                        class="action-delete"
+                        onclick="ZonedDelete()"
+                    >
+                        Delete
+                    </button>
+                </h3>
+            `
+        }
+
+        function renderActiveZoneForm() {
+            let form = document.getElementById("activeZone_form")
+            form.style.display = "block"
+            document.getElementById("rr_type").value = 1
+            onSelectRRType(1)
+        }
+
+        function renderActiveZoneRecords() {
+            let el = document.getElementById("activeZone_records")
+            el.style.display = "block"
+            let w = document.getElementById("list_records")
+            out = ""
+            for (const [name, listRR] of Object.entries(activeZone.Records)) {
+                if (listRR == null || !Array.isArray(listRR)) {
+                    continue
+                }
+                listRR.forEach((rr, idx) => {
+                    out += `
+                        <div class="rr">
+                            <span class="name">
+                                ${rr.Name}
+                            </span>
+                            <span class="type">
+                                ${resc.GetRRTypeName(rr.Type)}
+                            </span>
+                            <span class="value">
+                                ${renderRecordValue(rr.Value)}
+                            </span>
+                            <span class="actions">
+                                <button onclick="ZonedRecordDelete('${rr.Name}', ${idx})">
+                                    X
+                                </button>
+                            </span>
+                        </div>
+                    `
+                })
+            }
+            w.innerHTML = out
         }
 
         function renderActiveZoneSOA() {
@@ -444,40 +487,8 @@
             document.getElementById("soa_minimum").value = soa.Minimum
         }
 
-        function renderActiveZoneRecords() {
-            let el = document.getElementById("activeZone_records")
-            el.style.display = "block"
-            let w = document.getElementById("list_records")
-            out = ""
-            for (const [name, listRR] of Object.entries(activeZone.Records)) {
-                if (listRR == null || !Array.isArray(listRR)) {
-                    continue
-                }
-                listRR.forEach((rr, idx) => {
-                    out += `
-							<div class="rr">
-								<span class="name">
-									${rr.Name}
-								</span>
-								<span class="type">
-									${resc.GetRRTypeName(rr.Type)}
-								</span>
-								<span class="value">
-									${renderRRValue(rr.Value)}
-								</span>
-								<span class="actions">
-									<button onclick="deleteRR('${rr.Name}', ${idx})">
-										X
-									</button>
-								</span>
-							</div>
-					`
-                })
-            }
-            w.innerHTML = out
-        }
 
-        function renderRRValue(value) {
+        function renderRecordValue(value) {
             if (typeof value === "object") {
                 let w = ""
                 for (const [k, v] of Object.entries(value)) {
@@ -491,17 +502,8 @@
             return value
         }
 
-        function renderActiveZoneForm() {
-            let form = document.getElementById("activeZone_form")
-            form.style.display = "block"
-            document.getElementById("rr_type").value = 1
-            onSelectRRType(1)
-        }
-
         function resetActiveZone() {
-            document.getElementById("activeZone").innerHTML = `
-					<p>Select one of the zone file to manage.</p>
-				`
+            document.getElementById("activeZone").innerHTML = `<p>Select one of the zone file to manage.</p>`
             document.getElementById("activeZone_soa").style.display = "none"
             document.getElementById("activeZone_records").style.display = "none"
             document.getElementById("activeZone_form").style.display = "none"
@@ -509,10 +511,13 @@
         }
 
         async function saveSOA() {
-            console.log("saveSOA: ", activeZone.SOA.Value)
-            let rr = activeZone.SOA
-            rr.Type = 6
-            let res = await resc.ZonedRecordAdd(activeZone.Name, rr)
+            activeZone.SOA.Type = 6
+            let req = {
+                Name: activeZone.Name,
+                Type: 6,
+                Value: activeZone.SOA,
+            }
+            let res = await resc.ZonedRecordAdd(activeZone.Name, req)
             if (res.code != 200) {
                 notifError(res.message)
                 return
@@ -521,13 +526,13 @@
         }
 
         async function setActiveZone(name) {
-            activeZone = resc.env.Zones[name]
             let res = await resc.ZonedRecords(name)
             if (res.code != 200) {
                 notifError(res.message)
                 return
             }
-            activeZone.Records = res.data
+
+            activeZone = resc.zoned[name]
             console.log("setActiveZone: records: ", activeZone.Records)
             renderActiveZone()
             renderActiveZoneSOA()
@@ -536,7 +541,7 @@
         }
 
         function updateSOA(k, v) {
-            activeZone.SOA.Value[k] = v
+            activeZone.SOA[k] = v
         }
     </script>
 </body>

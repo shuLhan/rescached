@@ -208,7 +208,7 @@
 
         <div class="section-bottom">
             <div>
-                <button onclick="handleSave()">Save</button>
+                <button onclick="EnvironmentUpdate()">Save</button>
             </div>
         </div>
     </div>
@@ -218,8 +218,38 @@
     <script>
         let resc = null
 
-        async function getEnvironment() {
-            const res = await resc.getEnvironment()
+        async function EnvironmentUpdate() {
+            let res = await resc.EnvironmentUpdate()
+            if (res.code !== 200) {
+                notifError(res.message)
+                return
+            }
+            notifInfo("Environment has been saved!")
+        }
+
+        function handleAddNameserver() {
+            resc.env.NameServers.push("")
+            renderNameservers()
+        }
+
+        function onDeleteNameserver(x) {
+            resc.env.NameServers.splice(x, 1)
+            renderNameservers()
+        }
+
+        function onInput(key, value) {
+            console.log("onInput ", key, ": ", value)
+            resc.env[key] = value
+        }
+
+        function onInputNameserver(x, newv) {
+            resc.env.NameServers[x] = newv
+        }
+
+        async function onLoad() {
+            resc = new Rescached("")
+
+            const res = await resc.Environment()
             if (res.code != 200) {
                 notifError(res.message)
                 return
@@ -246,40 +276,6 @@
             document.getElementById("PruneThreshold").value = env.PruneThreshold
         }
 
-        function handleAddNameserver() {
-            resc.env.NameServers.push("")
-            renderNameservers()
-        }
-
-        async function handleSave() {
-            console.log("handleSave: ", resc.env)
-            let res = await resc.updateEnvironment()
-            if (res.code !== 200) {
-                notifError(res.message)
-                return
-            }
-            notifInfo("Environment has been saved!")
-        }
-
-        function onDeleteNameserver(x) {
-            resc.env.NameServers.splice(x, 1)
-            renderNameservers()
-        }
-
-        function onInput(key, value) {
-            console.log("onInput ", key, ": ", value)
-            resc.env[key] = value
-        }
-
-        function onInputNameserver(x, newv) {
-            resc.env.NameServers[x] = newv
-        }
-
-        function onLoad() {
-            resc = new Rescached("")
-            getEnvironment()
-        }
-
         function renderNameservers() {
             let listNS = document.getElementById("nameservers")
             listNS.innerHTML = ""
@@ -295,10 +291,10 @@
                 let el = document.createElement("div")
                 el.classList.add("input-deletable")
                 el.innerHTML = `
-						<input value="${ns}" oninput="onInputNameserver(${x}, this.value)">
-						<button onclick="onDeleteNameserver(${x})">
-							Delete
-						</button>`
+                    <input value="${ns}" oninput="onInputNameserver(${x}, this.value)">
+                    <button onclick="onDeleteNameserver(${x})">
+                        Delete
+                    </button>`
                 listNS.appendChild(el)
             }
         }

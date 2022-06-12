@@ -79,7 +79,7 @@
                 <br />
                 <input id="newHostsFile" oninput="onInputNewHostsFile(this.value)" />
             </label>
-            <button onclick="onCreateHostsFile()">Create</button>
+            <button onclick="HostsdCreate()">Create</button>
         </div>
 
         <div id="activeHostsFile">
@@ -98,16 +98,47 @@
             Value: "",
         }
 
-        async function getHostsFile(name) {
-            activeHostsFile = resc.env.HostsFiles[name]
+        async function HostsdCreate() {
+            if (newHostsFile === "") {
+                notifError("Please fill the hosts file name first")
+                return
+            }
+
+            let res = await resc.HostsdCreate(newHostsFile)
+
+            if (res.code >= 400) {
+                notifError("ERROR: HostsdCreate: " + res.message)
+                return
+            }
+            renderHostsd(resc.hostsd)
+            notifInfo(res.message)
+            resetInputs()
+        }
+
+        async function HostsdDelete() {
+            const res = await resc.HostsdDelete(activeHostsFile.Name)
+            if (res.code != 200) {
+                notifError(res.message)
+                return
+            }
+
+            renderHostsd(resc.hostsd)
+
+            document.getElementById("activeHostsFile").innerHTML = `<p>Select one of the hosts file to manage.</p>`
+
+            notifInfo(`Hosts file "${activeHostsFile.Name}" has been deleted`)
+            activeHostsFile = null
+        }
+
+        async function HostsdGet(name) {
+            activeHostsFile = resc.hostsd[name]
             if (typeof activeHostsFile.Records === "undefined") {
                 activeHostsFile.Records = []
-            }
-            if (activeHostsFile.Records === null) {
+            } else if (activeHostsFile.Records === null) {
                 activeHostsFile.Records = []
             }
             if (activeHostsFile.Records.length === 0) {
-                const res = await resc.HostsFileGet(name)
+                const res = await resc.HostsdGet(name)
                 activeHostsFile.Records = res.data
             }
             renderHostsFile(activeHostsFile)
@@ -115,38 +146,7 @@
             newRecord.Value = ""
         }
 
-        async function onCreateHostsFile() {
-            if (newHostsFile === "") {
-                notifError("Please fill the hosts file name first")
-                return
-            }
-
-            let res = await resc.HostsFileCreate(newHostsFile)
-
-            if (res.code >= 400) {
-                notifError("ERROR: HostsFileCreate: " + res.message)
-                return
-            }
-            renderHostsFiles(resc.env.HostsFiles)
-            notifInfo(res.message)
-            resetInputs()
-        }
-
-        async function onDeleteActiveHostsFile() {
-            const res = await resc.HostsFileDelete(activeHostsFile.Name)
-            if (res.code != 200) {
-                notifError(res.message)
-                return
-            }
-            renderHostsFiles(resc.env.HostsFiles)
-            document.getElementById(
-                "activeHostsFile",
-            ).innerHTML = `<p>Select one of the hosts file to manage.</p>`
-            notifInfo(`Hosts file "${activeHostsFile.Name}" has been deleted`)
-            activeHostsFile = null
-        }
-
-        async function onCreateRecord(hostsFile) {
+        async function HostsdRecordAdd(hostsFile) {
             if (hostsFile === "") {
                 notifError("invalid or empty hosts file name: " + hostsFile)
                 return
@@ -167,13 +167,13 @@
             renderNewRecord(res.data)
         }
 
-        async function onDeleteRecord(domain) {
+        async function HostsdRecordDelete(domain) {
             let res = await resc.HostsdRecordDelete(activeHostsFile.Name, domain)
             if (res.code !== 200) {
                 notifError("Failed to delete record " + domain)
                 return
             }
-            activeHostsFile = resc.env.HostsFiles[activeHostsFile.Name]
+            activeHostsFile = resc.hostsd[activeHostsFile.Name]
             renderHostsFile(activeHostsFile)
         }
 
@@ -188,52 +188,52 @@
         async function onLoad() {
             resc = new Rescached("")
 
-            let res = await resc.getEnvironment()
+            let res = await resc.Hostsd()
             if (res.code != 200) {
                 notifError(res.message)
                 return
             }
-
-            renderHostsFiles(res.data.HostsFiles)
+            renderHostsd(resc.hostsd)
             resetInputs()
         }
 
         function renderHostsFile(hf) {
             let content = document.getElementById("activeHostsFile")
             let innerHTML = `
-					<p>
-						${hf.Name} (${hf.Records.length} records)
-						<button onclick="onDeleteActiveHostsFile()">Delete</button>
-					</p>
-					<div class="host">
-						<input class="host_name" placeholder="Domain name" value=""
-							oninput="onInputNewRecord('Name', this.value)"
-						/>
-						<input class="host_value" placeholder="IP address" value=""
-							oninput="onInputNewRecord('Value', this.value)"
-						/>
-						<button onclick="onCreateRecord('${hf.Name}')">Create</button>
-					</div>
-					<div class="host header">
-						<span class="host_name"> Domain name </span>
-						<span class="host_value"> IP address </span>
-					</div>
-					<div id="records">
-				`
+                <p>
+                    ${hf.Name} (${hf.Records.length} records)
+                    <button onclick="HostsdDelete()">Delete</button>
+                </p>
+                <div class="host">
+                    <input class="host_name" placeholder="Domain name" value=""
+                        oninput="onInputNewRecord('Name', this.value)"
+                    />
+                    <input class="host_value" placeholder="IP address" value=""
+                        oninput="onInputNewRecord('Value', this.value)"
+                    />
+                    <button onclick="HostsdRecordAdd('${hf.Name}')">Create</button>
+                </div>
+                <div class="host header">
+                    <span class="host_name"> Domain name </span>
+                    <span class="host_value"> IP address </span>
+                </div>
+                <div id="records">
+            `
             for (let x = 0; x < hf.Records.length; x++) {
                 let rr = hf.Records[x]
                 innerHTML += `
-						<div class="host">
-							<span class="host_name"> ${rr.Name} </span>
-							<span class="host_value"> ${rr.Value} </span>
-							<button onclick="onDeleteRecord('${rr.Name}')">X</button>
-						</div>`
+                    <div class="host">
+                        <span class="host_name"> ${rr.Name} </span>
+                        <span class="host_value"> ${rr.Value} </span>
+                        <button onclick="HostsdRecordDelete('${rr.Name}')">X</button>
+                    </div>
+                `
             }
             innerHTML += "</div>"
             content.innerHTML = innerHTML
         }
 
-        function renderHostsFiles(hostsFiles) {
+        function renderHostsd(hostsFiles) {
             let parent = document.getElementById("HostsFiles")
             parent.innerHTML = ""
 
@@ -244,7 +244,7 @@
                 let hf = hostsFiles[k]
                 let item = document.createElement("div")
                 item.classList.add("item")
-                item.innerHTML = `<a href="#" onclick="getHostsFile('${k}')"> ${hf.Name} </a>`
+                item.innerHTML = `<a href="#" onclick="HostsdGet('${k}')"> ${hf.Name} </a>`
                 parent.appendChild(item)
             }
         }
@@ -253,11 +253,12 @@
         function renderNewRecord(rr) {
             let div = document.getElementById("records")
             innerHTML = `
-					<div class="host">
-						<span class="host_name"> ${rr.Name} </span>
-						<span class="host_value"> ${rr.Value} </span>
-						<button onclick="onDeleteRecord('${rr.Name}')">X</button>
-					</div>`
+                <div class="host">
+                    <span class="host_name"> ${rr.Name} </span>
+                    <span class="host_value"> ${rr.Value} </span>
+                    <button onclick="HostsdRecordDelete('${rr.Name}')">X</button>
+                </div>
+            `
             div.innerHTML = innerHTML + div.innerHTML
         }
 

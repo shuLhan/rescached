@@ -18,6 +18,8 @@ link:benchmark.html[Benchmark]:: The latest benchmark of rescached server.
 [#todo]
 ==  TODO
 
+* Zoned create should fill default SOA
+
 * zone.d rr add - check for duplicate value.
 
 * Prioritize the order of hosts file to be loaded:

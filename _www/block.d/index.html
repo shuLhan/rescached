@@ -82,7 +82,7 @@
     <div id="HostBlockd" class="block_source"></div>
 
     <div>
-        <button onclick="blockdUpdate()">Save</button>
+        <button onclick="BlockdUpdate()">Save</button>
     </div>
 
     <script src="/index.js"></script>
@@ -90,81 +90,75 @@
     <script>
         let resc = null
 
-        function onLoad() {
+        async function onLoad() {
             resc = new Rescached("")
-            getEnvironment()
-        }
 
-        async function getEnvironment() {
-            const res = await resc.getEnvironment()
+            const res = await resc.Blockd()
             if (res.code != 200) {
                 notifError(res.message)
                 return
             }
-
-            let env = res.data
-            renderHostBlockd(env.HostBlockd)
+            renderBlockd(resc.blockd)
         }
 
         function onCheckHostblock(key, val) {
-            resc.env.HostBlockd[key].IsEnabled = val
+            resc.blockd[key].IsEnabled = val
         }
 
-        async function blockdFetch(name) {
+        async function BlockdFetch(name) {
             const res = await resc.BlockdFetch(name)
             if (res.code != 200) {
-                notifError("blockdFetch: ", res.message)
+                notifError("BlockdFetch: ", res.message)
                 return
             }
 
-            resc.env.HostBlockd[name] = res.data
+            notifInfo(`The hosts for blockd.d ${name} has been fetched.`)
 
-            notifInfo("The hosts blocks has been updated.")
-
-            renderHostBlockd(resc.env.HostBlockd)
+            renderBlockd(resc.blockd)
         }
 
-        async function blockdUpdate() {
-            const res = await resc.BlockdUpdate(resc.env.HostBlockd)
+        async function BlockdUpdate() {
+            const res = await resc.BlockdUpdate(resc.blockd)
             if (res.code != 200) {
-                notifError("blockdUpdate: ", res.message)
+                notifError("BlockdUpdate: ", res.message)
                 return
             }
 
-            renderHostBlockd(res.data)
+            renderBlockd(resc.blockd)
             notifInfo("The hosts blocks has been updated.")
         }
 
-        function renderHostBlockd(hostsBlockd) {
+        function renderBlockd(blockd) {
             let parent = document.getElementById("HostBlockd")
             parent.innerHTML = ""
 
-            for (var k in hostsBlockd) {
-                if (!hostsBlockd.hasOwnProperty(k)) {
+            for (var k in blockd) {
+                if (!blockd.hasOwnProperty(k)) {
                     continue;
                 }
 
-                let hostsBlock = hostsBlockd[k]
+                let hostsBlock = blockd[k]
                 let item = document.createElement("div")
                 item.classList.add("item")
                 item.innerHTML = `
-						<span class="is-enabled">
-							<input
-								type="checkbox"
-								${hostsBlock.IsEnabled ? "checked" : ""}
-								oninput="onCheckHostblock('${k}', this.checked)"
-							/>
-						</span>
-						<span class="info">
-							<div>
-								${hostsBlock.Name}
-								<button onclick="blockdFetch('${k}')">
-									Update
-								</button>
-							</div>
-							<div> URL: <input value="${hostsBlock.URL}" disabled /> </div>
-							<div> Last updated at ${hostsBlock.LastUpdated} </div>
-						</span>`
+                    <span class="is-enabled">
+                        <input
+                            type="checkbox"
+                            ${hostsBlock.IsEnabled ? "checked" : ""}
+                            oninput="onCheckHostblock('${k}', this.checked)"
+                        />
+                    </span>
+                    <span class="info">
+                        <div>
+                            ${hostsBlock.Name}
+                            <button onclick="BlockdFetch('${k}')">
+                                Update
+                            </button>
+                        </div>
+                        <div> URL: <input value="${hostsBlock.URL}" disabled /> </div>
+                        <div> Last updated at ${hostsBlock.LastUpdated} </div>
+                    </span>
+                `
 
                 parent.appendChild(item)
             }
