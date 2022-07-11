@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	libhttp "github.com/shuLhan/share/lib/http"
 )
@@ -25,6 +26,7 @@ func TestMain(m *testing.M) {
 	var (
 		err        error
 		testStatus int
+		x          int
 	)
 
 	go mockBlockdServer()
@@ -47,6 +49,16 @@ func TestMain(m *testing.M) {
 	defer testServer.Stop()
 
 	resc = NewClient("http://"+testEnv.WUIListen, false)
+
+	// Loop 10 times until server ready for testing.
+	for x = 0; x < 10; x++ {
+		time.Sleep(500)
+		_, err = resc.Env()
+		if err != nil {
+			continue
+		}
+		break
+	}
 
 	testStatus = m.Run()
 
