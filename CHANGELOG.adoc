@@ -6,6 +6,271 @@ Shulhan <ms@kilabit.info>
 :sectanchors:
 :sectlinks:
 
+
+[#v4.4.0]
+==  rescached v4.4.0 (2022-08-06)
+
+This release refactoring the resolver command as CLI to rescached server.
+The resolver command now can manage environment, caches, hosts.d, and zone.d
+in the server; not just query.
+
+
+[#v4.4.0_breaking_changes]
+===  Breaking changes
+
+all: un-export HostsFiles and Zones fields on Environment::
++
+--
+Previously those fields exported because web client need it to initialize
+the content for /hosts.d and /zone.d pages.
+
+Since we now have HTTP API for that, web client can call get request
+to the respective API without depends on the environment.
+--
+
+all: refactoring the HTTP API for deleting zone record::
++
+--
+Previously, the HTTP API for deleting a record is by passing the
+parameters as JSON in the body.
+This may cause issue if HTTP client does not support sending body
+in DELETE method.
+
+This changes the method to pass the parameters in the query,
+
+	DELETE /zone.d/rr?zone=<string>&type=<string>&record=<base64 json>
+
+Parameters,
+
+* zone: the zone name,
+* type: the record type,
+* record: the content of record with its domain name and value.
+--
+
+all: refactoring HTTP API for adding new zone.d record::
++
+--
+Previously, the request for adding new record on zone file is by passing
+the zone name and type inside the path,
+
+	/zone.d/:name/rr/:type
+
+This commit changes it to pass all parameters inside the request body
+as JSON,
+
+----
+{
+	"zone": <string>,
+	"kind": <string>,
+	"record": <base64 string|base64 JSON>
+}
+----
+
+For example, to add A record for subdomain "www" to zone file "my.zone",
+the request format would be,
+
+----
+{
+	"zone": "my.zone",
+	"kind": "A",
+	"record": "eyJOYW1lIjoid3d3IiwiVmFsdWUiOiIxMjcuMC4wLjEifQ=="
+}
+----
+
+Where "record" value is equal to `{"Name":"www","Value":"127.0.0.1"}`.
+
+On the response, we changes it to return only the new record instead of
+all record in the zone.
+--
+
+all: refactor the HTTP API for zone.d::
++
+--
+Previously, the the HTTP API for creating and deleting zone file is
+by passing the zone file name in path of URL.
+
+This changes move the parameter name to POST body when creating new
+zone file and in the DELETE query when deleting zone file.
+--
+
+all: refactor the APIs to manage hosts.d resource records (RR)::
++
+--
+There are two APIs to manage hosts.d RR: create and delete.
+
+Previously, the create API pass the hosts name inside and values inside
+the path,
+
+	POST /hosts.d/<name>/rr?domain=&value=
+
+This commit changes the request type to form, so all parameters move
+to body,
+
+----
+POST /hosts.d/rr
+Content-Type: application/x-www-form-urlencoded
+
+name=&domain=&value=
+----
+
+On delete API, we changes the name parameter to be send on query
+parameter along with domain to be deleted.
+Previously, the delete API was
+
+	DELETE /hosts.d/<name>/rr?domain=
+
+now it become
+
+	DELETE /hosts.d/rr?name=&domain=
+--
+
+all: rename the page and HTTP API for hosts_blocks to block.d::
++
+--
+This is to make all terminology to be consistent, from configuration to
+page URL, and API.
+--
+
+[#v4.4.0_new_features]
+===  New features
+
+all: implement HTTP API to fetch list of block.d::
++
+--
+Given the following request,
+
+	GET /api/block.d
+
+It will return list of hosts in block.d as JSON format:
+
+----
+{
+	"data": {
+		"<name>": <Blockd>
+		...
+	}
+}
+----
+--
+
+all: implement HTTP API to fetch records in zone::
++
+--
+Sending the following request to HTTP server:
+
+	GET /api/zone.d/rr?zone=<string>
+
+where zone parameter is the zone name, it will return list of records
+in that zone.
+--
+
+all: add new HTTP API to get all zones::
++
+--
+The HTTP API has the following format,
+
+	GET /api/zone.d
+
+On success, it will return HTTP status code 200 with all zone formatted
+as JSON in the body.
+--
+
+all: implement HTTP API to enable or disable hosts on block.d::
++
+--
+The URL /api/block.d/enable activate the hosts in block.d, while
+The URL /api/block.d/disable deactivate the hosts in block.d.
+
+Both of this API accept single parameter "name" in the body as
+application/x-www-form-urlencoded.
+--
+
+all: implement HTTP API to update hosts.d::
++
+--
+The API receive the block.d name and if it valid, the server will
+fetch latest hosts file from the block provider based on the registered
+URL.
+--
+
+all: implement HTTP API to remove all caches::
++
+--
+On the HTTP side, if the query parameter "name" for "DELETE /api/caches"
+is "all" it will remove all caches.
+
+On the resolver side, if the parameter for "caches remove" is "all"
+it will remove all caches.
+
+This changes require latest lib/dns on share module.
+--
+
+[#v4.4.0_bug_fixes]
+===  Bug fixes
+
+all: fix panic if a nil HostsFiles and/or Zones is accessed::
+
+all: fix error updating hosts block if directory not exist::
++
+--
+If the hosts block file never created before and the directory to
+hosts block file is not exist, the hostsBlock update method will return
+an error.
+
+This changes fix this issue by creating the path to hosts block directory
+first before fetching and storing the new update.
+--
+
+[#v4.4.0_enhancements]
+===  Enhancements
+
+all: return the hosts file in response of hosts.d create and delete::
++
+--
+Instead of returning empty data, return the affected hosts file when
+creating a new one or when deleting existing one.
+--
+
+cmd/resolver: refactor the resolver as client of DNS and rescached::
++
+--
+Previously, the resolver command only for querying DNS server.
+
+In this changes and in the future, the resolver command will be client
+for DNS and rescached server.
+--
+
+[#v4.4.0_chores]
+===  Chores
+
+all: move the documentation under _www/doc directory::
++
+--
+This also allow the latest/released documentation viewed on
+the web user interface under /doc path.
+
+While at it, reformat HTML and CSS files using js-beautify and
+JavaScript files using clang-format [1].
+--
+
+all: move all installation files into directory _sys::
++
+--
+Previously, all files required for installing rescached scattered in
+different directories.
+
+This changes move all files into single directory _sys with the
+directory structure matched with target system.
+--
+
+all: remove malwaredomainlist.com from provider of hosts block::
++
+--
+The URL and contents from this provider is now empty and has not been
+updated.
+--
+
+
 [#v4.3.0]
 ==  rescached v4.3.0 (2022-03-15)
 

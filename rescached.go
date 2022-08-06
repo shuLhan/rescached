@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	Version string // Contains version of program, overwritten by build.
+	Version = `4.4.0` // Contains version of program, overwritten by build.
 )
 
 // Server implement caching DNS server.
