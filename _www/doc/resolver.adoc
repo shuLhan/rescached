@@ -345,55 +345,63 @@ Delete hosts file named "myhosts" inside the hosts.d directory,
 
 Get the content of hosts file named "myhosts" inside the hosts.d directory,
 
-	$ resolver hosts.d get myhosts
-	[
-	  {
-	    "Value": "127.0.0.1",
-	    "Name": "localhost",
-	    "Type": 1,
-	    "Class": 1,
-	    "TTL": 604800
-	  },
-	  {
-	    "Value": "::1",
-	    "Name": "localhost",
-	    "Type": 28,
-	    "Class": 1,
-	    "TTL": 604800
-	  }
-	]
+----
+$ resolver hosts.d get myhosts
+[
+  {
+    "Value": "127.0.0.1",
+    "Name": "localhost",
+    "Type": 1,
+    "Class": 1,
+    "TTL": 604800
+  },
+  {
+    "Value": "::1",
+    "Name": "localhost",
+    "Type": 28,
+    "Class": 1,
+    "TTL": 604800
+  }
+]
+----
 
 ===  MANAGING RECORD IN HOSTS.D
 
 Add new record "127.0.0.1 my.hosts" to hosts file named "hosts",
 
-	$ resolver hosts.d rr add hosts my.hosts 127.0.0.1
-	{
-	  "Value": "127.0.0.1",
-	  "Name": "my.hosts",
-	  "Type": 1,
-	  "Class": 1,
-	  "TTL": 604800
-	}
+----
+$ resolver hosts.d rr add hosts my.hosts 127.0.0.1
+{
+  "Value": "127.0.0.1",
+  "Name": "my.hosts",
+  "Type": 1,
+  "Class": 1,
+  "TTL": 604800
+}
+----
 
 Delete record "my.hosts" from hosts file "hosts",
 
-	$ resolver hosts.d rr delete hosts my.hosts
-	{
-	  "Value": "127.0.0.1",
-	  "Name": "my.hosts",
-	  "Type": 1,
-	  "Class": 1,
-	  "TTL": 604800
-	}
+----
+$ resolver hosts.d rr delete hosts my.hosts
+{
+  "Value": "127.0.0.1",
+  "Name": "my.hosts",
+  "Type": 1,
+  "Class": 1,
+  "TTL": 604800
+}
+----
 
 ===  MANAGING ZONE.D
 
 Print all zone in the server,
 
-	$ resolver zone.d
-	my.zone
-	  SOA: {MName:my.zone RName: Serial:0 Refresh:0 Retry:0 Expire:0 Minimum:0}
+----
+$ resolver zone.d
+my.zone
+  SOA: {MName:my.zone RName: Serial:0 Refresh:0 Retry:0 Expire:0 Minimum:0}
+----
 
 
 ===  MANAGING RECORD IN ZONE.D
@@ -402,49 +410,61 @@ Assume that we have create zone "my.zone".
 
 Get all records in the zone "my.zone",
 
-	$ resolver zone.d rr get my.zone
-	my.zone
-	  604800 MX IN map[Exchange:mail.my.zone Preference:10]
-	  604800  A IN 127.0.0.2
-	  604800  A IN 127.0.0.3
-	www.my.zone
-	  604800  A IN 192.168.1.2
+----
+$ resolver zone.d rr get my.zone
+my.zone
+  604800 MX IN map[Exchange:mail.my.zone Preference:10]
+  604800  A IN 127.0.0.2
+  604800  A IN 127.0.0.3
+www.my.zone
+  604800  A IN 192.168.1.2
+----
 
 Add IPv4 address "127.0.0.1" for domain my.zone,
 
-	$ resolver zone.d rr add my.zone @ 0 A IN 127.0.0.1
+----
+$ resolver zone.d rr add my.zone @ 0 A IN 127.0.0.1
+----
 
 or
 
-	$ resolver zone.d rr add my.zone "" 0 A IN 127.0.0.1
-	{
-	  "Value": "127.0.0.1",
-	  "Name": "my.zone",
-	  "Type": 1,
-	  "Class": 1,
-	  "TTL": 604800
-	}
+----
+$ resolver zone.d rr add my.zone "" 0 A IN 127.0.0.1
+{
+  "Value": "127.0.0.1",
+  "Name": "my.zone",
+  "Type": 1,
+  "Class": 1,
+  "TTL": 604800
+}
+----
 
 and to delete the above record,
 
-	$ resolver zone.d rr delete my.zone @ A IN 127.0.0.1
-	OK
+----
+$ resolver zone.d rr delete my.zone @ A IN 127.0.0.1
+OK
+----
 
 Add subdomain "www" with IPv4 address "192.168.1.2" to zone "my.zone",
 
-	$ resolver zone.d rr add my.zone www 0 A IN 192.168.1.2
-	{
-	  "Value": "192.168.1.2",
-	  "Name": "www.my.zone",
-	  "Type": 1,
-	  "Class": 1,
-	  "TTL": 604800
-	}
+----
+$ resolver zone.d rr add my.zone www 0 A IN 192.168.1.2
+{
+  "Value": "192.168.1.2",
+  "Name": "www.my.zone",
+  "Type": 1,
+  "Class": 1,
+  "TTL": 604800
+}
+----
 
 and to delete the above record,
 
-	$ resolver zone.d rr delete my.zone www A IN 192.168.1.2
-	OK
+----
+$ resolver zone.d rr delete my.zone www A IN 192.168.1.2
+OK
+----
 
 == AUTHOR
 
