@@ -14,7 +14,7 @@ resolver - command line interface (CLI) for DNS and rescached server.
 
 == SYNOPSIS
 
-resolver [-insecure] [-ns=<dns-URL>] [-server=<rescached-URL>] <command> [args...]
+	resolver [-insecure] [-ns=<dns-URL>] [-server=<rescached-URL>] <command> [args...]
 
 
 == DESCRIPTION

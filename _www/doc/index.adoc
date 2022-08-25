@@ -1,22 +1,35 @@
 // SPDX-FileCopyrightText: 2022 M. Shulhan <ms@kilabit.info>
 // SPDX-License-Identifier: GPL-3.0-or-later
-= rescached documentation
-Shulhan <ms@kilabit.info>
+= rescached
+:toc:
+:sectanchors:
+:sectlinks:
 
-link:CHANGELOG.html[CHANGELOG]:: Log for each release.
+==  Documentation
 
-link:README.html[rescached]:: Manual page for rescached program.
+link:benchmark.html[Benchmark^]:: The benchmark result of rescached server.
 
-link:rescached.cfg.html[rescached.cfg]:: Manual page for rescached
+link:CHANGELOG.html[CHANGELOG^]:: Log for each release.
+
+link:README.html[rescached^]:: Manual page for rescached program.
+
+link:rescached.cfg.html[rescached.cfg^]:: Manual page for rescached
 configuration.
 
-link:resolver.html[resolver]:: Manual page for resolver.
+link:resolver.html[resolver^]:: Manual page for resolver.
 
-link:benchmark.html[Benchmark]:: The latest benchmark of rescached server.
+==  Development
 
+https://github.com/shuLhan/rescached-go[Repository^]::
+Link to the source code.
 
-[#todo]
-==  TODO
+https://github.com/shuLhan/rescached-go/issues[Issues^]::
+List of open issues.
+
+https://github.com/shuLhan/rescached-go/pulls[Patches^]::
+Link to submit the patches.
+
+==  Todo
 
 * Zoned create should fill default SOA
 
