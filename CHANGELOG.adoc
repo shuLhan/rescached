@@ -6,16 +6,50 @@ Shulhan <ms@kilabit.info>
 :sectanchors:
 :sectlinks:
 
+Log of new features, enhancements, and/or bug fixes for each release.
 
-[#v4.4.0]
+[#v4_4_1]
+==  rescached v4.4.1 (2023-04-01)
+//{{{
+
+[#v4_4_1__chores]
+=== Enhancements
+
+go.mod: set Go version to 1.19 and update share module::
++
+--
+The latest share module has several fixes and enhancements regarding
+DNS library, including
+
+* lib/dns: simplify unpackDomainName return value for end
+* lib/dns: use the packet length to derive current offset
+* lib/dns: handle zone file with CRLF line ending
+* lib/dns: allow parsing TXT rdata without quote in zone file
+* lib/dns: fix parsing SRV record from zone file
+* lib/dns: fix packing and unpacking resource record HINFO
+* lib/dns: fix packing, parsing, and saving MINFO resource data
+--
+
+_www/doc: update the index and resolver documentation::
++
+--
+While at it, rename the README.adoc to README and made symlink
+to it as README.adoc.
+--
+
+//}}}
+
+
+[#v4_4_0]
 ==  rescached v4.4.0 (2022-08-06)
+//{{{
 
 This release refactoring the resolver command as CLI to rescached server.
 The resolver command now can manage environment, caches, hosts.d, and zone.d
 in the server; not just query.
 
 
-[#v4.4.0_breaking_changes]
+[#v4_4_0__breaking_changes]
 ===  Breaking changes
 
 all: un-export HostsFiles and Zones fields on Environment::
@@ -131,7 +165,7 @@ This is to make all terminology to be consistent, from configuration to
 page URL, and API.
 --
 
-[#v4.4.0_new_features]
+[#v4_4_0__new_features]
 ===  New features
 
 all: implement HTTP API to fetch list of block.d::
@@ -205,7 +239,7 @@ it will remove all caches.
 This changes require latest lib/dns on share module.
 --
 
-[#v4.4.0_bug_fixes]
+[#v4_4_0__bug_fixes]
 ===  Bug fixes
 
 all: fix panic if a nil HostsFiles and/or Zones is accessed::
@@ -221,7 +255,7 @@ This changes fix this issue by creating the path to hosts block directory
 first before fetching and storing the new update.
 --
 
-[#v4.4.0_enhancements]
+[#v4_4_0__enhancements]
 ===  Enhancements
 
 all: return the hosts file in response of hosts.d create and delete::
@@ -240,7 +274,7 @@ In this changes and in the future, the resolver command will be client
 for DNS and rescached server.
 --
 
-[#v4.4.0_chores]
+[#v4_4_0__chores]
 ===  Chores
 
 all: move the documentation under _www/doc directory::
@@ -270,8 +304,10 @@ The URL and contents from this provider is now empty and has not been
 updated.
 --
 
+//}}}
 
-[#v4.3.0]
+
+[#v4_3_0]
 ==  rescached v4.3.0 (2022-03-15)
 
 This release re-licensing the rescached under GPL 3.0 or later.
@@ -279,68 +315,83 @@ This release re-licensing the rescached under GPL 3.0 or later.
 See https://kilabit.info/journal/2022/gpl/ for more information.
 
 
+[#v4_2_0]
 ==  rescached v4.2.0 (2022-02-09)
+//{{{
 
+[#v4_2_0__new_features]
 ===  New features
 
-*  www: implement functionality to remove cache by record name
+www: implement functionality to remove cache by record name::
 +
+--
 In the web user interface (WUI), we have a button "Remove from cache"
 that displayed per record, but somehow this feature is not implemented,
 probably missing from commits due to rebase or I completely forgot about
 it.
-+
+
 Anyway, this commit implement the feature to remove record from cache
 by clicking the button.  On success, it will remove the removed record
 from search result.
-+
-Fix #10
 
+Fix #10
+--
+
+[#v4_2_0__bug_fixes]
 ===  Bug fixes
 
-*  www: check for possible null on NameServers environment
+www: check for possible null on NameServers environment::
 
-*  www: fix caches record type showing "undefined"
+www: fix caches record type showing "undefined"::
 +
 Due to refactoring on DNS library, we forgot to rename the field QType
 to RType on the frontend.  This cause the record type on caches showed
 on the page as "undefined".
 
+[#v4_2_0__chores]
 ===  Chores
 
-*  all: fix format of all asciidoc files
+all: fix format of all asciidoc files::
 +
 This is to make the adoc files parsed and rendered correctly by
 asciidocgo and asciidoc tools.
 
-*  cmd/rescached: add command "embed" and to run in development mode
+cmd/rescached: add command "embed" and to run in development mode::
 +
+--
 This two commands is used internally for development.
-+
+
 The "embed" command embed all files inside "_www" directory into
 Go file "memfs_generate.go".
 This command replace "internal/generate_memfs.go".
-+
+
 The "dev" command run the rescached server in development mode using
 "cmd/rescached/rescached.cfg.test" as the configuration.
-+
+
 The "dev" command listen on DNS port 5350, so to prevent conflict with
 live rescached server, we run script _bin/nft_dnstest_chain.sh to redirect
 UDP and TCP requests from port 53 to port 5350.
+--
+
+//}}}
 
 
+[#v4_1_0]
 ==  rescached v4.1.0 (2021-12-03)
+//{{{
 
+[#v4_1_0__breaking_changes]
 ===  Breaking changes
 
-*  all: remove using tcp scheme in config and documentation
+all: remove using tcp scheme in config and documentation::
 +
+--
 Using TCP for parent name server is discouraged, because most of server
 disallow keeping the connection alive.
-+
+
 The valid use case for TCP connection is when server received truncated
 UDP answer.
-+
+
 Using UDP as parent scheme, will automatically assume that the server
 also capable of handling query in TCP.
 This is required when client (for example, your browser) re-send the query
@@ -348,57 +399,74 @@ after receiving truncated UDP answer.
 Any query received by rescached through TCP will forwarded to the parent
 name server as TCP too, using the same address and port defined in one of
 UDP parent.
-+
+
 While at it, use Cloudflare DNS server as default in configuration
 and as example in documentation.
+--
 
+[#v4_1_0__new_features]
 ===  New features
 
-*  Add support to save and load caches to/from storage upon restart
+Add support to save and load caches to/from storage upon restart::
 +
+--
 rescached now able to save and load caches to local storage upon restart.
-+
+
 On POSIX, the caches is stored in /var/cache/rescached/rescached.gob,
 encoded using gob.
-+
-Update #9
 
+Update #9
+--
+
+[#v4_1_0__bug_fixes]
 ===  Bug fixes
 
-*  make the TCP forwarders as complementary of UDP
+make the TCP forwarders as complementary of UDP::
 +
+--
 The TCP forwarders only active when client send the DNS request as TCP.
 When the server receive that request it should also forward the request
 as TCP not as UDP to prevent the truncated response.
-+
+
 Another use case for TCP is when the response is truncated, the client
 will send the query back through TCP connection.  The server should
 forward this request using TCP instead of UDP.
+--
 
+[#v4_1_0__enhancements]
 ===  Enhancements
 
-*  Remove the fallback name servers (NS) from server options
+Remove the fallback name servers (NS) from server options::
 +
+--
 The original idea of fallback NS is to send the query to the one
 define in resolv.conf, instead of using the one defined by user in
 ServerOptions NameServers, when an error occured.
-+
+
 But, most of error usually caused by network (disconnected, time out),
 so re-sending query to fallback NS does not have any effect if the
 network it self is not working.
-+
+
 This changes remove the unnecessary and complex fallback NS from
 server.
+--
 
-*  Do not cache truncated answer
+Do not cache truncated answer::
 +
+--
 Previously only answer with non-zero response code is ignored.
-+
+
 This changes ignore also answer where response header is truncated.
+--
+
+//}}}
 
 
+[#v4_0_0]
 ==  rescached v4.0.0 (2021-01-25)
+//{{{
 
+[#v4_0_0__new_features]
 ===  New features
 
 Rescached now have a web user interface (wui) that can be accessed at
@@ -407,70 +475,93 @@ http://127.0.0.1:5380.
 The interface can be used to monitoring caches, managing caches, environment,
 blocked hosts, internal hosts files, and zone files.
 
+[#v4_0_0__breaking_changes]
 ===  Breaking changes
 
-*  The `rescached::dir.hosts` now default to "/etc/rescached/hosts.d"
+The `rescached::dir.hosts` now default to "/etc/rescached/hosts.d"::
 
-*  The `rescached::dir.master` now default to "/etc/rescached/zone.d"
+The `rescached::dir.master` now default to "/etc/rescached/zone.d"::
+
+//}}}
 
 
+[#v3_0_2]
 ==  rescached v3.0.2 (2020-05-08)
 
-*  go.mod: comment replace directive
-   This cause package is un-buildable using normal go get or git clone.
+go.mod: comment replace directive::
 +
-   Sorry :/
+--
+This cause package is un-buildable using normal go get or git clone.
+
+Sorry :/
+--
 
 
+[#v3_0_1]
 ==  rescached v3.0.1 (2020-05-07)
+//{{{
 
+[#v3_0_1__enhancements]
 ===  Enhancements
 
-*  dns: change the mark of input/output in log output
+dns: change the mark of input/output in log output::
 +
-   Previously, the character '<' is used to indicate incoming request
-   from client and '>' to indicate outgoing response.
-   This change reverse it because '<' make more sense for output and '>'
-   is for input (looks like cin and cout on C++ world)
+Previously, the character '<' is used to indicate incoming request
+from client and '>' to indicate outgoing response.
+This change reverse it because '<' make more sense for output and '>'
+is for input (looks like cin and cout on C++ world)
 
+[#v3_0_1__bug_fixes]
 ===  Bug fixes
 
-*  dns: fix index out of range when unpacking OPT RR
-*  dns: forward the request to fallback queue if there is no forwarders
+dns: fix index out of range when unpacking OPT RR::
 
+dns: forward the request to fallback queue if there is no forwarders::
+
+[#v3_0_1__chores]
 ===  Chores
 
-*  Add prefix "_" to all non-Go source directories.
-   This is to ignore the directory being scanned by Go tools.
+Add prefix "_" to all non-Go source directories::
++
+This is to ignore the directory being scanned by Go tools.
+
+//}}}
 
 
+[#v3_0_0]
 ==  rescached v3.0.0 (2020-01-15)
 
+[#v3_0_0__enhancements]
 ===  Enhancements
 
-* Makefile: remove unused option "CGO_ENABLED=0"
+Makefile: remove unused option "CGO_ENABLED=0"::
 
+[#v3_0_0__bug_fixes]
 ===  Bug Fixes
 
-* Makefile: remove invalid task "install-service-systemd"
+Makefile: remove invalid task "install-service-systemd"::
 
-* cmd: fix formatting arguments
+cmd: fix formatting arguments::
 
 
+[#v3_0_0-alpha]
 ==  rescached v3.0.0-alpha (2019-12-26)
+//{{{
 
 All the server core functionalities (caches and forwarding) now
 implemented inside "dns.Server".  The main function of this package are
 for reading options from configuration file (or from command line options)
 and watching changes from system resolv.conf.
 
+[#v3_0_0-alpha__new_features]
 ===  New Features
 
-*  Support serving and forwarding DNS over TLS
+* Support serving and forwarding DNS over TLS
 
-*  Add launchd script for macOS and make tasks to install and uninstall on
-   macOS
+* Add launchd script for macOS and make tasks to install and uninstall on
+  macOS
 
+[#v3_0_0-alpha__breaking_changes]
 ===  Breaking Changes
 
 There are also some major changes on configuration file.
@@ -497,42 +588,56 @@ service is not applicable or relevant anymore on systemd or launchd.
 If the program already started, the second program will fail because
 the port is already used.
 
+//}}}
 
+
+[#v2_1_2]
 ==  rescached v2.1.2 (2019-03-22)
 
-===  Bug Fix
+[#v2_1_2__bug_fixes]
+===  Bug Fixes
 
 Use single Go routine to handle request.  This fix mismatched ID in
 response due to single response is being use by multiple routines.
 
 
+[#v2_1_1]
 ==  rescached v2.1.1 (2019-03-02)
 
+[#v2_1_1__enhancements]
 ===  Enhancements
 
 *  Run multiple (4) go routines to handle request
 *  Make the debug output to be more human readable
 
+[#v2_1_1__bug_fixes]
 ===  Bug Fixes
 
 *  cmd/resolver: fix query with zero ID
 
 
+[#v2_1_0]
 ==  rescached v2.1.0 (2019-02-01)
 
+[#v2_1_0__new_features]
 ===  New Features
 
-*  Change default parent nameservers to Cloudflare DNS
+Change default parent nameservers to Cloudflare DNS::
 +
+--
 We believe in Cloudflare!
 Please read Cloudflare DNS policy for more information:
 https://developers.cloudflare.com/1.1.1.1/commitment-to-privacy/privacy-policy/privacy-policy/
+--
 
+[#v2_1_0__enhancements]
 ===  Enhancements
 
-*  Improve response performance.  Previously we can serve around 93k request
-per second (RPS).  The new enhancement increase the RPS to around 115k.
+Improve response performance::.
+Previously we can serve around 93k request per second (RPS).  The new
+enhancement increase the RPS to around 115k.
 
+[#v2_1_0__bug_fixes]
 ===  Bug Fixes
 
 *  Fix the example certificate and key for DNS over HTTPS
@@ -540,9 +645,11 @@ per second (RPS).  The new enhancement increase the RPS to around 115k.
 *  Fix response with different query type that may not get pruned
 
 
+[#v2_0_0]
 ==  rescached v2.0.0 (2019-01-16)
 
-===  Features
+[#v2_0_0__new_features]
+===  New features
 
 *  Enable to handle request from UDP and TCP connections
 *  Enable to forward request using UDP or TCP connection
