@@ -6,14 +6,17 @@ module github.com/shuLhan/rescached-go/v4
 go 1.19
 
 require (
-	git.sr.ht/~shulhan/ciigo v0.9.3
-	github.com/shuLhan/share v0.45.0
+	git.sr.ht/~shulhan/ciigo v0.10.0
+	github.com/shuLhan/share v0.46.0
 )
 
 require (
 	git.sr.ht/~shulhan/asciidoctor-go v0.4.1 // indirect
-	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	github.com/yuin/goldmark v1.5.4 // indirect
+	github.com/yuin/goldmark-meta v1.1.0 // indirect
+	golang.org/x/net v0.12.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
-//replace github.com/shuLhan/share => ../share
+replace github.com/shuLhan/share => ../share

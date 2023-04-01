@@ -73,6 +73,7 @@ func TestLoadEnvironment(t *testing.T) {
 			fileConfig: filepath.Join(testDirBase, "/etc/rescached/rescached.cfg"),
 
 			WUIListen: "127.0.0.1:5381",
+			Telemetry: `questdb+tcp://127.0.0.1:9009`,
 			HostBlockd: map[string]*Blockd{
 				"a.block": &Blockd{
 					Name: "a.block",

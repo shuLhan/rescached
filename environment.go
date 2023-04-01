@@ -73,6 +73,12 @@ type Environment struct {
 	FileResolvConf string `ini:"rescached::file.resolvconf"`
 	WUIListen      string `ini:"rescached::wui.listen"`
 
+	// Telemetry define the URI for sending telemetry.
+	// Format: "<forwarder>+<url>".
+	// For example, collecting telemetry to store in questdb at localhost,
+	// "questdb+tcp://127.0.0.1:9009"
+	Telemetry string `ini:"rescached::telemetry"`
+
 	HostBlockd     map[string]*Blockd `ini:"block.d"`
 	hostBlockdFile map[string]*dns.HostsFile
 	hostsd         map[string]*dns.HostsFile

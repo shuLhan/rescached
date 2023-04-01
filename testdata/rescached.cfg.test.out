@@ -1,6 +1,7 @@
 [rescached]
 file.resolvconf =
 wui.listen = 127.0.0.1:5381
+telemetry = questdb+tcp://127.0.0.1:9009
 debug = 1
 
 [block.d "a.block"]
@@ -27,6 +28,7 @@ parent = udp://10.8.0.1
 http.idle_timeout = 0s
 cache.prune_delay = 0s
 cache.prune_threshold = 0s
+debug = 0
 http.port = 0
 tls.port = 0
 tls.allow_insecure = true
