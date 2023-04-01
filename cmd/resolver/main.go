@@ -36,9 +36,8 @@ const (
 	subCmdUpdate  = "update"
 )
 
-var (
-	Usage string // Contains usage of program, overwritten by build.
-)
+// Usage of program, overwritten by build.
+var Usage string
 
 func main() {
 	var (

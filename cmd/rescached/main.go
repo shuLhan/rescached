@@ -1,6 +1,12 @@
 // SPDX-FileCopyrightText: 2018 M. Shulhan <ms@kilabit.info>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+// Program rescached server that caching internet name and address on local
+// memory for speeding up DNS resolution.
+//
+// Rescached primary goal is only to caching DNS queries and answers, used by
+// personal or small group of users, to minimize unneeded traffic to outside
+// network.
 package main
 
 import (

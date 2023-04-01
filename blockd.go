@@ -18,6 +18,7 @@ const (
 	lastUpdatedFormat = "2006-01-02 15:04:05 MST"
 )
 
+// Blockd define the container for each block.d section in configuration.
 type Blockd struct {
 	lastUpdated time.Time
 

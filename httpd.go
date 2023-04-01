@@ -331,7 +331,7 @@ func (srv *Server) httpdRun() {
 //			...
 //		}
 //	}
-func (srv *Server) httpApiBlockdList(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpApiBlockdList(_ *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 	)
@@ -495,7 +495,7 @@ func (srv *Server) httpApiBlockdFetch(epr *libhttp.EndpointRequest) (resBody []b
 	return json.Marshal(&res)
 }
 
-func (srv *Server) httpApiCaches(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpApiCaches(_ *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res     = libhttp.EndpointResponse{}
 		answers = srv.dns.Caches.ExternalLRU()
@@ -580,7 +580,7 @@ func (srv *Server) httpApiCachesDelete(epr *libhttp.EndpointRequest) (resBody []
 //	{
 //		"data": <Environment>
 //	}
-func (srv *Server) httpApiEnvironmentGet(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpApiEnvironmentGet(_ *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 	)
@@ -1138,7 +1138,7 @@ func (srv *Server) apiHostsdRecordDelete(epr *libhttp.EndpointRequest) (resbody 
 //			...
 //		}
 //	}
-func (srv *Server) apiZoned(epr *libhttp.EndpointRequest) (resb []byte, err error) {
+func (srv *Server) apiZoned(_ *libhttp.EndpointRequest) (resb []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 	)

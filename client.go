@@ -176,6 +176,7 @@ func (cl *Client) Caches() (answers []*dns.Answer, err error) {
 	return answers, nil
 }
 
+// CachesRemove request to remove caches by its domain name.
 func (cl *Client) CachesRemove(q string) (listAnswer []*dns.Answer, err error) {
 	var (
 		logp   = "CachesRemove"
@@ -523,7 +524,7 @@ func (cl *Client) ZonedDelete(name string) (zone *dns.Zone, err error) {
 	return zone, nil
 }
 
-// ZoneRecords fetch the zone records by its name.
+// ZonedRecords fetch the zone records by its name.
 func (cl *Client) ZonedRecords(zone string) (zoneRecords dns.ZoneRecords, err error) {
 	var (
 		logp   = "ZonedRecords"

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /*
-Command resolver is command line interface (CLI) for DNS and rescached server.
+Program resolver is command line interface (CLI) for DNS and rescached server.
 
 # SYNOPSIS
 

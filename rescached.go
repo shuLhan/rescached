@@ -17,9 +17,8 @@ import (
 	"github.com/shuLhan/share/lib/memfs"
 )
 
-var (
-	Version = `4.4.0` // Contains version of program, overwritten by build.
-)
+// Version of program, overwritten by build.
+var Version = `4.4.0`
 
 // Server implement caching DNS server.
 type Server struct {
