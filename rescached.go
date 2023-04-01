@@ -126,7 +126,6 @@ func (srv *Server) Start() (err error) {
 		if err != nil {
 			return err
 		}
-		err = nil
 	}
 
 	for _, hfile = range srv.env.hostsd {
@@ -145,7 +144,6 @@ func (srv *Server) Start() (err error) {
 		if err != nil {
 			return err
 		}
-		err = nil
 	}
 	for _, zone = range srv.env.zoned {
 		srv.dns.Caches.InternalPopulate(zone.Messages(), zone.Path)
