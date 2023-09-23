@@ -89,15 +89,6 @@ func (srv *Server) Start() (err error) {
 		}
 	}
 
-	hfile, err = dns.ParseHostsFile(dns.GetSystemHosts())
-	if err != nil {
-		return err
-	}
-	err = srv.dns.Caches.InternalPopulateRecords(hfile.Records, hfile.Path)
-	if err != nil {
-		return err
-	}
-
 	for _, hb = range srv.env.HostBlockd {
 		if !hb.IsEnabled {
 			continue
