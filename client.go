@@ -525,7 +525,7 @@ func (cl *Client) ZonedDelete(name string) (zone *dns.Zone, err error) {
 }
 
 // ZonedRecords fetch the zone records by its name.
-func (cl *Client) ZonedRecords(zone string) (zoneRecords dns.ZoneRecords, err error) {
+func (cl *Client) ZonedRecords(zone string) (zoneRecords map[string][]*dns.ResourceRecord, err error) {
 	var (
 		logp   = "ZonedRecords"
 		params = url.Values{}
@@ -597,7 +597,7 @@ func (cl *Client) ZonedRecordAdd(name string, rreq dns.ResourceRecord) (rres *dn
 }
 
 // ZonedRecordDelete delete record from zone file.
-func (cl *Client) ZonedRecordDelete(name string, rreq dns.ResourceRecord) (zoneRecords dns.ZoneRecords, err error) {
+func (cl *Client) ZonedRecordDelete(name string, rreq dns.ResourceRecord) (zoneRecords map[string][]*dns.ResourceRecord, err error) {
 	var (
 		logp   = "ZonedRecordDelete"
 		params = url.Values{}

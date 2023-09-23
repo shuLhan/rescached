@@ -136,7 +136,7 @@ func (srv *Server) Start() (err error) {
 		}
 	}
 	for _, zone = range srv.env.zoned {
-		srv.dns.Caches.InternalPopulate(zone.Messages(), zone.Path)
+		srv.dns.Caches.InternalPopulateZone(zone)
 	}
 
 	if len(srv.env.FileResolvConf) > 0 {

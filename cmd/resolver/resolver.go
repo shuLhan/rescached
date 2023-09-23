@@ -664,7 +664,7 @@ func (rsol *resolver) doCmdZonedRRDelete(resc *rescached.Client, args []string) 
 		zone = strings.ToLower(args[0])
 		rreq = dns.ResourceRecord{}
 
-		zoneRecords dns.ZoneRecords
+		zoneRecords map[string][]*dns.ResourceRecord
 		vstr        string
 		vuint       uint64
 		err         error
@@ -723,7 +723,7 @@ func (rsol *resolver) doCmdZonedRRGet(resc *rescached.Client, args []string) {
 	}
 
 	var (
-		zoneRecords dns.ZoneRecords
+		zoneRecords map[string][]*dns.ResourceRecord
 		err         error
 	)
 
@@ -912,7 +912,7 @@ func printQueryResponse(nameserver string, msg *dns.Message) {
 	printMessage(msg)
 }
 
-func printZoneRecords(zr dns.ZoneRecords) {
+func printZoneRecords(zr map[string][]*dns.ResourceRecord) {
 	var (
 		dname  string
 		listRR []*dns.ResourceRecord

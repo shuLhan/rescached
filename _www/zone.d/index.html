@@ -315,7 +315,7 @@
         }
 
         async function ZonedDelete() {
-            let res = await resc.ZonedDelete(activeZone.Name)
+            let res = await resc.ZonedDelete(activeZone.Origin)
             if (res.code != 200) {
                 notifError(res.message)
                 return
@@ -348,7 +348,7 @@
 
             console.log("ZonedRecordAdd: ", newRR)
 
-            let res = await resc.ZonedRecordAdd(activeZone.Name, newRR)
+            let res = await resc.ZonedRecordAdd(activeZone.Origin, newRR)
             if (res.code != 200) {
                 notifError(res.message)
                 return
@@ -360,7 +360,7 @@
         async function ZonedRecordDelete(name, idx) {
             let rr = activeZone.Records[name][idx]
             console.log("ZonedRecordDelete: ", rr)
-            let res = await resc.ZonedRecordDelete(activeZone.Name, rr)
+            let res = await resc.ZonedRecordDelete(activeZone.Origin, rr)
             if (res.code != 200) {
                 notifError(res.message)
                 return
@@ -381,13 +381,13 @@
                 // PTR
                 formDefault.style.display = "none"
                 formPTR.style.display = "block"
-                formPTR.children[1].children[2].innerText = "." + activeZone.Name
+                formPTR.children[1].children[2].innerText = "." + activeZone.Origin
                 formMX.style.display = "none"
             } else if (v == 15) {
                 formDefault.style.display = "none"
                 formPTR.style.display = "none"
                 formMX.style.display = "block"
-                formMX.children[0].children[2].innerText = "." + activeZone.Name
+                formMX.children[0].children[2].innerText = "." + activeZone.Origin
                 newRR.Value = {
                     Name: "",
                     Exchange: "",
@@ -395,7 +395,7 @@
                 }
             } else {
                 formDefault.style.display = "block"
-                formDefault.children[0].children[2].innerText = "." + activeZone.Name
+                formDefault.children[0].children[2].innerText = "." + activeZone.Origin
                 formPTR.style.display = "none"
                 formMX.style.display = "none"
             }
@@ -411,8 +411,8 @@
                 let zoneFile = zoned[name]
                 out += `
                         <div class="item">
-                            <span onclick="setActiveZone('${zoneFile.Name}')">
-                                ${zoneFile.Name}
+                            <span onclick="setActiveZone('${name}')">
+                                ${name}
                             </span>
                         </div>`
             }
@@ -423,7 +423,7 @@
             let w = document.getElementById("activeZone")
             w.innerHTML = `
                 <h3>
-                    ${activeZone.Name}
+                    ${activeZone.Origin}
                     <button
                         class="action-delete"
                         onclick="ZonedDelete()"
@@ -513,11 +513,11 @@
         async function saveSOA() {
             activeZone.SOA.Type = 6
             let req = {
-                Name: activeZone.Name,
+                Name: activeZone.Origin,
                 Type: 6,
                 Value: activeZone.SOA,
             }
-            let res = await resc.ZonedRecordAdd(activeZone.Name, req)
+            let res = await resc.ZonedRecordAdd(activeZone.Origin, req)
             if (res.code != 200) {
                 notifError(res.message)
                 return
