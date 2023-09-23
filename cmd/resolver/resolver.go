@@ -4,11 +4,13 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
+	"math"
+	"math/big"
 	"os"
 	"strconv"
 	"strings"
@@ -773,15 +775,21 @@ func (rsol *resolver) newRescachedClient() (resc *rescached.Client) {
 
 func (rsol *resolver) query(timeout time.Duration, qname string) (res *dns.Message, err error) {
 	var (
-		logp = "query"
-		req  = dns.NewMessage()
-	)
+		logp    = "query"
+		req     = dns.NewMessage()
+		randMax = big.NewInt(math.MaxUint16)
 
-	rand.Seed(time.Now().Unix())
+		randv *big.Int
+	)
 
 	rsol.dnsc.SetTimeout(timeout)
 
-	req.Header.ID = uint16(rand.Intn(65535))
+	randv, err = rand.Int(rand.Reader, randMax)
+	if err != nil {
+		log.Panicf(`%s: %s`, logp, err)
+	}
+
+	req.Header.ID = uint16(randv.Int64())
 	req.Question.Name = qname
 	req.Question.Type = rsol.qtype
 	req.Question.Class = rsol.qclass
