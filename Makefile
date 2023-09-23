@@ -29,7 +29,7 @@ DIR_RESCACHED=/usr/share/rescached
 
 ##---- Tasks for testing, linting, and building program.
 
-.PHONY: test test.prof lint debug build resolver rescached
+.PHONY: test test.prof debug build resolver rescached
 
 build: lint test resolver rescached
 
@@ -61,9 +61,13 @@ test.prof:
 		-cpuprofile $(CPU_PROF) \
 		-memprofile $(MEM_PROF) ./...
 
+.PHONY: lint
 lint:
-	-golangci-lint run ./...
-	-reuse lint
+	-go vet ./...
+	-fieldalignment ./...
+	-shadow ./...
+	-revive ./...
+	-reuse --suppress-deprecation lint
 
 
 ##---- Cleaning up.
