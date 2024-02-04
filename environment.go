@@ -34,7 +34,7 @@ const (
 	keyDebug          = "debug"
 	keyFileResolvConf = "file.resolvconf"
 	keyName           = "name"
-	keyUrl            = "url"
+	keyURL            = `url`
 
 	keyCachePruneDelay     = "cache.prune_delay"
 	keyCachePruneThreshold = "cache.prune_threshold"
@@ -248,7 +248,7 @@ func (env *Environment) save(file string) (in *ini.Ini, err error) {
 
 	for _, hb = range env.HostBlockd {
 		in.Set(sectionNameBlockd, hb.Name, keyName, hb.Name)
-		in.Set(sectionNameBlockd, hb.Name, keyUrl, hb.URL)
+		in.Set(sectionNameBlockd, hb.Name, keyURL, hb.URL)
 	}
 
 	in.UnsetAll(sectionNameDNS, subNameServer, keyParent)

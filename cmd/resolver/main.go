@@ -50,7 +50,7 @@ func main() {
 
 	flag.BoolVar(&rsol.insecure, "insecure", false, "Ignore invalid server certificate.")
 	flag.StringVar(&rsol.nameserver, "ns", "", "Parent name server address using scheme based.")
-	flag.StringVar(&rsol.rescachedUrl, "server", defRescachedUrl, "Set the rescached HTTP server.")
+	flag.StringVar(&rsol.rescachedURL, `server`, defRescachedURL, `Set the rescached HTTP server.`)
 
 	flag.Parse()
 

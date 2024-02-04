@@ -27,15 +27,15 @@ const (
 	paramNameType   = "type"
 	paramNameValue  = "value"
 
-	httpApiBlockd        = "/api/block.d"
-	httpApiBlockdDisable = "/api/block.d/disable"
-	httpApiBlockdEnable  = "/api/block.d/enable"
-	httpApiBlockdFetch   = "/api/block.d/fetch"
+	httpAPIBlockd        = `/api/block.d`
+	httpAPIBlockdDisable = `/api/block.d/disable`
+	httpAPIBlockdEnable  = `/api/block.d/enable`
+	httpAPIBlockdFetch   = `/api/block.d/fetch`
 
-	httpApiCaches       = "/api/caches"
-	httpApiCachesSearch = "/api/caches/search"
+	httpAPICaches       = `/api/caches`
+	httpAPICachesSearch = `/api/caches/search`
 
-	httpApiEnvironment = "/api/environment"
+	httpAPIEnvironment = `/api/environment`
 
 	apiHostsd   = "/api/hosts.d"
 	apiHostsdRR = "/api/hosts.d/rr"
@@ -63,10 +63,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
-		Path:         httpApiBlockd,
+		Path:         httpAPIBlockd,
 		RequestType:  libhttp.RequestTypeNone,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpApiBlockdList,
+		Call:         srv.httpAPIBlockdList,
 	})
 	if err != nil {
 		return err
@@ -74,10 +74,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPut,
-		Path:         httpApiBlockd,
+		Path:         httpAPIBlockd,
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpApiBlockdUpdate,
+		Call:         srv.httpAPIBlockdUpdate,
 	})
 	if err != nil {
 		return err
@@ -85,10 +85,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         httpApiBlockdDisable,
+		Path:         httpAPIBlockdDisable,
 		RequestType:  libhttp.RequestTypeForm,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpApiBlockdDisable,
+		Call:         srv.httpAPIBlockdDisable,
 	})
 	if err != nil {
 		return err
@@ -96,10 +96,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         httpApiBlockdEnable,
+		Path:         httpAPIBlockdEnable,
 		RequestType:  libhttp.RequestTypeForm,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpApiBlockdEnable,
+		Call:         srv.httpAPIBlockdEnable,
 	})
 	if err != nil {
 		return err
@@ -107,10 +107,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         httpApiBlockdFetch,
+		Path:         httpAPIBlockdFetch,
 		RequestType:  libhttp.RequestTypeForm,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpApiBlockdFetch,
+		Call:         srv.httpAPIBlockdFetch,
 	})
 	if err != nil {
 		return err
@@ -120,10 +120,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
-		Path:         httpApiCaches,
+		Path:         httpAPICaches,
 		RequestType:  libhttp.RequestTypeQuery,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpApiCaches,
+		Call:         srv.httpAPICaches,
 	})
 	if err != nil {
 		return err
@@ -131,10 +131,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
-		Path:         httpApiCaches,
+		Path:         httpAPICaches,
 		RequestType:  libhttp.RequestTypeQuery,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpApiCachesDelete,
+		Call:         srv.httpAPICachesDelete,
 	})
 	if err != nil {
 		return err
@@ -142,10 +142,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
-		Path:         httpApiCachesSearch,
+		Path:         httpAPICachesSearch,
 		RequestType:  libhttp.RequestTypeQuery,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpApiCachesSearch,
+		Call:         srv.httpAPICachesSearch,
 	})
 	if err != nil {
 		return err
@@ -155,10 +155,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
-		Path:         httpApiEnvironment,
+		Path:         httpAPIEnvironment,
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpApiEnvironmentGet,
+		Call:         srv.httpAPIEnvironmentGet,
 	})
 	if err != nil {
 		return err
@@ -166,10 +166,10 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
-		Path:         httpApiEnvironment,
+		Path:         httpAPIEnvironment,
 		RequestType:  libhttp.RequestTypeJSON,
 		ResponseType: libhttp.ResponseTypeJSON,
-		Call:         srv.httpApiEnvironmentUpdate,
+		Call:         srv.httpAPIEnvironmentUpdate,
 	})
 	if err != nil {
 		return err
@@ -315,7 +315,7 @@ func (srv *Server) httpdRun() {
 	}
 }
 
-// httpApiBlockdList fetch the list of block.d files.
+// httpAPIBlockdList fetch the list of block.d files.
 //
 // # Request
 //
@@ -331,10 +331,8 @@ func (srv *Server) httpdRun() {
 //			...
 //		}
 //	}
-func (srv *Server) httpApiBlockdList(_ *libhttp.EndpointRequest) (resBody []byte, err error) {
-	var (
-		res = libhttp.EndpointResponse{}
-	)
+func (srv *Server) httpAPIBlockdList(_ *libhttp.EndpointRequest) (resBody []byte, err error) {
+	var res = libhttp.EndpointResponse{}
 
 	res.Code = http.StatusOK
 	res.Data = srv.env.HostBlockd
@@ -343,7 +341,7 @@ func (srv *Server) httpApiBlockdList(_ *libhttp.EndpointRequest) (resBody []byte
 	return resBody, err
 }
 
-// httpApiBlockdDisable disable the hosts block.d.
+// httpAPIBlockdDisable disable the hosts block.d.
 //
 // # Request
 //
@@ -359,7 +357,7 @@ func (srv *Server) httpApiBlockdList(_ *libhttp.EndpointRequest) (resBody []byte
 //	{
 //		"data": <Blockd>
 //	}
-func (srv *Server) httpApiBlockdDisable(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpAPIBlockdDisable(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 
@@ -392,7 +390,7 @@ func (srv *Server) httpApiBlockdDisable(epr *libhttp.EndpointRequest) (resBody [
 	return json.Marshal(&res)
 }
 
-// httpApiBlockdEnable enable the hosts block.d.
+// httpAPIBlockdEnable enable the hosts block.d.
 //
 // # Request
 //
@@ -408,7 +406,7 @@ func (srv *Server) httpApiBlockdDisable(epr *libhttp.EndpointRequest) (resBody [
 //	{
 //		"data": <Blockd>
 //	}
-func (srv *Server) httpApiBlockdEnable(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpAPIBlockdEnable(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 
@@ -441,7 +439,7 @@ func (srv *Server) httpApiBlockdEnable(epr *libhttp.EndpointRequest) (resBody []
 	return json.Marshal(&res)
 }
 
-// httpApiBlockdFetch fetch the latest hosts file from the block.d provider
+// httpAPIBlockdFetch fetch the latest hosts file from the block.d provider
 // based on registered URL.
 //
 // # Request
@@ -455,9 +453,9 @@ func (srv *Server) httpApiBlockdEnable(epr *libhttp.EndpointRequest) (resBody []
 //
 // On success, the hosts file will be updated and the server will be
 // restarted.
-func (srv *Server) httpApiBlockdFetch(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpAPIBlockdFetch(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
-		logp = "httpApiBlockdFetch"
+		logp = `httpAPIBlockdFetch`
 		res  = libhttp.EndpointResponse{}
 
 		hb     *Blockd
@@ -495,7 +493,7 @@ func (srv *Server) httpApiBlockdFetch(epr *libhttp.EndpointRequest) (resBody []b
 	return json.Marshal(&res)
 }
 
-func (srv *Server) httpApiCaches(_ *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpAPICaches(_ *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res     = libhttp.EndpointResponse{}
 		answers = srv.dns.Caches.ExternalLRU()
@@ -509,7 +507,7 @@ func (srv *Server) httpApiCaches(_ *libhttp.EndpointRequest) (resBody []byte, er
 	return json.Marshal(&res)
 }
 
-func (srv *Server) httpApiCachesSearch(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpAPICachesSearch(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 		q   = epr.HttpRequest.Form.Get(paramNameQuery)
@@ -542,7 +540,7 @@ func (srv *Server) httpApiCachesSearch(epr *libhttp.EndpointRequest) (resBody []
 	return json.Marshal(&res)
 }
 
-func (srv *Server) httpApiCachesDelete(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpAPICachesDelete(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 		q   = epr.HttpRequest.Form.Get(paramNameName)
@@ -567,7 +565,7 @@ func (srv *Server) httpApiCachesDelete(epr *libhttp.EndpointRequest) (resBody []
 	return json.Marshal(&res)
 }
 
-// httpApiEnvironmentGet get the current Environment.
+// httpAPIEnvironmentGet get the current Environment.
 //
 // # Request
 //
@@ -580,7 +578,7 @@ func (srv *Server) httpApiCachesDelete(epr *libhttp.EndpointRequest) (resBody []
 //	{
 //		"data": <Environment>
 //	}
-func (srv *Server) httpApiEnvironmentGet(_ *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpAPIEnvironmentGet(_ *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
 	)
@@ -591,7 +589,7 @@ func (srv *Server) httpApiEnvironmentGet(_ *libhttp.EndpointRequest) (resBody []
 	return json.Marshal(&res)
 }
 
-// httpApiEnvironmentUpdate update the environment and restart the service.
+// httpAPIEnvironmentUpdate update the environment and restart the service.
 //
 // # Request
 //
@@ -611,7 +609,7 @@ func (srv *Server) httpApiEnvironmentGet(_ *libhttp.EndpointRequest) (resBody []
 //	{
 //		"data": <Environment>
 //	}
-func (srv *Server) httpApiEnvironmentUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpAPIEnvironmentUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res    = libhttp.EndpointResponse{}
 		newEnv = new(Environment)
@@ -659,7 +657,7 @@ func (srv *Server) httpApiEnvironmentUpdate(epr *libhttp.EndpointRequest) (resBo
 	return json.Marshal(&res)
 }
 
-// httpApiBlockdUpdate set the HostsBlock to be enabled or disabled.
+// httpAPIBlockdUpdate set the HostsBlock to be enabled or disabled.
 //
 // If its status changes to enabled, unhide the hosts block file, populate the
 // hosts back to caches, and add it to list of hostBlockdFile.
@@ -689,9 +687,9 @@ func (srv *Server) httpApiEnvironmentUpdate(epr *libhttp.EndpointRequest) (resBo
 //			...
 //		}
 //	}
-func (srv *Server) httpApiBlockdUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
+func (srv *Server) httpAPIBlockdUpdate(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
-		logp       = "httpApiBlockdUpdate"
+		logp       = `httpAPIBlockdUpdate`
 		res        = libhttp.EndpointResponse{}
 		hostBlockd = make(map[string]*Blockd, 0)
 

@@ -25,7 +25,7 @@ const (
 	defAttempts     = 1
 	defQueryType    = "A"
 	defQueryClass   = "IN"
-	defRescachedUrl = "http://127.0.0.1:5380"
+	defRescachedURL = `http://127.0.0.1:5380`
 	defResolvConf   = "/etc/resolv.conf"
 	defTimeout      = 5 * time.Second
 )
@@ -40,7 +40,7 @@ type resolver struct {
 	sqclass string
 
 	nameserver   string
-	rescachedUrl string
+	rescachedURL string
 
 	qtype  dns.RecordType
 	qclass dns.RecordClass
@@ -197,28 +197,29 @@ func (rsol *resolver) doCmdEnv(args []string) {
 	var (
 		resc = rsol.newRescachedClient()
 
-		env     *rescached.Environment
-		subCmd  string
-		envJson []byte
-		err     error
+		err error
 	)
 
 	if len(args) == 0 {
+		var env *rescached.Environment
+
 		env, err = resc.Env()
 		if err != nil {
 			log.Fatalf("resolver: %s: %s", rsol.cmd, err)
 		}
 
-		envJson, err = json.MarshalIndent(env, "", "  ")
+		var envJSON []byte
+
+		envJSON, err = json.MarshalIndent(env, ``, `  `)
 		if err != nil {
 			log.Fatalf("resolver: %s: %s", rsol.cmd, err)
 		}
 
-		fmt.Println(string(envJson))
+		fmt.Println(string(envJSON))
 		return
 	}
 
-	subCmd = strings.ToLower(args[0])
+	var subCmd = strings.ToLower(args[0])
 	switch subCmd {
 	case subCmdUpdate:
 		args = args[1:]
@@ -241,21 +242,20 @@ func (rsol *resolver) doCmdEnv(args []string) {
 // doCmdEnvUpdate update the server environment by reading the JSON formatted
 // environment from file or from stdin.
 func (rsol *resolver) doCmdEnvUpdate(resc *rescached.Client, fileOrStdin string) (err error) {
-	var (
-		env     *rescached.Environment
-		envJson []byte
-	)
+	var envJSON []byte
 
 	if fileOrStdin == "-" {
-		envJson, err = io.ReadAll(os.Stdin)
+		envJSON, err = io.ReadAll(os.Stdin)
 	} else {
-		envJson, err = os.ReadFile(fileOrStdin)
+		envJSON, err = os.ReadFile(fileOrStdin)
 	}
 	if err != nil {
 		return fmt.Errorf("%s %s: %w", cmdEnv, subCmdUpdate, err)
 	}
 
-	err = json.Unmarshal(envJson, &env)
+	var env *rescached.Environment
+
+	err = json.Unmarshal(envJSON, &env)
 	if err != nil {
 		return fmt.Errorf("%s %s: %w", cmdEnv, subCmdUpdate, err)
 	}
@@ -265,12 +265,12 @@ func (rsol *resolver) doCmdEnvUpdate(resc *rescached.Client, fileOrStdin string)
 		return fmt.Errorf("%s %s: %w", cmdEnv, subCmdUpdate, err)
 	}
 
-	envJson, err = json.MarshalIndent(env, "", "  ")
+	envJSON, err = json.MarshalIndent(env, ``, `  `)
 	if err != nil {
 		return fmt.Errorf("%s %s: %w", cmdEnv, subCmdUpdate, err)
 	}
 
-	fmt.Println(string(envJson))
+	fmt.Println(string(envJSON))
 
 	return nil
 }
@@ -766,10 +766,10 @@ func (rsol *resolver) initSystemResolver() (err error) {
 
 // newRescachedClient create new rescached Client.
 func (rsol *resolver) newRescachedClient() (resc *rescached.Client) {
-	if len(rsol.rescachedUrl) == 0 {
-		rsol.rescachedUrl = defRescachedUrl
+	if len(rsol.rescachedURL) == 0 {
+		rsol.rescachedURL = defRescachedURL
 	}
-	resc = rescached.NewClient(rsol.rescachedUrl, rsol.insecure)
+	resc = rescached.NewClient(rsol.rescachedURL, rsol.insecure)
 	return resc
 }
 

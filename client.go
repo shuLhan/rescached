@@ -20,10 +20,10 @@ type Client struct {
 }
 
 // NewClient create new HTTP client that connect to rescached HTTP server.
-func NewClient(serverUrl string, insecure bool) (cl *Client) {
+func NewClient(serverURL string, insecure bool) (cl *Client) {
 	var (
 		httpcOpts = libhttp.ClientOptions{
-			ServerUrl:     serverUrl,
+			ServerUrl:     serverURL,
 			AllowInsecure: insecure,
 		}
 	)
@@ -42,7 +42,7 @@ func (cl *Client) Blockd() (hostBlockd map[string]*Blockd, err error) {
 		resb []byte
 	)
 
-	_, resb, err = cl.Get(httpApiBlockd, nil, nil)
+	_, resb, err = cl.Get(httpAPIBlockd, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -72,7 +72,7 @@ func (cl *Client) BlockdDisable(blockdName string) (blockd *Blockd, err error) {
 
 	params.Set(paramNameName, blockdName)
 
-	_, resb, err = cl.PostForm(httpApiBlockdDisable, nil, params)
+	_, resb, err = cl.PostForm(httpAPIBlockdDisable, nil, params)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -101,7 +101,7 @@ func (cl *Client) BlockdEnable(blockdName string) (blockd *Blockd, err error) {
 
 	params.Set(paramNameName, blockdName)
 
-	_, resb, err = cl.PostForm(httpApiBlockdEnable, nil, params)
+	_, resb, err = cl.PostForm(httpAPIBlockdEnable, nil, params)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -131,7 +131,7 @@ func (cl *Client) BlockdFetch(blockdName string) (blockd *Blockd, err error) {
 
 	params.Set(paramNameName, blockdName)
 
-	_, resb, err = cl.PostForm(httpApiBlockdFetch, nil, params)
+	_, resb, err = cl.PostForm(httpAPIBlockdFetch, nil, params)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -159,7 +159,7 @@ func (cl *Client) Caches() (answers []*dns.Answer, err error) {
 		resb []byte
 	)
 
-	_, resb, err = cl.Get(httpApiCaches, nil, nil)
+	_, resb, err = cl.Get(httpAPICaches, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -190,7 +190,7 @@ func (cl *Client) CachesRemove(q string) (listAnswer []*dns.Answer, err error) {
 
 	params.Set(paramNameName, q)
 
-	_, resb, err = cl.Delete(httpApiCaches, nil, params)
+	_, resb, err = cl.Delete(httpAPICaches, nil, params)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -222,7 +222,7 @@ func (cl *Client) CachesSearch(q string) (listMsg []*dns.Message, err error) {
 
 	params.Set(paramNameQuery, q)
 
-	_, resb, err = cl.Get(httpApiCachesSearch, nil, params)
+	_, resb, err = cl.Get(httpAPICachesSearch, nil, params)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -248,7 +248,7 @@ func (cl *Client) Env() (env *Environment, err error) {
 		resb []byte
 	)
 
-	_, resb, err = cl.Get(httpApiEnvironment, nil, nil)
+	_, resb, err = cl.Get(httpAPIEnvironment, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -273,7 +273,7 @@ func (cl *Client) EnvUpdate(envIn *Environment) (envOut *Environment, err error)
 		resb []byte
 	)
 
-	_, resb, err = cl.PostJSON(httpApiEnvironment, nil, envIn)
+	_, resb, err = cl.PostJSON(httpAPIEnvironment, nil, envIn)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}

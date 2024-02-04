@@ -111,7 +111,7 @@ func TestClient_BlockdFetch(t *testing.T) {
 		err = os.WriteFile(affectedBlockd.fileDisabled, []byte("127.0.0.1 a.block\n"), 0644)
 	})
 
-	expString = "BlockdFetch: 400 httpApiBlockdFetch: unknown hosts block.d name: xxx"
+	expString = `BlockdFetch: 400 httpAPIBlockdFetch: unknown hosts block.d name: xxx`
 
 	gotBlockd, err = resc.BlockdFetch("xxx")
 	if err != nil {
