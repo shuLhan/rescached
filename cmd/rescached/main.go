@@ -168,7 +168,7 @@ func watchWwwDoc() {
 		logp        = "watchWwwDoc"
 		convertOpts = ciigo.ConvertOptions{
 			Root:         "_www/doc",
-			HtmlTemplate: "_www/doc/html.tmpl",
+			HTMLTemplate: "_www/doc/html.tmpl",
 		}
 
 		err error
