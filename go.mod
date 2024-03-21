@@ -3,20 +3,20 @@
 
 module github.com/shuLhan/rescached-go/v4
 
-go 1.20
+go 1.22
 
 require (
-	git.sr.ht/~shulhan/ciigo v0.11.0
-	github.com/shuLhan/share v0.53.1-0.20240204074700-48e6dced72d4
+	git.sr.ht/~shulhan/ciigo v0.11.1-0.20240321082653-aed750e52cec
+	git.sr.ht/~shulhan/pakakeh.go v0.53.2-0.20240321083144-547c4b598110
 )
 
 require (
-	git.sr.ht/~shulhan/asciidoctor-go v0.5.1 // indirect
-	github.com/yuin/goldmark v1.6.0 // indirect
+	git.sr.ht/~shulhan/asciidoctor-go v0.5.2-0.20240305110034-dc67158aeeb6 // indirect
+	github.com/yuin/goldmark v1.7.0 // indirect
 	github.com/yuin/goldmark-meta v1.1.0 // indirect
-	golang.org/x/net v0.20.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-//replace github.com/shuLhan/share => ../share
+//replace git.sr.ht/~shulhan/pakakeh.go => ../pakakeh.go

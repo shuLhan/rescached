@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/shuLhan/share/lib/dns"
-	libhttp "github.com/shuLhan/share/lib/http"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
+	libhttp "git.sr.ht/~shulhan/pakakeh.go/lib/http"
 )
 
 // Client for rescached.
@@ -23,12 +23,12 @@ type Client struct {
 func NewClient(serverURL string, insecure bool) (cl *Client) {
 	var (
 		httpcOpts = libhttp.ClientOptions{
-			ServerUrl:     serverURL,
+			ServerURL:     serverURL,
 			AllowInsecure: insecure,
 		}
 	)
 	cl = &Client{
-		Client: libhttp.NewClient(&httpcOpts),
+		Client: libhttp.NewClient(httpcOpts),
 	}
 	return cl
 }
@@ -36,20 +36,23 @@ func NewClient(serverURL string, insecure bool) (cl *Client) {
 // Blockd return list of all block.d files on the server.
 func (cl *Client) Blockd() (hostBlockd map[string]*Blockd, err error) {
 	var (
-		logp = "Blockd"
-		res  = libhttp.EndpointResponse{}
-
-		resb []byte
+		logp      = `Blockd`
+		clientReq = libhttp.ClientRequest{
+			Path: httpAPIBlockd,
+		}
+		clientResp *libhttp.ClientResponse
 	)
 
-	_, resb, err = cl.Get(httpAPIBlockd, nil, nil)
+	clientResp, err = cl.Get(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	res.Data = &hostBlockd
+	var res = libhttp.EndpointResponse{
+		Data: &hostBlockd,
+	}
 
-	err = json.Unmarshal(resb, &res)
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -63,22 +66,26 @@ func (cl *Client) Blockd() (hostBlockd map[string]*Blockd, err error) {
 // BlockdDisable disable specific hosts on block.d.
 func (cl *Client) BlockdDisable(blockdName string) (blockd *Blockd, err error) {
 	var (
-		logp   = "BlockdDisable"
-		res    = libhttp.EndpointResponse{}
-		params = url.Values{}
-
-		resb []byte
+		logp      = `BlockdDisable`
+		clientReq = libhttp.ClientRequest{
+			Path: httpAPIBlockdDisable,
+			Params: url.Values{
+				paramNameName: []string{blockdName},
+			},
+		}
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameName, blockdName)
-
-	_, resb, err = cl.PostForm(httpAPIBlockdDisable, nil, params)
+	clientResp, err = cl.PostForm(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	res.Data = &blockd
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &blockd,
+	}
+
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -92,22 +99,25 @@ func (cl *Client) BlockdDisable(blockdName string) (blockd *Blockd, err error) {
 // BlockdEnable enable specific hosts on block.d.
 func (cl *Client) BlockdEnable(blockdName string) (blockd *Blockd, err error) {
 	var (
-		logp   = "BlockdEnable"
-		res    = libhttp.EndpointResponse{}
-		params = url.Values{}
-
-		resb []byte
+		logp      = `BlockdEnable`
+		clientReq = libhttp.ClientRequest{
+			Path: httpAPIBlockdEnable,
+			Params: url.Values{
+				paramNameName: []string{blockdName},
+			},
+		}
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameName, blockdName)
-
-	_, resb, err = cl.PostForm(httpAPIBlockdEnable, nil, params)
+	clientResp, err = cl.PostForm(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	res.Data = &blockd
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &blockd,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -122,22 +132,25 @@ func (cl *Client) BlockdEnable(blockdName string) (blockd *Blockd, err error) {
 // provider based on registered URL.
 func (cl *Client) BlockdFetch(blockdName string) (blockd *Blockd, err error) {
 	var (
-		logp   = "BlockdFetch"
-		params = url.Values{}
-		res    = libhttp.EndpointResponse{}
-
-		resb []byte
+		logp = `BlockdFetch`
+		req  = libhttp.ClientRequest{
+			Path: httpAPIBlockdFetch,
+			Params: url.Values{
+				paramNameName: []string{blockdName},
+			},
+		}
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameName, blockdName)
-
-	_, resb, err = cl.PostForm(httpAPIBlockdFetch, nil, params)
+	clientResp, err = cl.PostForm(req)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	res.Data = &blockd
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &blockd,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -151,20 +164,22 @@ func (cl *Client) BlockdFetch(blockdName string) (blockd *Blockd, err error) {
 // Caches fetch all of non-local caches from server.
 func (cl *Client) Caches() (answers []*dns.Answer, err error) {
 	var (
-		logp = "Caches"
-		res  = libhttp.EndpointResponse{
-			Data: &answers,
+		logp      = `Caches`
+		clientReq = libhttp.ClientRequest{
+			Path: httpAPICaches,
 		}
-
-		resb []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	_, resb, err = cl.Get(httpAPICaches, nil, nil)
+	clientResp, err = cl.Get(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &answers,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -179,23 +194,26 @@ func (cl *Client) Caches() (answers []*dns.Answer, err error) {
 // CachesRemove request to remove caches by its domain name.
 func (cl *Client) CachesRemove(q string) (listAnswer []*dns.Answer, err error) {
 	var (
-		logp   = "CachesRemove"
-		params = url.Values{}
-		res    = libhttp.EndpointResponse{
-			Data: &listAnswer,
+		logp      = `CachesRemove`
+		clientReq = libhttp.ClientRequest{
+			Path: httpAPICaches,
+			Params: url.Values{
+				paramNameName: []string{q},
+			},
 		}
-
-		resb []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameName, q)
-
-	_, resb, err = cl.Delete(httpAPICaches, nil, params)
+	clientResp, err = cl.Delete(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &listAnswer,
+	}
+
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -211,23 +229,25 @@ func (cl *Client) CachesRemove(q string) (listAnswer []*dns.Answer, err error) {
 // as DNS message.
 func (cl *Client) CachesSearch(q string) (listMsg []*dns.Message, err error) {
 	var (
-		logp   = "CachesSearch"
-		params = url.Values{}
-		res    = libhttp.EndpointResponse{
-			Data: &listMsg,
+		logp      = `CachesSearch`
+		clientReq = libhttp.ClientRequest{
+			Path: httpAPICachesSearch,
+			Params: url.Values{
+				paramNameQuery: []string{q},
+			},
 		}
-
-		resb []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameQuery, q)
-
-	_, resb, err = cl.Get(httpAPICachesSearch, nil, params)
+	clientResp, err = cl.Get(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &listMsg,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -241,18 +261,22 @@ func (cl *Client) CachesSearch(q string) (listMsg []*dns.Message, err error) {
 // Env get the server environment.
 func (cl *Client) Env() (env *Environment, err error) {
 	var (
-		logp = "Env"
-		res  = libhttp.EndpointResponse{
-			Data: &env,
+		logp      = `Env`
+		clientReq = libhttp.ClientRequest{
+			Path: httpAPIEnvironment,
 		}
-		resb []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	_, resb, err = cl.Get(httpAPIEnvironment, nil, nil)
+	clientResp, err = cl.Get(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
-	err = json.Unmarshal(resb, &res)
+
+	var res = libhttp.EndpointResponse{
+		Data: &env,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -265,20 +289,23 @@ func (cl *Client) Env() (env *Environment, err error) {
 // EnvUpdate update the server environment using new Environment.
 func (cl *Client) EnvUpdate(envIn *Environment) (envOut *Environment, err error) {
 	var (
-		logp = "EnvUpdate"
-		res  = libhttp.EndpointResponse{
-			Data: &envOut,
+		logp      = `EnvUpdate`
+		clientReq = libhttp.ClientRequest{
+			Path:   httpAPIEnvironment,
+			Params: envIn,
 		}
-
-		resb []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	_, resb, err = cl.PostJSON(httpAPIEnvironment, nil, envIn)
+	clientResp, err = cl.PostJSON(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &envOut,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -291,23 +318,25 @@ func (cl *Client) EnvUpdate(envIn *Environment) (envOut *Environment, err error)
 // HostsdCreate create new hosts file inside the hosts.d with requested name.
 func (cl *Client) HostsdCreate(name string) (hostsFile *dns.HostsFile, err error) {
 	var (
-		logp = "HostsdCreate"
-		res  = libhttp.EndpointResponse{
-			Data: &hostsFile,
+		logp      = `HostsdCreate`
+		clientReq = libhttp.ClientRequest{
+			Path: apiHostsd,
+			Params: url.Values{
+				paramNameName: []string{name},
+			},
 		}
-		params = url.Values{}
-
-		resb []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameName, name)
-
-	_, resb, err = cl.PostForm(apiHostsd, nil, params)
+	clientResp, err = cl.PostForm(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &hostsFile,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -320,23 +349,25 @@ func (cl *Client) HostsdCreate(name string) (hostsFile *dns.HostsFile, err error
 // HostsdDelete delete hosts file inside the hosts.d by file name.
 func (cl *Client) HostsdDelete(name string) (hostsFile *dns.HostsFile, err error) {
 	var (
-		logp = "HostsdDelete"
-		res  = libhttp.EndpointResponse{
-			Data: &hostsFile,
+		logp      = `HostsdDelete`
+		clientReq = libhttp.ClientRequest{
+			Path: apiHostsd,
+			Params: url.Values{
+				paramNameName: []string{name},
+			},
 		}
-		params = url.Values{}
-
-		resb []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameName, name)
-
-	_, resb, err = cl.Delete(apiHostsd, nil, params)
+	clientResp, err = cl.Delete(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &hostsFile,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -349,23 +380,25 @@ func (cl *Client) HostsdDelete(name string) (hostsFile *dns.HostsFile, err error
 // HostsdGet get the content of hosts file inside the hosts.d by file name.
 func (cl *Client) HostsdGet(name string) (listrr []*dns.ResourceRecord, err error) {
 	var (
-		logp = "HostsdGet"
-		res  = libhttp.EndpointResponse{
-			Data: &listrr,
+		logp      = `HostsdGet`
+		clientReq = libhttp.ClientRequest{
+			Path: apiHostsd,
+			Params: url.Values{
+				paramNameName: []string{name},
+			},
 		}
-		params = url.Values{}
-
-		resb []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameName, name)
-
-	_, resb, err = cl.Get(apiHostsd, nil, params)
+	clientResp, err = cl.Get(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &listrr,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -378,25 +411,27 @@ func (cl *Client) HostsdGet(name string) (listrr []*dns.ResourceRecord, err erro
 // HostsdRecordAdd add new resource record to the hosts file.
 func (cl *Client) HostsdRecordAdd(hostsName, domain, value string) (record *dns.ResourceRecord, err error) {
 	var (
-		logp = "HostsdRecordAdd"
-		res  = libhttp.EndpointResponse{
-			Data: &record,
+		logp      = `HostsdRecordAdd`
+		clientReq = libhttp.ClientRequest{
+			Path: apiHostsdRR,
+			Params: url.Values{
+				paramNameName:   []string{hostsName},
+				paramNameDomain: []string{domain},
+				paramNameValue:  []string{value},
+			},
 		}
-		params = url.Values{}
-
-		resb []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameName, hostsName)
-	params.Set(paramNameDomain, domain)
-	params.Set(paramNameValue, value)
-
-	_, resb, err = cl.PostForm(apiHostsdRR, nil, params)
+	clientResp, err = cl.PostForm(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &record,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -410,24 +445,26 @@ func (cl *Client) HostsdRecordAdd(hostsName, domain, value string) (record *dns.
 // HostsdRecordDelete delete a record from hosts file by domain name.
 func (cl *Client) HostsdRecordDelete(hostsName, domain string) (record *dns.ResourceRecord, err error) {
 	var (
-		logp = "HostsdRecordDelete"
-		res  = libhttp.EndpointResponse{
-			Data: &record,
+		logp      = `HostsdRecordDelete`
+		clientReq = libhttp.ClientRequest{
+			Path: apiHostsdRR,
+			Params: url.Values{
+				paramNameName:   []string{hostsName},
+				paramNameDomain: []string{domain},
+			},
 		}
-		params = url.Values{}
-
-		resb []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameName, hostsName)
-	params.Set(paramNameDomain, domain)
-
-	_, resb, err = cl.Delete(apiHostsdRR, nil, params)
+	clientResp, err = cl.Delete(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &record,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -441,20 +478,22 @@ func (cl *Client) HostsdRecordDelete(hostsName, domain string) (record *dns.Reso
 // Zoned fetch and return list of zone managed on server.
 func (cl *Client) Zoned() (zones map[string]*dns.Zone, err error) {
 	var (
-		logp = "Zoned"
-		res  = libhttp.EndpointResponse{}
-
-		resBody []byte
+		logp      = `Zoned`
+		clientReq = libhttp.ClientRequest{
+			Path: apiZoned,
+		}
+		clientResp *libhttp.ClientResponse
 	)
 
-	res.Data = &zones
-
-	_, resBody, err = cl.Get(apiZoned, nil, nil)
+	clientResp, err = cl.Get(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = json.Unmarshal(resBody, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &zones,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -465,23 +504,25 @@ func (cl *Client) Zoned() (zones map[string]*dns.Zone, err error) {
 // ZonedCreate create new zone file.
 func (cl *Client) ZonedCreate(name string) (zone *dns.Zone, err error) {
 	var (
-		logp = "ZonedCreate"
-		res  = libhttp.EndpointResponse{
-			Data: &zone,
+		logp      = `ZonedCreate`
+		clientReq = libhttp.ClientRequest{
+			Path: apiZoned,
+			Params: url.Values{
+				paramNameName: []string{name},
+			},
 		}
-		params = url.Values{}
-
-		resb []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameName, name)
-
-	_, resb, err = cl.PostForm(apiZoned, nil, params)
+	clientResp, err = cl.PostForm(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &zone,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -494,27 +535,28 @@ func (cl *Client) ZonedCreate(name string) (zone *dns.Zone, err error) {
 // ZonedDelete delete zone file by name.
 func (cl *Client) ZonedDelete(name string) (zone *dns.Zone, err error) {
 	var (
-		logp = "ZonedDelete"
-		res  = libhttp.EndpointResponse{
-			Data: &zone,
+		logp      = `ZonedDelete`
+		clientReq = libhttp.ClientRequest{
+			Path: apiZoned,
+			Params: url.Values{
+				paramNameName: []string{name},
+			},
 		}
-		params = url.Values{}
-
-		httpRes *http.Response
-		resb    []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameName, name)
-
-	httpRes, resb, err = cl.Delete(apiZoned, nil, params)
+	clientResp, err = cl.Delete(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
-	if httpRes.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("%s: %s", logp, httpRes.Status)
+	if clientResp.HTTPResponse.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("%s: %s", logp, clientResp.HTTPResponse.Status)
 	}
 
-	err = json.Unmarshal(resb, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &zone,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -527,23 +569,25 @@ func (cl *Client) ZonedDelete(name string) (zone *dns.Zone, err error) {
 // ZonedRecords fetch the zone records by its name.
 func (cl *Client) ZonedRecords(zone string) (zoneRecords map[string][]*dns.ResourceRecord, err error) {
 	var (
-		logp   = "ZonedRecords"
-		params = url.Values{}
-		res    = libhttp.EndpointResponse{
-			Data: &zoneRecords,
+		logp      = `ZonedRecords`
+		clientReq = libhttp.ClientRequest{
+			Path: apiZonedRR,
+			Params: url.Values{
+				paramNameName: []string{zone},
+			},
 		}
-
-		resBody []byte
+		clientResp *libhttp.ClientResponse
 	)
 
-	params.Set(paramNameName, zone)
-
-	_, resBody, err = cl.Get(apiZonedRR, nil, params)
+	clientResp, err = cl.Get(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	err = json.Unmarshal(resBody, &res)
+	var res = libhttp.EndpointResponse{
+		Data: &zoneRecords,
+	}
+	err = json.Unmarshal(clientResp.Body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -554,20 +598,19 @@ func (cl *Client) ZonedRecords(zone string) (zoneRecords map[string][]*dns.Resou
 // ZonedRecordAdd add new record to zone file.
 func (cl *Client) ZonedRecordAdd(name string, rreq dns.ResourceRecord) (rres *dns.ResourceRecord, err error) {
 	var (
-		logp = "ZonedRecordAdd"
+		logp = `ZonedRecordAdd`
 		zrr  = zoneRecordRequest{
 			Name: name,
 		}
-
-		res  *libhttp.EndpointResponse
-		rawb []byte
-		ok   bool
+		ok bool
 	)
 
 	zrr.Type, ok = dns.RecordTypeNames[rreq.Type]
 	if !ok {
 		return nil, fmt.Errorf("%s: unknown record type: %d", logp, rreq.Type)
 	}
+
+	var rawb []byte
 
 	rawb, err = json.Marshal(rreq)
 	if err != nil {
@@ -576,16 +619,22 @@ func (cl *Client) ZonedRecordAdd(name string, rreq dns.ResourceRecord) (rres *dn
 
 	zrr.Record = base64.StdEncoding.EncodeToString(rawb)
 
-	_, rawb, err = cl.PostJSON(apiZonedRR, nil, zrr)
+	var clientReq = libhttp.ClientRequest{
+		Path:   apiZonedRR,
+		Params: zrr,
+	}
+	var clientResp *libhttp.ClientResponse
+
+	clientResp, err = cl.PostJSON(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
 	rres = &dns.ResourceRecord{}
-	res = &libhttp.EndpointResponse{
+	var res = &libhttp.EndpointResponse{
 		Data: rres,
 	}
-	err = json.Unmarshal(rawb, res)
+	err = json.Unmarshal(clientResp.Body, res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
@@ -599,22 +648,22 @@ func (cl *Client) ZonedRecordAdd(name string, rreq dns.ResourceRecord) (rres *dn
 // ZonedRecordDelete delete record from zone file.
 func (cl *Client) ZonedRecordDelete(name string, rreq dns.ResourceRecord) (zoneRecords map[string][]*dns.ResourceRecord, err error) {
 	var (
-		logp   = "ZonedRecordDelete"
-		params = url.Values{}
+		logp   = `ZonedRecordDelete`
+		params = url.Values{
+			paramNameName: []string{name},
+		}
 
-		res  *libhttp.EndpointResponse
 		vstr string
-		rawb []byte
 		ok   bool
 	)
-
-	params.Set(paramNameName, name)
 
 	vstr, ok = dns.RecordTypeNames[rreq.Type]
 	if !ok {
 		return nil, fmt.Errorf("%s: unknown record type: %d", logp, rreq.Type)
 	}
 	params.Set(paramNameType, vstr)
+
+	var rawb []byte
 
 	rawb, err = json.Marshal(rreq)
 	if err != nil {
@@ -623,15 +672,21 @@ func (cl *Client) ZonedRecordDelete(name string, rreq dns.ResourceRecord) (zoneR
 	vstr = base64.StdEncoding.EncodeToString(rawb)
 	params.Set(paramNameRecord, vstr)
 
-	_, rawb, err = cl.Delete(apiZonedRR, nil, params)
+	var clientReq = libhttp.ClientRequest{
+		Path:   apiZonedRR,
+		Params: params,
+	}
+	var clientResp *libhttp.ClientResponse
+
+	clientResp, err = cl.Delete(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}
 
-	res = &libhttp.EndpointResponse{
+	var res = &libhttp.EndpointResponse{
 		Data: &zoneRecords,
 	}
-	err = json.Unmarshal(rawb, res)
+	err = json.Unmarshal(clientResp.Body, res)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", logp, err)
 	}

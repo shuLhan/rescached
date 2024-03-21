@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/shuLhan/share/lib/dns"
-	libhttp "github.com/shuLhan/share/lib/http"
-	"github.com/shuLhan/share/lib/ini"
-	"github.com/shuLhan/share/lib/test"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
+	libhttp "git.sr.ht/~shulhan/pakakeh.go/lib/http"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/ini"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/test"
 )
 
 func TestEnvironment(t *testing.T) {
@@ -87,7 +87,7 @@ func TestLoadEnvironment(t *testing.T) {
 					URL:  "http://127.0.0.1:11180/hosts/c",
 				},
 			},
-			HttpdOptions: &libhttp.ServerOptions{
+			HttpdOptions: libhttp.ServerOptions{
 				Address: "127.0.0.1:5381",
 			},
 			ServerOptions: dns.ServerOptions{

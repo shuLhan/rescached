@@ -10,13 +10,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/shuLhan/share/lib/debug"
-	"github.com/shuLhan/share/lib/dns"
-	libhttp "github.com/shuLhan/share/lib/http"
-	"github.com/shuLhan/share/lib/ini"
-	"github.com/shuLhan/share/lib/memfs"
-	libnet "github.com/shuLhan/share/lib/net"
-	libstrings "github.com/shuLhan/share/lib/strings"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/debug"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
+	libhttp "git.sr.ht/~shulhan/pakakeh.go/lib/http"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/ini"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/memfs"
+	libnet "git.sr.ht/~shulhan/pakakeh.go/lib/net"
+	libstrings "git.sr.ht/~shulhan/pakakeh.go/lib/strings"
 )
 
 const (
@@ -79,7 +79,7 @@ type Environment struct {
 	zoned          map[string]*dns.Zone
 
 	// The options for WUI HTTP server.
-	HttpdOptions *libhttp.ServerOptions `json:"-"`
+	HttpdOptions libhttp.ServerOptions `json:"-"`
 
 	dns.ServerOptions
 
@@ -127,13 +127,6 @@ func newEnvironment(dirBase, fileConfig string) *Environment {
 
 		fileConfig:     filepath.Join(dirBase, fileConfig),
 		hostBlockdFile: make(map[string]*dns.HostsFile),
-		HttpdOptions: &libhttp.ServerOptions{
-			Memfs:   mfsWww,
-			Address: defWuiAddress,
-		},
-		ServerOptions: dns.ServerOptions{
-			ListenAddress: defListenAddress,
-		},
 	}
 }
 
@@ -151,12 +144,10 @@ func (env *Environment) init() (err error) {
 
 	debug.Value = env.Debug
 
-	if env.HttpdOptions == nil {
-		env.HttpdOptions = &libhttp.ServerOptions{
-			Memfs:   mfsWww,
-			Address: env.WUIListen,
-		}
-	} else {
+	if env.HttpdOptions.Memfs == nil {
+		env.HttpdOptions.Memfs = mfsWww
+	}
+	if len(env.HttpdOptions.Address) == 0 {
 		env.HttpdOptions.Address = env.WUIListen
 	}
 

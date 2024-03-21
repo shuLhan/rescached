@@ -16,9 +16,9 @@ import (
 	"strings"
 	"time"
 
+	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
+	libnet "git.sr.ht/~shulhan/pakakeh.go/lib/net"
 	"github.com/shuLhan/rescached-go/v4"
-	"github.com/shuLhan/share/lib/dns"
-	libnet "github.com/shuLhan/share/lib/net"
 )
 
 const (

@@ -13,9 +13,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/shuLhan/share/lib/dns"
-	libhttp "github.com/shuLhan/share/lib/http"
-	libnet "github.com/shuLhan/share/lib/net"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
+	libhttp "git.sr.ht/~shulhan/pakakeh.go/lib/http"
+	libnet "git.sr.ht/~shulhan/pakakeh.go/lib/net"
 )
 
 const (
@@ -61,7 +61,7 @@ func (srv *Server) httpdInit() (err error) {
 func (srv *Server) httpdRegisterEndpoints() (err error) {
 	// Register HTTP APIs to manage block.d.
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
 		Path:         httpAPIBlockd,
 		RequestType:  libhttp.RequestTypeNone,
@@ -72,7 +72,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPut,
 		Path:         httpAPIBlockd,
 		RequestType:  libhttp.RequestTypeJSON,
@@ -83,7 +83,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         httpAPIBlockdDisable,
 		RequestType:  libhttp.RequestTypeForm,
@@ -94,7 +94,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         httpAPIBlockdEnable,
 		RequestType:  libhttp.RequestTypeForm,
@@ -105,7 +105,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         httpAPIBlockdFetch,
 		RequestType:  libhttp.RequestTypeForm,
@@ -118,7 +118,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	// Register HTTP APIs to manage caches.
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
 		Path:         httpAPICaches,
 		RequestType:  libhttp.RequestTypeQuery,
@@ -129,7 +129,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
 		Path:         httpAPICaches,
 		RequestType:  libhttp.RequestTypeQuery,
@@ -140,7 +140,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
 		Path:         httpAPICachesSearch,
 		RequestType:  libhttp.RequestTypeQuery,
@@ -153,7 +153,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	// Register HTTP APIs to manage environment.
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
 		Path:         httpAPIEnvironment,
 		RequestType:  libhttp.RequestTypeJSON,
@@ -164,7 +164,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         httpAPIEnvironment,
 		RequestType:  libhttp.RequestTypeJSON,
@@ -177,7 +177,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 
 	// Register HTTP APIs to manage hosts.d.
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         apiHostsd,
 		RequestType:  libhttp.RequestTypeForm,
@@ -188,7 +188,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 	// Register API to delete hosts file.
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
 		Path:         apiHostsd,
 		RequestType:  libhttp.RequestTypeQuery,
@@ -199,7 +199,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 	// Register API to get content of hosts file.
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
 		Path:         apiHostsd,
 		RequestType:  libhttp.RequestTypeQuery,
@@ -211,7 +211,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 
 	// Register API to create one record in hosts file.
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         apiHostsdRR,
 		RequestType:  libhttp.RequestTypeForm,
@@ -223,7 +223,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	}
 
 	// Register API to delete a record from hosts file.
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
 		Path:         apiHostsdRR,
 		RequestType:  libhttp.RequestTypeQuery,
@@ -234,7 +234,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
 		Path:         apiZoned,
 		RequestType:  libhttp.RequestTypeNone,
@@ -245,7 +245,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         apiZoned,
 		RequestType:  libhttp.RequestTypeForm,
@@ -255,7 +255,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	if err != nil {
 		return err
 	}
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
 		Path:         apiZoned,
 		RequestType:  libhttp.RequestTypeNone,
@@ -266,7 +266,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 		return err
 	}
 
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodGet,
 		Path:         apiZonedRR,
 		RequestType:  libhttp.RequestTypeQuery,
@@ -276,7 +276,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	if err != nil {
 		return err
 	}
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodPost,
 		Path:         apiZonedRR,
 		RequestType:  libhttp.RequestTypeJSON,
@@ -286,7 +286,7 @@ func (srv *Server) httpdRegisterEndpoints() (err error) {
 	if err != nil {
 		return err
 	}
-	err = srv.httpd.RegisterEndpoint(&libhttp.Endpoint{
+	err = srv.httpd.RegisterEndpoint(libhttp.Endpoint{
 		Method:       libhttp.RequestMethodDelete,
 		Path:         apiZonedRR,
 		RequestType:  libhttp.RequestTypeForm,
@@ -365,7 +365,7 @@ func (srv *Server) httpAPIBlockdDisable(epr *libhttp.EndpointRequest) (resBody [
 		hbName string
 	)
 
-	hbName = strings.ToLower(epr.HttpRequest.Form.Get(paramNameName))
+	hbName = strings.ToLower(epr.HTTPRequest.Form.Get(paramNameName))
 
 	hb = srv.env.HostBlockd[hbName]
 	if hb == nil {
@@ -414,7 +414,7 @@ func (srv *Server) httpAPIBlockdEnable(epr *libhttp.EndpointRequest) (resBody []
 		hbName string
 	)
 
-	hbName = strings.ToLower(epr.HttpRequest.Form.Get(paramNameName))
+	hbName = strings.ToLower(epr.HTTPRequest.Form.Get(paramNameName))
 
 	hb = srv.env.HostBlockd[hbName]
 	if hb == nil {
@@ -462,7 +462,7 @@ func (srv *Server) httpAPIBlockdFetch(epr *libhttp.EndpointRequest) (resBody []b
 		hbName string
 	)
 
-	hbName = strings.ToLower(epr.HttpRequest.Form.Get(paramNameName))
+	hbName = strings.ToLower(epr.HTTPRequest.Form.Get(paramNameName))
 
 	hb = srv.env.HostBlockd[hbName]
 	if hb == nil {
@@ -510,7 +510,7 @@ func (srv *Server) httpAPICaches(_ *libhttp.EndpointRequest) (resBody []byte, er
 func (srv *Server) httpAPICachesSearch(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
-		q   = epr.HttpRequest.Form.Get(paramNameQuery)
+		q   = epr.HTTPRequest.Form.Get(paramNameQuery)
 
 		re      *regexp.Regexp
 		listMsg []*dns.Message
@@ -543,7 +543,7 @@ func (srv *Server) httpAPICachesSearch(epr *libhttp.EndpointRequest) (resBody []
 func (srv *Server) httpAPICachesDelete(epr *libhttp.EndpointRequest) (resBody []byte, err error) {
 	var (
 		res = libhttp.EndpointResponse{}
-		q   = epr.HttpRequest.Form.Get(paramNameName)
+		q   = epr.HTTPRequest.Form.Get(paramNameName)
 
 		answers []*dns.Answer
 	)
@@ -827,7 +827,7 @@ func (srv *Server) blockdDisable(hb *Blockd) (err error) {
 func (srv *Server) apiHostsdCreate(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res  = libhttp.EndpointResponse{}
-		name = epr.HttpRequest.Form.Get(paramNameName)
+		name = epr.HTTPRequest.Form.Get(paramNameName)
 
 		hfile *dns.HostsFile
 		path  string
@@ -881,7 +881,7 @@ func (srv *Server) apiHostsdCreate(epr *libhttp.EndpointRequest) (resbody []byte
 func (srv *Server) apiHostsdDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res  = libhttp.EndpointResponse{}
-		name = epr.HttpRequest.Form.Get(paramNameName)
+		name = epr.HTTPRequest.Form.Get(paramNameName)
 
 		hfile *dns.HostsFile
 		found bool
@@ -939,7 +939,7 @@ func (srv *Server) apiHostsdDelete(epr *libhttp.EndpointRequest) (resbody []byte
 func (srv *Server) apiHostsdGet(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res  = libhttp.EndpointResponse{}
-		name = epr.HttpRequest.Form.Get(paramNameName)
+		name = epr.HTTPRequest.Form.Get(paramNameName)
 
 		hf    *dns.HostsFile
 		found bool
@@ -995,7 +995,7 @@ func (srv *Server) apiHostsdGet(epr *libhttp.EndpointRequest) (resbody []byte, e
 func (srv *Server) apiHostsdRecordAdd(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res           = libhttp.EndpointResponse{}
-		hostsFileName = epr.HttpRequest.Form.Get(paramNameName)
+		hostsFileName = epr.HTTPRequest.Form.Get(paramNameName)
 
 		hfile *dns.HostsFile
 		rr    *dns.ResourceRecord
@@ -1020,12 +1020,12 @@ func (srv *Server) apiHostsdRecordAdd(epr *libhttp.EndpointRequest) (resbody []b
 		Class: dns.RecordClassIN,
 	}
 
-	rr.Name = epr.HttpRequest.Form.Get(paramNameDomain)
+	rr.Name = epr.HTTPRequest.Form.Get(paramNameDomain)
 	if len(rr.Name) == 0 {
 		res.Message = "empty 'domain' query parameter"
 		return nil, &res
 	}
-	v = epr.HttpRequest.Form.Get(paramNameValue)
+	v = epr.HTTPRequest.Form.Get(paramNameValue)
 	if len(v) == 0 {
 		res.Message = "empty 'value' query parameter"
 		return nil, &res
@@ -1070,8 +1070,8 @@ func (srv *Server) apiHostsdRecordAdd(epr *libhttp.EndpointRequest) (resbody []b
 func (srv *Server) apiHostsdRecordDelete(epr *libhttp.EndpointRequest) (resbody []byte, err error) {
 	var (
 		res           = libhttp.EndpointResponse{}
-		hostsFileName = epr.HttpRequest.Form.Get(paramNameName)
-		domainName    = epr.HttpRequest.Form.Get(paramNameDomain)
+		hostsFileName = epr.HTTPRequest.Form.Get(paramNameName)
+		domainName    = epr.HTTPRequest.Form.Get(paramNameDomain)
 
 		hfile *dns.HostsFile
 		rr    *dns.ResourceRecord
@@ -1150,7 +1150,7 @@ func (srv *Server) apiZoned(_ *libhttp.EndpointRequest) (resb []byte, err error)
 func (srv *Server) apiZonedCreate(epr *libhttp.EndpointRequest) (resb []byte, err error) {
 	var (
 		res      = libhttp.EndpointResponse{}
-		zoneName = epr.HttpRequest.Form.Get(paramNameName)
+		zoneName = epr.HTTPRequest.Form.Get(paramNameName)
 
 		zone     *dns.Zone
 		zoneFile string
@@ -1196,7 +1196,7 @@ func (srv *Server) apiZonedCreate(epr *libhttp.EndpointRequest) (resb []byte, er
 func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, err error) {
 	var (
 		res      = libhttp.EndpointResponse{}
-		zoneName = epr.HttpRequest.Form.Get(paramNameName)
+		zoneName = epr.HTTPRequest.Form.Get(paramNameName)
 
 		zone  *dns.Zone
 		names []string
@@ -1261,7 +1261,7 @@ func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, er
 //	}
 func (srv *Server) apiZonedRR(epr *libhttp.EndpointRequest) (resb []byte, err error) {
 	var (
-		zoneName = epr.HttpRequest.Form.Get(paramNameName)
+		zoneName = epr.HTTPRequest.Form.Get(paramNameName)
 		res      = libhttp.EndpointResponse{}
 
 		zone *dns.Zone
@@ -1455,7 +1455,7 @@ func (srv *Server) apiZonedRRDelete(epr *libhttp.EndpointRequest) (resbody []byt
 
 	res.Code = http.StatusBadRequest
 
-	req.Name = epr.HttpRequest.Form.Get(paramNameName)
+	req.Name = epr.HTTPRequest.Form.Get(paramNameName)
 	if len(req.Name) == 0 {
 		res.Message = "empty zone file name"
 		return nil, &res
@@ -1467,14 +1467,14 @@ func (srv *Server) apiZonedRRDelete(epr *libhttp.EndpointRequest) (resbody []byt
 		return nil, &res
 	}
 
-	req.Type = epr.HttpRequest.Form.Get(paramNameType)
+	req.Type = epr.HTTPRequest.Form.Get(paramNameType)
 	req.rtype, ok = dns.RecordTypes[req.Type]
 	if !ok {
 		res.Message = fmt.Sprintf("invalid or empty param type %s: %s", paramNameType, err)
 		return nil, &res
 	}
 
-	req.Record = epr.HttpRequest.Form.Get(paramNameRecord)
+	req.Record = epr.HTTPRequest.Form.Get(paramNameRecord)
 	req.recordRaw, err = base64.StdEncoding.DecodeString(req.Record)
 	if err != nil {
 		res.Message = fmt.Sprintf("invalid record value: %s", err.Error())

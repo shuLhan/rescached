@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	libhttp "github.com/shuLhan/share/lib/http"
+	libhttp "git.sr.ht/~shulhan/pakakeh.go/lib/http"
 )
 
 const (
@@ -84,12 +84,12 @@ func mockBlockdServer() {
 		err        error
 	)
 
-	mockServer, err = libhttp.NewServer(&serverOpts)
+	mockServer, err = libhttp.NewServer(serverOpts)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = mockServer.RegisterEndpoint(&epHostsA)
+	err = mockServer.RegisterEndpoint(epHostsA)
 	if err != nil {
 		log.Fatal(err)
 	}

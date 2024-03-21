@@ -11,10 +11,10 @@ import (
 	"os"
 	"sync"
 
-	"github.com/shuLhan/share/lib/debug"
-	"github.com/shuLhan/share/lib/dns"
-	"github.com/shuLhan/share/lib/http"
-	"github.com/shuLhan/share/lib/memfs"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/debug"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/http"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/memfs"
 )
 
 // Version of program, overwritten by build.

@@ -20,8 +20,8 @@ import (
 	"time"
 
 	"git.sr.ht/~shulhan/ciigo"
-	"github.com/shuLhan/share/lib/debug"
-	"github.com/shuLhan/share/lib/memfs"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/debug"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/memfs"
 
 	"github.com/shuLhan/rescached-go/v4"
 )

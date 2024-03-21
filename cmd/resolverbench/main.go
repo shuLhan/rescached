@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/shuLhan/share/lib/dns"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
 )
 
 func usage() {
