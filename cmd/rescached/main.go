@@ -27,20 +27,15 @@ import (
 )
 
 const (
-	cmdEmbed = "embed" // Command to generate embedded files.
-	cmdDev   = "dev"   // Command to run rescached for local development.
+	cmdDev     = `dev`   // Command to run rescached for local development.
+	cmdEmbed   = `embed` // Command to generate embedded files.
+	cmdVersion = `version`
 )
 
 func main() {
 	var (
-		env        *rescached.Environment
-		rcd        *rescached.Server
 		dirBase    string
 		fileConfig string
-		cmd        string
-		running    chan bool
-		qsignal    chan os.Signal
-		err        error
 	)
 
 	log.SetFlags(0)
@@ -50,14 +45,27 @@ func main() {
 	flag.StringVar(&fileConfig, "config", "", "Path to configuration.")
 	flag.Parse()
 
+	var (
+		env *rescached.Environment
+		err error
+	)
+
 	env, err = rescached.LoadEnvironment(dirBase, fileConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cmd = strings.ToLower(flag.Arg(0))
+	var (
+		cmd     = strings.ToLower(flag.Arg(0))
+		running chan bool
+	)
 
 	switch cmd {
+	case cmdDev:
+		running = make(chan bool)
+		go watchWww(env, running)
+		go watchWwwDoc()
+
 	case cmdEmbed:
 		err = env.HttpdOptions.Memfs.GoEmbed()
 		if err != nil {
@@ -65,11 +73,12 @@ func main() {
 		}
 		return
 
-	case cmdDev:
-		running = make(chan bool)
-		go watchWww(env, running)
-		go watchWwwDoc()
+	case cmdVersion:
+		fmt.Printf("rescached version %s\n", rescached.Version)
+		return
 	}
+
+	var rcd *rescached.Server
 
 	rcd, err = rescached.New(env)
 	if err != nil {
@@ -85,7 +94,7 @@ func main() {
 		go debugRuntime()
 	}
 
-	qsignal = make(chan os.Signal, 1)
+	var qsignal = make(chan os.Signal, 1)
 	signal.Notify(qsignal, syscall.SIGQUIT, syscall.SIGSEGV, syscall.SIGTERM, syscall.SIGINT)
 	<-qsignal
 	if cmd == cmdDev {
