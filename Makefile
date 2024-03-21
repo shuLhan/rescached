@@ -29,33 +29,41 @@ DIR_RESCACHED=/usr/share/rescached
 
 ##---- Tasks for testing, linting, and building program.
 
-.PHONY: test test.prof debug build resolver rescached
+.PHONY: all
+all: lint test resolver rescached
 
-build: lint test resolver rescached
+.PHONY: build
+build: resolver rescached
 
 ## Build with race detection.
 
+.PHONY: debug
 debug: CGO_ENABLED=1
 debug: DEBUG=-race -v
 debug: test build
 
 
+.PHONY: resolver
 resolver: LD_FLAGS =-X 'main.Usage=$$(go tool doc ./cmd/resolver)'
-resolver: LD_FLAGS+=-X 'github.com/shuLhan/rescached-go/v4.Version=${VERSION}'
+resolver: LD_FLAGS+=-X 'git.sr.ht/~shulhan/rescached.Version=$(VERSION)'
 resolver:
 	mkdir -p _bin/$(GOOS)_$(GOARCH)
 	go build $(DEBUG) -ldflags="$(LD_FLAGS)" -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/resolver
 
+.PHONY: rescached
+rescached: LD_FLAGS+=-X 'git.sr.ht/~shulhan/rescached.Version=$(VERSION)'
 rescached:
 	mkdir -p _bin/$(GOOS)_$(GOARCH)
 	go run ./cmd/rescached embed
 	go build $(DEBUG) -ldflags="$(LD_FLAGS)" -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/rescached
 
 
+.PHONY: test
 test:
 	go test $(DEBUG) -count=1 -coverprofile=$(COVER_OUT) ./...
 	go tool cover -html=$(COVER_OUT) -o $(COVER_HTML)
 
+.PHONY: test.prof
 test.prof:
 	go test $(DEBUG) -count=1 \
 		-cpuprofile $(CPU_PROF) \

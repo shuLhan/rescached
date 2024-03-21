@@ -18,7 +18,8 @@ import (
 
 	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
 	libnet "git.sr.ht/~shulhan/pakakeh.go/lib/net"
-	"github.com/shuLhan/rescached-go/v4"
+
+	"git.sr.ht/~shulhan/rescached"
 )
 
 const (

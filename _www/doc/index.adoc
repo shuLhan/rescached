@@ -20,13 +20,13 @@ link:resolver.html[resolver^]:: Manual page for resolver.
 
 ==  Development
 
-https://github.com/shuLhan/rescached-go[Repository^]::
+https://git.sr.ht/~shulhan/rescached[Repository^]::
 Link to the source code.
 
-https://github.com/shuLhan/rescached-go/issues[Issues^]::
+https://todo.sr.ht/~shulhan/rescached[Issues^]::
 List of open issues.
 
-https://github.com/shuLhan/rescached-go/pulls[Patches^]::
+https://lists.sr.ht/~shulhan/rescached[Patches^]::
 Link to submit the patches.
 
 ==  Todo

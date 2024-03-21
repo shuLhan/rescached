@@ -482,7 +482,7 @@ found in the COPYING file.
 
 == LINKS
 
-Source code repository: https://github.com/shuLhan/rescached-go
+Source code repository: https://git.sr.ht/~shulhan/rescached
 
 
 == SEE ALSO

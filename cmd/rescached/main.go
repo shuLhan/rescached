@@ -23,7 +23,7 @@ import (
 	"git.sr.ht/~shulhan/pakakeh.go/lib/debug"
 	"git.sr.ht/~shulhan/pakakeh.go/lib/memfs"
 
-	"github.com/shuLhan/rescached-go/v4"
+	"git.sr.ht/~shulhan/rescached"
 )
 
 const (

@@ -154,8 +154,8 @@ record from cache.
 Steps to compile from source,
 
 ----
-$ go get -u github.com/shuLhan/rescached-go
-$ cd ${GOPATH}/src/github.com/shuLhan/rescached-go
+$ go get -u git.sr.ht/~shulhan/rescached
+$ cd ${GOPATH}/src/git.sr.ht/~shulhan/rescached
 $ go build ./cmd/rescached
 ----
 
@@ -475,11 +475,11 @@ in the COPYING file.
 
 == LINKS
 
-The repository for this software is available at
-https://github.com/shuLhan/rescached-go.
+The project for this software is available at
+https://sr.ht/~shulhan/rescached.
 
 For request of features and/or bugs report please submitted through web at
-https://github.com/shuLhan/rescached-go/issues.
+https://todo.sr.ht/~shulhan/rescached.
 
 
 == SEE ALSO

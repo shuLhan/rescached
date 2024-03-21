@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/shuLhan/rescached-go/v4"
+	"git.sr.ht/~shulhan/rescached"
 )
 
 // List of valid commands.
