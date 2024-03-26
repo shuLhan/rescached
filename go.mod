@@ -3,7 +3,7 @@
 
 module git.sr.ht/~shulhan/rescached
 
-go 1.22
+go 1.22.0
 
 require (
 	git.sr.ht/~shulhan/ciigo v0.11.1-0.20240321082653-aed750e52cec
