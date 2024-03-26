@@ -7,7 +7,7 @@ go 1.22
 
 require (
 	git.sr.ht/~shulhan/ciigo v0.11.1-0.20240321082653-aed750e52cec
-	git.sr.ht/~shulhan/pakakeh.go v0.53.2-0.20240321083144-547c4b598110
+	git.sr.ht/~shulhan/pakakeh.go v0.53.2-0.20240326160702-71eaafc5119b
 )
 
 require (
@@ -19,4 +19,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-//replace git.sr.ht/~shulhan/pakakeh.go => ../pakakeh.go
+//replace git.sr.ht/~shulhan/pakakeh.go => /home/ms/go/src/git.sr.ht/~shulhan/pakakeh.go
