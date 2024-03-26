@@ -46,8 +46,6 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 
-	defer testServer.Stop()
-
 	resc = NewClient("http://"+testEnv.WUIListen, false)
 
 	// Loop 10 times until server ready for testing.
@@ -61,7 +59,7 @@ func TestMain(m *testing.M) {
 	}
 
 	testStatus = m.Run()
-
+	testServer.Stop()
 	os.Exit(testStatus)
 }
 
@@ -103,6 +101,6 @@ func mockBlockdServer() {
 
 	err = mockServer.Start()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }

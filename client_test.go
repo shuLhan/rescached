@@ -108,7 +108,7 @@ func TestClient_BlockdFetch(t *testing.T) {
 
 	// Revert the content of a.block.
 	t.Cleanup(func() {
-		err = os.WriteFile(affectedBlockd.fileDisabled, []byte("127.0.0.1 a.block\n"), 0644)
+		err = os.WriteFile(affectedBlockd.fileDisabled, []byte("127.0.0.1 a.block\n"), 0600)
 	})
 
 	expString = `BlockdFetch: 400 httpAPIBlockdFetch: unknown hosts block.d name: xxx`

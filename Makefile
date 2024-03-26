@@ -71,10 +71,14 @@ test.prof:
 
 .PHONY: lint
 lint:
-	-go vet ./...
 	-fieldalignment ./...
 	-shadow ./...
-	-revive ./...
+	-golangci-lint run \
+		--presets bugs,metalinter,performance,unused \
+		--disable exhaustive \
+		--disable musttag \
+		--disable bodyclose \
+		./...
 	-reuse --suppress-deprecation lint
 
 

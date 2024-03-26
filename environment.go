@@ -98,12 +98,12 @@ func LoadEnvironment(dirBase, fileConfig string) (env *Environment, err error) {
 	if len(fileConfig) > 0 {
 		cfg, err = ini.Open(env.fileConfig)
 		if err != nil {
-			return nil, fmt.Errorf("%s: %q: %s", logp, env.fileConfig, err)
+			return nil, fmt.Errorf(`%s: %q: %w`, logp, env.fileConfig, err)
 		}
 
 		err = cfg.Unmarshal(env)
 		if err != nil {
-			return nil, fmt.Errorf("%s: %q: %s", logp, env.fileConfig, err)
+			return nil, fmt.Errorf(`%s: %q: %w`, logp, env.fileConfig, err)
 		}
 	}
 
@@ -254,8 +254,8 @@ func (env *Environment) save(file string) (in *ini.Ini, err error) {
 	in.Set(sectionNameDNS, subNameServer, keyTLSPort, strconv.Itoa(int(env.TLSPort)))
 	in.Set(sectionNameDNS, subNameServer, keyTLSCertificate, env.TLSCertFile)
 	in.Set(sectionNameDNS, subNameServer, keyTLSPrivateKey, env.TLSPrivateKey)
-	in.Set(sectionNameDNS, subNameServer, keyTLSAllowInsecure, fmt.Sprintf("%t", env.TLSAllowInsecure))
-	in.Set(sectionNameDNS, subNameServer, keyDohBehindProxy, fmt.Sprintf("%t", env.DoHBehindProxy))
+	in.Set(sectionNameDNS, subNameServer, keyTLSAllowInsecure, strconv.FormatBool(env.TLSAllowInsecure))
+	in.Set(sectionNameDNS, subNameServer, keyDohBehindProxy, strconv.FormatBool(env.DoHBehindProxy))
 
 	in.Set(sectionNameDNS, subNameServer, keyCachePruneDelay, env.PruneDelay.String())
 	in.Set(sectionNameDNS, subNameServer, keyCachePruneThreshold, env.PruneThreshold.String())

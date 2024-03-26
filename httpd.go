@@ -370,7 +370,7 @@ func (srv *Server) httpAPIBlockdDisable(epr *libhttp.EndpointRequest) (resBody [
 	hb = srv.env.HostBlockd[hbName]
 	if hb == nil {
 		res.Code = http.StatusBadRequest
-		res.Message = fmt.Sprintf("hosts block.d name not found: %s", hbName)
+		res.Message = `hosts block.d name not found: ` + hbName
 		return nil, &res
 	}
 
@@ -419,7 +419,7 @@ func (srv *Server) httpAPIBlockdEnable(epr *libhttp.EndpointRequest) (resBody []
 	hb = srv.env.HostBlockd[hbName]
 	if hb == nil {
 		res.Code = http.StatusBadRequest
-		res.Message = fmt.Sprintf("hosts block.d name not found: %s", hbName)
+		res.Message = `hosts block.d name not found: ` + hbName
 		return nil, &res
 	}
 
@@ -1197,10 +1197,6 @@ func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, er
 	var (
 		res      = libhttp.EndpointResponse{}
 		zoneName = epr.HTTPRequest.Form.Get(paramNameName)
-
-		zone  *dns.Zone
-		names []string
-		name  string
 	)
 
 	res.Code = http.StatusBadRequest
@@ -1210,13 +1206,16 @@ func (srv *Server) apiZonedDelete(epr *libhttp.EndpointRequest) (resb []byte, er
 		return nil, &res
 	}
 
-	zone = srv.env.zoned[zoneName]
+	var zone = srv.env.zoned[zoneName]
 	if zone == nil {
 		res.Message = "zone file not found: " + zoneName
 		return nil, &res
 	}
 
-	names = make([]string, 0, len(zone.Records))
+	var (
+		names = make([]string, 0, len(zone.Records))
+		name  string
+	)
 	for name = range zone.Records {
 		names = append(names, name)
 	}
@@ -1331,7 +1330,7 @@ func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err
 
 	err = json.Unmarshal(epr.RequestBody, &req)
 	if err != nil {
-		res.Message = fmt.Sprintf("invalid request: %s", err.Error())
+		res.Message = `invalid request: ` + err.Error()
 		return nil, &res
 	}
 
@@ -1355,7 +1354,7 @@ func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err
 
 	req.recordRaw, err = base64.StdEncoding.DecodeString(req.Record)
 	if err != nil {
-		res.Message = fmt.Sprintf("invalid record value: %s", err.Error())
+		res.Message = `invalid record value: ` + err.Error()
 		return nil, &res
 	}
 
@@ -1417,7 +1416,7 @@ func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err
 	}
 
 	res.Code = http.StatusOK
-	res.Message = fmt.Sprintf("%s record has been saved", dns.RecordTypeNames[rr.Type])
+	res.Message = dns.RecordTypeNames[rr.Type] + ` record has been saved`
 	res.Data = rr
 
 	return json.Marshal(&res)
@@ -1477,7 +1476,7 @@ func (srv *Server) apiZonedRRDelete(epr *libhttp.EndpointRequest) (resbody []byt
 	req.Record = epr.HTTPRequest.Form.Get(paramNameRecord)
 	req.recordRaw, err = base64.StdEncoding.DecodeString(req.Record)
 	if err != nil {
-		res.Message = fmt.Sprintf("invalid record value: %s", err.Error())
+		res.Message = `invalid record value: ` + err.Error()
 		return nil, &res
 	}
 

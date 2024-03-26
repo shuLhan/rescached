@@ -5,6 +5,7 @@ package rescached
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -100,13 +101,7 @@ func (hb *Blockd) update() (err error) {
 		return nil
 	}
 
-	var (
-		logp = "Blockd.update"
-
-		res      *http.Response
-		body     []byte
-		errClose error
-	)
+	var logp = `Blockd.update`
 
 	fmt.Printf("%s %s: updating ...\n", logp, hb.Name)
 
@@ -115,16 +110,26 @@ func (hb *Blockd) update() (err error) {
 		return fmt.Errorf("%s %s: %w", logp, hb.Name, err)
 	}
 
-	res, err = http.Get(hb.URL)
+	var (
+		req *http.Request
+		res *http.Response
+	)
+	req, err = http.NewRequestWithContext(context.Background(), http.MethodGet, hb.URL, nil)
+	if err != nil {
+		return fmt.Errorf(`%s %s: %w`, logp, hb.Name, err)
+	}
+	res, err = http.DefaultClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("%s %s: %w", logp, hb.Name, err)
 	}
 	defer func() {
-		errClose = res.Body.Close()
+		var errClose = res.Body.Close()
 		if errClose != nil {
 			log.Printf("%s %q: %s", logp, hb.Name, err)
 		}
 	}()
+
+	var body []byte
 
 	body, err = io.ReadAll(res.Body)
 	if err != nil {
@@ -134,9 +139,9 @@ func (hb *Blockd) update() (err error) {
 	body = bytes.ReplaceAll(body, []byte("\r\n"), []byte("\n"))
 
 	if hb.IsEnabled {
-		err = os.WriteFile(hb.file, body, 0644)
+		err = os.WriteFile(hb.file, body, 0600)
 	} else {
-		err = os.WriteFile(hb.fileDisabled, body, 0644)
+		err = os.WriteFile(hb.fileDisabled, body, 0600)
 	}
 	if err != nil {
 		return fmt.Errorf("%s %q: %w", logp, hb.Name, err)
