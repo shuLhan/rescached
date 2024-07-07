@@ -21,7 +21,6 @@
         }
 
         #caches {
-            height: 20em;
             overflow: auto;
             font-family: monospace;
         }
@@ -208,7 +207,8 @@
         }
 
         function renderCaches(answers) {
-            document.getElementById("summary").innerHTML = `Total caches: ${answers.length}`;
+            document.getElementById("summary").innerHTML = `Total caches: ${answers.length}<br/>
+                Auto refresh every 10 seconds.`;
             let w = document.getElementById("caches");
             let out = "";
             for (let x = answers.length - 1; x >= 0; x--) {
