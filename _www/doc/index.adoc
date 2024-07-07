@@ -39,12 +39,7 @@ Link to submit the patches.
 ** block.d
 ** hosts.d
 ** zone.d
-** /etc/hosts
 
 * Generate unique ID for each RR in caches/zone for deletion.
 
-* Move repository to sr.ht
-
-* Implement DNS type 65
-
-* Implement DNSSec
+* Support DNSSec
