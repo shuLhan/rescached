@@ -75,9 +75,9 @@ lint:
 	-shadow ./...
 	-golangci-lint run \
 		--presets bugs,metalinter,performance,unused \
+		--disable bodyclose \
 		--disable exhaustive \
 		--disable musttag \
-		--disable bodyclose \
 		./...
 	-reuse --suppress-deprecation lint
 
@@ -222,3 +222,12 @@ build-linux-amd64: build
 deploy-personal-server: build-linux-amd64
 	rsync --progress _bin/linux_amd64/rescached personal-server:~/bin/rescached
 	ssh personal-server "sudo rsync ~/bin/rescached /usr/bin/rescached; sudo systemctl restart rescached.service"
+
+
+#---- Development.
+
+## Run web server to test WUI.
+
+.PHONY: dev.www
+dev.www:
+	go run ./internal/cmd/www

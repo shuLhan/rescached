@@ -39,21 +39,22 @@ function getRRTypeName(k) {
 }
 
 class Rescached {
+  static SERVER = "";
   static nanoSeconds = 1000000000;
 
-  static apiBlockd = "/api/block.d";
-  static apiBlockdFetch = "/api/block.d/fetch";
+  static apiBlockd = Rescached.SERVER + "/api/block.d";
+  static apiBlockdFetch = Rescached.SERVER + "/api/block.d/fetch";
 
-  static apiCaches = "/api/caches";
-  static apiCachesSearch = "/api/caches/search";
+  static apiCaches = Rescached.SERVER + "/api/caches";
+  static apiCachesSearch = Rescached.SERVER + "/api/caches/search";
 
-  static apiEnvironment = "/api/environment";
+  static apiEnvironment = Rescached.SERVER + "/api/environment";
 
-  static apiHostsd = "/api/hosts.d";
-  static apiHostsdRR = "/api/hosts.d/rr";
+  static apiHostsd = Rescached.SERVER + "/api/hosts.d";
+  static apiHostsdRR = Rescached.SERVER + "/api/hosts.d/rr";
 
-  static apiZoned = "/api/zone.d";
-  static apiZonedRR = "/api/zone.d/rr";
+  static apiZoned = Rescached.SERVER + "/api/zone.d";
+  static apiZonedRR = Rescached.SERVER + "/api/zone.d/rr";
 
   constructor(server) {
     this.blockd = {};
