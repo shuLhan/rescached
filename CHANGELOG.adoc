@@ -7,6 +7,36 @@
 
 Log of new features, enhancements, and/or bug fixes for each release.
 
+[#v4_4_3]
+==  rescached v4.4.3 (2024-09-07)
+
+[#v4_4_3__enhancements]
+=== Enhancements
+
+cmd/rescached: add sub command to print the current version::
++
+Running "rescached version" now will print the program version.
+
+support SVCB record (type 64) and HTTPS record (type 65)::
++
+The latest update on "lib/dns" package support RFC 9460, SVCB record
+(type 64) and HTTPS record (type 65).
+
+[#v4_4_3__chores]
+=== Chores
+
+all: replace module "share" with "pakakeh.go"::
++
+The module "share" has been moved to new repository at SourceHut and
+we rename it to make it more unique instead of common English words
+"share".
+
+all: move repository to SourceHut::
++
+The new repository and project page for rescached is at
+https://sr.ht/~shulhan/rescached .
+
+
 [#v4_4_2]
 ==  rescached v4.4.2 (2023-11-10)
 
@@ -497,9 +527,9 @@ blocked hosts, internal hosts files, and zone files.
 [#v4_0_0__breaking_changes]
 ===  Breaking changes
 
-The `rescached::dir.hosts` now default to "/etc/rescached/hosts.d"::
+The `rescached\::dir.hosts` now default to "/etc/rescached/hosts.d"::
 
-The `rescached::dir.master` now default to "/etc/rescached/zone.d"::
+The `rescached\::dir.master` now default to "/etc/rescached/zone.d"::
 
 //}}}
 
