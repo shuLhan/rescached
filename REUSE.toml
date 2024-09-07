@@ -1,0 +1,31 @@
+## SPDX-FileCopyrightText: 2024 M. Shulhan <ms@kilabit.info>
+##
+## SPDX-License-Identifier: GPL-3.0-or-later
+
+version = 1
+
+[[annotations]]
+path = [".gitignore", ".gitmodules", ".ignore", "go.sum"]
+SPDX-FileCopyrightText = "2018 Shulhan <ms@kilabit.info>"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = ["_www/doc/rescached.cfg.5.gz", "_www/doc/resolver.1.gz"]
+SPDX-FileCopyrightText = "2020 Shulhan <ms@kilabit.info>"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = ["_www/doc/images/**", "rescached.1.gz", "testdata/**", "_sys/**"
+  , "_test/**", "_www/favicon.png"]
+SPDX-FileCopyrightText = "2021 Shulhan <ms@kilabit.info>"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = ["_sys/etc/rescached/block.d/.pgl.yoyo.org"]
+SPDX-FileCopyrightText = "McRae <pgl@yoyo.org>"
+SPDX-License-Identifier = "LicenseRef-mcrae"
+
+[[annotations]]
+path = ["_sys/etc/rescached/block.d/.winhelp2002.mvps.org"]
+SPDX-FileCopyrightText = "WinHelp2002 <winhelp2002@gmail.com>"
+SPDX-License-Identifier = "CC-BY-NC-SA-4.0"
