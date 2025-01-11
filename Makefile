@@ -73,13 +73,8 @@ test.prof:
 lint:
 	-fieldalignment ./...
 	-shadow ./...
-	-golangci-lint run \
-		--presets bugs,metalinter,performance,unused \
-		--disable bodyclose \
-		--disable exhaustive \
-		--disable musttag \
-		./...
-	-reuse --suppress-deprecation lint
+	go vet ./...
+	-reuse lint
 
 
 ##---- Cleaning up.
