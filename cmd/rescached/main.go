@@ -128,19 +128,19 @@ func watchWww(env *rescached.Environment, running chan bool) {
 		tick      = time.NewTicker(3 * time.Second)
 		isRunning = true
 
-		dw       *memfs.DirWatcher
+		changeq  <-chan []*memfs.Node
 		nChanges int
 		err      error
 	)
 
-	dw, err = env.HttpdOptions.Memfs.Watch(memfs.WatchOptions{})
+	changeq, err = env.HttpdOptions.Memfs.Watch(memfs.WatchOptions{})
 	if err != nil {
 		log.Fatalf("%s: %s", logp, err)
 	}
 
 	for isRunning {
 		select {
-		case <-dw.C:
+		case <-changeq:
 			nChanges++
 
 		case <-tick.C:
@@ -168,7 +168,7 @@ func watchWww(env *rescached.Environment, running chan bool) {
 			log.Printf("%s", err)
 		}
 	}
-	dw.Stop()
+	env.HttpdOptions.Memfs.StopWatch()
 	running <- false
 }
 
@@ -183,7 +183,7 @@ func watchWwwDoc() {
 		err error
 	)
 
-	err = ciigo.Watch(&convertOpts)
+	err = ciigo.Watch(convertOpts)
 	if err != nil {
 		log.Fatalf("%s: %s", logp, err)
 	}

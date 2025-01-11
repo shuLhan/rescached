@@ -10,11 +10,12 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"git.sr.ht/~shulhan/pakakeh.go/lib/debug"
 	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
 	"git.sr.ht/~shulhan/pakakeh.go/lib/http"
-	"git.sr.ht/~shulhan/pakakeh.go/lib/memfs"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/watchfs/v2"
 )
 
 // Version of program, overwritten by build.
@@ -24,7 +25,7 @@ var Version = `4.4.3`
 type Server struct {
 	dns       *dns.Server
 	env       *Environment
-	rcWatcher *memfs.Watcher
+	rcWatcher *watchfs.FileWatcher
 
 	httpd       *http.Server
 	httpdRunner sync.Once
@@ -208,33 +209,33 @@ func (srv *Server) Stop() {
 // watchResolvConf watch an update to file resolv.conf.
 func (srv *Server) watchResolvConf() {
 	var (
-		logp = "watchResolvConf"
+		logp      = `watchResolvConf`
+		watchOpts = watchfs.FileWatcherOptions{
+			File:     srv.env.FileResolvConf,
+			Interval: 5 * time.Second,
+		}
 
-		ns  memfs.NodeState
+		fi  os.FileInfo
 		err error
+		ok  bool
 	)
 
-	srv.rcWatcher, err = memfs.NewWatcher(srv.env.FileResolvConf, 0)
-	if err != nil {
-		log.Fatalf("%s: %s", logp, err)
-	}
+	srv.rcWatcher = watchfs.WatchFile(watchOpts)
 
-	for ns = range srv.rcWatcher.C {
-		switch ns.State {
-		case memfs.FileStateDeleted:
+	for fi = range srv.rcWatcher.C {
+		if fi == nil {
 			log.Printf("= %s: file %q deleted\n", logp, srv.env.FileResolvConf)
 			return
-		default:
-			ok, err := srv.env.loadResolvConf()
-			if err != nil {
-				log.Printf("%s: %s", logp, err)
-				break
-			}
-			if !ok {
-				break
-			}
-
-			srv.dns.RestartForwarders(srv.env.NameServers)
 		}
+
+		ok, err = srv.env.loadResolvConf()
+		if err != nil {
+			log.Printf(`%s: %s`, logp, err)
+			break
+		}
+		if !ok {
+			break
+		}
+		srv.dns.RestartForwarders(srv.env.NameServers)
 	}
 }

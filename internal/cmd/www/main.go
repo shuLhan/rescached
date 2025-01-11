@@ -37,7 +37,7 @@ func main() {
 		IsDevelopment: true,
 	}
 
-	var err = ciigo.Serve(&serveOpts)
+	var err = ciigo.Serve(serveOpts)
 	if err != nil {
 		log.Fatal(err)
 	}
