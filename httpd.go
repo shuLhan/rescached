@@ -1348,7 +1348,7 @@ func (srv *Server) apiZonedRRAdd(epr *libhttp.EndpointRequest) (resb []byte, err
 	req.Type = strings.ToUpper(req.Type)
 	req.rtype, ok = dns.RecordTypes[req.Type]
 	if !ok {
-		res.Message = fmt.Sprintf("invalid or empty RR type %q: %s", req.Type, err.Error())
+		res.Message = fmt.Sprintf(`invalid or empty RR type %q`, req.Type)
 		return nil, &res
 	}
 
