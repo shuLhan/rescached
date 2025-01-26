@@ -90,7 +90,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if debug.Value >= 4 {
+	if rescached.Debug >= 4 {
 		go debugRuntime()
 	}
 

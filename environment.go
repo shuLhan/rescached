@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"git.sr.ht/~shulhan/pakakeh.go/lib/debug"
 	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
 	libhttp "git.sr.ht/~shulhan/pakakeh.go/lib/http"
 	"git.sr.ht/~shulhan/pakakeh.go/lib/ini"
@@ -142,7 +141,7 @@ func (env *Environment) init() (err error) {
 		_, _ = env.loadResolvConf()
 	}
 
-	debug.Value = env.Debug
+	Debug = env.Debug
 
 	if env.HttpdOptions.Memfs == nil {
 		env.HttpdOptions.Memfs = mfsWww
@@ -193,7 +192,7 @@ func (env *Environment) loadResolvConf() (ok bool, err error) {
 		return false, err
 	}
 
-	if debug.Value > 0 {
+	if Debug > 0 {
 		fmt.Printf("loadResolvConf: %+v\n", rc)
 	}
 

@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"git.sr.ht/~shulhan/pakakeh.go/lib/debug"
 	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
 	"git.sr.ht/~shulhan/pakakeh.go/lib/http"
 	"git.sr.ht/~shulhan/pakakeh.go/lib/watchfs/v2"
@@ -20,6 +19,9 @@ import (
 
 // Version of program, overwritten by build.
 var Version = `4.4.3`
+
+// Debug level, set by configuration as "rescached::debug".
+var Debug int
 
 // Server implement caching DNS server.
 type Server struct {
@@ -33,10 +35,6 @@ type Server struct {
 
 // New create and initialize new rescached server.
 func New(env *Environment) (srv *Server, err error) {
-	if debug.Value >= 1 {
-		fmt.Printf("--- rescached: config: %+v\n", env)
-	}
-
 	err = env.init()
 	if err != nil {
 		return nil, fmt.Errorf("rescached: New: %w", err)
