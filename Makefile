@@ -164,7 +164,7 @@ uninstall-common:
 
 .PHONY: install deploy uninstall
 
-install: build install-common
+install: install-common
 	mkdir -p $(PREFIX)/usr/lib/systemd/system
 	cp _sys/usr/lib/systemd/system/rescached.service $(PREFIX)/usr/lib/systemd/system/
 
@@ -186,11 +186,11 @@ deploy: build
 install-macos: DIR_BIN=/usr/local/bin
 install-macos: DIR_MAN=/usr/local/share/man
 install-macos: DIR_RESCACHED=/usr/local/share/rescached
-install-macos: build install-common
+install-macos: install-common
 	cp _sys/Library/LaunchDaemons/info.kilabit.rescached.plist /Library/LaunchDaemons/
 
 deploy-macos: DIR_BIN=/usr/local/bin
-deploy-macos: build
+deploy-macos:
 	sudo cp _bin/$(GOOS)_$(GOARCH)/rescached $(DIR_BIN)/
 	sudo cp _bin/$(GOOS)_$(GOARCH)/resolver  $(DIR_BIN)/
 	sudo launchctl stop info.kilabit.rescached
