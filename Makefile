@@ -54,7 +54,6 @@ resolver:
 rescached: LD_FLAGS+=-X 'git.sr.ht/~shulhan/rescached.Version=$(VERSION)'
 rescached:
 	mkdir -p _bin/$(GOOS)_$(GOARCH)
-	go run ./cmd/rescached embed
 	go build $(DEBUG) -ldflags="$(LD_FLAGS)" -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/rescached
 
 
