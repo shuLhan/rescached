@@ -5,6 +5,34 @@
 :sectanchors:
 :sectlinks:
 
+`rescached` is a daemon that caching internet name and address on local memory
+for speeding up DNS resolution.
+
+`rescached` is not a reimplementation of DNS server like BIND.
+
+`rescached` primary goal is only to caching DNS queries and answers, used by
+personal or small group of users, to minimize unneeded traffic to outside
+network.
+
+
+== Features
+
+List of current features,
+
+* Enable to handle request from UDP and TCP connections
+* Enable to forward request using UDP or TCP
+* Load and serve addresses and host names in `/etc/hosts`
+* Load and serve hosts formatted files inside directory
+  `/etc/rescached/hosts.d/`
+* Blocking ads and/or malicious websites through host list in
+  `/etc/rescached/hosts.d/`
+* Support loading and serving zone file format from
+  `/etc/rescached/zone.d`
+* Integration with openresolv
+* Support DNS over TLS (DoH) (RFC 7858)
+* Support DNS over HTTPS (DoH) (RFC 8484)
+
+
 ==  Documentation
 
 link:benchmark.html[Benchmark^]:: The benchmark result of rescached server.
@@ -18,6 +46,7 @@ configuration.
 
 link:resolver.html[resolver^]:: Manual page for resolver.
 
+
 ==  Development
 
 https://git.sr.ht/~shulhan/rescached[Repository^]::
@@ -29,10 +58,10 @@ List of open issues.
 https://lists.sr.ht/~shulhan/rescached[Patches^]::
 Link to submit the patches.
 
+
 ==  Todo
 
 * Zoned create should fill default SOA
-
 * zone.d rr add - check for duplicate value.
 
 * Prioritize the order of hosts file to be loaded:
@@ -41,5 +70,4 @@ Link to submit the patches.
 ** zone.d
 
 * Generate unique ID for each RR in caches/zone for deletion.
-
 * Support DNSSec

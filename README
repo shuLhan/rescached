@@ -370,7 +370,7 @@ request is from HTTPS connection and its working.
 == WEB USER INTERFACE
 
 The rescached service provide a web user interface that can be accessed at
-http://127.0.0.1:5380.
+\http://127.0.0.1:5380 .
 
 .Screenshot of front page
 image:https://raw.githubusercontent.com/shuLhan/rescached-go/master/_www/doc/images/Screenshot_wui_frontpage.png[Screenshot
@@ -405,11 +405,6 @@ Zone.d page,320]
 
 The Zone.d page allow user manage zone file, creating new zone file, adding or
 deleting new resource record in the zone file.
-
-
-== EXIT STATUS
-
-Upon success, `rescached` will return 0, or 1 otherwise.
 
 
 == FILES
@@ -459,9 +454,16 @@ OPT:: This is a "pseudo DNS record type" needed to support EDNS
 Technically, if it can compiled, it will run in any operating system.
 
 
-== AUTHOR
+==  LINKS
 
-`rescached` is developed by Shulhan (ms@kilabit.info).
+https://git.sr.ht/~shulhan/rescached[Repository^]::
+Link to the source code.
+
+https://todo.sr.ht/~shulhan/rescached[Issues^]::
+List of open issues.
+
+https://lists.sr.ht/~shulhan/rescached[Patches^]::
+Link to submit the patches and discussion.
 
 
 == LICENSE
@@ -471,15 +473,6 @@ All rights reserved.
 
 Use of this source code is governed by a GPL 3.0 license that can be found
 in the COPYING file.
-
-
-== LINKS
-
-The project for this software is available at
-https://sr.ht/~shulhan/rescached.
-
-For request of features and/or bugs report please submitted through web at
-https://todo.sr.ht/~shulhan/rescached.
 
 
 == SEE ALSO
