@@ -44,7 +44,7 @@ debug: test build
 
 
 .PHONY: resolver
-resolver: LD_FLAGS =-X 'main.Usage=$$(go tool doc ./cmd/resolver)'
+resolver: LD_FLAGS =-X 'main.Usage=$$(go doc ./cmd/resolver)'
 resolver: LD_FLAGS+=-X 'git.sr.ht/~shulhan/rescached.Version=$(VERSION)'
 resolver:
 	mkdir -p _bin/$(GOOS)_$(GOARCH)
