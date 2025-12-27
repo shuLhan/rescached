@@ -7,6 +7,55 @@
 
 Log of new features, enhancements, and/or bug fixes for each release.
 
+Legend,
+
+* 🪵: Breaking changes
+* 🌱: New feature
+* 🌼: Enhancement
+* 💧: Chores
+
+[#rescached_v4_4_4]
+==  rescached v4.4.4 (2025-12-27)
+
+This release mostly chores.
+
+**💧 all: replace golangci-lint with "go vet"**
+
+**💧 all: replace debug package with internal Debug variabel**
+
+The [debug.Value] will be removed in the next release of pakakeh.go.
+
+**💧 internal/cmd/gocheck: add internal static analyzers**
+
+Instead of using binary fieldalignment and shadow, run them by creating
+command that call the same Analyzer internally.
+
+This analyzers help finding possible panic on httpd.go.
+
+**💧 make: remove build task from install tasks**
+
+The build task should be run by user, while install tasks run by root.
+If we make build depends on install then the binaries will rebuild by
+user root.
+
+**💧 Makefile: do not run "embed" when building rescached**
+
+The embed command should be run once when the assets file in _www changes.
+
+**💧 all: cleaning README and expand the index in documentation**
+
+In the README, we remove the EXIT STATUS and AUTHOR sections.
+Those sections are not informative.
+
+In the index, we expand the preamble to include short information about
+what is rescached.
+
+**💧 make: fix building resolver**
+
+Seems like the "go tool doc" subcommand has been removed on latest
+release of Go.
+
+
 [#v4_4_3]
 ==  rescached v4.4.3 (2024-09-07)
 
