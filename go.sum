@@ -1,9 +1,9 @@
-git.sr.ht/~shulhan/asciidoctor-go v0.7.2 h1:MeLOXoHeBE5Glq0M/DegO9lIv/MSH1mhre2EMNPXG3I=
-git.sr.ht/~shulhan/asciidoctor-go v0.7.2/go.mod h1:cY9Ae1vu3OniC7z29twH1/PMJa7ZSSUqbK9QQM4/bhc=
-git.sr.ht/~shulhan/ciigo v0.15.3 h1:N38E5tVstuQVAO9X0TVbx305Tq2jH+X9i4ws3yu9GQ8=
-git.sr.ht/~shulhan/ciigo v0.15.3/go.mod h1:gqQpR1ytLik3v+W6NyzFymcktUwc9ITUO/GJf+KL8Es=
-git.sr.ht/~shulhan/pakakeh.go v0.60.2 h1:ZSRE77lYm+mkhvg9pSrxCIO81ydbqt93qbsWuZJpjtI=
-git.sr.ht/~shulhan/pakakeh.go v0.60.2/go.mod h1:1MkKXbLZRHTcnheeSEbRpGztkym4Yxzh90ep+jCxbDc=
+git.sr.ht/~shulhan/asciidoctor-go v0.7.3-0.20260124143117-f289b7f13a1d h1:rdDzlVPJjgR6Jz84VNEAbdvNypMPtH3O6uEbVYb/7Rk=
+git.sr.ht/~shulhan/asciidoctor-go v0.7.3-0.20260124143117-f289b7f13a1d/go.mod h1:cY9Ae1vu3OniC7z29twH1/PMJa7ZSSUqbK9QQM4/bhc=
+git.sr.ht/~shulhan/ciigo v0.15.4-0.20260124144929-5f12f2705a29 h1:WQt46ZMMLVVSsccM7IGzUz+FrddehvHaplzpBl7u9UI=
+git.sr.ht/~shulhan/ciigo v0.15.4-0.20260124144929-5f12f2705a29/go.mod h1:S2aZR80qc3bN8b6O1gHZiJOfhlzJT7rGn2H82V9wMac=
+git.sr.ht/~shulhan/pakakeh.go v0.60.3-0.20260125195513-b5e7b1fefd3a h1:VwlleUyxkJ+CEP8gs9RLZ3maKdLGVYtvCQzr2wBPqVE=
+git.sr.ht/~shulhan/pakakeh.go v0.60.3-0.20260125195513-b5e7b1fefd3a/go.mod h1:1MkKXbLZRHTcnheeSEbRpGztkym4Yxzh90ep+jCxbDc=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=

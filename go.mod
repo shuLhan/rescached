@@ -6,12 +6,12 @@ module git.sr.ht/~shulhan/rescached
 go 1.24.0
 
 require (
-	git.sr.ht/~shulhan/ciigo v0.15.3
-	git.sr.ht/~shulhan/pakakeh.go v0.60.2
+	git.sr.ht/~shulhan/ciigo v0.15.4-0.20260124144929-5f12f2705a29
+	git.sr.ht/~shulhan/pakakeh.go v0.60.3-0.20260125195513-b5e7b1fefd3a
 )
 
 require (
-	git.sr.ht/~shulhan/asciidoctor-go v0.7.2 // indirect
+	git.sr.ht/~shulhan/asciidoctor-go v0.7.3-0.20260124143117-f289b7f13a1d // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/yuin/goldmark v1.7.13 // indirect
 	github.com/yuin/goldmark-meta v1.1.0 // indirect
@@ -25,3 +25,5 @@ require (
 )
 
 //replace git.sr.ht/~shulhan/pakakeh.go => ../pakakeh.go
+
+//replace git.sr.ht/~shulhan/ciigo => ../ciigo
