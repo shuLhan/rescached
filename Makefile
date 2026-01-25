@@ -203,6 +203,13 @@ uninstall-macos: uninstall-common
 	rm -f /Library/LaunchDaemons/info.kilabit.rescached.plist
 
 
+##---- Deploy to local machine.
+
+.PHONY: deploy.local
+deploy.local: build
+	sudo rsync _bin/linux_amd64/rescached /usr/bin/rescached
+	sudo systemctl restart rescached.service
+
 ##---- Tasks for deploying to public DNS server.
 
 .PHONY: deploy-personal-server
