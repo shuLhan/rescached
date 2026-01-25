@@ -333,7 +333,7 @@ If the parent nameserver is using self-signed certificate, you can set
 "tls.allow_insecure" to true.
 
 Using the above configuration, rescached will serve DoH queries on
-https://localhost/dns-query on port 443 and UDP queries on port 53.
+\https://localhost/dns-query on port 443 and UDP queries on port 53.
 All queries to both locations will be forwarded to parent nameserver.
 
 This feature can be tested using Firefox Nightly by updating the configuration
@@ -349,7 +349,7 @@ Since we are using `mode=3`, the `network.trr.bootstrapAddress` is required so
 Firefox Nightly can resolve "localhost" to "127.0.0.1".
 If you use the provided self-signed certificate, you must import and/or enable
 an exception for it manually in Firefox Nightly (for example. by opening
-https://localhost/dns-query in new tab and accept security risk).
+\https://localhost/dns-query in new tab and accept security risk).
 
 To check if DoH works, first, set the `debug` option to `1`, and
 restart the rescached.
@@ -469,10 +469,9 @@ Link to submit the patches and discussion.
 == LICENSE
 
 Copyright 2018, M. Shulhan (ms@kilabit.info).
-All rights reserved.
 
-Use of this source code is governed by a GPL 3.0 license that can be found
-in the COPYING file.
+This software is licensed under GNU General Public License version 3.0 that
+can be found in the COPYING file.
 
 
 == SEE ALSO

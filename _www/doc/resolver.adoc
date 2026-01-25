@@ -50,10 +50,10 @@ The nameserver is defined in the following format,
 
 Examples,
 
-* udp://194.233.68.184:53 for querying with UDP,
-* tcp://194.233.68.184:53 for querying with TCP,
-* https://194.233.68.184:853 for querying with DNS over TLS (DoT), and
-* https://kilabit.info/dns-query for querying with DNS over HTTPS (DoH).
+* \udp://194.233.68.184:53 for querying with UDP,
+* \tcp://194.233.68.184:53 for querying with TCP,
+* \https://194.233.68.184:853 for querying with DNS over TLS (DoT), and
+* \https://kilabit.info/dns-query for querying with DNS over HTTPS (DoH).
 
 Default to one of "nameserver" in `/etc/resolv.conf`.
 --
@@ -66,7 +66,7 @@ The rescached-URL use HTTP scheme:
 
 	("http" / "https") "://" (domain / ip-address) [":" port]
 
-Default to https://127.0.0.1:5380 if its empty.
+Default to \https://127.0.0.1:5380 if its empty.
 --
 
 ==  COMMANDS
@@ -296,7 +296,7 @@ name server kilabit.info,
 
 	$ resolver -ns=https://kilabit.info/dns-query query kilabit.info
 
-Inspect the rescached's caches on server at http://127.0.0.1:5380,
+Inspect the caches on server at \http://127.0.0.1:5380,
 
 	$ resolver -server=http://127.0.0.1:5380 caches
 
@@ -466,23 +466,25 @@ $ resolver zone.d rr delete my.zone www A IN 192.168.1.2
 OK
 ----
 
-== AUTHOR
 
-This software is developed by M. Shulhan (ms@kilabit.info).
+==  LINKS
+
+https://git.sr.ht/~shulhan/rescached[Repository^]::
+Link to the source code.
+
+https://todo.sr.ht/~shulhan/rescached[Issues^]::
+List of open issues.
+
+https://lists.sr.ht/~shulhan/rescached[Patches^]::
+Link to submit the patches and discussion.
 
 
 == LICENSE
 
 Copyright 2018, M. Shulhan (ms@kilabit.info).
-All rights reserved.
 
-Use of this source code is governed by a GPL 3.0 license that can be
-found in the COPYING file.
-
-
-== LINKS
-
-Source code repository: https://git.sr.ht/~shulhan/rescached
+This software is licensed under GNU General Public License version 3.0 that
+can be found in the COPYING file.
 
 
 == SEE ALSO
