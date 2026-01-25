@@ -37,7 +37,7 @@ type Server struct {
 func New(env *Environment) (srv *Server, err error) {
 	err = env.init()
 	if err != nil {
-		return nil, fmt.Errorf("rescached: New: %w", err)
+		return nil, fmt.Errorf(`New: %w`, err)
 	}
 
 	env.initHostsBlock()

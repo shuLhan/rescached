@@ -307,7 +307,7 @@ func (srv *Server) httpdRun() {
 		}
 	}()
 
-	log.Printf("=== rescached: httpd listening at %s", srv.env.WUIListen)
+	log.Printf(`httpd listening at %s`, srv.env.WUIListen)
 
 	err := srv.httpd.Start()
 	if err != nil {
