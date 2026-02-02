@@ -1,6 +1,7 @@
 [rescached]
 file.resolvconf =
 wui.listen = 127.0.0.1:5381
+minimum_ttl = 0
 debug = 1
 
 [block.d "a.block"]

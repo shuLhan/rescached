@@ -18,7 +18,7 @@ import (
 )
 
 // Version of program, overwritten by build.
-var Version = `4.4.4`
+var Version = `4.5.0`
 
 // Debug level, set by configuration as "rescached::debug".
 var Debug int
@@ -50,6 +50,8 @@ func New(env *Environment) (srv *Server, err error) {
 	if err != nil {
 		return nil, err
 	}
+
+	srv.initHooks()
 
 	return srv, nil
 }
@@ -235,5 +237,25 @@ func (srv *Server) watchResolvConf() {
 			break
 		}
 		srv.dns.RestartForwarders(srv.env.NameServers)
+	}
+}
+
+func (srv *Server) initHooks() {
+	if srv.env.MinimumTTL > 0 {
+		srv.env.ServerOptions.OnAnswerReceived = srv.onAnswerReceived
+	}
+}
+
+func (srv *Server) onAnswerReceived(answer *dns.Answer) {
+	var isLower bool
+	for x := range len(answer.Message.Answer) {
+		if answer.Message.Answer[x].TTL < srv.env.MinimumTTL {
+			isLower = true
+			break
+		}
+	}
+	if isLower {
+		answer.Message.SetTTL(srv.env.MinimumTTL)
+		answer.TTL = srv.env.MinimumTTL
 	}
 }

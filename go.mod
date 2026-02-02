@@ -7,7 +7,7 @@ go 1.24.0
 
 require (
 	git.sr.ht/~shulhan/ciigo v0.15.4-0.20260124144929-5f12f2705a29
-	git.sr.ht/~shulhan/pakakeh.go v0.60.3-0.20260125195513-b5e7b1fefd3a
+	git.sr.ht/~shulhan/pakakeh.go v0.60.3-0.20260202092811-1e3bb9be8444
 )
 
 require (

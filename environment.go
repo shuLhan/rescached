@@ -82,6 +82,13 @@ type Environment struct {
 
 	dns.ServerOptions
 
+	// MinimumTTL force the TTL in the answer to this value.
+	// The value is in seconds, default to 0 (disabled).
+	// Note that this option is not standard and obviously not recommended
+	// for resolver facing public networks.
+	// It should be used only in personal or private network.
+	MinimumTTL uint32 `ini:"rescached::minimum_ttl"`
+
 	Debug int `ini:"rescached::debug"`
 }
 

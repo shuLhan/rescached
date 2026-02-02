@@ -70,6 +70,17 @@ dnsmasq_resolv=/etc/rescached/resolv.conf
 ----
 --
 
+[#minimum_ttl]
+==== minimum_ttl
+
+Format:: integer
+Default:: 0 (disabled)
+Description:: Force the TTL in the answer to this value.
+The value is in seconds, default to 0 (disabled).
+Note that this option is not standard and obviously not recommended
+for resolver facing public networks.
+It should be used only in personal or private network.
+
 [#debug]
 ==== debug
 

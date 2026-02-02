@@ -2,8 +2,8 @@ git.sr.ht/~shulhan/asciidoctor-go v0.7.3-0.20260124143117-f289b7f13a1d h1:rdDzlV
 git.sr.ht/~shulhan/asciidoctor-go v0.7.3-0.20260124143117-f289b7f13a1d/go.mod h1:cY9Ae1vu3OniC7z29twH1/PMJa7ZSSUqbK9QQM4/bhc=
 git.sr.ht/~shulhan/ciigo v0.15.4-0.20260124144929-5f12f2705a29 h1:WQt46ZMMLVVSsccM7IGzUz+FrddehvHaplzpBl7u9UI=
 git.sr.ht/~shulhan/ciigo v0.15.4-0.20260124144929-5f12f2705a29/go.mod h1:S2aZR80qc3bN8b6O1gHZiJOfhlzJT7rGn2H82V9wMac=
-git.sr.ht/~shulhan/pakakeh.go v0.60.3-0.20260125195513-b5e7b1fefd3a h1:VwlleUyxkJ+CEP8gs9RLZ3maKdLGVYtvCQzr2wBPqVE=
-git.sr.ht/~shulhan/pakakeh.go v0.60.3-0.20260125195513-b5e7b1fefd3a/go.mod h1:1MkKXbLZRHTcnheeSEbRpGztkym4Yxzh90ep+jCxbDc=
+git.sr.ht/~shulhan/pakakeh.go v0.60.3-0.20260202092811-1e3bb9be8444 h1:mqX+Z2dyfChpFOgt6gV9R5AT3oQN3pw4gMbPQLGm1DI=
+git.sr.ht/~shulhan/pakakeh.go v0.60.3-0.20260202092811-1e3bb9be8444/go.mod h1:1MkKXbLZRHTcnheeSEbRpGztkym4Yxzh90ep+jCxbDc=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=

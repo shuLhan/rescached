@@ -14,6 +14,17 @@ Legend,
 * 🌼: Enhancement
 * 💧: Chores
 
+[#rescached_v4_5_0]
+==  rescached v4.5.0 (2026-xx-xx)
+
+**🌱 all: add option to set minimum TTL**
+
+In the rescached.cfg, we add option where user can force the minimum
+TTL in the DNS answer.
+This option is not a standard and not recommended used in public
+facing network.
+It should be used only for personal and private network.
+
 [#rescached_v4_4_4]
 ==  rescached v4.4.4 (2025-12-27)
 
