@@ -15,7 +15,18 @@ Legend,
 * 💧: Chores
 
 [#rescached_v4_5_0]
-==  rescached v4.5.0 (2026-xx-xx)
+==  rescached v4.5.0 (2026-02-09)
+
+**💧 all: remove prefix "rescached:" on logging**
+
+Adding those prefix make the log context redundant in journald.
+
+**💧 block.d: update blocked hosts for pgl.yoyo.org and someonewhocares.org**
+
+The pgl.yoyo.org updated to "Mon, 19 Jan 2026 15:51:36 GMT".
+
+The someonewhocares.org updated to version "Tue, 27 Jan 2026 at 00:07:12
+GMT".
 
 **🌱 all: add option to set minimum TTL**
 
@@ -24,6 +35,7 @@ TTL in the DNS answer.
 This option is not a standard and not recommended used in public
 facing network.
 It should be used only for personal and private network.
+
 
 [#rescached_v4_4_4]
 ==  rescached v4.4.4 (2025-12-27)
