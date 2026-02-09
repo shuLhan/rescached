@@ -1,5 +1,5 @@
-// SPDX-FileCopyrightText: 2024 M. Shulhan <ms@kilabit.info>
 // SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2024 M. Shulhan <ms@kilabit.info>
 
 // Package www provides an HTTP server that serve the _www directory for
 // testing.
@@ -12,6 +12,7 @@ import (
 	"log"
 
 	"git.sr.ht/~shulhan/ciigo"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/http"
 	"git.sr.ht/~shulhan/pakakeh.go/lib/memfs"
 )
 
@@ -23,21 +24,23 @@ func main() {
 	flag.Parse()
 
 	var serveOpts = ciigo.ServeOptions{
-		Mfs: &memfs.MemFS{
-			Opts: &memfs.Options{
-				Root:      `./_www`,
-				TryDirect: true,
+		ServerOptions: http.ServerOptions{
+			Memfs: &memfs.MemFS{
+				Opts: &memfs.Options{
+					Root:      `./_www`,
+					TryDirect: true,
+				},
 			},
+			Address: flagAddress,
 		},
-		ConvertOptions: ciigo.ConvertOptions{
-			Root:         `./_www`,
-			HTMLTemplate: `./_www/doc/html.tmpl`,
-		},
-		Address:       flagAddress,
 		IsDevelopment: true,
 	}
+	var convertOpts = ciigo.ConvertOptions{
+		Root:         `./_www`,
+		HTMLTemplate: `./_www/doc/html.tmpl`,
+	}
 
-	var err = ciigo.Serve(serveOpts)
+	var err = ciigo.Serve(serveOpts, convertOpts)
 	if err != nil {
 		log.Fatal(err)
 	}
