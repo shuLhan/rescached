@@ -156,19 +156,19 @@ query from client.
 If you want rescached to serve a query from another host in your local
 network, change this value to `0.0.0.0:53`.
 
-[#http-port]
-==== http.port
+[#doh.listen]
+==== doh.listen
 
-Format:: Number
-Default:: 443
-Description:: Port to serve DNS over HTTP.
+Format:: String
+Default:: (empty)
+Description:: Address to serve DNS over HTTP.
 
-[#tls-port]
-==== tls.port
+[#dot.listen]
+==== dot.listen
 
-Format:: Number
-Default:: 853
-Description:: Port to serve DNS over TLS.
+Format:: String
+Default:: (empty)
+Description:: Address to serve DNS over TLS.
 
 [#tls-certificate]
 ==== tls.certificate

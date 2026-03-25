@@ -22,6 +22,8 @@ url = http://someurl
 
 [dns "server"]
 listen = 127.0.0.1:5350
+doh.listen =
+dot.listen =
 tls.certificate =
 tls.private_key =
 parent = udp://10.8.0.1
@@ -29,7 +31,5 @@ http.idle_timeout = 0s
 cache.prune_delay = 0s
 cache.prune_threshold = 0s
 debug = 0
-http.port = 0
-tls.port = 0
 tls.allow_insecure = true
 doh.behind_proxy = false

@@ -38,13 +38,13 @@ const (
 	keyCachePruneDelay     = "cache.prune_delay"
 	keyCachePruneThreshold = "cache.prune_threshold"
 	keyDohBehindProxy      = "doh.behind_proxy"
-	keyHTTPPort            = "http.port"
+	keyDoHListen           = "doh.listen"
+	keyDoTListen           = "dot.listen"
 	keyListen              = "listen"
 	keyParent              = "parent"
 	keyWUIListen           = "wui.listen"
 	keyTLSAllowInsecure    = "tls.allow_insecure"
 	keyTLSCertificate      = "tls.certificate"
-	keyTLSPort             = "tls.port"
 	keyTLSPrivateKey       = "tls.private_key"
 
 	dirBlock  = "/etc/rescached/block.d"
@@ -255,9 +255,9 @@ func (env *Environment) save(file string) (in *ini.Ini, err error) {
 
 	in.Set(sectionNameDNS, subNameServer, keyListen, env.ListenAddress)
 
-	in.Set(sectionNameDNS, subNameServer, keyHTTPPort, strconv.Itoa(int(env.HTTPPort)))
+	in.Set(sectionNameDNS, subNameServer, keyDoHListen, env.DoHListen)
 
-	in.Set(sectionNameDNS, subNameServer, keyTLSPort, strconv.Itoa(int(env.TLSPort)))
+	in.Set(sectionNameDNS, subNameServer, keyDoTListen, env.DoTListen)
 	in.Set(sectionNameDNS, subNameServer, keyTLSCertificate, env.TLSCertFile)
 	in.Set(sectionNameDNS, subNameServer, keyTLSPrivateKey, env.TLSPrivateKey)
 	in.Set(sectionNameDNS, subNameServer, keyTLSAllowInsecure, strconv.FormatBool(env.TLSAllowInsecure))

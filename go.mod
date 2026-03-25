@@ -3,11 +3,11 @@
 
 module git.sr.ht/~shulhan/rescached
 
-go 1.25.0
+go 1.26.0
 
 require (
 	git.sr.ht/~shulhan/ciigo v0.16.0
-	git.sr.ht/~shulhan/pakakeh.go v0.61.0
+	git.sr.ht/~shulhan/pakakeh.go v0.61.1-0.20260325223430-5a765dc7f90c
 )
 
 require (
@@ -15,12 +15,12 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/yuin/goldmark v1.7.16 // indirect
 	github.com/yuin/goldmark-meta v1.1.0 // indirect
-	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
-	golang.org/x/mod v0.32.0 // indirect
-	golang.org/x/net v0.49.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
-	golang.org/x/tools v0.41.0 // indirect
+	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa // indirect
+	golang.org/x/mod v0.33.0 // indirect
+	golang.org/x/net v0.51.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/tools v0.42.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
