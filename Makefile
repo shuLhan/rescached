@@ -45,13 +45,13 @@ debug: test build
 
 .PHONY: resolver
 resolver: LD_FLAGS =-X 'main.Usage=$$(go doc ./cmd/resolver)'
-resolver: LD_FLAGS+=-X 'git.sr.ht/~shulhan/rescached.Version=$(VERSION)'
+resolver: LD_FLAGS+=-X 'kilabit.info/rescached.Version=$(VERSION)'
 resolver:
 	mkdir -p _bin/$(GOOS)_$(GOARCH)
 	go build $(DEBUG) -ldflags="$(LD_FLAGS)" -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/resolver
 
 .PHONY: rescached
-rescached: LD_FLAGS+=-X 'git.sr.ht/~shulhan/rescached.Version=$(VERSION)'
+rescached: LD_FLAGS+=-X 'kilabit.info/rescached.Version=$(VERSION)'
 rescached:
 	mkdir -p _bin/$(GOOS)_$(GOARCH)
 	go build $(DEBUG) -ldflags="$(LD_FLAGS)" -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/rescached

@@ -469,7 +469,7 @@ OK
 
 ==  LINKS
 
-https://git.sr.ht/~shulhan/rescached[Repository^]::
+https://kilabit.info/rescached[Repository^]::
 Link to the source code.
 
 https://todo.sr.ht/~shulhan/rescached[Issues^]::

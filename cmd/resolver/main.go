@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"git.sr.ht/~shulhan/rescached"
+	"kilabit.info/rescached"
 )
 
 // List of valid commands.

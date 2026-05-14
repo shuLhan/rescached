@@ -19,7 +19,7 @@ import (
 	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
 	libnet "git.sr.ht/~shulhan/pakakeh.go/lib/net"
 
-	"git.sr.ht/~shulhan/rescached"
+	"kilabit.info/rescached"
 )
 
 const (

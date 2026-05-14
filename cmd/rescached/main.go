@@ -23,7 +23,7 @@ import (
 	"git.sr.ht/~shulhan/pakakeh.go/lib/memfs"
 	"kilabit.info/ciigo"
 
-	"git.sr.ht/~shulhan/rescached"
+	"kilabit.info/rescached"
 )
 
 const (

@@ -151,12 +151,10 @@ record from cache.
 
 === COMPILING
 
-Steps to compile from source,
+Steps to build from source,
 
 ----
-$ go get -u git.sr.ht/~shulhan/rescached
-$ cd ${GOPATH}/src/git.sr.ht/~shulhan/rescached
-$ go build ./cmd/rescached
+$ go install kilabit.info/rescached/cmd/rescached
 ----
 
 The last command will build binary named `rescached` in current directory.
@@ -456,14 +454,11 @@ Technically, if it can compiled, it will run in any operating system.
 
 ==  LINKS
 
-https://git.sr.ht/~shulhan/rescached[Repository^]::
+https://kilabit.info/project/rescached/[rescached^]::
+Link to project page.
+
+https://git.kilabit.info/rescached/[Repository^]::
 Link to the source code.
-
-https://todo.sr.ht/~shulhan/rescached[Issues^]::
-List of open issues.
-
-https://lists.sr.ht/~shulhan/rescached[Patches^]::
-Link to submit the patches and discussion.
 
 
 == LICENSE

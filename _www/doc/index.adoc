@@ -49,14 +49,8 @@ link:resolver.html[resolver^]:: Manual page for resolver.
 
 ==  Development
 
-https://git.sr.ht/~shulhan/rescached[Repository^]::
+https://git.kilabit.info/rescached/[Repository^]::
 Link to the source code.
-
-https://todo.sr.ht/~shulhan/rescached[Issues^]::
-List of open issues.
-
-https://lists.sr.ht/~shulhan/rescached[Patches^]::
-Link to submit the patches.
 
 
 ==  Todo
