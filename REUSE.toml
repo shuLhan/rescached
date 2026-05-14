@@ -1,29 +1,41 @@
+## SPDX-License-Identifier: GPL-3.0-only
 ## SPDX-FileCopyrightText: 2024 M. Shulhan <ms@kilabit.info>
-##
-## SPDX-License-Identifier: GPL-3.0-or-later
 
 version = 1
 
 [[annotations]]
-path = [".gitignore", ".gitmodules", ".ignore", "go.sum"]
-SPDX-FileCopyrightText = "2018 Shulhan <ms@kilabit.info>"
-SPDX-License-Identifier = "GPL-3.0-or-later"
-
-[[annotations]]
 path = ["_www/doc/rescached.cfg.5.gz", "_www/doc/resolver.1.gz"]
 SPDX-FileCopyrightText = "2020 Shulhan <ms@kilabit.info>"
-SPDX-License-Identifier = "GPL-3.0-or-later"
+SPDX-License-Identifier = "GPL-3.0-only"
 
 [[annotations]]
-path = ["_www/doc/images/**", "rescached.1.gz", "testdata/**", "_sys/**"
-  , "_test/**", "_www/favicon.png"]
+path = [
+	"_sys/etc/rescached/localhost.pem",
+	"_sys/etc/rescached/localhost.pem.key",
+	"_sys/usr/share/man/man1/rescached.1.gz",
+	"_sys/usr/share/man/man1/resolver.1.gz",
+	"_sys/usr/share/man/man5/rescached.cfg.5.gz",
+	"_test/**",
+	"_www/doc/images/Screenshot_wui_environment.png",
+	"_www/doc/images/Screenshot_wui_frontpage.png",
+	"_www/doc/images/Screenshot_wui_hosts_blocks.png",
+	"_www/doc/images/Screenshot_wui_hosts_d.png",
+	"_www/doc/images/Screenshot_wui_zone_d.png",
+	"_www/favicon.png",
+	"testdata/rescached.cfg.test.out",
+]
 SPDX-FileCopyrightText = "2021 Shulhan <ms@kilabit.info>"
-SPDX-License-Identifier = "GPL-3.0-or-later"
+SPDX-License-Identifier = "GPL-3.0-only"
 
 [[annotations]]
 path = ["_sys/etc/rescached/block.d/.pgl.yoyo.org"]
 SPDX-FileCopyrightText = "McRae <pgl@yoyo.org>"
 SPDX-License-Identifier = "LicenseRef-mcrae"
+
+[[annotations]]
+path = ["_sys/etc/rescached/block.d/.someonewhocares.org"]
+SPDX-FileCopyrightText = "Dan Pollock"
+SPDX-License-Identifier = "CC-BY-NC-SA-4.0"
 
 [[annotations]]
 path = ["_sys/etc/rescached/block.d/.winhelp2002.mvps.org"]

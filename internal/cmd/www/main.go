@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2024 M. Shulhan <ms@kilabit.info>
 
 // Package www provides an HTTP server that serve the _www directory for

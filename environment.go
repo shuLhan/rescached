@@ -1,5 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2018 M. Shulhan <ms@kilabit.info>
-// SPDX-License-Identifier: GPL-3.0-or-later
 
 package rescached
 
@@ -167,8 +167,8 @@ func (env *Environment) init() (err error) {
 				`.*\.png$`,
 			},
 			Embed: memfs.EmbedOptions{
-				CommentHeader: `// SPDX-FileCopyrightText: 2021 M. Shulhan <ms@kilabit.info>
-// SPDX-License-Identifier: GPL-3.0-or-later
+				CommentHeader: `// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2021 M. Shulhan <ms@kilabit.info>
 `,
 				PackageName: "rescached",
 				VarName:     "mfsWww",

@@ -1,5 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2022 M. Shulhan <ms@kilabit.info>
-// SPDX-License-Identifier: GPL-3.0-or-later
 
 /*
 Program resolver is command line interface (CLI) for DNS and rescached server.
