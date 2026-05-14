@@ -11,9 +11,9 @@ import (
 	"flag"
 	"log"
 
-	"git.sr.ht/~shulhan/ciigo"
 	"git.sr.ht/~shulhan/pakakeh.go/lib/http"
 	"git.sr.ht/~shulhan/pakakeh.go/lib/memfs"
+	"kilabit.info/ciigo"
 )
 
 func main() {
