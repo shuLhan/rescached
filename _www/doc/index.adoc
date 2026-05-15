@@ -2,9 +2,9 @@
 // SPDX-FileCopyrightText: 2022 M. Shulhan <ms@kilabit.info>
 
 = rescached
-:toc:
 :sectanchors:
-:sectlinks:
+:toc-title!:
+:toc:
 
 `rescached` is a daemon that caching internet name and address on local memory
 for speeding up DNS resolution.
@@ -40,12 +40,12 @@ link:benchmark.html[Benchmark^]:: The benchmark result of rescached server.
 
 link:CHANGELOG.html[CHANGELOG^]:: Log for each release.
 
-link:README.html[rescached^]:: Manual page for rescached program.
+link:README.html[rescached MANUAL^]:: Manual page for rescached program.
 
 link:rescached.cfg.html[rescached.cfg^]:: Manual page for rescached
 configuration.
 
-link:resolver.html[resolver^]:: Manual page for resolver.
+link:resolver.html[resolver MANUAL^]:: Manual page for resolver.
 
 
 ==  Development
@@ -53,6 +53,8 @@ link:resolver.html[resolver^]:: Manual page for resolver.
 https://git.kilabit.info/rescached/[Repository^]::
 Link to the source code.
 
+Feel free to send a patch or report a bug by sending email to
+<ms@kilabit.info>.
 
 ==  Todo
 
