@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
-	libhttp "git.sr.ht/~shulhan/pakakeh.go/lib/http"
+	"kilabit.info/pakakeh.go/lib/dns"
+	libhttp "kilabit.info/pakakeh.go/lib/http"
 )
 
 // Client for rescached.

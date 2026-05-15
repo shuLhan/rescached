@@ -16,8 +16,8 @@ import (
 	"strings"
 	"time"
 
-	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
-	libnet "git.sr.ht/~shulhan/pakakeh.go/lib/net"
+	"kilabit.info/pakakeh.go/lib/dns"
+	libnet "kilabit.info/pakakeh.go/lib/net"
 
 	"kilabit.info/rescached"
 )

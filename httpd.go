@@ -13,9 +13,9 @@ import (
 	"regexp"
 	"strings"
 
-	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
-	libhttp "git.sr.ht/~shulhan/pakakeh.go/lib/http"
-	libnet "git.sr.ht/~shulhan/pakakeh.go/lib/net"
+	"kilabit.info/pakakeh.go/lib/dns"
+	libhttp "kilabit.info/pakakeh.go/lib/http"
+	libnet "kilabit.info/pakakeh.go/lib/net"
 )
 
 const (

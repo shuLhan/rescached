@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
-	"git.sr.ht/~shulhan/pakakeh.go/lib/http"
-	"git.sr.ht/~shulhan/pakakeh.go/lib/watchfs/v2"
+	"kilabit.info/pakakeh.go/lib/dns"
+	"kilabit.info/pakakeh.go/lib/http"
+	"kilabit.info/pakakeh.go/lib/watchfs/v2"
 )
 
 // Version of program, overwritten by build.

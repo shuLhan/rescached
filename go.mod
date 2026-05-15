@@ -6,8 +6,8 @@ module kilabit.info/rescached
 go 1.26.0
 
 require (
-	git.sr.ht/~shulhan/pakakeh.go v0.63.0
-	kilabit.info/ciigo v0.18.0
+	kilabit.info/ciigo v0.18.1
+	kilabit.info/pakakeh.go v0.64.0
 )
 
 require (
@@ -21,9 +21,9 @@ require (
 	golang.org/x/sys v0.44.0 // indirect
 	golang.org/x/tools v0.45.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	kilabit.info/asciidoctor-go v0.8.0 // indirect
+	kilabit.info/asciidoctor-go v0.8.1 // indirect
 )
 
-//replace git.sr.ht/~shulhan/pakakeh.go => ../pakakeh.go
+//replace kilabit.info/pakakeh.go => ../pakakeh.go
 
 //replace kilabit.info/ciigo => ../ciigo

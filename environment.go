@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"strings"
 
-	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
-	libhttp "git.sr.ht/~shulhan/pakakeh.go/lib/http"
-	"git.sr.ht/~shulhan/pakakeh.go/lib/ini"
-	"git.sr.ht/~shulhan/pakakeh.go/lib/memfs"
-	libnet "git.sr.ht/~shulhan/pakakeh.go/lib/net"
-	libstrings "git.sr.ht/~shulhan/pakakeh.go/lib/strings"
+	"kilabit.info/pakakeh.go/lib/dns"
+	libhttp "kilabit.info/pakakeh.go/lib/http"
+	"kilabit.info/pakakeh.go/lib/ini"
+	"kilabit.info/pakakeh.go/lib/memfs"
+	libnet "kilabit.info/pakakeh.go/lib/net"
+	libstrings "kilabit.info/pakakeh.go/lib/strings"
 )
 
 const (

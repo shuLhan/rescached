@@ -19,8 +19,8 @@ import (
 	"syscall"
 	"time"
 
-	"git.sr.ht/~shulhan/pakakeh.go/lib/debug"
-	"git.sr.ht/~shulhan/pakakeh.go/lib/memfs"
+	"kilabit.info/pakakeh.go/lib/debug"
+	"kilabit.info/pakakeh.go/lib/memfs"
 	"kilabit.info/ciigo"
 
 	"kilabit.info/rescached"

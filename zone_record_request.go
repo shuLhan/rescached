@@ -4,7 +4,7 @@
 package rescached
 
 import (
-	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
+	"kilabit.info/pakakeh.go/lib/dns"
 )
 
 // zoneRecordRequest contains the request parameters for adding or deleting

@@ -1,5 +1,3 @@
-git.sr.ht/~shulhan/pakakeh.go v0.63.0 h1:j3uF2skC3+tEUD6Osd79XID1oA/8eSlmxh3Wg2EL7JA=
-git.sr.ht/~shulhan/pakakeh.go v0.63.0/go.mod h1:lw3LvAZvBb97lDZ5SMB1djKkg7fMJP1s2qPAtn3aPV8=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
@@ -30,7 +28,9 @@ gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntN
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
 gopkg.in/yaml.v2 v2.4.0 h1:D8xgwECY7CYvx+Y2n4sBz93Jn9JRvxdiyyo8CTfuKaY=
 gopkg.in/yaml.v2 v2.4.0/go.mod h1:RDklbk79AGWmwhnvt/jBztapEOGDOx6ZbXqjP6csGnQ=
-kilabit.info/asciidoctor-go v0.8.0 h1:XejD7MBfK5Oyk/Pkyr9eZpN43t4qGalLGE3wvGPjX/s=
-kilabit.info/asciidoctor-go v0.8.0/go.mod h1:tbS7GbhSea83RxK+Hl2laiD9JI6MErSz7FrI42y4rGs=
-kilabit.info/ciigo v0.18.0 h1:P2hWdcUh3uuv6CAWbpOyIj+XuKjBKmRbwAH0mgpNTnU=
-kilabit.info/ciigo v0.18.0/go.mod h1:XuMojT7PhkMTxIlshD5W9vx+HRGjlXPPQD/5K1bl8HU=
+kilabit.info/asciidoctor-go v0.8.1 h1:+sZBZxiyxUowmvhPcMS8MzKncqS2VTvpq5Vm7k7vHw8=
+kilabit.info/asciidoctor-go v0.8.1/go.mod h1:xwksBjwywnDWxyowoIhtn3hkfTG8ykiY3EP9Dawq/PA=
+kilabit.info/ciigo v0.18.1 h1:9N6Z8WOQOFZYmvv6q75Z6532CV4t10vvvMMPPWUNtIE=
+kilabit.info/ciigo v0.18.1/go.mod h1:ACnm9zngj61uUETezOoaGDHjGFcMWzEpULiD5U73M8g=
+kilabit.info/pakakeh.go v0.64.0 h1:4CBOYu/fHkVz7AhwhmerOzVJw7/DDVlUOqqYLaA65/s=
+kilabit.info/pakakeh.go v0.64.0/go.mod h1:n74mxc0TFkhskjsXsSVwAU4BG+SBwYGSHgPFrAsVlbc=

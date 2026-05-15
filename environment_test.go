@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"git.sr.ht/~shulhan/pakakeh.go/lib/dns"
-	libhttp "git.sr.ht/~shulhan/pakakeh.go/lib/http"
-	"git.sr.ht/~shulhan/pakakeh.go/lib/ini"
-	"git.sr.ht/~shulhan/pakakeh.go/lib/test"
+	"kilabit.info/pakakeh.go/lib/dns"
+	libhttp "kilabit.info/pakakeh.go/lib/http"
+	"kilabit.info/pakakeh.go/lib/ini"
+	"kilabit.info/pakakeh.go/lib/test"
 )
 
 func TestEnvironment(t *testing.T) {
