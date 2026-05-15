@@ -144,11 +144,11 @@ install.common:
 	cp $(RESCACHED_CFG_MAN) $(PREFIX)$(DIR_MAN)/man5/
 
 	mkdir -p   $(PREFIX)$(DIR_RESCACHED)
-	cp COPYING $(PREFIX)$(DIR_RESCACHED)
+	cp LICENSES/GPL-3.0-only.txt $(PREFIX)$(DIR_RESCACHED)
 
 
 uninstall.common:
-	rm -f $(PREFIX)$(DIR_RESCACHED)/COPYING
+	rm -f $(PREFIX)$(DIR_RESCACHED)/GPL-3.0-only.txt
 
 	rm -f $(PREFIX)$(DIR_MAN)/man5/$(RESCACHED_CFG_MAN)
 	rm -f $(PREFIX)$(DIR_MAN)/man1/$(RESOLVER_MAN)
