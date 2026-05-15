@@ -38,20 +38,20 @@ build: resolver rescached
 ## Build with race detection.
 
 .PHONY: debug
-debug: CGO_ENABLED=1
-debug: DEBUG=-race -v
+debug: export CGO_ENABLED=1
+debug: export DEBUG=-race -v
 debug: test build
 
 
 .PHONY: resolver
-resolver: LD_FLAGS =-X 'main.Usage=$$(go doc ./cmd/resolver)'
-resolver: LD_FLAGS+=-X 'kilabit.info/rescached.Version=$(VERSION)'
+resolver: export LD_FLAGS =-X 'main.Usage=$$(go doc ./cmd/resolver)'
+resolver: export LD_FLAGS+=-X 'kilabit.info/rescached.Version=$(VERSION)'
 resolver:
 	mkdir -p _bin/$(GOOS)_$(GOARCH)
 	go build $(DEBUG) -ldflags="$(LD_FLAGS)" -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/resolver
 
 .PHONY: rescached
-rescached: LD_FLAGS+=-X 'kilabit.info/rescached.Version=$(VERSION)'
+rescached: export LD_FLAGS+=-X 'kilabit.info/rescached.Version=$(VERSION)'
 rescached:
 	mkdir -p _bin/$(GOOS)_$(GOARCH)
 	go build $(DEBUG) -ldflags="$(LD_FLAGS)" -o _bin/$(GOOS)_$(GOARCH)/ ./cmd/rescached
@@ -72,7 +72,6 @@ test.prof:
 lint:
 	go run ./internal/cmd/gocheck ./...
 	go vet ./...
-	-reuse lint
 
 
 ##---- Cleaning up.
@@ -118,9 +117,9 @@ dev:
 
 ##---- Common tasks for installing and uninstalling program.
 
-.PHONY: install-common uninstall-common
+.PHONY: install.common uninstall.common
 
-install-common:
+install.common:
 	mkdir -p $(PREFIX)/etc/rescached
 	mkdir -p $(PREFIX)/etc/rescached/hosts.d
 	mkdir -p $(PREFIX)/etc/rescached/zone.d
@@ -148,7 +147,7 @@ install-common:
 	cp COPYING $(PREFIX)$(DIR_RESCACHED)
 
 
-uninstall-common:
+uninstall.common:
 	rm -f $(PREFIX)$(DIR_RESCACHED)/COPYING
 
 	rm -f $(PREFIX)$(DIR_MAN)/man5/$(RESCACHED_CFG_MAN)
@@ -163,11 +162,11 @@ uninstall-common:
 
 .PHONY: install deploy uninstall
 
-install: install-common
+install: install.common
 	mkdir -p $(PREFIX)/usr/lib/systemd/system
 	cp _sys/usr/lib/systemd/system/rescached.service $(PREFIX)/usr/lib/systemd/system/
 
-uninstall: uninstall-common
+uninstall: uninstall.common
 	systemctl stop rescached
 	systemctl disable rescached
 	rm -f /usr/lib/systemd/system/rescached.service
@@ -180,12 +179,12 @@ deploy: build
 
 ##---- Tasks for installing and uninstalling service on macOS.
 
-.PHONY: install-macos deploy-macos uninstall-macos
+.PHONY: install.macos deploy-macos uninstall.macos
 
-install-macos: DIR_BIN=/usr/local/bin
-install-macos: DIR_MAN=/usr/local/share/man
-install-macos: DIR_RESCACHED=/usr/local/share/rescached
-install-macos: install-common
+install.macos: export DIR_BIN=/usr/local/bin
+install.macos: export DIR_MAN=/usr/local/share/man
+install.macos: export DIR_RESCACHED=/usr/local/share/rescached
+install.macos: install.common
 	cp _sys/Library/LaunchDaemons/info.kilabit.rescached.plist /Library/LaunchDaemons/
 
 deploy-macos: DIR_BIN=/usr/local/bin
@@ -194,10 +193,10 @@ deploy-macos:
 	sudo cp _bin/$(GOOS)_$(GOARCH)/resolver  $(DIR_BIN)/
 	sudo launchctl stop info.kilabit.rescached
 
-uninstall-macos: DIR_BIN=/usr/local/bin
-uninstall-macos: DIR_MAN=/usr/local/share/man
-uninstall-macos: DIR_RESCACHED=/usr/local/share/rescached
-uninstall-macos: uninstall-common
+uninstall.macos: DIR_BIN=/usr/local/bin
+uninstall.macos: DIR_MAN=/usr/local/share/man
+uninstall.macos: DIR_RESCACHED=/usr/local/share/rescached
+uninstall.macos: uninstall.common
 	launchctl stop info.kilabit.rescached
 	launchctl unload info.kilabit.rescached
 	rm -f /Library/LaunchDaemons/info.kilabit.rescached.plist
@@ -205,21 +204,22 @@ uninstall-macos: uninstall-common
 
 ##---- Deploy to local machine.
 
-.PHONY: deploy.local
-deploy.local: build
+.PHONY: local.deploy
+local.deploy: build
 	sudo rsync _bin/linux_amd64/rescached /usr/bin/rescached
 	sudo systemctl restart rescached.service
 
+
 ##---- Tasks for deploying to public DNS server.
 
-.PHONY: deploy-personal-server
+.PHONY: deploy.personal-server
 
-build-linux-amd64: CGO_ENABLED=0
-build-linux-amd64: GOOS=linux
-build-linux-amd64: GOARCH=amd64
+build-linux-amd64: export CGO_ENABLED=0
+build-linux-amd64: export GOOS=linux
+build-linux-amd64: export GOARCH=amd64
 build-linux-amd64: build
 
-deploy-personal-server: build-linux-amd64
+deploy.personal-server: build-linux-amd64
 	rsync --progress _bin/linux_amd64/rescached personal-server:~/bin/rescached
 	ssh personal-server "sudo rsync ~/bin/rescached /usr/bin/rescached; sudo systemctl restart rescached.service"
 
