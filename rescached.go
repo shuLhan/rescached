@@ -18,7 +18,7 @@ import (
 )
 
 // Version of program, overwritten by build.
-var Version = `4.5.0`
+var Version = `4.6.0`
 
 // Debug level, set by configuration as "rescached::debug".
 var Debug int

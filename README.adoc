@@ -147,8 +147,8 @@ record from cache.
 
 === PREREQUISITES
 
-* https://golang.org[Go compiler]
-* https://git-scm.com[git, version control system]
+* https://go.dev/[Go compiler]
+* https://git-scm.com/[git, version control system]
 * asciidoc, to generate manual pages
 * systemd or system V init tool for service on Linux
 

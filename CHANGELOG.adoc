@@ -2,9 +2,10 @@
 // SPDX-FileCopyrightText: 2019 M. Shulhan <ms@kilabit.info>S
 
 = Changelog for rescached
-:toc:
 :sectanchors:
-:sectlinks:
+:toc-title!:
+:toc:
+:toclevels: 1
 
 Log of new features, enhancements, and/or bug fixes for each release.
 
@@ -14,6 +15,34 @@ Legend,
 * 🌱: New feature
 * 🌼: Enhancement
 * 💧: Chores
+
+
+[#rescached_v4_6_0]
+==  rescached v4.6.0 (2026-05-15)
+
+This minor release is due to the Go module and the repository of this
+project has been migrated to new domain.
+
+The Go module path now is "kilabit.info/rescached" and the repository is
+https://git.kilabit.info/rescached .
+
+We also changes the license to GPL-3.0-only.
+The "or-later" suffix on previous license, GPL-3.0-or-later, is too broad.
+Lets limit to what we have now, which is GPL-3.0-only.
+
+Other changes are noted below.
+
+**🌼 Refactoring DoT and DoH to use listen address instead port**
+
+Using port makes the IP address of DoT and DoH listen on the same
+address with UDP.
+If we set ListenAddress to 0.0.0.0 and TLS termination is handled
+by proxy, this cause DoT and DoH will also listen on all
+addresses.
+
+This behaviour makes the server open DoT and DoH ports to the public,
+where it should be on local address only.
+
 
 [#rescached_v4_5_0]
 ==  rescached v4.5.0 (2026-02-09)
